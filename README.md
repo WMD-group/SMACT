@@ -7,7 +7,7 @@ Semiconducting Materials by Analogy and Computational Techniques
 Requirements
 ------------
 
-The main language will be Python with Numpy, Scipy and Matplotlib
+The main language will be Python with Numpy, Scipy and Matplotlib.
 The [chemlab](http://chemlab.github.com/chemlab) project is also used.
 Modifications will be made in [ajjackson's fork](https://github.com/ajjackson/chemlab).
 
