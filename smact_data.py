@@ -17,3 +17,17 @@ def get_pauling(element):
 	pauling=A.get('data','paulingenegdict')[element]
 	return pauling
 
+def get_covalent(element):
+
+	from chemlab.db import chemlabdb
+	
+	A= chemlabdb.ChemlabDB()
+	covalent=A.get('data','covalentdict')[element]
+	return covalent
+"""Need to link to database of eigenvalues (solid_properties.txt) """
+def get_eig(element):
+
+	from **** import ****
+	A = ****
+	eig= ****
+	return eig
