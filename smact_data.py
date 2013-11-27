@@ -24,10 +24,12 @@ def get_covalent(element):
 	A= chemlabdb.ChemlabDB()
 	covalent=A.get('data','covalentdict')[element]
 	return covalent
-"""Need to link to database of eigenvalues (solid_properties.txt) """
-def get_eig(element):
 
-	from **** import ****
-	A = ****
-	eig= ****
-	return eig
+# AJJ: commenting this out while incomplete to avoid breaking things
+#"""Need to link to database of eigenvalues (solid_properties.txt) """
+#def get_eig(element):
+#
+#	from **** import ****
+#	A = ****
+#	eig= ****
+#	return eig
