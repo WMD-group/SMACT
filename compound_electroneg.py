@@ -3,16 +3,16 @@ import sys
 from numpy import product
 from smact_data import get_mulliken
 
-def compound_electroneg(argv=None):
+def compound_electroneg(verbose=False,elements=None,stoichs=None):
     """Compound electronegativity from geometric mean of elemental Mulliken electronegativities."""
-    if argv is None:
-        argv = sys.argv
         
-    """Get element names"""
-    elements=raw_input("Enter elements (space separated): ").split(" ")
-    stoichs=raw_input("Enter stoichiometries (space separated): ").split(" ")
-    elementlist=list(elements)
-    stoichslist=list(stoichs)
+    """Get elements and stoichiometries if not provided as argument"""
+    if not elements:
+        elements=raw_input("Enter elements (space separated): ")
+    if not stoichs:
+        stoichs=raw_input("Enter stoichiometries (space separated): ")
+    elementlist=list(elements.split(" "))
+    stoichslist=list(stoichs.split(" "))
 
     """Convert stoichslist from string to float"""
     stoichslist=map(float, stoichslist)
@@ -25,7 +25,8 @@ def compound_electroneg(argv=None):
     for i in range(0,len(elementlist)):
         elementlist[i]=get_mulliken(elementlist[i])
 
-    print "Electronegativities of elements=", elementlist
+    if verbose:
+        print "Electronegativities of elements=", elementlist
 
     """Raise each electronegativity to it's appropriate power"""
     for i in range(0,len(elementlist)):
@@ -37,7 +38,29 @@ def compound_electroneg(argv=None):
     prod = product(elementlist)
     #print "Product=", prod
     compelectroneg = (prod)**(1.0/(sum(stoichslist)))
-    print "Geometric mean = Compound 'electronegativity'=", compelectroneg
-
+    if verbose:
+        print "Geometric mean = Compound 'electronegativity'=", compelectroneg
+    return compelectroneg
+        
 if __name__ == "__main__":
-        compound_electroneg(argv=None)
+    import argparse
+    parser = argparse.ArgumentParser(description="Compound electronegativity from geometric mean of elemental Mulliken electronegativities.")
+    parser.add_argument("-e", "--elements", type=str,
+                        help="Space-separated string of elements (e.g. \"Cu Zn Sn S\")"
+                        )
+    parser.add_argument("-s", "--stoichiometry", type=str,
+                        help="Space-separated string of stoichiometry (e.g. \"2 1 1 4\")"
+                        )
+    parser.add_argument("-v", "--verbose", help="More verbose output [default]",
+                        action="store_true")
+    parser.add_argument("-q", "--quiet", help="Quiet output",
+                       action="store_true")
+    args=parser.parse_args()
+    if args.quiet:
+        verbose_flag=False
+    else:
+        verbose_flag=True
+
+    print compound_electroneg(verbose=verbose_flag,elements=args.elements,
+                              stoichs=args.stoichiometry)
+
