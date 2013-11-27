@@ -7,6 +7,7 @@ Contents
 --------
 
 * **smact_data.py** A collection of functions providing elemental properties. Draws on `chemlab`'s database (which in turn draws on openbabel)
+* **smact_lattice.py** Given the sites, multiplicities and possible oxidation states at those sites, this reads from the database and generates all possible stoichiometeries.
 
 Requirements
 ------------
