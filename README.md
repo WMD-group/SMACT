@@ -20,7 +20,10 @@ License and attribution
 -----------------------
 
 SMACT is produced by the Walsh Materials Design group of the Department of Chemistry at the University of Bath, UK. 
-It is licensed under the GNU Public License v3.
+Python code and original data tables are licensed under the GNU General Public License (GPL) v3.
+
+The following files have their own licenses:
+**data/elements.txt ** is from the OpenBabel project and licensed under the GPL v2, which is included in the parent folder.
 
 References
 ----------
