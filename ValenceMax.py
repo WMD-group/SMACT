@@ -16,7 +16,7 @@
 ################################################################################
 
 from numpy import product,sqrt
-"get_eig function not yet working"""
+"""get_eig function not yet working"""
 from smact_data import get_eig,get_covalent
 from scipy.constants import hbar m_e
 
