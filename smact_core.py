@@ -20,8 +20,8 @@ Core classes and functions for SMACT
 """
 
 class element(object):
-"""Class providing standard chemical data for elements."""
-	def __init__(self, symbol):
+    """Class providing standard chemical data for elements."""
+    def __init__(self, symbol):
                 """
                 Collection of standard elemental properties for given element.
                 Data is drawn from "data/element.txt", part of the Open Babel package.
@@ -55,13 +55,13 @@ class element(object):
                 if not elementdata:
                         raise NameError('Element {0} not found'.format(symbol))
                 else:
-                        self.symbol=symbol
-                        self.name=elementdata[14]
-                        self.covalent_radius=elementdata[3]
-                        self.vdw_radius=elementdata[5]
-                        self.pauling_eneg=elementdata[8]
-                        self.ionpot=elementdata[9]
-                        self.e_affinity = elementdata[10]
+                        self.symbol=          str(symbol)
+                        self.name=            str(elementdata[14])
+                        self.covalent_radius= float(elementdata[3])
+                        self.vdw_radius=      float(elementdata[5])
+                        self.pauling_eneg=    float(elementdata[8])
+                        self.ionpot=          float(elementdata[9])
+                        self.e_affinity =     float(elementdata[10])
 #                       self.eigenval = 
 
-		
+        

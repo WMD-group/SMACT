@@ -15,36 +15,39 @@
 #  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
 ################################################################################
 
-def get_mulliken(element):
-	"""Gets Mulliken electroneg from the IE and EA"""
-	from chemlab.db import chemlabdb
-	A = chemlabdb.ChemlabDB()
-	ionpot=A.get('data','ionpotdict')[element]
-	eaff=A.get('data','eaffdict')[element]
-	mulliken=(ionpot+eaff)/2.0
-	return mulliken
-
-def get_pauling(element):
-
-	from chemlab.db import chemlabdb 
-
-	A = chemlabdb.ChemlabDB() 
-	pauling=A.get('data','paulingenegdict')[element]
-	return pauling
-
-def get_covalent(element):
-
-	from chemlab.db import chemlabdb
-	
-	A= chemlabdb.ChemlabDB()
-	covalent=A.get('data','covalentdict')[element]
-	return covalent
+def get_mulliken(symbol):
+    """Gets Mulliken electroneg from the IE and EA"""
+    from smact_core import element
+    A = element(symbol)
+    mulliken=(A.ionpot+A.e_affinity)/2.0
+    return mulliken
 
 # AJJ: commenting this out while incomplete to avoid breaking things
 #"""Need to link to database of eigenvalues (solid_properties.txt) """
 #def get_eig(element):
 #
-#	from **** import ****
-#	A = ****
-#	eig= ****
-#	return eig
+#   from **** import ****
+#   A = ****
+#   eig= ****
+#   return eig
+
+
+################################################################################
+#### The following functions are deprecated. New code should access these   ####
+#### properties directly by forming an "element" object and calling the     ####
+#### desired property, as in the wrappers below.                            ####
+################################################################################
+
+def get_pauling(symbol):
+    """Pauling electronegativity of specified element.
+    Drawn from Open Babel data table."""
+    from smact_core import element
+    A = element(symbol)
+    return A.pauling_eneg
+
+def get_covalent(symbol):
+    """Covalent radius of specified element.
+    Drawn from Open Babel data table."""
+    from smact_core import element
+    A = element(symbol)
+    return A.covalent_radius
