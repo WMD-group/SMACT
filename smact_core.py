@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ################################################################################
-# Copyright Daniel Davies (2013)                                               #
+#  Copyright Adam J. Jackson, Daniel Davies (2013)                             #
 #                                                                              #
 #  This file is part of SMACT: smact_core.py is free software: you can         #
 #  redistribute it and/or modify it under the terms of the GNU General Public  #
@@ -15,9 +15,53 @@
 #  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
 ################################################################################
 
+"""
+Core classes and functions for SMACT
+"""
+
 class element(object):
-	def __init__(self, name, eigen_p, eigen_d, covalentrad):
-		self.name = 
-		self.eigenval = 
-		self.covalentrad = 
+"""Class providing standard chemical data for elements."""
+	def __init__(self, symbol):
+                """
+                Collection of standard elemental properties for given element.
+                Data is drawn from "data/element.txt", part of the Open Babel package.
+                element = element('Symbol')
+
+                Methods
+                -------
+                element.symbol: Elemental symbol used to retrieve data
+
+                element.name: Full name of element
+
+                element.covalent_radius: Covalent radius in AA (1.6 if unknown)
+                
+                element.vdw_radius: van der Waals radius in AA (2.0 if unknown)
+
+                element.pauling_eneg: Pauling electronegativity (0.0 if unknown)
+
+                element.ionpot: Ionisation potential in eV (0.0 if unknown)
+
+                element.e_affinity: Eletron affinity in eV (0.0 if unknown)                
+                """
+                with open('data/element.txt','r') as f:
+                        data = f.readlines()
+                elementdata = 0
+                for line in data:
+                        if not line.startswith('#'):
+                                l = line.split()
+                                if (l[1] == symbol):
+                                        elementdata = l
+                                        break
+                if not elementdata:
+                        raise NameError('Element {0} not found'.format(symbol))
+                else:
+                        self.symbol=symbol
+                        self.name=elementdata[14]
+                        self.covalent_radius=elementdata[3]
+                        self.vdw_radius=elementdata[5]
+                        self.pauling_eneg=elementdata[8]
+                        self.ionpot=elementdata[9]
+                        self.e_affinity = elementdata[10]
+#                       self.eigenval = 
+
 		
