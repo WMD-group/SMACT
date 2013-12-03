@@ -17,8 +17,8 @@
 
 def get_mulliken(symbol):
     """Gets Mulliken electroneg from the IE and EA"""
-    from smact_core import element
-    A = element(symbol)
+    from smact_core import Element
+    A = Element(symbol)
     mulliken=(A.ionpot+A.e_affinity)/2.0
     return mulliken
 
@@ -41,13 +41,13 @@ def get_mulliken(symbol):
 def get_pauling(symbol):
     """Pauling electronegativity of specified element.
     Drawn from Open Babel data table."""
-    from smact_core import element
-    A = element(symbol)
+    from smact_core import Element
+    A = Element(symbol)
     return A.pauling_eneg
 
 def get_covalent(symbol):
     """Covalent radius of specified element.
     Drawn from Open Babel data table."""
-    from smact_core import element
-    A = element(symbol)
+    from smact_core import Element
+    A = Element(symbol)
     return A.covalent_radius

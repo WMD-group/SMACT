@@ -19,7 +19,7 @@
 Core classes and functions for SMACT
 """
 
-class element(object):
+class Element(object):
     """Class providing standard chemical data for elements."""
     def __init__(self, symbol):
                 """
@@ -29,19 +29,19 @@ class element(object):
 
                 Methods
                 -------
-                element.symbol: Elemental symbol used to retrieve data
+                Element.symbol: Elemental symbol used to retrieve data
 
-                element.name: Full name of element
+                Element.name: Full name of element
 
-                element.covalent_radius: Covalent radius in AA (1.6 if unknown)
+                Element.covalent_radius: Covalent radius in AA (1.6 if unknown)
                 
-                element.vdw_radius: van der Waals radius in AA (2.0 if unknown)
+                Element.vdw_radius: van der Waals radius in AA (2.0 if unknown)
 
-                element.pauling_eneg: Pauling electronegativity (0.0 if unknown)
+                Element.pauling_eneg: Pauling electronegativity (0.0 if unknown)
 
-                element.ionpot: Ionisation potential in eV (0.0 if unknown)
+                Element.ionpot: Ionisation potential in eV (0.0 if unknown)
 
-                element.e_affinity: Eletron affinity in eV (0.0 if unknown)                
+                Element.e_affinity: Eletron affinity in eV (0.0 if unknown)                
                 """
                 with open('data/element.txt','r') as f:
                         data = f.readlines()
