@@ -1,9 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python 
+# Using the ase spacegroup module this can build the structure, from 
+# the composition, as defined in the smact_lattice module. 
+#TODO:
+# Estimate the cell parameters based on radii from tables.
+# Add further types, Spinel, Flourite, Delafossite ....
 
 ################################################################################
-# Copyright Daniel Davies (2013)                                               #
+# Copyright Keith Butler (2013)                                                #
 #                                                                              #
-#  This file is part of SMACT: ValenceMax.py is free software: you can         #
+#  This file is part of SMACT: smact_builder.py is free software: you can      #
 #  redistribute it and/or modify it under the terms of the GNU General Public  #
 #  License as published by the Free Software Foundation, either version 3 of   #
 #  the License, or (at your option) any later version.                         #
@@ -15,20 +20,12 @@
 #  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
 ################################################################################
 
-from numpy import product,sqrt
-"""get_eig function not yet working"""
-from smact_data import get_eig,get_covalent
-from scipy.constants import hbar m_e
+from ase.lattice.spacegroup import crystal
 
-"""Get element names"""
-An = 
-Cat =
 
-"""calculations"""
-V2 = (2.16*(hbar)**2)/m_e*((get_covalent(An))+(get_covalent(Cat))**2)
-
-V3 =  (get_eig(Cat) + get_eig(An))/2 
-
-Ev = V3 + sqrt((V2**2)+(V3**2))
-
-print "Valence Band Minimum = ", Ev
+def cubic_perovskite(species):
+	 system = crystal((species), 
+	 [(0,0,0), (0.5, 0.5, 0.5), (0.5, 0.5, 0)],
+         spacegroup=221, cellpar=[6,6,6,90,90,90])
+	
+         return system

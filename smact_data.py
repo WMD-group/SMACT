@@ -1,33 +1,53 @@
 #!/usr/bin/env python
 
-def get_mulliken(element):
-	"""Gets Mulliken electroneg from the IE and EA"""
-	from chemlab.db import chemlabdb
-	A = chemlabdb.ChemlabDB()
-	ionpot=A.get('data','ionpotdict')[element]
-	eaff=A.get('data','eaffdict')[element]
-	mulliken=(ionpot+eaff)/2.0
-	return mulliken
+################################################################################
+# Copyright Daniel Davies, Adam J. Jackson (2013)                              #
+#                                                                              #
+#  This file is part of SMACT: smact_data.py is free software: you can         #
+#  redistribute it and/or modify it under the terms of the GNU General Public  #
+#  License as published by the Free Software Foundation, either version 3 of   #
+#  the License, or (at your option) any later version.                         #
+#  This program is distributed in the hope that it will be useful, but WITHOUT #
+#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
+#  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   #
+#  more details.                                                               #
+#  You should have received a copy of the GNU General Public License along with#
+#  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
+################################################################################
 
-def get_pauling(element):
+def get_mulliken(symbol):
+    """Gets Mulliken electroneg from the IE and EA"""
+    from smact_core import Element
+    A = Element(symbol)
+    mulliken=(A.ionpot+A.e_affinity)/2.0
+    return mulliken
 
-	from chemlab.db import chemlabdb 
+# AJJ: commenting this out while incomplete to avoid breaking things
+#"""Need to link to database of eigenvalues (solid_properties.txt) """
+#def get_eig(element):
+#
+#   from **** import ****
+#   A = ****
+#   eig= ****
+#   return eig
 
-	A = chemlabdb.ChemlabDB() 
-	pauling=A.get('data','paulingenegdict')[element]
-	return pauling
 
-def get_covalent(element):
+################################################################################
+#### The following functions are deprecated. New code should access these   ####
+#### properties directly by forming an "element" object and calling the     ####
+#### desired property, as in the wrappers below.                            ####
+################################################################################
 
-	from chemlab.db import chemlabdb
-	
-	A= chemlabdb.ChemlabDB()
-	covalent=A.get('data','covalentdict')[element]
-	return covalent
-"""Need to link to database of eigenvalues (solid_properties.txt) """
-def get_eig(element):
+def get_pauling(symbol):
+    """Pauling electronegativity of specified element.
+    Drawn from Open Babel data table."""
+    from smact_core import Element
+    A = Element(symbol)
+    return A.pauling_eneg
 
-	from **** import ****
-	A = ****
-	eig= ****
-	return eig
+def get_covalent(symbol):
+    """Covalent radius of specified element.
+    Drawn from Open Babel data table."""
+    from smact_core import Element
+    A = Element(symbol)
+    return A.covalent_radius
