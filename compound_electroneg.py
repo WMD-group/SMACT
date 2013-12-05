@@ -8,7 +8,7 @@ stoichs=raw_input("Enter stoichiometries (space separated): ").split(" ")
 elementlist=list(elements)
 stoichslist=list(stoichs)
 
-"""Confirt stoichslist from string to float"""
+"""Convert stoichslist from string to float"""
 stoichslist=map(float, stoichslist)
 
 #print "List of elements=", elementlist
