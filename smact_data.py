@@ -51,3 +51,8 @@ def get_covalent(symbol):
     from smact_core import Element
     A = Element(symbol)
     return A.covalent_radius
+
+def get_eig(symbol):
+    from smact_core import Element
+    A=Element(symbol)
+    return A.eig

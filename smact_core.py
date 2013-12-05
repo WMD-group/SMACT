@@ -62,6 +62,11 @@ class Element(object):
                         self.pauling_eneg=    float(elementdata[8])
                         self.ionpot=          float(elementdata[9])
                         self.e_affinity =     float(elementdata[10])
-#                       self.eigenval = 
 
-        
+                with open('data/Eigenvalues.csv','r') as f:
+                    while True:
+                        l=f.readline()
+                        if l.split(",")[0] == symbol:
+                            break
+                    self.eig = float(l.split(",")[1])
+

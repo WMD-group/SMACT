@@ -16,19 +16,31 @@
 ################################################################################
 
 from numpy import product,sqrt
-"""get_eig function not yet working"""
 from smact_data import get_eig,get_covalent
-from scipy.constants import hbar m_e
+from scipy.constants import hbar, m_e
+from scipy.constants import physical_constants
+J2eV = physical_constants['joule-electron volt relationship'][0]
 
 """Get element names"""
-An = 
-Cat =
+An = raw_input("Enter Anion Symbol: ")
+Cat = raw_input("Enter Cation Symbol: ")
 
 """calculations"""
-V2 = (2.16*(hbar)**2)/m_e*((get_covalent(An))+(get_covalent(Cat))**2)
+V2 = (2.16*(hbar)**2)/(
+                       m_e* (
+                             get_covalent(An)*1E-10 +
+                             get_covalent(Cat)*1E-10
+                             )**2
+                       )
 
-V3 =  (get_eig(Cat) + get_eig(An))/2 
+V3 =  (get_eig(Cat) - get_eig(An))/2
 
-Ev = V3 + sqrt((V2**2)+(V3**2))
+Ev = ((get_eig(Cat) + get_eig(An))/2) - (sqrt((V2**2)+(V3**2)))
 
-print "Valence Band Minimum = ", Ev
+
+print An, "Eigenvalue:", get_eig(An)
+print Cat, "Eigenvalue:", get_eig(Cat)
+print " "
+print "V2:", V2*J2eV, "eV"
+print "V3:", V3, "eV"
+print "Valence Band Minimum = ", Ev, "eV"
