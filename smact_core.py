@@ -41,7 +41,10 @@ class Element(object):
 
                 Element.ionpot: Ionisation potential in eV (0.0 if unknown)
 
-                Element.e_affinity: Eletron affinity in eV (0.0 if unknown)                
+                Element.e_affinity: Electron affinity in eV (0.0 if unknown)
+
+                Element.eig: Electron eigenvalue (units unknown)
+                N.B. For Cu, Au and Ag this defaults to d-orbital. FIX/OPTION NEEDED.
                 """
                 with open('data/element.txt','r') as f:
                         data = f.readlines()
@@ -62,7 +65,7 @@ class Element(object):
                         self.pauling_eneg=    float(elementdata[8])
                         self.ionpot=          float(elementdata[9])
                         self.e_affinity =     float(elementdata[10])
-
+                      
                 with open('data/Eigenvalues.csv','r') as f:
                     while True:
                         l=f.readline()
