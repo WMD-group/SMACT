@@ -26,7 +26,7 @@ An = raw_input("Enter Anion Symbol: ")
 Cat = raw_input("Enter Cation Symbol: ")
 
 """calculations"""
-V2 = (2.16*(hbar)**2)/(
+V2 = J2eV*(2.16*(hbar)**2)/(
                        m_e* (
                              get_covalent(An)*1E-10 +
                              get_covalent(Cat)*1E-10
@@ -40,7 +40,9 @@ Ev = ((get_eig(Cat) + get_eig(An))/2) - (sqrt((V2**2)+(V3**2)))
 
 print An, "Eigenvalue:", get_eig(An)
 print Cat, "Eigenvalue:", get_eig(Cat)
+print "CatEig+AnEig/2:", ((get_eig(Cat) + get_eig(An))/2)
+print "root(V2^2 + V3^2):)", (sqrt((V2**2)+(V3**2)))
 print " "
-print "V2:", V2*J2eV, "eV"
+print "V2:", V2, "eV"
 print "V3:", V3, "eV"
 print "Valence Band Minimum = ", Ev, "eV"
