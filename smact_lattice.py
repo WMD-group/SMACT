@@ -1,20 +1,4 @@
 #!/usr/bin/env python 
-
-################################################################################
-# Copyright Keith T. Butler (2013)                                             #
-#                                                                              #
-#  This file is part of SMACT: smact_lattice.py is free software: you can      #
-#  redistribute it and/or modify it under the terms of the GNU General Public  #
-#  License as published by the Free Software Foundation, either version 3 of   #
-#  the License, or (at your option) any later version.                         #
-#  This program is distributed in the hope that it will be useful, but WITHOUT #
-#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-#  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   #
-#  more details.                                                               #
-#  You should have received a copy of the GNU General Public License along with#
-#  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
-################################################################################
-
 import numpy as np
 
 class Lattice(object):
@@ -94,5 +78,19 @@ def possible_elements(elements, oxidations):
         	    atoms.append(element)
     return atoms
 #------------------------------------------------------------------------------------
+
+elements ={'Cu' : 2, 'Pb' : 2, 'Ti' : 4, 'I' : -1, 'O' : -2, 'Nb' : 4, 'Cl' : -1, 'Sn' : 1, 'S' : -2}
+
+
+#perovskite = Lattice(["A","B","C"],[1,1,3],[[1,2],[2,3,4],[-1,-2]])
+#mixed_perovskite = Lattice(["A","B","C","D"],[0.5,0.5,1,3],[[1,2,3],[1,2,3],[2,3,4],[-1,-2]])
+
+# Perovskite A B X_3
+#perovskite_compositions = possible_compositions(perovskite)
+# Mixed A site perovskite A_0.5 M_0.5 B X_3
+#mixed_perovskite_compositions = possible_compositions(mixed_perovskite)
+
+#print perovskite_compositions
+#print mixed_perovskite_compositions
 
 
