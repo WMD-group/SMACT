@@ -1,8 +1,24 @@
 #!/usr/bin/env python 
+
+################################################################################
+#  Copyright Keith T. Butler, Adam J. Jackson (2013)                           #
+#                                                                              #
+# This file is part of SMACT: smact_lattice.py is free software: you can       #
+# redistribute it and/or modify it under the terms of the GNU General Public   #
+# License as published by the Free Software Foundation, either version 3 of    #
+# the License, or (at your option) any later version.                          #
+# This program is distributed in the hope that it will be useful, but WITHOUT  #
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or        #
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for    #
+# more details.                                                                #
+# You should have received a copy of the GNU General Public License along with #
+# this program.  If not, see <http://www.gnu.org/licenses/>.                   #
+################################################################################
+
 import numpy as np
 
 class Lattice(object):
-      """A class of objects to hold the structure stoiciometry"""
+      """A class of objects to hold the structure stoichiometry"""
 
       def __init__(self, sites, site_ratios, site_oxidations):
 	self.sites = sites
@@ -10,17 +26,45 @@ class Lattice(object):
 	self.site_oxidations = site_oxidations
 #------------------------------------------------------------------------------------
 def check_lattice_charges(charges, site_elements, sites):
+      """
+      This function does something, briefly explained here.
+
+      Additional explanation if needed
+
+      Args:
+          charges: list/array/dict of int/float/string charges of something useful
+          site_elements: list/array/dict of int/float/string charges of something
+          sites: list/array/dict of int/float/string charges of something useful
+
+      Returns:
+          input site_elements array with appended neutral sites (???)
+
+      """
+
 # Check if all sub-lattice charges sum to zero, append to list if true
 	if np.sum(charges) == 0:
 # Need to use two lists, new contains the present composition; site_elements is the 
 # list of all news found.
+#
+# AJJ: I wasn't able to decipher this function. Please define the format and contents
+#  of the arguments in the docstring above. 
+# 
 	    site_elements.append(sites)
 
         return site_elements
 #------------------------------------------------------------------------------------
 def possible_compositions(crystal, elements):
-    """Seach for the elements which satisfy the possible oxidations and chrge neutrality"""
-    """As input it takes the crystal class and the dictionary elements, which contains the oxidation state data for the elements"""
+    """Seach for the elements which satisfy the possible oxidations and charge neutrality.
+
+    Args:
+        crystal: A Lattice object defining the crystal class
+        elements: Dictionary of elements and their allowable oxidation states
+
+    Returns:
+        list/array/dict of int/float/string of something useful (???)
+
+    """
+
 # Initialise the array atom, containing possible elements for each sub lattice
     atom = []
 # Initialise the array, site_elements, containing compositions found
@@ -68,9 +112,19 @@ def possible_compositions(crystal, elements):
 		                        site_elements = check_lattice_charges(charges, site_elements, sites)
 
     return site_elements
+
 #------------------------------------------------------------------------------------
 def possible_elements(elements, oxidations):
-    """Possible atoms to occupy a site"""
+    """Identify possible atoms to occupy a site
+    
+    Args:
+        elements:
+        oxidations: 
+
+    Returns: 
+        Array of atoms
+
+    """
     atoms = []
     for element in elements:
         for ox_state_a in oxidations:
@@ -78,6 +132,4 @@ def possible_elements(elements, oxidations):
         	    atoms.append(element)
     return atoms
 #------------------------------------------------------------------------------------
-
-
 
