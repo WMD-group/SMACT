@@ -22,54 +22,69 @@ Core classes and functions for SMACT
 class Element(object):
     """Class providing standard chemical data for elements."""
     def __init__(self, symbol):
-                """
-                Collection of standard elemental properties for given element.
-                Data is drawn from "data/element.txt", part of the Open Babel package.
-                element = element('Symbol')
+        """
+        Collection of standard elemental properties for given element.
+        Data is drawn from "data/element.txt", part of the Open Babel package.
+        element = element('Symbol')
 
-                Methods
-                -------
-                Element.symbol: Elemental symbol used to retrieve data
-
-                Element.name: Full name of element
-
-                Element.covalent_radius: Covalent radius in AA (1.6 if unknown)
+        Attributes:
                 
-                Element.vdw_radius: van der Waals radius in AA (2.0 if unknown)
+            Element.symbol: Elemental symbol used to retrieve data
 
-                Element.pauling_eneg: Pauling electronegativity (0.0 if unknown)
+            Element.name: Full name of element
 
-                Element.ionpot: Ionisation potential in eV (0.0 if unknown)
+            Element.covalent_radius: Covalent radius in AA (1.6 if unknown)
+                
+            Element.vdw_radius: van der Waals radius in AA (2.0 if unknown)
 
-                Element.e_affinity: Electron affinity in eV (0.0 if unknown)
+            Element.pauling_eneg: Pauling electronegativity (0.0 if unknown)
 
-                Element.eig: Electron eigenvalue (units unknown)
-                N.B. For Cu, Au and Ag this defaults to d-orbital. FIX/OPTION NEEDED.
-                """
-                with open('data/element.txt','r') as f:
-                        data = f.readlines()
-                elementdata = 0
-                for line in data:
-                        if not line.startswith('#'):
-                                l = line.split()
-                                if (l[1] == symbol):
-                                        elementdata = l
-                                        break
-                if not elementdata:
-                        raise NameError('Element {0} not found'.format(symbol))
-                else:
-                        self.symbol=          str(symbol)
-                        self.name=            str(elementdata[14])
-                        self.covalent_radius= float(elementdata[3])
-                        self.vdw_radius=      float(elementdata[5])
-                        self.pauling_eneg=    float(elementdata[8])
-                        self.ionpot=          float(elementdata[9])
-                        self.e_affinity =     float(elementdata[10])
-                      
-                with open('data/Eigenvalues.csv','r') as f:
-                    while True:
-                        l=f.readline()
-                        if l.split(",")[0] == symbol:
-                            break
+            Element.ionpot: Ionisation potential in eV (0.0 if unknown)
+
+            Element.e_affinity: Electron affinity in eV (0.0 if unknown)
+
+            Element.eig: Electron eigenvalue (units unknown)
+            N.B. For Cu, Au and Ag this defaults to d-orbital.
+            TODO(DD): implement a way to select the desired orbital
+
+        Raises:
+            NameError: Element not found in element.txt
+            Warning: Element not found in Eigenvalues.csv
+            
+        """
+        # Import general data from Openbabel-derived data table:
+        # Import whole file
+        with open('data/element.txt','r') as f:
+            data = f.readlines()
+        # Iterate through data file, ignoring comments and checking line against symbol
+        for line in data:
+            if not line.startswith('#'):
+                l = line.split()
+                if (l[1] == symbol):
+                    elementdata = l
+                    break
+        # If the for loop exits without breaking, the element was not found. Report error:
+        else:  
+            raise NameError('Element {0} not found in element.txt'.format(symbol))
+        
+        # Set attributes
+        self.symbol=          str(symbol)
+        self.name=            str(elementdata[14])
+        self.covalent_radius= float(elementdata[3])
+        self.vdw_radius=      float(elementdata[5])
+        self.pauling_eneg=    float(elementdata[8])
+        self.ionpot=          float(elementdata[9])
+        self.e_affinity =     float(elementdata[10])
+
+        # Load eigenvalue data from data table by iterating through CSV file
+        with open('data/Eigenvalues.csv','r') as f:            
+            while True:
+                l=f.readline()
+                if l.split(",")[0] == symbol:
                     self.eig = float(l.split(",")[1])
-
+                    break
+                # Check for end of file
+                elif not l:
+                    print 'WARNING: Element {0} not found in Eigenvalues.csv'.format(symbol)
+                    self.eig = False
+                    break
