@@ -1,0 +1,17 @@
+Script: smact_distorter.py
+Author: Keith T. Butler
+--------------------------------------------
+Description:
+For generating symmetry unique substitutions on a given sub-lattice.
+As input it takes the ASE crystal object (as built by smact_builder)
+and the sub-lattice on which substitutions are to be made. 
+There is an example of how to use the code in Example_distort.py
+--------------------------------------------
+
+TODO:
+Add a function substitute. This will take the array of symmetry unique
+sites generated above, then perform the desired substitution, returning
+a crystal object.
+
+Change to be a proper class.
+--------------------------------------------
