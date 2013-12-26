@@ -14,6 +14,7 @@
 #                                                                              #
 ################################################################################
 import ase
+import copy
 import smact_builder as builder
 from pyspglib import spglib
 from ase.lattice.spacegroup import Spacegroup
@@ -62,4 +63,30 @@ def get_inequivalent_sites(sub_lattice, lattice):
         i = i + 1
     return inequivalent_sites
 #------------------------------------------------------------------------------------------
+def make_substitution(lattice,site,new_species):
+    """Change the atomic species @ site in lattice to new_species [atomic number]"""
+    i = 0
+# NBNBNBNB  It ise necessary to use deepcopy for objects, otherwise changes applied to a clone
+# will also apply to the parent object.
+    new_lattice = copy.deepcopy(lattice)
+    lattice_sites = new_lattice.get_scaled_positions()
+    for lattice_site in lattice_sites:
+	if are_eq(lattice_site, site):
+	    new_lattice[i].symbol = new_species
+	i = i + 1
+    return new_lattice
 #------------------------------------------------------------------------------------------
+def build_sub_lattice(lattice,symbol):
+    """Generatea a sub-lattice of the lattice based on equivalent atomic species"""
+    sub_lattice = []
+    i = 0
+    atomic_labels = lattice.get_chemical_symbols()    
+    positions = lattice.get_scaled_positions()
+    for atom in atomic_labels:
+        if atom == "Ba":
+            sub_lattice.append(positions[i])
+        i = i + 1
+    return sub_lattice
+#------------------------------------------------------------------------------------------
+
+

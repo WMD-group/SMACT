@@ -1,31 +1,42 @@
+# Example script of using distorter, generate all possible (symmetry inequivalent) subsitiutions of Sr on Ba 
+# sites; single and double substitutions.
+
 import ase
 import smact_builder as builder
 import smact_distorter as distort
 import numpy as np
 
 # Build the input
-test_case = builder.cubic_perovskite(['Ba','Ti','O'],[1,2,2])
+test_case = builder.cubic_perovskite(['Ba','Ti','O'],[2,2,2])
 
 
-# Get arrays of site labels and positions
-positions = test_case.get_scaled_positions()
-atomic_labels = test_case.get_chemical_symbols()
+print "------------------------------"
+print "Original coordinates: ", test_case
+print "------------------------------"
 
-#Build a sub-lattice you wish to disorder [test case do the O sub-lattice]
-sub_lattice = []
-i = 0
-for atom in atomic_labels:
-    if atom == "Ba":
-        sub_lattice.append(positions[i])
-    i = i + 1
-i = 0
 
-# Enumerate the ineuivalent sites
-inequivalent_sites = distort.get_inequivalent_sites(sub_lattice,test_case)
+# Do the single substitution first, it is trivial as all Ba sites are equivalent we will choose the first Ba
+subs_site = [0.0, 0.0, 0.0]
+single_substitution = distort.make_substitution(test_case,subs_site,"Sr")
+print "Single: ", single_substitution
 
-print "SUB LATTICE"
-print "----- ----- ----- ----- ----- -----"
-print sub_lattice
-print "INEQUIVALENT SITES"
-print "----- ----- ----- ----- ----- -----"
-print inequivalent_sites
+
+#Build a sub-lattice you wish to disorder [test case do the Ba sub-lattice]
+sub_lattice = distort.build_sub_lattice(single_substitution,"Ba")
+
+
+# Enumerate the inequivalent sites
+inequivalent_sites = distort.get_inequivalent_sites(sub_lattice,single_substitution)
+
+
+# Replace Ba at inequivalent sites with Sr
+for inequivalent_site in inequivalent_sites:
+    print "------------------------------"
+    print " Substituted coordinates" 
+    #print test_case,inequivalent_site
+    distorted = distort.make_substitution(single_substitution,inequivalent_site,"Sr")
+    print distorted
+    
+
+print "------------------------------"
+print "------------------------------"
