@@ -11,7 +11,8 @@ Contents
 * **smact_core.py** 
 * **smact_data.py** A collection of functions providing elemental properties.
 * **smact_lattice.py** Given the sites, multiplicities and possible oxidation states at those sites, this reads from the database and generates all possible stoichiometeries.
-
+* **smact_builder** Builds some common lattice structures, given the chemical composition.
+* **smact_distorter.py** A collection of functions for enumerating and then substituting on inequivalent sites of a sub-lattice.
 Requirements
 ------------
 
