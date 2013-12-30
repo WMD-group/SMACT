@@ -45,4 +45,4 @@ print "root(V2^2 + V3^2):)", (sqrt((V2**2)+(V3**2)))
 print " "
 print "V2:", V2, "eV"
 print "V3:", V3, "eV"
-print "Valence Band Minimum = ", Ev, "eV"
+print "Valence Band Maximum = ", Ev, "eV"
