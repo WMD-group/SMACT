@@ -23,6 +23,12 @@ import numpy as np
 #------------------------------------------------------------------------------------------
 def get_sg(lattice):
     # Get the space-group of the system
+    """
+	Args:
+	lattice: the ASE crystal class
+	Returns:
+	sg: integer number of the spacegroup
+    """
     spacegroup = spglib.get_spacegroup(lattice, symprec=1e-5)
     space_split=spacegroup.split()
     spg_num = space_split[1].replace('(','').replace(')','')
@@ -30,7 +36,13 @@ def get_sg(lattice):
     return sg
 #------------------------------------------------------------------------------------------
 def are_eq(A,B,tolerance=1e-4):
-    """Check two arrays for tolearnce [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]"""
+    """Check two arrays for tolearnce [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
+	Args:
+	A/B: arrays
+	tolerance: numberical precision for equality condidtion
+	Returns:
+	True/Flase
+    """
     are_eq = True
     if len(A) != len(B):
 	are_eq = False
@@ -43,7 +55,12 @@ def are_eq(A,B,tolerance=1e-4):
     return are_eq
 #------------------------------------------------------------------------------------------
 def get_inequivalent_sites(sub_lattice, lattice):
-    """Given a sub lattice, returns symmetry unique sites for substitutions"""
+    """Given a sub lattice, returns symmetry unique sites for substitutions
+
+	Args:
+	sub_lattice: array containing Cartesian coordinates of the sub-lattice of interest
+	lattice: ASE crystal class, the total lattice
+     """
     sg = get_sg(lattice)
     inequivalent_sites = []
     i = 0
@@ -64,7 +81,12 @@ def get_inequivalent_sites(sub_lattice, lattice):
     return inequivalent_sites
 #------------------------------------------------------------------------------------------
 def make_substitution(lattice,site,new_species):
-    """Change the atomic species @ site in lattice to new_species [atomic number]"""
+    """Change the atomic species @ site in lattice to new_species [atomic number]
+	Args:
+	lattice: ASE crystal class
+	site: array, containing the Cartesian coordinates of the substitution site
+	new_species: string, the new species
+     """
     i = 0
 # NBNBNBNB  It ise necessary to use deepcopy for objects, otherwise changes applied to a clone
 # will also apply to the parent object.
@@ -77,13 +99,20 @@ def make_substitution(lattice,site,new_species):
     return new_lattice
 #------------------------------------------------------------------------------------------
 def build_sub_lattice(lattice,symbol):
-    """Generatea a sub-lattice of the lattice based on equivalent atomic species"""
+    """Generatea a sub-lattice of the lattice based on equivalent atomic species
+	Args:
+	lattice: ASE crystal class
+	symbol: The name of the species whose sub-lattice you wish to build
+	Returns:
+	sub_lattice: Cartesian coordinates of the sub-lattice of symbol
+    """
+
     sub_lattice = []
     i = 0
     atomic_labels = lattice.get_chemical_symbols()    
     positions = lattice.get_scaled_positions()
     for atom in atomic_labels:
-        if atom == "Ba":
+        if atom == symbol:
             sub_lattice.append(positions[i])
         i = i + 1
     return sub_lattice
