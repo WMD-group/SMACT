@@ -34,7 +34,7 @@ def cut010(crystal,nlayers=6):
 
 def cut001(crystal,nlayers=6):
     """Cleave the 001 surface"""
-    crystal010 = cut(crystal,[0,1,0],[0,0,1],nlayers=nlayers)
+    crystal001 = cut(crystal,[0,1,0],[0,0,1],nlayers=nlayers)
     return crystal001
 
 def cut110(crystal,nlayers=6):
