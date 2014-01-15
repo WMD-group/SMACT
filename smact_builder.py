@@ -36,3 +36,10 @@ def spinel(species,cell_par=[8,8,8,90,90,90],repititions=[1,1,1]):
 	 spacegroup=227,size=repititions,cellpar=cell_par)
 
          return system
+
+def wurtzite(species, cell_par=[2,2,6,90,90,120],repititions=[1,1,1]):
+         system = crystal((species),
+         basis=[(2./3.,1./3.,0),(2./3.,1./3.,5./8.)],
+         spacegroup=186, size = repititions, cellpar=[3, 3, 6, 90,90,120])
+
+         return system
