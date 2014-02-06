@@ -88,3 +88,24 @@ class Element(object):
                     print 'WARNING: Element {0} not found in Eigenvalues.csv'.format(symbol)
                     self.eig = False
                     break
+
+#------------------------------------------------------------------------------------------
+def are_eq(A,B,tolerance=1e-4):
+    """Check two arrays for tolearnce [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
+        Args:
+        A/B: arrays
+        tolerance: numberical precision for equality condidtion
+        Returns:
+        True/Flase
+    """
+    are_eq = True
+    if len(A) != len(B):
+        are_eq = False
+    else:
+        i = 0
+        while i < len(A):
+            if abs(A[i] - B[i]) > tolerance:
+                are_eq = False
+            i = i + 1
+    return are_eq
+#------------------------------------------------------------------------------------------
