@@ -3,13 +3,13 @@ from smact_builder import *
 from ase.io import *
 
 
-# Generate a dictionary elements, form the dataset oxidationstates.data
+# Generate a dictionary elements, from the dataset oxidationstates.data
 # Dictionary contains elements and their oxidation states
 # Reduce the regions of the periodic table to visit, by using search_space
 search_space = {'Pb','Ti','O-','Cs','Sn','F-','Cl','I-','Ca','Sr'}
 
 elements = {}
-f = open('oxidationstates.data','r')
+f = open('test/oxidationstates.data','r')
 lines = f.readlines()
 f.close()
 for line in lines:

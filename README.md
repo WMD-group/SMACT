@@ -18,7 +18,7 @@ Requirements
 
 The main language will be Python with Numpy, Scipy and Matplotlib.
 The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) 
-(ASE) is required for some components.
+(ASE) is required for some components, as is [spglib](http://spglib.sourceforge.net).
 
 The [chemlab](http://chemlab.github.com/chemlab) project is not
 currently used, but is considered ``friendly''; we will try to avoid
