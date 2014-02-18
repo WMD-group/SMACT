@@ -21,6 +21,7 @@ from numpy import product
 from smact_data import get_mulliken
 
 def compound_electroneg(verbose=False,elements=None,stoichs=None):
+
     """Estimate electronegativity of compound from elemental data.
 
     Geometric mean is used (n-th root of product of components), e.g.:
@@ -28,12 +29,12 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
     X_Cu2S = (X_Cu * X_Cu * C_S)^(1/3)
 
     Args:
-        elements: A space-separated string of elements employed, given as
-                standard elemental symbols. Optional: if not used,
-                interactive input will be offered.
-        stoichs: A space-separated string of stoichiometries, given as
-               integers or floats. Optional: if not used, interactive input
-               will be offered.
+        elements: A list of elements given as standard elemental symbols.
+		Optional: if not used, interactive input of space separated
+		elemental symbols will be offered.
+        stoichs: A list of stoichiometries, given as integers or floats.
+		Optional: if not used, interactive input of space separated
+		integers  will be offered.
         verbose: An optional True/False flag. If True, additional information is
                printed to the standard output. [Default: False]
 
@@ -45,16 +46,18 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
         (There are no special error messages for this function.)
     
     """
-
-        
+    if elements:
+	elementlist = elements
+    if stoichs:
+	stoichslist = stoichs
+    
     """Get elements and stoichiometries if not provided as argument"""
     if not elements:
-        elements=raw_input("Enter elements (space separated): ")
+        elementlist = list(raw_input("Enter elements (space separated): ").split(" "))	    
     if not stoichs:
-        stoichs=raw_input("Enter stoichiometries (space separated): ")
-    elementlist=list(elements.split(" "))
-    stoichslist=list(stoichs.split(" "))
+        stoichslist = list(raw_input("Enter stoichiometries (space separated): ").split(" "))
 
+  
     """Convert stoichslist from string to float"""
     stoichslist=map(float, stoichslist)
 
@@ -80,7 +83,7 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
     """Print optional formatted output."""
     if verbose:
         print "Geometric mean = Compound 'electronegativity'=", compelectroneg
-        
+      
     return compelectroneg
 
 """Wrapper for command line usage: argparse passes command line arguments
