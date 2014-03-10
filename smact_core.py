@@ -18,6 +18,12 @@
 """
 Core classes and functions for SMACT
 """
+import os # get correct path for datafiles when called from another directory
+smact_directory = os.path.dirname(__file__)
+# Append a trailing slash to make coherent directory name - this would select the
+# root directory in the case of no prefix, so we need to check
+if smact_directory:
+    smact_directory = smact_directory + '/'
 
 class Element(object):
     """Class providing standard chemical data for elements."""
@@ -54,7 +60,7 @@ class Element(object):
         """
         # Import general data from Openbabel-derived data table:
         # Import whole file
-        with open('data/element.txt','r') as f:
+        with open(smact_directory + '/data/element.txt','r') as f:
             data = f.readlines()
         # Iterate through data file, ignoring comments and checking line against symbol
         for line in data:
@@ -77,7 +83,7 @@ class Element(object):
         self.e_affinity =     float(elementdata[10])
 
         # Load eigenvalue data from data table by iterating through CSV file
-        with open('data/Eigenvalues.csv','r') as f:            
+        with open(smact_directory + '/data/Eigenvalues.csv','r') as f:            
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:
