@@ -1,15 +1,15 @@
 from smact_lattice import *
-from smact_builder import *
-from ase.io import *
+#from smact_builder import *
+#from ase.io import *
 
 
-# Generate a dictionary elements, form the dataset oxidationstates.data
+# Generate a dictionary elements, from the dataset oxidationstates.data
 # Dictionary contains elements and their oxidation states
 # Reduce the regions of the periodic table to visit, by using search_space
 search_space = {'Pb','Ti','O-','Cs','Sn','F-','Cl','I-','Ca','Sr'}
 
 elements = {}
-f = open('oxidationstates.data','r')
+f = open('test/oxidationstates.data','r')
 lines = f.readlines()
 f.close()
 for line in lines:
@@ -25,7 +25,8 @@ perovskite_compositions = possible_compositions(perovskite, elements)
 
 i = 0
 for composition in perovskite_compositions:
-    print composition
+    print  composition
 #    system = cubic_perovskite(composition)
 #    write('%s.cif'%i, system, format='cif')
     i = i + 1
+

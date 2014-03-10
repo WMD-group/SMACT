@@ -18,7 +18,7 @@ Requirements
 
 The main language will be Python with Numpy, Scipy and Matplotlib.
 The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) 
-(ASE) is required for some components.
+(ASE) is required for some components, as is [spglib](http://spglib.sourceforge.net).
 
 The [chemlab](http://chemlab.github.com/chemlab) project is not
 currently used, but is considered ``friendly''; we will try to avoid
@@ -63,3 +63,7 @@ style](http://google-styleguide.googlecode.com/svn/trunk/pyguide.html)
 is also helpful, including a good model for docstrings.
 Please use comments liberally when adding nontrivial features, and
 take the chance to clean up other people's code while looking at it.
+
+Testing modules should be pass/fail and wrapped into **tests/test.py**.
+Tests need to be run from the main directory (i.e. with `python tests/test.py`).
+TODO(AJJ): Examples should be kept separately in some kind of logical structure.

@@ -1,5 +1,6 @@
-# Example script of using distorter, generate all possible (symmetry inequivalent) subsitiutions of Sr on Ba 
-# sites; single and double substitutions.
+# Example script using distorter, generate all possible 
+# (symmetry inequivalent) substitutions of Sr on Ba  sites; 
+# single and double substitutions.
 
 import ase
 import smact_builder as builder
@@ -15,7 +16,8 @@ print "Original coordinates: ", test_case
 print "------------------------------"
 
 
-# Do the single substitution first, it is trivial as all Ba sites are equivalent we will choose the first Ba
+# Do the single substitution first, it is trivial as all Ba 
+#  sites are equivalent we will choose the first Ba
 subs_site = [0.0, 0.0, 0.0]
 single_substitution = distort.make_substitution(test_case,subs_site,"Sr")
 print "Single: ", single_substitution
