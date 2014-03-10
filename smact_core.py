@@ -18,6 +18,12 @@
 """
 Core classes and functions for SMACT
 """
+import os # get correct path for datafiles when called from another directory
+smact_directory = os.path.dirname(__file__)
+# Append a trailing slash to make coherent directory name - this would select the
+# root directory in the case of no prefix, so we need to check
+if smact_directory:
+    smact_directory = smact_directory + '/'
 
 class Element(object):
     """Class providing standard chemical data for elements."""
@@ -54,7 +60,7 @@ class Element(object):
         """
         # Import general data from Openbabel-derived data table:
         # Import whole file
-        with open('data/element.txt','r') as f:
+        with open(smact_directory + '/data/element.txt','r') as f:
             data = f.readlines()
         # Iterate through data file, ignoring comments and checking line against symbol
         for line in data:
@@ -76,8 +82,9 @@ class Element(object):
         self.ionpot=          float(elementdata[9])
         self.e_affinity =     float(elementdata[10])
 
-        # Load p-eigenvalue data from data table by iterating through CSV file
-        with open('data/Eigenvalues.csv','r') as f:            
+        # Load eigenvalue data from data table by iterating through CSV file
+        with open(smact_directory + '/data/Eigenvalues.csv','r') as f:            
+
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:
@@ -134,4 +141,23 @@ def are_eq(A,B,tolerance=1e-4):
                 are_eq = False
             i = i + 1
     return are_eq
+#------------------------------------------------------------------------------------------
+def lattices_are_same(lattice1, lattice2):
+    """Checks for the equivalence of two lattices
+    	Args:
+	lattice1,lattice2 : ASE crystal class
+	Returns:
+	lattices_are_same : boolean 
+	"""
+    lattices_are_same = False
+    i = 0
+    for site1 in lattice1:
+        for site2 in lattice2:
+            if site1.symbol == site2.symbol:
+                if are_eq(site1.position, site2.position):
+                    i += 1
+    if i == len(lattice1):
+        lattices_are_same = True
+    return lattices_are_same
+
 #------------------------------------------------------------------------------------------
