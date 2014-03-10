@@ -109,3 +109,22 @@ def are_eq(A,B,tolerance=1e-4):
             i = i + 1
     return are_eq
 #------------------------------------------------------------------------------------------
+def lattices_are_same(lattice1, lattice2):
+    """Checks for the equivalence of two lattices
+    	Args:
+	lattice1,lattice2 : ASE crystal class
+	Returns:
+	lattices_are_same : boolean 
+	"""
+    lattices_are_same = False
+    i = 0
+    for site1 in lattice1:
+        for site2 in lattice2:
+            if site1.symbol == site2.symbol:
+                if are_eq(site1.position, site2.position):
+                    i += 1
+    if i == len(lattice1):
+        lattices_are_same = True
+    return lattices_are_same
+
+#------------------------------------------------------------------------------------------
