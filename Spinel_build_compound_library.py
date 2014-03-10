@@ -2,8 +2,6 @@ from smact_lattice import *
 #from smact_builder import *
 #from ase.io import *
 from compound_electroneg import *
-from Band_gap_full import *
-from Band_gap_simple import *
 import copy
 
 # Generate a dictionary elements, form the dataset oxidationstates.data
@@ -40,7 +38,6 @@ counter = 1
 for combination, index in zip(perovskite_compositions, element_compositions):
 	result = compound_electroneg(False,combination,[1,1,3])
 	out.write(str(counter) + ". " + str(index) + ", " + str(result) + "\n")
-
 	counter = counter + 1
 out.close()
 

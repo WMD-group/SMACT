@@ -76,7 +76,7 @@ class Element(object):
         self.ionpot=          float(elementdata[9])
         self.e_affinity =     float(elementdata[10])
 
-        # Load eigenvalue data from data table by iterating through CSV file
+        # Load p-eigenvalue data from data table by iterating through CSV file
         with open('data/Eigenvalues.csv','r') as f:            
             while True:
                 l=f.readline()
@@ -87,6 +87,32 @@ class Element(object):
                 elif not l:
                     print 'WARNING: Element {0} not found in Eigenvalues.csv'.format(symbol)
                     self.eig = False
+                    break
+
+	# Load s-eigenvalue data from data table by iterating through CSV file
+	with open('data/Eigenvalues_s.csv','r') as f:
+            while True:
+                l=f.readline()
+                if l.split(",")[0] == symbol:
+                    self.eig_s = float(l.split(",")[1])
+                    break
+                # Check for end of file
+                elif not l:
+                    print 'WARNING: Element {0} not found in Eigenvalues_s.csv'.format(symbol)
+                    self.eig_s = False
+                    break
+
+	# Load ionic radii data from data table by iterating through CSV file
+        with open('data/ionic_radii.csv','r') as f:
+            while True:
+                l=f.readline()
+                if l.split(",")[0] == symbol:
+                    self.ionic = float(l.split(",")[1])
+                    break
+                # Check for end of file
+                elif not l:
+                    print 'WARNING: Element {0} not found in ionic_radii.csv'.format(symbol)
+                    self.ionic = False
                     break
 
 #------------------------------------------------------------------------------------------

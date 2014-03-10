@@ -20,7 +20,7 @@ import sys
 from numpy import product
 from smact_data import get_mulliken
 
-def compound_electroneg(verbose=False,elements=None,stoichs=None):
+def compound_electroneg(verbose=True,elements=None,stoichs=None):
 
     """Estimate electronegativity of compound from elemental data.
 

@@ -7,7 +7,7 @@ import copy
 # Generate a dictionary elements, form the dataset oxidationstates.data
 # Dictionary contains elements and their oxidation states
 # Reduce the regions of the periodic table to visit, by using search_space
-search_space = {'Ti','O-','Sn','F-','C','Sr','Mg','Cu','Li','S','Si','Ge'}
+search_space = {'Ba','Sr','Mg','Cu','Li','S','Si','Ge'}
 # Get the list of possible constituant elements
 elements = {}
 f = open('oxidationstates.data','r')
