@@ -10,7 +10,7 @@ from smact_data import get_ionic, get_pauling, get_covalent
 # Generate a dictionary elements, form the dataset oxidationstates.data
 # Dictionary contains elements and their oxidation states
 # Reduce the regions of the periodic table to visit, by using search_space
-search_space = {'Li','Be','Na','Mg','K','Ca','Rb','Sr','Cs','Ba','Al','Si','Ga','Ge','As','In','Sn','Sb','Te','Tl','Pb','Bi','Po','At','S','O','Se','F','Cl','Br','I'}
+search_space = {'Li','Be','Na','Mg','K','Ca','Rb','Sr','Cs','Ba','Al','Si','Ga','Ge','As','In','Sn','Sb','Te','Tl','Pb','Bi','Po','At','S','O','Se','F','Cl','Br','Zn','Cu','I'}
 # Get the list of possible constituant elements
 elements = {}
 f = open('oxidationstates.data','r')
