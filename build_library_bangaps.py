@@ -2,6 +2,7 @@ from smact_lattice import *
 #from smact_builder import *
 #from ase.io import *
 from compound_electroneg import *
+from compound_electroneg_pauling import *
 from Band_gap_simple import *
 import copy
 from smact_data import get_ionic, get_pauling, get_covalent
@@ -23,7 +24,7 @@ for line in lines:
     	    elements[key] = inp[1]
 
 # Generate list of compositions which satisfy charge neutrality
-simple = Lattice(["A","B"],[1,2],[[1,2],[-1,-2]])
+simple = Lattice(["A","B"],[1,1],[[1,2],[-1,-2]])
 simple_compositions = possible_compositions(simple, elements)
 
 
@@ -48,10 +49,10 @@ for combination, index in zip(simple_compositions, element_compositions):
 	else:
 		dist = float(get_covalent(combination[1])+get_covalent(combination[0]))
 	bandgap = band_gap_simple(False, combination[1], combination[0], dist)
-	mul_eneg = compound_electroneg(False,combination,[1,2])
+	eneg = compound_electroneg_pauling(False,combination,[1,1])
 	
-	print str(index), "--", str(bandgap), "--", str(mul_eneg), "--", str(dist)
-	out.write(str(index) + ", " + str(bandgap) + ", " + str(mul_eneg) + ", " + str(dist) + "\n")
+	print str(index), "--", str(bandgap), "--", str(eneg), "--", str(dist)
+	out.write(str(index) + ", " + str(bandgap) + ", " + str(eneg) + ", " + str(dist) + "\n")
 
 #	result = compound_electroneg(False,combination,[1,1,3])
 #	out.write(str(counter) + ". " + str(index) + ", " + str(result) + "\n")
