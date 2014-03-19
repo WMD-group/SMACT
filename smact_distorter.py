@@ -13,6 +13,22 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.                   #
 #                                                                              #
 ################################################################################
+
+"""
+smact_distorter: Module for generating symmetry-unique substitutions on a given sub-lattice.
+
+As input it takes the ASE crystal object (as built by smact_builder)
+and the sub-lattice on which substitutions are to be made. 
+There is an example of how to use the code in Example_distort.py
+
+---------------------------------------------------------------------
+TODO:
+Add a functionality to check two Atoms objects against one another 
+for equivalence.
+---------------------------------------------------------------------
+
+"""
+
 import ase
 import copy
 import smact_builder as builder
