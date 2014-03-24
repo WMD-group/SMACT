@@ -66,4 +66,8 @@ take the chance to clean up other people's code while looking at it.
 
 Testing modules should be pass/fail and wrapped into **tests/test.py**.
 Tests need to be run from the main directory (i.e. with `python tests/test.py`).
+
+General To Do list:
+-------------------
 TODO(AJJ): Examples should be kept separately in some kind of logical structure.
+TODO(DD):  ValenceMaxTest.py seems to serve no purpose now? Remove if so, or clarify its purpose in docs.

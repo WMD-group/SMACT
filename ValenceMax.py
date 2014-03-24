@@ -14,6 +14,11 @@
 #  You should have received a copy of the GNU General Public License along with#
 #  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
 ################################################################################
+#                                                                              #
+# TODO(AJJ): Rename to avoid confusing use of CamelCase                        #
+# TODO(AJJ): Implement non-interactive interface through command-line args     #
+#                                                                              #
+################################################################################
 
 from numpy import product,sqrt
 from smact_data import get_eig,get_covalent
