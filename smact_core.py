@@ -60,7 +60,7 @@ class Element(object):
         """
         # Import general data from Openbabel-derived data table:
         # Import whole file
-        with open(smact_directory + '/data/element.txt','r') as f:
+        with open(smact_directory + 'data/element.txt','r') as f:
             data = f.readlines()
         # Iterate through data file, ignoring comments and checking line against symbol
         for line in data:
@@ -83,7 +83,7 @@ class Element(object):
         self.e_affinity =     float(elementdata[10])
 
         # Load eigenvalue data from data table by iterating through CSV file
-        with open(smact_directory + '/data/Eigenvalues.csv','r') as f:            
+        with open(smact_directory + 'data/Eigenvalues.csv','r') as f:            
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:

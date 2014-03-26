@@ -56,8 +56,6 @@ def get_eig(symbol):
     from smact_core import Element
     A=Element(symbol)
     return A.eig
-<<<<<<< HEAD
-=======
 
 def get_eig_s(symbol):
     from smact_core import Element
@@ -68,4 +66,6 @@ def get_ionic(symbol):
     from smact_core import Element
     A=Element(symbol)
     return A.ionic
->>>>>>> dbcf14ff51363bbf7a81cbc549399b2aa9c248e8
+
+
+
