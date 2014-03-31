@@ -34,3 +34,11 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Any .cif files generated from examples running
+*.cif
+*/*.cif
+*/*/*.cif
+
+# The LEGO development directory
+surface/*

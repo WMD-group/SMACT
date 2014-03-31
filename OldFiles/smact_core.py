@@ -60,7 +60,11 @@ class Element(object):
         """
         # Import general data from Openbabel-derived data table:
         # Import whole file
+<<<<<<< HEAD
+        with open(smact_directory + '/data/element.txt','r') as f:
+=======
         with open(smact_directory + 'data/element.txt','r') as f:
+>>>>>>> dbcf14ff51363bbf7a81cbc549399b2aa9c248e8
             data = f.readlines()
         # Iterate through data file, ignoring comments and checking line against symbol
         for line in data:
@@ -83,7 +87,12 @@ class Element(object):
         self.e_affinity =     float(elementdata[10])
 
         # Load eigenvalue data from data table by iterating through CSV file
+<<<<<<< HEAD
+        with open(smact_directory + '/data/Eigenvalues.csv','r') as f:            
+=======
         with open(smact_directory + 'data/Eigenvalues.csv','r') as f:            
+
+>>>>>>> dbcf14ff51363bbf7a81cbc549399b2aa9c248e8
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:
@@ -93,6 +102,32 @@ class Element(object):
                 elif not l:
                     print 'WARNING: Element {0} not found in Eigenvalues.csv'.format(symbol)
                     self.eig = False
+                    break
+
+	# Load s-eigenvalue data from data table by iterating through CSV file
+	with open('data/Eigenvalues_s.csv','r') as f:
+            while True:
+                l=f.readline()
+                if l.split(",")[0] == symbol:
+                    self.eig_s = float(l.split(",")[1])
+                    break
+                # Check for end of file
+                elif not l:
+                    print 'WARNING: Element {0} not found in Eigenvalues_s.csv'.format(symbol)
+                    self.eig_s = False
+                    break
+
+	# Load ionic radii data from data table by iterating through CSV file
+        with open('data/ionic_radii.csv','r') as f:
+            while True:
+                l=f.readline()
+                if l.split(",")[0] == symbol:
+                    self.ionic = float(l.split(",")[1])
+                    break
+                # Check for end of file
+                elif not l:
+                    print 'WARNING: Element {0} not found in ionic_radii.csv'.format(symbol)
+                    self.ionic = False
                     break
 
 #------------------------------------------------------------------------------------------

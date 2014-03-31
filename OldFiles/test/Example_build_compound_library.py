@@ -1,6 +1,6 @@
 from smact_lattice import *
-from smact_builder import *
-from ase.io import *
+#from smact_builder import *
+#from ase.io import *
 
 
 # Generate a dictionary elements, from the dataset oxidationstates.data
@@ -25,7 +25,8 @@ perovskite_compositions = possible_compositions(perovskite, elements)
 
 i = 0
 for composition in perovskite_compositions:
-    print composition
+    print  composition
 #    system = cubic_perovskite(composition)
 #    write('%s.cif'%i, system, format='cif')
     i = i + 1
+

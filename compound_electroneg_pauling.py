@@ -3,10 +3,10 @@
 ################################################################################
 # Copyright Daniel Davies, Adam J. Jackson (2013)                              #
 #                                                                              #
-# This file is part of SMACT: compound_electroneg.py is free software: you can #
-# redistribute it and/or modify it under the terms of the GNU General Public   #
-# License as published by the Free Software Foundation, either version 3 of    #
-# the License, or (at your option) any later version.                          #
+# This file is part of SMACT: compound_electroneg_pauling.py is free software: #
+# you can redistribute it and/or modify it under the terms of the GNU 		   #
+# General Public License as published by the Free Software Foundation, either  #
+# version 3 of the License, or (at your option) any later version.			   #											                         
 # This program is distributed in the hope that it will be useful, but WITHOUT  #
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or        #
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for    #
@@ -18,13 +18,12 @@
 
 import sys
 from numpy import product
-from smact_data import get_mulliken
+from smact_data import get_pauling
 
-def compound_electroneg(verbose=False,elements=None,stoichs=None):
+def compound_electroneg_pauling(verbose=True,elements=None,stoichs=None):
 
-    """Estimate Mulliken electronegativity of compound from elemental data.
-		Uses get_mulliken function which uses elemental ionisation potentials
-		and electron affinities. 
+    """Estimate Mulliken electronegativity of compound from elemental data
+		based on Pauling electronegativities. Scaling factor of 2.86 used.
 
     Geometric mean is used (n-th root of product of components), e.g.:
 
@@ -65,7 +64,7 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
 
     """Get mulliken values for each element"""
     for i in range(0,len(elementlist)):
-        elementlist[i]=get_mulliken(elementlist[i])
+        elementlist[i]=get_pauling(elementlist[i])
 
     """Print optional list of element electronegativities.
     This may be a useful sanity check in case of a suspicious result.
@@ -80,7 +79,7 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
         elementlist[i]=[elementlist[i]**stoichslist[i]]
     """Calculate geometric mean (n-th root of product)"""
     prod = product(elementlist)
-    compelectroneg = (prod)**(1.0/(sum(stoichslist)))
+    compelectroneg = 2.86*(prod)**(1.0/(sum(stoichslist)))
 
     """Print optional formatted output."""
     if verbose:
@@ -115,6 +114,6 @@ if __name__ == "__main__":
     else:
         verbose_flag=True
 
-    print compound_electroneg(verbose=verbose_flag,elements=args.elements,
+    print compound_electroneg_pauling(verbose=verbose_flag,elements=args.elements,
                               stoichs=args.stoichiometry)
 
