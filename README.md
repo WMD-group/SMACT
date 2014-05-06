@@ -13,10 +13,11 @@ Contents
 * **smact_lattice.py** Given the sites, multiplicities and possible oxidation states at those sites, this reads from the database and generates all possible stoichiometeries.
 * **smact_builder** Builds some common lattice structures, given the chemical composition.
 * **smact_distorter.py** A collection of functions for enumerating and then substituting on inequivalent sites of a sub-lattice.
+
 Requirements
 ------------
 
-The main language will be Python with Numpy, Scipy and Matplotlib.
+The main language is Python with Numpy, Scipy and Matplotlib.
 The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) 
 (ASE) is required for some components, as is [spglib](http://spglib.sourceforge.net).
 
@@ -26,8 +27,6 @@ namespace clashes and it may be used for some features in the future.
 Needed modifications will be made in [ajjackson's
 fork](https://github.com/ajjackson/chemlab), 
 but are expected to make it upstream fairly rapidly.
-
-
 
 License and attribution
 -----------------------
@@ -45,9 +44,10 @@ References
 ----------
 
 B. R. Pamplin, "A systematic method of deriving new semiconducting
-compounds by structural analogy", (1964) *J. Phys. Chem. Solids*
-**25** pp. 675-684
+compounds by structural analogy", *J. Phys. Chem. Solids*
+**25**, 675 (1964)
 
+S. Chen, X. G. Gong, A. Walsh and S.-H. Wei, "Electronic structure and stability of quaternary chalcogenide semiconductors derived from cation cross-substitution of II-VI and I-III-VI2 compounds", *Physical Review B* **79**, 165211 (2009)
 
 Development notes
 -----------------
@@ -66,4 +66,5 @@ take the chance to clean up other people's code while looking at it.
 
 Testing modules should be pass/fail and wrapped into **tests/test.py**.
 Tests need to be run from the main directory (i.e. with `python tests/test.py`).
+
 TODO(AJJ): Examples should be kept separately in some kind of logical structure.

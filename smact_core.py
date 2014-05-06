@@ -88,11 +88,15 @@ class Element(object):
 
         # Load eigenvalue data from data table by iterating through CSV file
 <<<<<<< HEAD
+<<<<<<< HEAD
         with open(smact_directory + '/data/Eigenvalues.csv','r') as f:            
 =======
         with open(smact_directory + 'data/Eigenvalues.csv','r') as f:            
 
 >>>>>>> dbcf14ff51363bbf7a81cbc549399b2aa9c248e8
+=======
+        with open(smact_directory + 'data/Eigenvalues.csv','r') as f:            
+>>>>>>> b9b5e2734d7368a81d6124409d917504f0bfb71b
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:

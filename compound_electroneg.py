@@ -20,17 +20,11 @@ import sys
 from numpy import product
 from smact_data import get_mulliken
 
-<<<<<<< HEAD
 def compound_electroneg(verbose=False,elements=None,stoichs=None):
-
-    """Estimate electronegativity of compound from elemental data.
-=======
-def compound_electroneg(verbose=True,elements=None,stoichs=None):
 
     """Estimate Mulliken electronegativity of compound from elemental data.
 		Uses get_mulliken function which uses elemental ionisation potentials
 		and electron affinities. 
->>>>>>> dbcf14ff51363bbf7a81cbc549399b2aa9c248e8
 
     Geometric mean is used (n-th root of product of components), e.g.:
 
