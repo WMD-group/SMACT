@@ -1,11 +1,11 @@
-from smact.smact_lattice import *
-#from smact_builder import *
+from smact.lattice import *
+#from smact.builder import *
 #from ase.io import *
 from smact.properties.compound_electroneg import *
 from smact.properties.compound_electroneg_pauling import *
 from smact.properties.Band_gap_simple import *
 import copy
-from smact.smact_data import get_ionic, get_pauling, get_covalent
+from smact.data import get_ionic, get_pauling, get_covalent
 import os.path
 
 # Get correct directory if calling from elsewhere

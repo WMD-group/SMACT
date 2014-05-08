@@ -3,7 +3,7 @@
 ################################################################################
 # Copyright Daniel Davies, Adam J. Jackson (2013)                              #
 #                                                                              #
-#  This file is part of SMACT: smact_data.py is free software: you can         #
+#  This file is part of SMACT: data.py is free software: you can               #
 #  redistribute it and/or modify it under the terms of the GNU General Public  #
 #  License as published by the Free Software Foundation, either version 3 of   #
 #  the License, or (at your option) any later version.                         #
@@ -17,7 +17,7 @@
 
 def get_mulliken(symbol):
     """Gets Mulliken electroneg from the IE and EA"""
-    from smact_core import Element
+    from smact.core import Element
     A = Element(symbol)
     mulliken=(A.ionpot+A.e_affinity)/2.0
     return mulliken
@@ -41,29 +41,29 @@ def get_mulliken(symbol):
 def get_pauling(symbol):
     """Pauling electronegativity of specified element.
     Drawn from Open Babel data table."""
-    from smact_core import Element
+    from smact.core import Element
     A = Element(symbol)
     return A.pauling_eneg
 
 def get_covalent(symbol):
     """Covalent radius of specified element.
     Drawn from Open Babel data table."""
-    from smact_core import Element
+    from smact.core import Element
     A = Element(symbol)
     return A.covalent_radius
 
 def get_eig(symbol):
-    from smact_core import Element
+    from smact.core import Element
     A=Element(symbol)
     return A.eig
 
 def get_eig_s(symbol):
-    from smact_core import Element
+    from smact.core import Element
     A=Element(symbol)
     return A.eig_s
 
 def get_ionic(symbol):
-    from smact_core import Element
+    from smact.core import Element
     A=Element(symbol)
     return A.ionic
 

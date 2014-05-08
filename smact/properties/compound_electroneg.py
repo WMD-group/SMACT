@@ -18,7 +18,7 @@
 
 import sys
 from numpy import product
-from smact.smact_data import get_mulliken
+from smact.data import get_mulliken
 
 def compound_electroneg(verbose=False,elements=None,stoichs=None):
 

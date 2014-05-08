@@ -17,7 +17,7 @@
 ################################################################################
 import sys
 from numpy import sqrt
-from smact.smact_data import get_eig, get_eig_s
+from smact.data import get_eig, get_eig_s
 
 def band_gap_simple(verbose=False,Anion=None,Cation=None,Distance=None):
 

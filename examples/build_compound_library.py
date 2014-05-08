@@ -1,5 +1,5 @@
-from smact.smact_lattice import *
-#from smact_builder import *
+from smact.lattice import *
+#from smact.builder import *
 #from ase.io import *
 import copy
 

@@ -8,11 +8,12 @@ A collection of fast screening tools from elemental data.
 Contents
 --------
 
-* **smact_core.py** 
-* **smact_data.py** A collection of functions providing elemental properties.
-* **smact_lattice.py** Given the sites, multiplicities and possible oxidation states at those sites, this reads from the database and generates all possible stoichiometeries.
-* **smact_builder** Builds some common lattice structures, given the chemical composition.
-* **smact_distorter.py** A collection of functions for enumerating and then substituting on inequivalent sites of a sub-lattice.
+* **smact** library containing:
+  * **core.py** 
+  * **data.py** A collection of functions providing elemental properties.
+  * **lattice.py** Given the sites, multiplicities and possible oxidation states at those sites, this reads from the database and generates all possible stoichiometeries.
+  * **builder.py** Builds some common lattice structures, given the chemical composition.
+  * **distorter.py** A collection of functions for enumerating and then substituting on inequivalent sites of a sub-lattice.
 
 Requirements
 ------------
@@ -27,6 +28,14 @@ namespace clashes and it may be used for some features in the future.
 Needed modifications will be made in [ajjackson's
 fork](https://github.com/ajjackson/chemlab), 
 but are expected to make it upstream fairly rapidly.
+
+Installation
+------------
+
+On a unix-like system, simply add the directory containing this README file
+to your PYTHONPATH. e.g. in ~/.bashrc
+
+    export PYTHONPATH="/home/username/src/smact:$PYTHONPATH"
 
 License and attribution
 -----------------------
