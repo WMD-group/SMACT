@@ -32,6 +32,7 @@ for equivalence.
 import ase
 import copy
 import smact_builder as builder
+import smact_core as core
 from pyspglib import spglib
 from ase.lattice.spacegroup import Spacegroup
 import numpy as np
@@ -54,26 +55,6 @@ def get_sg(lattice):
     sg = Spacegroup(int(spg_num))
     return sg
 #------------------------------------------------------------------------------------------
-def are_eq(A,B,tolerance=1e-4):
-    """Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
-
-	Args:
-	A/B: arrays
-	tolerance: numerical precision for equality condition
-	Returns:
-	True/False
-    """
-    are_eq = True
-    if len(A) != len(B):
-	are_eq = False
-    else:
-        i = 0
-        while i < len(A):
-	    if abs(A[i] - B[i]) > tolerance:
-	        are_eq = False
-            i = i + 1
-    return are_eq
-#------------------------------------------------------------------------------------------
 def get_inequivalent_sites(sub_lattice, lattice):
     """Given a sub lattice, returns symmetry unique sites for substitutions
 
@@ -88,12 +69,12 @@ def get_inequivalent_sites(sub_lattice, lattice):
         new_site = True
 # Check against the existing members of the list of inequivalent sites
         for inequiv_site in inequivalent_sites:
-	    if are_eq(site, inequiv_site) == True:
+	    if core.are_eq(site, inequiv_site) == True:
 	        new_site = False
 # Check against symmetry related members of the list of inequivalent sites
             equiv_inequiv_sites,junk = sg.equivalent_sites(inequiv_site)    	
 	    for equiv_inequiv_site in equiv_inequiv_sites:
-	        if are_eq(site, equiv_inequiv_site) == True:
+	        if core.are_eq(site, equiv_inequiv_site) == True:
 	   	    new_site = False
         if new_site == True:
 	    inequivalent_sites.append(site)
@@ -115,7 +96,7 @@ def make_substitution(lattice,site,new_species):
     new_lattice = copy.deepcopy(lattice)
     lattice_sites = new_lattice.get_scaled_positions()
     for lattice_site in lattice_sites:
-	if are_eq(lattice_site, site):
+	if core.are_eq(lattice_site, site):
 	    new_lattice[i].symbol = new_species
 	i = i + 1
     return new_lattice
