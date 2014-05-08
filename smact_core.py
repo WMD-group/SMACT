@@ -96,7 +96,7 @@ class Element(object):
                     break
 
 	# Load s-eigenvalue data from data table by iterating through CSV file
-	with open('data/Eigenvalues_s.csv','r') as f:
+	with open(smact_directory + 'data/Eigenvalues_s.csv','r') as f:
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:
@@ -109,7 +109,7 @@ class Element(object):
                     break
 
 	# Load ionic radii data from data table by iterating through CSV file
-        with open('data/ionic_radii.csv','r') as f:
+        with open(smact_directory + 'data/ionic_radii.csv','r') as f:
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:
@@ -123,12 +123,12 @@ class Element(object):
 
 #------------------------------------------------------------------------------------------
 def are_eq(A,B,tolerance=1e-4):
-    """Check two arrays for tolearnce [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
+    """Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
         Args:
         A/B: arrays
-        tolerance: numberical precision for equality condidtion
+        tolerance: numerical precision for equality condition
         Returns:
-        True/Flase
+        True/False
     """
     are_eq = True
     if len(A) != len(B):

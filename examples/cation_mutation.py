@@ -3,8 +3,8 @@
 # single and double substitutions.
 
 import ase
-import smact_builder as builder
-import smact_distorter as distort
+import smact.smact_builder as builder
+import smact.smact_distorter as distort
 import numpy as np
 
 # Build the input

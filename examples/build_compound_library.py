@@ -1,7 +1,11 @@
-from smact_lattice import *
+from smact.smact_lattice import *
 #from smact_builder import *
 #from ase.io import *
 import copy
+
+import os # get correct path for datafiles when called from another directory
+this_directory = os.path.dirname(__file__)
+smact_directory = this_directory + '../'
 
 # Generate a dictionary elements, form the dataset oxidationstates.data
 # Dictionary contains elements and their oxidation states
@@ -9,7 +13,7 @@ import copy
 search_space = {'Ti','O-','Sn','F-','C','Sr','Mg','Cu','Li','S','Si','Ge'}
 # Get the list of possible constituant elements
 elements = {}
-f = open('oxidationstates.data','r')
+f = open(smact_directory + 'data/oxidationstates.data','r')
 lines = f.readlines()
 f.close()
 for line in lines:

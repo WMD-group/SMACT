@@ -18,7 +18,7 @@
 
 import sys
 from numpy import product
-from smact_data import get_pauling
+from smact.smact_data import get_pauling
 
 def compound_electroneg_pauling(verbose=True,elements=None,stoichs=None):
 
