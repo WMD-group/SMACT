@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import unittest
-from compound_electroneg import compound_electroneg
-import smact_core
+from smact.properties.compound_electroneg import compound_electroneg
+import smact.core
 
 class TestSequenceFunctions(unittest.TestCase):
 
@@ -10,7 +10,7 @@ class TestSequenceFunctions(unittest.TestCase):
         pass
 
     def test_Element_class_Pt(self):
-        Pt = smact_core.Element('Pt')
+        Pt = smact.core.Element('Pt')
         self.assertEqual(Pt.name,'Platinum')
         self.assertEqual(Pt.ionpot,8.9588)
 
