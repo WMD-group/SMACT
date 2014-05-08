@@ -95,6 +95,32 @@ class Element(object):
                     self.eig = False
                     break
 
+	# Load s-eigenvalue data from data table by iterating through CSV file
+	with open('data/Eigenvalues_s.csv','r') as f:
+            while True:
+                l=f.readline()
+                if l.split(",")[0] == symbol:
+                    self.eig_s = float(l.split(",")[1])
+                    break
+                # Check for end of file
+                elif not l:
+                    print 'WARNING: Element {0} not found in Eigenvalues_s.csv'.format(symbol)
+                    self.eig_s = False
+                    break
+
+	# Load ionic radii data from data table by iterating through CSV file
+        with open('data/ionic_radii.csv','r') as f:
+            while True:
+                l=f.readline()
+                if l.split(",")[0] == symbol:
+                    self.ionic = float(l.split(",")[1])
+                    break
+                # Check for end of file
+                elif not l:
+                    print 'WARNING: Element {0} not found in ionic_radii.csv'.format(symbol)
+                    self.ionic = False
+                    break
+
 #------------------------------------------------------------------------------------------
 def are_eq(A,B,tolerance=1e-4):
     """Check two arrays for tolearnce [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
