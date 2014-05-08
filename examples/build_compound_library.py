@@ -5,7 +5,9 @@ import copy
 
 import os # get correct path for datafiles when called from another directory
 this_directory = os.path.dirname(__file__)
-smact_directory = this_directory + '../'
+if this_directory:
+    this_directory = this_directory + '/'
+smact_directory = this_directory + '../smact/'
 
 # Generate a dictionary elements, form the dataset oxidationstates.data
 # Dictionary contains elements and their oxidation states

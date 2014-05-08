@@ -6,6 +6,14 @@ from smact.properties.compound_electroneg_pauling import *
 from smact.properties.Band_gap_simple import *
 import copy
 from smact.smact_data import get_ionic, get_pauling, get_covalent
+import os.path
+
+# Get correct directory if calling from elsewhere
+# (if statement needed in case of empty response)
+this_directory = os.path.dirname(__file__)
+if this_directory:
+    this_directory = this_directory + '/'
+smact_directory = this_directory + '../smact/'
 
 # Generate a dictionary elements, form the dataset oxidationstates.data
 # Dictionary contains elements and their oxidation states
@@ -13,7 +21,7 @@ from smact.smact_data import get_ionic, get_pauling, get_covalent
 search_space = {'Li','Be','Na','Mg','K','Ca','Rb','Sr','Cs','Ba','Al','Si','Ga','Ge','As','In','Sn','Sb','Te','Tl','Pb','Bi','Po','At','S','O','Se','F','Cl','Br','Zn','Cu','I'}
 # Get the list of possible constituent elements
 elements = {}
-f = open('../data/oxidationstates.data','r')
+f = open(smact_directory + 'data/oxidationstates.data','r')
 lines = f.readlines()
 f.close()
 for line in lines:
