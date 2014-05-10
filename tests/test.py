@@ -4,6 +4,9 @@ import unittest
 from smact.properties.compound_electroneg import compound_electroneg
 import smact.smact_core as smact_core
 from smact.smact_builder import wurtzite
+from smact.smact_lattice import *
+import copy
+import os
 
 class TestSequenceFunctions(unittest.TestCase):
 
@@ -29,6 +32,38 @@ class TestSequenceFunctions(unittest.TestCase):
 	self.assertEqual(round(ZnS.positions[2,2],2),3.75)
 	self.assertEqual(round(ZnS.cell[0,0],2),3.0)
 	self.assertEqual(round(ZnS.cell[1,0],2),-1.5)
+
+    def test_compound_library(self):
+        """A compound test, this covers builder, oxidation_data and the possible_compositions functions"""
+        this_directory = os.path.dirname(__file__)
+        if this_directory:
+            this_directory = this_directory + '/'
+        smact_directory = this_directory + '../smact/'
+
+# Generate a dictionary elements, form the dataset oxidationstates.data
+# Dictionary contains elements and their oxidation states
+# Reduce the regions of the periodic table to visit, by using search_space
+        search_space = {'Ti','O-','Sn','F-','C','Sr','Mg','Cu','Li','S','Si','Ge'}
+# Get the list of possible constituant elements
+        elements = {}
+        f = open(smact_directory + 'data/oxidationstates.data','r')
+        lines = f.readlines()
+        f.close()
+        for line in lines:
+            inp = line.split()
+            for item in search_space:
+                if inp[0].startswith(item):
+                    key = inp[0]
+                    elements[key] = inp[1]
+
+# Generate list of compositions which satisfy charge neutrality
+        perovskite = Lattice(["A","B","C"],[1,1,3],[[1,2],[2,3,4],[-1,-2]])
+        perovskite_compositions = possible_compositions(perovskite, elements)
+        self.assertEqual(perovskite_compositions[3][2],'C-2')
+        self.assertEqual(perovskite_compositions[12][2],'S-2')
+        self.assertEqual(perovskite_compositions[20][1],'Ge4')
+        self.assertEqual(perovskite_compositions[32][0],'S2')
+#--------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     unittest.main()
