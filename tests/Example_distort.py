@@ -2,13 +2,13 @@
 # sites; single and double substitutions.
 
 import ase
-import smact_builder as builder
-import smact_distorter as distort
+import smact.builder as builder
+import smact.distorter as distort
 import numpy as np
 import ase.io as io
 
 # Build the input
-test_case = builder.cubic_perovskite(['Ba','Ti','O'],repititions=[2,2,2])
+test_case = builder.cubic_perovskite(['Ba','Ti','O'],repetitions=[2,2,2])
 
 
 print "------------------------------"

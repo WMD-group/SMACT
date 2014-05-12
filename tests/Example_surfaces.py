@@ -1,7 +1,7 @@
 import ase
 from ase.io import *
-import smact_builder as build
-import smact_surface as surface
+import smact.builder as build
+import smact.surface as surface
 
 PbZrO = build.cubic_perovskite(['Pb','Zr','O'])
 

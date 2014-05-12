@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from numpy import product, sqrt
-from smact_data import get_eig, get_eig_s, get_covalent
+from smact.data import get_eig, get_eig_s, get_covalent
 from scipy.constants import m_e, physical_constants
 
 # Set constants

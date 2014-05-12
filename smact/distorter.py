@@ -1,7 +1,7 @@
 ################################################################################
 # Copyright Keith T Butler    (2013)                                           #
 #                                                                              #
-# This file is part of SMACT: smact_distorter.py is free software: you can     #
+# This file is part of SMACT: distorter.py is free software: you can           #
 # redistribute it and/or modify it under the terms of the GNU General Public   #
 # License as published by the Free Software Foundation, either version 3 of    #
 # the License, or (at your option) any later version.                          #
@@ -15,9 +15,9 @@
 ################################################################################
 
 """
-smact_distorter: Module for generating symmetry-unique substitutions on a given sub-lattice.
+smact.distorter: Module for generating symmetry-unique substitutions on a given sub-lattice.
 
-As input it takes the ASE crystal object (as built by smact_builder)
+As input it takes the ASE crystal object (as built by smact.builder)
 and the sub-lattice on which substitutions are to be made. 
 There is an example of how to use the code in Example_distort.py
 
@@ -31,8 +31,8 @@ for equivalence.
 
 import ase
 import copy
-import smact_builder as builder
-import smact_core as core
+import smact.builder as builder
+import smact.core as core
 from pyspglib import spglib
 from ase.lattice.spacegroup import Spacegroup
 import numpy as np

@@ -2,11 +2,11 @@
 
 import unittest
 from smact.properties.compound_electroneg import compound_electroneg
-import smact.smact_core as smact_core
-from smact.smact_builder import wurtzite
-from smact.smact_lattice import *
+from smact.builder import wurtzite
+from smact.lattice import *
 import copy
 import os
+import smact.core
 
 class TestSequenceFunctions(unittest.TestCase):
 
@@ -14,7 +14,7 @@ class TestSequenceFunctions(unittest.TestCase):
         pass
 
     def test_Element_class_Pt(self):
-        Pt = smact_core.Element('Pt')
+        Pt = smact.core.Element('Pt')
         self.assertEqual(Pt.name,'Platinum')
         self.assertEqual(Pt.ionpot,8.9588)
 

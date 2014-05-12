@@ -7,7 +7,7 @@
 ################################################################################
 # Copyright Keith T Butler    (2013)                                           #
 #                                                                              #
-# This file is part of SMACT: smact_builder.py is free software: you can #
+# This file is part of SMACT: builder.py is free software: you can             #
 # redistribute it and/or modify it under the terms of the GNU General Public   #
 # License as published by the Free Software Foundation, either version 3 of    #
 # the License, or (at your option) any later version.                          #
@@ -23,23 +23,23 @@
 from ase.lattice.spacegroup import crystal
 
 
-def cubic_perovskite(species,cell_par=[6,6,6,90,90,90],repititions=[1,1,1]):
+def cubic_perovskite(species,cell_par=[6,6,6,90,90,90],repetitions=[1,1,1]):
 	 system = crystal((species), 
 	 basis=[(0,0,0), (0.5, 0.5, 0.5), (0.5, 0.5, 0)],
-         spacegroup=221, size = repititions, cellpar=cell_par)
+         spacegroup=221, size = repetitions, cellpar=cell_par)
 	
          return system
 
-def spinel(species,cell_par=[8,8,8,90,90,90],repititions=[1,1,1]):
+def spinel(species,cell_par=[8,8,8,90,90,90],repetitions=[1,1,1]):
 	 system = crystal((species),
 	 basis=[(0.0, 0.0, 0.0),(0.625, 0.625, 0.625),(0.3873, 0.3873, 0.3873)],
-	 spacegroup=227,size=repititions,cellpar=cell_par)
+	 spacegroup=227,size=repetitions,cellpar=cell_par)
 
          return system
 
-def wurtzite(species, cell_par=[2,2,6,90,90,120],repititions=[1,1,1]):
+def wurtzite(species, cell_par=[2,2,6,90,90,120],repetitions=[1,1,1]):
          system = crystal((species),
          basis=[(2./3.,1./3.,0),(2./3.,1./3.,5./8.)],
-         spacegroup=186, size = repititions, cellpar=[3, 3, 6, 90,90,120])
+         spacegroup=186, size = repetitions, cellpar=[3, 3, 6, 90,90,120])
 
          return system

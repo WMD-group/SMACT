@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from numpy import product,sqrt
 """get_eig function not yet working"""
-from smact_data import get_covalent
+from smact.data import get_covalent
 from scipy.constants import hbar, m_e
 """Get element names"""
 An =raw_input("Enter Anion Symbol: ") 
