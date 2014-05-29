@@ -33,15 +33,13 @@ class Element(object):
         Data is drawn from "data/element.txt", part of the Open Babel package.
         element = element('Symbol')
 
+        Atoms with a defined oxidation state draw properties from the "Species" class.
+
         Attributes:
                 
             Element.symbol: Elemental symbol used to retrieve data
 
             Element.name: Full name of element
-
-            Element.covalent_radius: Covalent radius in AA (1.6 if unknown)
-                
-            Element.vdw_radius: van der Waals radius in AA (2.0 if unknown)
 
             Element.pauling_eneg: Pauling electronegativity (0.0 if unknown)
 
@@ -76,8 +74,8 @@ class Element(object):
         # Set attributes
         self.symbol=          str(symbol)
         self.name=            str(elementdata[14])
-        self.covalent_radius= float(elementdata[3])
-        self.vdw_radius=      float(elementdata[5])
+#        self.covalent_radius= float(elementdata[3])
+#        self.vdw_radius=      float(elementdata[5])
         self.pauling_eneg=    float(elementdata[8])
         self.ionpot=          float(elementdata[9])
         self.e_affinity =     float(elementdata[10])
@@ -95,8 +93,8 @@ class Element(object):
                     self.eig = False
                     break
 
-	# Load s-eigenvalue data from data table by iterating through CSV file
-	with open(smact_directory + 'data/Eigenvalues_s.csv','r') as f:
+        # Load s-eigenvalue data from data table by iterating through CSV file
+        with open(smact_directory + 'data/Eigenvalues_s.csv','r') as f:
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:
@@ -108,18 +106,61 @@ class Element(object):
                     self.eig_s = False
                     break
 
-	# Load ionic radii data from data table by iterating through CSV file
-        with open(smact_directory + 'data/ionic_radii.csv','r') as f:
-            while True:
-                l=f.readline()
-                if l.split(",")[0] == symbol:
-                    self.ionic = float(l.split(",")[1])
-                    break
-                # Check for end of file
-                elif not l:
-                    print 'WARNING: Element {0} not found in ionic_radii.csv'.format(symbol)
-                    self.ionic = False
-                    break
+        # # Load ionic radii data from data table by iterating through CSV file
+        # with open(smact_directory + 'data/ionic_radii.csv','r') as f:
+        #     while True:
+        #         l=f.readline()
+        #         if l.split(",")[0] == symbol:
+        #             self.ionic = float(l.split(",")[1])
+        #             break
+        #         # Check for end of file
+        #         elif not l:
+        #             print 'WARNING: Element {0} not found in ionic_radii.csv'.format(symbol)
+        #             self.ionic = False
+        #             break
+
+#------------------------------------------------------------------------------------------
+
+class Species(Element):
+    """
+    Class providing data for elements in a given chemical environment
+
+    In addition to the standard properties from the periodic table (inherited from the 
+    Element class), Species objects use the oxidation state and coordination environment
+    to provide further properties.
+
+    Attributes: 
+        Species.symbol: Elemental symbol used to retrieve data
+
+        Species.name: Full name of element
+
+        Species.oxidation: Oxidation state of species (signed integer)
+
+        Species.coordination: Coordination number of species (integer)
+
+        Species.pauling_eneg: Pauling electronegativity (0.0 if unknown)
+
+        Species.ionpot: Ionisation potential in eV (0.0 if unknown)
+
+        Species.e_affinity: Electron affinity in eV (0.0 if unknown)
+
+        Species.eig: Electron eigenvalue (units unknown)
+        N.B. For Cu, Au and Ag this defaults to d-orbital.
+        TODO(DD): implement a way to select the desired orbital
+
+        Raises:
+            NameError: Element not found in element.txt
+            Warning: Element not found in Eigenvalues.csv
+          
+    
+
+    """
+
+    def __init__(self,symbol,oxidation,coordination):
+        Element.__init__(self,symbol)
+        self.oxidation = oxidation
+        self.coordination = coordination
+
 
 #------------------------------------------------------------------------------------------
 def are_eq(A,B,tolerance=1e-4):
@@ -143,11 +184,11 @@ def are_eq(A,B,tolerance=1e-4):
 #------------------------------------------------------------------------------------------
 def lattices_are_same(lattice1, lattice2):
     """Checks for the equivalence of two lattices
-    	Args:
-	lattice1,lattice2 : ASE crystal class
-	Returns:
-	lattices_are_same : boolean 
-	"""
+        Args:
+        lattice1,lattice2 : ASE crystal class
+        Returns:
+        lattices_are_same : boolean 
+        """
     lattices_are_same = False
     i = 0
     for site1 in lattice1:

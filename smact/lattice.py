@@ -18,12 +18,46 @@
 import numpy as np
 
 class Lattice(object):
-      """A class of objects to hold the structure stoichiometry"""
+      """
+      A unique set of Sites
 
-      def __init__(self, sites, site_ratios, site_oxidations):
-	self.sites = sites
-	self.site_ratios = site_ratios
-	self.site_oxidations = site_oxidations
+      Lattice objects define a general crystal structure, with a space group and a
+      collection of Site objects. These Site objects have their own fractional
+      coordinates and a list of possible oxidation states (see the Site class).
+
+      Specific crystal structures with elements assigned to sites are "materials"
+      and use the Atoms class from the Atomic Simulation Environment.
+
+      Attributes:
+          sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
+          space_group: Integer space group number according to the International Tables
+                       for Crystallography.
+
+      """
+
+      def __init__(self, sites, space_group=1):
+            self.sites = sites
+            self.space_group = space_group
+
+class Site(object):
+      """
+      A single lattice site with a list of possible oxidation states
+
+      The Site object is primarily used within Lattice objects.
+
+      Attributes:
+          position: A list of fractional coordinates [x,y,z]
+          oxidation_states: A list of possible oxidation states e.g. [-1,0,1]
+      
+      """ 
+      
+      def __init__(self, position, oxidation_states=[0]):
+            self.position = position
+            self.oxidation_states = oxidation_states
+
+
+########## Everything below this is probably broken ##########
+
 #------------------------------------------------------------------------------------
 def check_lattice_charges(charges, site_elements, sites):
       """
