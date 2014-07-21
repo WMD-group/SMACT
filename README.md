@@ -11,9 +11,13 @@ Contents
 * **smact** library containing:
   * **core.py** 
   * **data.py** A collection of functions providing elemental properties.
-  * **lattice.py** Given the sites, multiplicities and possible oxidation states at those sites, this reads from the database and generates all possible stoichiometeries.
-  * **builder.py** Builds some common lattice structures, given the chemical composition.
-  * **distorter.py** A collection of functions for enumerating and then substituting on inequivalent sites of a sub-lattice.
+  * **lattice.py** Given the sites, multiplicities and possible oxidation states
+	at those sites, this reads from the database and generates all possible
+	stoichiometeries.
+  * **builder.py** Builds some common lattice structures, given the chemical
+	composition.
+  * **distorter.py** A collection of functions for enumerating and then
+	substituting on inequivalent sites of a sub-lattice.
 
 Requirements
 ------------
@@ -23,7 +27,7 @@ The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase)
 (ASE) is required for some components, as is [spglib](http://spglib.sourceforge.net).
 
 The [chemlab](http://chemlab.github.com/chemlab) project is not
-currently used, but is considered ``friendly''; we will try to avoid
+currently used, but is considered "friendly"; we will try to avoid
 namespace clashes and it may be used for some features in the future.
 Needed modifications will be made in [ajjackson's
 fork](https://github.com/ajjackson/chemlab), 
@@ -56,7 +60,9 @@ B. R. Pamplin, "A systematic method of deriving new semiconducting
 compounds by structural analogy", *J. Phys. Chem. Solids*
 **25**, 675 (1964)
 
-S. Chen, X. G. Gong, A. Walsh and S.-H. Wei, "Electronic structure and stability of quaternary chalcogenide semiconductors derived from cation cross-substitution of II-VI and I-III-VI2 compounds", *Physical Review B* **79**, 165211 (2009)
+S. Chen, X. G. Gong, A. Walsh and S.-H. Wei, "Electronic structure and stability
+of quaternary chalcogenide semiconductors derived from cation cross-substitution
+of II-VI and I-III-VI2 compounds", *Physical Review B* **79**, 165211 (2009)
 
 Development notes
 -----------------
