@@ -138,7 +138,7 @@ def possible_compositions(crystal, elements):
 		                    site_elements = check_lattice_charges(charges, site_elements, sites)
 			    if 5 <= len(atom):
 			    	for site_5 in atom[4]:
-				    charges[4] = int(elements[site_5]) * crystal_site_ratios[4] 
+				    charges[4] = int(elements[site_5]) * crystal.site_ratios[4] 
 	                            if len(atom) == 5:
 	                                sites = [site_1, site_2, site_3, site_4]
 		                        site_elements = check_lattice_charges(charges, site_elements, sites)
