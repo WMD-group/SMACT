@@ -148,11 +148,9 @@ class Species(Element):
         N.B. For Cu, Au and Ag this defaults to d-orbital.
         TODO(DD): implement a way to select the desired orbital
 
-        Raises:
-            NameError: Element not found in element.txt
-            Warning: Element not found in Eigenvalues.csv
-          
-    
+    Raises:
+        NameError: Element not found in element.txt
+        Warning: Element not found in Eigenvalues.csv              
 
     """
 
@@ -181,6 +179,7 @@ def are_eq(A,B,tolerance=1e-4):
                 are_eq = False
             i = i + 1
     return are_eq
+
 #------------------------------------------------------------------------------------------
 def lattices_are_same(lattice1, lattice2):
     """Checks for the equivalence of two lattices
