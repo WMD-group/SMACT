@@ -35,9 +35,10 @@ class Lattice(object):
 
       """
 
-      def __init__(self, sites, space_group=1):
+      def __init__(self, sites, space_group=1, strukturbericht=False):
             self.sites = sites
             self.space_group = space_group
+            self.strukturbericht = strukturbericht
 
 class Site(object):
       """
