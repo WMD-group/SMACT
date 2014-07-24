@@ -5,6 +5,9 @@ Semiconducting Materials by Analogy and Computational Techniques
 
 A collection of fast screening tools from elemental data.
 
+Development of the next iteration is taking place on the new-classes branch:
+https://github.com/WMD-Bath/smact/tree/feature/new-classes
+
 Contents
 --------
 
