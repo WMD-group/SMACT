@@ -41,6 +41,8 @@ class Element(object):
 
             Element.name: Full name of element
 
+            Element.number: Proton number of element
+
             Element.pauling_eneg: Pauling electronegativity (0.0 if unknown)
 
             Element.ionpot: Ionisation potential in eV (0.0 if unknown)
@@ -74,6 +76,7 @@ class Element(object):
         # Set attributes
         self.symbol=          str(symbol)
         self.name=            str(elementdata[14])
+        self.number=          int(elementdata[0])
 #        self.covalent_radius= float(elementdata[3])
 #        self.vdw_radius=      float(elementdata[5])
         self.pauling_eneg=    float(elementdata[8])

@@ -4,7 +4,6 @@ import unittest
 from smact.properties.compound_electroneg import compound_electroneg
 from smact.builder import wurtzite
 from smact.lattice import *
-import copy
 import os
 import smact.core
 
@@ -17,6 +16,7 @@ class TestSequenceFunctions(unittest.TestCase):
         Pt = smact.core.Element('Pt')
         self.assertEqual(Pt.name,'Platinum')
         self.assertEqual(Pt.ionpot,8.9588)
+        self.assertEqual(Pt.number,78)
 
 #TODO(AJJ): Implement warnings in a testable way. Have a Pu testcase.
     
