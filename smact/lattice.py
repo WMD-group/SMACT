@@ -18,20 +18,28 @@
 import numpy as np
 
 class Lattice(object):
-      """
-      A unique set of Sites
+      """A unique set of Sites
 
-      Lattice objects define a general crystal structure, with a space group and a
-      collection of Site objects. These Site objects have their own fractional
+      Lattice objects define a general crystal structure, with a space group and
+      a collection of Site objects. These Site objects have their own fractional
       coordinates and a list of possible oxidation states (see the Site class).
 
-      Specific crystal structures with elements assigned to sites are "materials"
-      and use the Atoms class from the Atomic Simulation Environment.
+      Specific crystal structures with elements assigned to sites are
+      "materials" and use the Atoms class from the Atomic Simulation
+      Environment.
 
-      Attributes:
-          sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
-          space_group: Integer space group number according to the International Tables
-                       for Crystallography.
+      Attributes: 
+          basis_sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
+          comprising the basis sites in Cartesian coordinates
+
+          space_group: Integer space group number according to the
+          International Tables for Crystallography.  
+
+          structurbericht:
+          Structurbericht identity, if applicable (e.g. 'B1')
+
+      Methods:
+          lattice_vector_calc():
 
       """
 
