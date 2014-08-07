@@ -52,12 +52,63 @@ class Element(object):
             Element.eig: Electron eigenvalue (units unknown)
             N.B. For Cu, Au and Ag this defaults to d-orbital.
             TODO(DD): implement a way to select the desired orbital
+            
+            Element.crustal_abundance: crustal abundance in the earths crust mg/kg taken from CRC
 
         Raises:
             NameError: Element not found in element.txt
             Warning: Element not found in Eigenvalues.csv
             
         """
+        # Import oxidation states from oxidation_states.txt
+        with open(smact_directory + 'data/oxidation_states.txt','r') as f:
+            data = f.readlines()
+        oxidation_states = False
+        for line in data:
+                        if not line.startswith('#'):
+                                l = line.split()
+                                if (l[0] == symbol):
+                                        if len(l)>1:
+                                                oxidation_states = l[1:]
+                                                for location, value in enumerate(oxidation_states):
+                                                        oxidation_states[location] = int(value)
+                                        else:
+                                            oxidation_states = []
+                                        
+        self.oxidation_states = oxidation_states
+
+        # Import crustal abundance from crustal_abundance.txt
+        with open(smact_directory + 'data/crustal_abundance.txt','r') as f:
+            data = f.readlines()
+
+        crustal_abundance = False
+
+        for line in data:
+			if not line.startswith("#"):
+				l = line.split()
+				if (l[0] == symbol):
+					if len (l)>1:
+						crustal_abundance = l[1]
+
+									
+        self.crustal_abundance = crustal_abundance	
+
+        # Import HHI's from HHI's.txt
+        with open(smact_directory + "data/HHIs.txt",'r') as f:
+	        data = f.readlines() 
+        HHI_p, HHI_R = [False, False]
+        for line in data:
+			if not line.startswith("#"):
+				l = line.split()
+				if (l[0] == symbol):
+					if len(l)>1:
+					    HHI_p, HHI_R = l[1:3]
+        self.HHI_p = HHI_p
+        self.HHI_R = HHI_R								
+                        
+
+                                       
+
         # Import general data from Openbabel-derived data table:
         # Import whole file
         with open(smact_directory + 'data/element.txt','r') as f:
@@ -164,6 +215,31 @@ class Species(Element):
 
 
 #------------------------------------------------------------------------------------------
+def ordered_elements(x,y):
+    """ 
+Function to return a list of element symbols, ordered by proton number in the range x -> y
+Args:
+	x,y : integers
+Returns:
+	ordered_elements : List of element symbols
+    """
+    with open(smact_directory + 'data/ordered_periodic.txt','r') as f:
+    	data = f.readlines()
+    elements = []
+    for line in data:
+		inp = line.split()
+		elements.append(inp[0])
+	
+    ordered_elements = []	
+    for i in range(x,y):
+        ordered_elements.append(elements[i-1])
+		
+    return ordered_elements
+		
+
+
+#------------------------------------------------------------------------------------------
+
 def are_eq(A,B,tolerance=1e-4):
     """Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
         Args:
