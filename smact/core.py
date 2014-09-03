@@ -20,6 +20,7 @@ Core classes and functions for SMACT
 """
 import os # get correct path for datafiles when called from another directory
 smact_directory = os.path.dirname(__file__)
+import csv
 # Append a trailing slash to make coherent directory name - this would select the
 # root directory in the case of no prefix, so we need to check
 if smact_directory:
@@ -54,6 +55,8 @@ class Element(object):
             TODO(DD): implement a way to select the desired orbital
             
             Element.crustal_abundance: crustal abundance in the earths crust mg/kg taken from CRC
+            
+            Element.coord_envs: The allowed coordination enviroments for the ion.
 
         Raises:
             NameError: Element not found in element.txt
@@ -128,7 +131,7 @@ class Element(object):
         self.symbol=          str(symbol)
         self.name=            str(elementdata[14])
         self.number=          int(elementdata[0])
-#        self.covalent_radius= float(elementdata[3])
+        self.covalent_radius= float(elementdata[3])
 #        self.vdw_radius=      float(elementdata[5])
         self.pauling_eneg=    float(elementdata[8])
         self.ionpot=          float(elementdata[9])
@@ -159,6 +162,25 @@ class Element(object):
                     print 'WARNING: Element {0} not found in Eigenvalues_s.csv'.format(symbol)
                     self.eig_s = False
                     break
+
+    
+#------------------------------------------------------------------------------------------#
+# THIS WAS CREATED BY TIM GAUNTLETT. PLEASE CHECK                                          #
+#------------------------------------------------------------------------------------------#
+        # Load coordination environments
+        coord_envs = []
+        with open(smact_directory + 'data/shannon_radii.csv','rU') as f:
+            reader = csv.reader(f)#, delimiter=',', quoting=csv.QUOTE_NONE)
+            for row in reader:
+                    if row[0] == symbol:
+                        coord_envs.append(row[2])
+
+        self.coord_envs = coord_envs
+
+     
+
+#------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------#
 
         # # Load ionic radii data from data table by iterating through CSV file
         # with open(smact_directory + 'data/ionic_radii.csv','r') as f:
@@ -212,6 +234,14 @@ class Species(Element):
         Element.__init__(self,symbol)
         self.oxidation = oxidation
         self.coordination = coordination
+        # Load shannon radii
+        with open(smact_directory + 'data/shannon_radii.csv','rU') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if row[0] == symbol and int(row[1]) == oxidation and row[2] == coordination:
+                    shannon_radius = row[3]
+
+        self.shannon_radius = shannon_radius
 
 
 #------------------------------------------------------------------------------------------
