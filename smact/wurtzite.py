@@ -4,7 +4,7 @@
 #TO DO:
 # Calculating the lattice parameters from the elemnts involved
 ################################################################################
-# Copyright Tim Gauntlett   (2014)  				                           #
+# Copyright Tim Gauntlett, Adam J. Jackson   (2014)                            #
 #                                                                              #
 # This file is part of SMACT: parameters.py is free software: you can          #
 # redistribute it and/or modify it under the terms of the GNU General Public   #
@@ -21,17 +21,26 @@
 
 import smact.core as core
 import numpy as np
-import sys
+import os
 import csv
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 
+
+# get correct path for datafiles when called from another directory
+smact_directory = os.path.dirname(__file__)
+# Append a trailing slash to make coherent directory name - this would select the
+# root directory in the case of no prefix, so we need to check
+if smact_directory:
+    smact_directory = smact_directory + '/'
+
+
 #B4    
-def Wurtzite(shannon_radius):
+def wurtzite(shannon_radius):
     #print shannon_radius
     ##limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(1./3.)]
-    a = 2*0.827*(shannon_radius[0]+shannon_radius[1])  # 0.817 is sin(109.6/2)
+    a = 2*0.817*(shannon_radius[0]+shannon_radius[1])  # 0.817 is sin(109.6/2)
     b = a
     c = (shannon_radius[0]+shannon_radius[1])*(2+2*0.334)  # 0.334 is sin(109.5-90)
     alpha = 90
@@ -41,8 +50,8 @@ def Wurtzite(shannon_radius):
     return a,b,c,alpha,beta,gamma,inner_space
 
 ##get info from tables
-def Radius_covalent(element):
-    with open('data/Covalent_radii.csv','rU') as f:
+def radius_covalent(element):
+    with open(smact_directory + 'data/Covalent_radii.csv','rU') as f:
         reader = csv.reader(f)         
         reader.next() # Skip the first row which is titles   
         r_covalent=0 
@@ -57,7 +66,7 @@ def Radius_covalent(element):
                 r_covalent = float(row[3])/ 100 #############################################
     return r_covalent
         
-def Formal_charge(element):
+def formal_charge(element):
     with open('data/oxidation_states.txt','r') as f:
         data = f.readlines()
         oxidation_states = False
@@ -117,21 +126,21 @@ for el in tetra_cood:
 for a_element in elements:
     
     #print a_element
-    a_formal_charge = Formal_charge(a_element)
+    a_formal_charge = formal_charge(a_element)
     if a_formal_charge:#i.e. a_formal_charge has a value
         for a_ox in a_formal_charge:
             a_shan=Radius_shannon(a_element,a_ox)
-            a_cov=Radius_covalent(a_element)
+            a_cov=radius_covalent(a_element)
             if a_shan == False:  ####Covelent radius
-                #print a_ox,Radius_covalent(a_element)
+                #print a_ox,radius_covalent(a_element)
                 for b_element in elements:
                     if a_element != b_element:
                         #print " ",a_element, b_element
-                        b_formal_charge = Formal_charge(b_element)  ## check again
+                        b_formal_charge = formal_charge(b_element)  ## check again
                         if b_formal_charge: #i.e. b_formal_charge has a value
                             for b_ox in b_formal_charge:
                                 if a_ox+b_ox==lattice_charge:
-                                    b_cov=Radius_covalent(b_element)
+                                    b_cov=radius_covalent(b_element)
                                     #print a_cov,b_cov
                                     g=[]
                                     g.append(float(a_cov))
@@ -139,7 +148,7 @@ for a_element in elements:
                                     g.sort(reverse=True)#Needed for calculating cavity
                                     #print g
                                     method="covalent radii"
-                                    a,b,c,alpha,beta,gamma,inner_space = Wurtzite(g)
+                                    a,b,c,alpha,beta,gamma,inner_space = wurtzite(g)
                                     hhi_a=core.Element(a_element).HHI_p
                                     hhi_b=core.Element(b_element).HHI_p
                                     hhi_rp=(float(hhi_a)*float(hhi_b))**0.5
@@ -154,12 +163,12 @@ for a_element in elements:
                 for b_element in elements:
                     if a_element != b_element:
                         #print " ",a_element, b_element
-                        b_formal_charge = Formal_charge(b_element)  ## check again
+                        b_formal_charge = formal_charge(b_element)  ## check again
                         if b_formal_charge:
                             for b_ox in b_formal_charge:
                                 if Radius_shannon(b_element,b_ox) == False:
                                     if a_ox+b_ox==lattice_charge:                       ## Charge of lattice
-                                        b_cov=Radius_covalent(b_element)
+                                        b_cov=radius_covalent(b_element)
                                         #print a_cov,b_cov
                                         g=[]
                                         g.append(float(a_cov))
@@ -167,7 +176,7 @@ for a_element in elements:
                                         g.sort(reverse=True)#Needed for calculating cavity
                                         #print g
                                         method="covalent radii"
-                                        a,b,c,alpha,beta,gamma,inner_space = Wurtzite(g)
+                                        a,b,c,alpha,beta,gamma,inner_space = wurtzite(g)
                                         hhi_a=core.Element(a_element).HHI_p
                                         hhi_b=core.Element(b_element).HHI_p
                                         hhi_rp=(float(hhi_a)*float(hhi_b))**0.5
@@ -189,7 +198,7 @@ for a_element in elements:
                                         g.sort(reverse=True)#Needed for calculating cavity
                                         #print g
                                         method="shannon radii"
-                                        a,b,c,alpha,beta,gamma,inner_space = Wurtzite(g)
+                                        a,b,c,alpha,beta,gamma,inner_space = wurtzite(g)
                                         hhi_a=core.Element(a_element).HHI_p
                                         hhi_b=core.Element(b_element).HHI_p
                                         hhi_rp=(float(hhi_a)*float(hhi_b))**0.5
