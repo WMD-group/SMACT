@@ -38,6 +38,7 @@ if smact_directory:
 
 #B4    
 def wurtzite(shannon_radius):
+    shannon_radius.sort(reverse=True) # Geometry assumes atom A is larger
     #print shannon_radius
     ##limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(1./3.)]
     a = 2*0.817*(shannon_radius[0]+shannon_radius[1])  # 0.817 is sin(109.6/2)
@@ -57,17 +58,19 @@ def radius_covalent(element):
         r_covalent=0 
         for row in reader:
             symbols= list(row[0])
+            # Some symbols specify a shell e.g. "Cu(d)"; we can ignore this part
             for char in symbols:
                 if char == '(':
                     a=symbols.index("(")
                     symbols = symbols[:a]
             symbols="".join(symbols)
             if symbols == element:
-                r_covalent = float(row[3])/ 100 #############################################
+                r_covalent = float(row[3])/ 100 
     return r_covalent
         
 def formal_charge(element):
-    with open('data/oxidation_states.txt','r') as f:
+    """Given an elemental symbol, return a list of available oxidation states"""
+    with open(smact_directory + 'data/oxidation_states.txt','r') as f:
         data = f.readlines()
         oxidation_states = False
         for line in data:
@@ -75,15 +78,15 @@ def formal_charge(element):
                 l = line.split()
                 if (l[0] == element):
                     if len(l)>1:
-                        oxidation_states = l[1:]#############################################
+                        oxidation_states = l[1:]
                         for location, value in enumerate(oxidation_states):
                             oxidation_states[location] = int(value)
                     else:
                         oxidation_states = []
     return oxidation_states
 
-def Radius_shannon(element,oxidation):
-    with open('data/shannon_radii.csv','rU') as f:
+def radius_shannon(element,oxidation):
+    with open(smact_directory + 'data/shannon_radii.csv','rU') as f:
         reader = csv.reader(f)
         r_shannon=False
         for row in reader:
@@ -99,53 +102,69 @@ output=[]
 #------------------------------------------------------------------------------------------
 lattice_charge=-1
 
-element=[]
 all_elements=[]
-elements=core.ordered_elements(1,100)     ## The safety valve!
-holes=np.zeros(shape=(100,100))
-matrix_hhi=np.zeros(shape=(100,100))
-with open('data/ordered_periodic.txt','rU') as f:
+element_set=core.ordered_elements(1,100)     ## The safety valve!
+
+# Form a separate complete list of elements for quickly accessing proton numbers with index()
+with open(smact_directory + 'data/ordered_periodic.txt','rU') as f:
     reader = csv.reader(f)
     for row in reader:
         all_elements.append(row[0])
 
-tetra_cood=[]
-for elm in elements:
-    with open('data/shannon_radii.csv','rU') as f:
+# Form list of elements known to coordinate tetragonally
+tetra_coord_elements=[]
+for element in element_set:
+    with open(smact_directory + 'data/shannon_radii.csv','rU') as f:
         reader = csv.reader(f)
         r_shannon=False
         for row in reader:
-            if row[2]=="4_n" and row[0]==elm:
-                tetra_cood.append(row[0])
-elements=[]                
-#print tetra_cood
-for el in tetra_cood:
-    if el not in elements:
-        elements.append(el)          
-#print elements
-for a_element in elements:
-    
-    #print a_element
+            if row[2]=="4_n" and row[0]==element and row[0] not in tetra_coord_elements:
+                tetra_coord_elements.append(row[0])
+
+# Calculate properties of combinations with target charge
+holes=np.zeros(shape=(100,100))
+matrix_hhi=np.zeros(shape=(100,100))
+
+for a_element in tetra_coord_elements:
+    a_cov=radius_covalent(a_element)
     a_formal_charge = formal_charge(a_element)
     if a_formal_charge:#i.e. a_formal_charge has a value
         for a_ox in a_formal_charge:
-            a_shan=Radius_shannon(a_element,a_ox)
-            a_cov=radius_covalent(a_element)
-            if a_shan == False:  ####Covelent radius
-                #print a_ox,radius_covalent(a_element)
-                for b_element in elements:
-                    if a_element != b_element:
-                        #print " ",a_element, b_element
-                        b_formal_charge = formal_charge(b_element)  ## check again
-                        if b_formal_charge: #i.e. b_formal_charge has a value
-                            for b_ox in b_formal_charge:
-                                if a_ox+b_ox==lattice_charge:
+            a_shan=radius_shannon(a_element,a_ox)
+
+            if a_shan == False:  # Fall back to covalent radius if Shannon unavailable
+                for b_element in (x for x in tetra_coord_elements if x != a_element):
+                    b_formal_charge = formal_charge(b_element)  ## check again
+                    if b_formal_charge: #i.e. b_formal_charge has a value
+                        # Check for charge-neutral combinations and write to array
+                        # Note that only the elements are recorded; 
+                        # multiple charge combinations for one element pair will be overwritten
+                        for b_ox in (x for x in b_formal_charge if x+a_ox==lattice_charge):
+                            b_cov=radius_covalent(b_element)
+                            g=[float(a_cov),float(b_cov)]
+                            method="covalent radii"
+                            a,b,c,alpha,beta,gamma,inner_space = wurtzite(g)
+                            hhi_a=core.Element(a_element).HHI_p
+                            hhi_b=core.Element(b_element).HHI_p
+                            hhi_rp=(float(hhi_a)*float(hhi_b))**0.5
+                            holes[all_elements.index(a_element),all_elements.index(b_element)]=inner_space
+                            matrix_hhi[all_elements.index(a_element),all_elements.index(b_element)]=hhi_rp
+                            '''print a_element,b_element,method
+                                    print "%.2f"%a,"%.2f"%b,"%.2f"%c,alpha,beta,gamma
+                                    print "%.2f"%inner_space'''
+                            output.append([a_element,b_element,hhi_rp,method,a,b,c,inner_space])
+                            
+            else:    # Use Shannon radius
+                for b_element in (x for x in tetra_coord_elements if x != a_element):
+                    b_formal_charge = formal_charge(b_element)  ## check again
+                    if b_formal_charge: 
+                        # Check for charge-neutral combinations and write to array
+                        for b_ox in b_formal_charge:
+                            if radius_shannon(b_element,b_ox) == False:
+                                if a_ox+b_ox==lattice_charge:                       ## Charge of lattice
                                     b_cov=radius_covalent(b_element)
                                     #print a_cov,b_cov
-                                    g=[]
-                                    g.append(float(a_cov))
-                                    g.append(float(b_cov))
-                                    g.sort(reverse=True)#Needed for calculating cavity
+                                    g=[float(a_cov),float(b_cov)]
                                     #print g
                                     method="covalent radii"
                                     a,b,c,alpha,beta,gamma,inner_space = wurtzite(g)
@@ -155,47 +174,16 @@ for a_element in elements:
                                     holes[all_elements.index(a_element),all_elements.index(b_element)]=inner_space
                                     matrix_hhi[all_elements.index(a_element),all_elements.index(b_element)]=hhi_rp
                                     '''print a_element,b_element,method
-                                    print "%.2f"%a,"%.2f"%b,"%.2f"%c,alpha,beta,gamma
-                                    print "%.2f"%inner_space'''
-                                    #output.append([a_element,b_element,hhi_a,hhi_b,method,a,b,c,inner_space])
-           
-            else:
-                for b_element in elements:
-                    if a_element != b_element:
-                        #print " ",a_element, b_element
-                        b_formal_charge = formal_charge(b_element)  ## check again
-                        if b_formal_charge:
-                            for b_ox in b_formal_charge:
-                                if Radius_shannon(b_element,b_ox) == False:
-                                    if a_ox+b_ox==lattice_charge:                       ## Charge of lattice
-                                        b_cov=radius_covalent(b_element)
-                                        #print a_cov,b_cov
-                                        g=[]
-                                        g.append(float(a_cov))
-                                        g.append(float(b_cov))
-                                        g.sort(reverse=True)#Needed for calculating cavity
-                                        #print g
-                                        method="covalent radii"
-                                        a,b,c,alpha,beta,gamma,inner_space = wurtzite(g)
-                                        hhi_a=core.Element(a_element).HHI_p
-                                        hhi_b=core.Element(b_element).HHI_p
-                                        hhi_rp=(float(hhi_a)*float(hhi_b))**0.5
-                                        holes[all_elements.index(a_element),all_elements.index(b_element)]=inner_space
-                                        matrix_hhi[all_elements.index(a_element),all_elements.index(b_element)]=hhi_rp
-                                        '''print a_element,b_element,method
                                         print "%.2f"%a,"%.2f"%b,"%.2f"%c,alpha,beta,gamma
                                         print "%.2f"%inner_space'''
-                                        #output.append([a_element,b_element,hhi_a,hhi_b,method,a,b,c,inner_space])
+                                    output.append([a_element,b_element,hhi_rp,method,a,b,c,inner_space])
                                     
                                     
                                 else:   ### Shannon radius
-                                    b_shan=Radius_shannon(b_element,b_ox)
+                                    b_shan=radius_shannon(b_element,b_ox)
                                     if a_ox+b_ox==lattice_charge:
                                         #print a_shan,b_shan
-                                        g=[]
-                                        g.append(float(a_shan))
-                                        g.append(float(b_shan))
-                                        g.sort(reverse=True)#Needed for calculating cavity
+                                        g=[float(a_shan),float(b_shan)]
                                         #print g
                                         method="shannon radii"
                                         a,b,c,alpha,beta,gamma,inner_space = wurtzite(g)
@@ -207,14 +195,16 @@ for a_element in elements:
                                         '''print a_element,b_element,method
                                         print "%.2f"%a,"%.2f"%b,"%.2f"%c,alpha,beta,gamma
                                         print "%.2f"%inner_space'''
-                                        #output.append([a_element,b_element,hhi_a,hhi_b,method,a,b,c,inner_space])
-'''
+                                        output.append([a_element,b_element,hhi_rp,method,a,b,c,inner_space])
+
 with open('wurtzite.csv', 'w') as csvfile:
-    spamwriter = csv.writer(csvfile, delimiter=',',
+    csv_writer = csv.writer(csvfile, delimiter=',',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    csv_writer.writerow(["Element A", "Element B", "HHI index (geometric mean)",
+                         "method","a / AA","b / AA","c / AA","pore volume / AA^3"])
     for structure in output:
-        spamwriter.writerow(structure)
-'''
+        csv_writer.writerow(structure)
+
 #np.savetxt('matrix_neg_1.dat',holes)
 
 '''
@@ -237,12 +227,12 @@ plt.xlabel('Elements(A) by proton numbers',fontsize=22)
 plt.ylabel('Elements(B) by proton numbers',fontsize=22)
 plt.colorbar()
 plt.savefig('wurtzite_hhi.png')
-plt.show()
+#plt.show()
 plt.imshow(holes, cmap=cm.BuGn, interpolation='nearest')
 plt.xlabel('Elements(A) by proton numbers',fontsize=22)
 plt.ylabel('Elements(B) by proton numbers',fontsize=22)
 plt.colorbar()
 plt.savefig('wurtzite_holes.png')
-plt.show()
+#plt.show()
 
 

@@ -170,7 +170,7 @@ class Element(object):
         # Load coordination environments
         coord_envs = []
         with open(smact_directory + 'data/shannon_radii.csv','rU') as f:
-            reader = csv.reader(f)#, delimiter=',', quoting=csv.QUOTE_NONE)
+            reader = csv.reader(f) #, delimiter=',', quoting=csv.QUOTE_NONE)
             for row in reader:
                     if row[0] == symbol:
                         coord_envs.append(row[2])
