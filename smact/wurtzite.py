@@ -23,6 +23,7 @@ import smact.core as core
 import numpy as np
 import os
 import csv
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
@@ -41,12 +42,33 @@ def wurtzite(shannon_radius):
     shannon_radius.sort(reverse=True) # Geometry assumes atom A is larger
     #print shannon_radius
     ##limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(1./3.)]
-    a = 2*0.817*(shannon_radius[0]+shannon_radius[1])  # 0.817 is sin(109.6/2)
-    b = a
-    c = (shannon_radius[0]+shannon_radius[1])*(2+2*0.334)  # 0.334 is sin(109.5-90)
+
+    # "Ideal" wurtzite structure
+    # 
+    # c/a = 1.633, u = 0.375
+    #
+
     alpha = 90
     beta = 90
     gamma = 120
+
+    # 
+    # Scenario A: A atoms are touching
+    #   i.e. height is that of two tetrahegons with side length a
+    #    = 2 * sqrt(2/3) * a
+    if shannon_radius[0] > 0.817*(shannon_radius[0]+shannon_radius[1]):
+        
+        a = 2 * shannon_radius[0]
+        b = a
+        c = 2 * np.sqrt(2./3.) * a
+
+    else:
+        # Scenario B: regular wurtzite, similar sizes
+
+        a = 2*0.817*(shannon_radius[0]+shannon_radius[1])  # 0.817 is sin(109.6/2)
+        b = a
+        c = (shannon_radius[0]+shannon_radius[1])*(2+2*0.335)  # 0.335 is sin(109.6-90)
+
     inner_space = a * (6**0.5) - (4*shannon_radius[0])
     return a,b,c,alpha,beta,gamma,inner_space
 
@@ -101,9 +123,11 @@ output=[]
 # Processing Lattices
 #------------------------------------------------------------------------------------------
 lattice_charge=-1
+upper_n = 100
+lower_n = 1
 
 all_elements=[]
-element_set=core.ordered_elements(1,100)     ## The safety valve!
+element_set=core.ordered_elements(lower_n,upper_n)     ## The safety valve!
 
 # Form a separate complete list of elements for quickly accessing proton numbers with index()
 with open(smact_directory + 'data/ordered_periodic.txt','rU') as f:
@@ -149,9 +173,6 @@ for a_element in tetra_coord_elements:
                             hhi_rp=(float(hhi_a)*float(hhi_b))**0.5
                             holes[all_elements.index(a_element),all_elements.index(b_element)]=inner_space
                             matrix_hhi[all_elements.index(a_element),all_elements.index(b_element)]=hhi_rp
-                            '''print a_element,b_element,method
-                                    print "%.2f"%a,"%.2f"%b,"%.2f"%c,alpha,beta,gamma
-                                    print "%.2f"%inner_space'''
                             output.append([a_element,b_element,hhi_rp,method,a,b,c,inner_space])
                             
             else:    # Use Shannon radius
@@ -173,30 +194,22 @@ for a_element in tetra_coord_elements:
                                     hhi_rp=(float(hhi_a)*float(hhi_b))**0.5
                                     holes[all_elements.index(a_element),all_elements.index(b_element)]=inner_space
                                     matrix_hhi[all_elements.index(a_element),all_elements.index(b_element)]=hhi_rp
-                                    '''print a_element,b_element,method
-                                        print "%.2f"%a,"%.2f"%b,"%.2f"%c,alpha,beta,gamma
-                                        print "%.2f"%inner_space'''
                                     output.append([a_element,b_element,hhi_rp,method,a,b,c,inner_space])
                                     
                                     
-                                else:   ### Shannon radius
-                                    b_shan=radius_shannon(b_element,b_ox)
-                                    if a_ox+b_ox==lattice_charge:
-                                        #print a_shan,b_shan
-                                        g=[float(a_shan),float(b_shan)]
-                                        #print g
-                                        method="shannon radii"
-                                        a,b,c,alpha,beta,gamma,inner_space = wurtzite(g)
-                                        hhi_a=core.Element(a_element).HHI_p
-                                        hhi_b=core.Element(b_element).HHI_p
-                                        hhi_rp=(float(hhi_a)*float(hhi_b))**0.5
-                                        holes[all_elements.index(a_element),all_elements.index(b_element)]=inner_space
-                                        matrix_hhi[all_elements.index(a_element),all_elements.index(b_element)]=hhi_rp
-                                        '''print a_element,b_element,method
-                                        print "%.2f"%a,"%.2f"%b,"%.2f"%c,alpha,beta,gamma
-                                        print "%.2f"%inner_space'''
-                                        output.append([a_element,b_element,hhi_rp,method,a,b,c,inner_space])
-
+                            else:   ### Shannon radius
+                                b_shan=radius_shannon(b_element,b_ox)
+                                if a_ox+b_ox==lattice_charge:
+                                    g=[float(a_shan),float(b_shan)]
+                                    method="shannon radii"
+                                    a,b,c,alpha,beta,gamma,inner_space = wurtzite(g)
+                                    hhi_a=core.Element(a_element).HHI_p
+                                    hhi_b=core.Element(b_element).HHI_p
+                                    hhi_rp=(float(hhi_a)*float(hhi_b))**0.5
+                                    holes[all_elements.index(a_element),all_elements.index(b_element)]=inner_space
+                                    matrix_hhi[all_elements.index(a_element),all_elements.index(b_element)]=hhi_rp
+                                    output.append([a_element,b_element,hhi_rp,method,a,b,c,inner_space])
+                                
 with open('wurtzite.csv', 'w') as csvfile:
     csv_writer = csv.writer(csvfile, delimiter=',',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -221,18 +234,34 @@ for line in lines:
     i = i + 1
  '''  
 
+mpl.rcParams['font.family'] = 'serif'
+mpl.rcParams['font.serif'] = 'Times New Roman'
+mpl.rcParams['font.size'] = 16
 
-plt.imshow(matrix_hhi, cmap=cm.BuPu, interpolation='nearest')
+plt.figure()
+plt.imshow(matrix_hhi, cmap=cm.BuPu, interpolation='none',
+           extent=[lower_n, upper_n, lower_n, upper_n],
+           origin='lower')
 plt.xlabel('Elements(A) by proton numbers',fontsize=22)
 plt.ylabel('Elements(B) by proton numbers',fontsize=22)
-plt.colorbar()
+plt.xlim(0, upper_n)
+plt.ylim(0, upper_n)
+cbar = plt.colorbar()
+cbar.set_label("Herfindahl-Hirschman Index (geometric mean)",
+               rotation=270, labelpad=20)
 plt.savefig('wurtzite_hhi.png')
 #plt.show()
-plt.imshow(holes, cmap=cm.BuGn, interpolation='nearest')
+plt.figure()
+plt.imshow(holes, cmap=cm.BuGn, interpolation='none',
+           extent=[lower_n, upper_n, lower_n, upper_n],
+           origin='lower')
 plt.xlabel('Elements(A) by proton numbers',fontsize=22)
 plt.ylabel('Elements(B) by proton numbers',fontsize=22)
-plt.colorbar()
+plt.xlim(0, upper_n)
+plt.ylim(0, upper_n)
+cbar = plt.colorbar()
+cbar.set_label("Est. pore volume / AA^3",
+               rotation=270, labelpad=20)
 plt.savefig('wurtzite_holes.png')
 #plt.show()
-
 
