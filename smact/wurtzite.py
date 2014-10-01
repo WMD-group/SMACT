@@ -152,12 +152,14 @@ matrix_hhi=np.zeros(shape=(100,100))
 for a_element in tetra_coord_elements:
     a_cov=radius_covalent(a_element)
     a_formal_charge = formal_charge(a_element)
+    b_elements = [b for b in tetra_coord_elements if (
+                        tetra_coord_elements.index(b) > tetra_coord_elements.index(a_element))]
     if a_formal_charge:#i.e. a_formal_charge has a value
         for a_ox in a_formal_charge:
             a_shan=radius_shannon(a_element,a_ox)
 
             if a_shan == False:  # Fall back to covalent radius if Shannon unavailable
-                for b_element in (x for x in tetra_coord_elements if x != a_element):
+                for b_element in b_elements:
                     b_formal_charge = formal_charge(b_element)  ## check again
                     if b_formal_charge: #i.e. b_formal_charge has a value
                         # Check for charge-neutral combinations and write to array
@@ -176,7 +178,7 @@ for a_element in tetra_coord_elements:
                             output.append([a_element,b_element,hhi_rp,method,a,b,c,inner_space])
                             
             else:    # Use Shannon radius
-                for b_element in (x for x in tetra_coord_elements if x != a_element):
+                for b_element in b_elements:
                     b_formal_charge = formal_charge(b_element)  ## check again
                     if b_formal_charge: 
                         # Check for charge-neutral combinations and write to array
