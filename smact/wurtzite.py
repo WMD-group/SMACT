@@ -220,6 +220,24 @@ with open('wurtzite.csv', 'w') as csvfile:
     for structure in output:
         csv_writer.writerow(structure)
 
+
+hhi_max = 2000
+hhi_min = 1     # To exclude unlisted elements (e.g. Tc...)
+
+hhi_filtered_output = [compound for compound in output if ((compound[2] <= hhi_max)
+                                                           and (compound[2] >= hhi_min))]
+
+def get_volume_key(compound):
+    return compound[7]
+size_sorted_ouput = sorted(hhi_filtered_output, key=get_volume_key, reverse=True)
+
+with open('candidates.csv','w') as csvfile:
+    csv_writer = csv.writer(csvfile, delimiter=',',
+                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    csv_writer.writerow(["Element A", "Element B", "HHI index (geometric mean)",
+                         "method","a / AA","b / AA","c / AA","pore volume / AA^3"])
+    csv_writer.writerows(size_sorted_ouput)
+
 #np.savetxt('matrix_neg_1.dat',holes)
 
 '''
