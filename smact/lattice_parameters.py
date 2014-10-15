@@ -66,3 +66,89 @@ def wurtzite(shannon_radius):
         c = (shannon_radius[0]+shannon_radius[1])*(2+2*0.335)  # 0.335 is sin(109.6-90)
 #    inner_space = a * (6**0.5) - (4*shannon_radius[0])
     return a,b,c,alpha,beta,gamma
+
+#A1#
+def fcc(covalent_radius):
+    '''The lattice parameters of the A1
+    Args:
+	covalent_radius : a list containing the radii of the a ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    a = 2 * 2**0.5 * covalent_radius
+    b = 2 * 2**0.5 * covalent_radius
+    c = 2 * 2**0.5 * covalent_radius
+    alpha = 90
+    beta = 90
+    gamma = 90
+    return a,b,c,alpha,beta,gamma
+
+#A2#
+def bcc(covalent_radius):
+    '''The lattice parameters of the A2
+    Args:
+	covalent_radius : a list containing the radii of the a ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    a = 4 * covalent_radius / np.sqrt(3)
+    b = a
+    c = a
+    alpha = 90
+    beta = 90
+    gamma = 90
+    return a,b,c,alpha,beta,gamma
+
+#A3#
+def hcp(covalent_radius):
+    '''The lattice parameters of the hcp
+    Args:
+	covalent_radius : a list containing the radii of the a ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    a = 2 * covalent_radius
+    b = a
+    c = (4./3.) * 6**0.5 * covalent_radius
+    alpha = 90
+    beta = 90
+    gamma = 120
+    return a,b,c,alpha,beta,gamma
+
+#A4#
+def diamond(covalent_radius):
+    '''The lattice parameters of the diamond
+    Args:
+	covalent_radius : a list containing the radii of the a ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    a = 8 * covalent_radius / np.sqrt(3)
+    b = a
+    c = a
+    alpha = 90
+    beta = 90
+    gamma = 90
+    return a,b,c,alpha,beta,gamma
+
+#A5#
+def bct(covalent_radius):
+    '''The lattice parameters of the bct
+    Args:
+	covalent_radius : a list containing the radii of the a ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    a = 3.86 * covalent_radius
+    b = a
+    c = 2 * covalent_radius
+    alpha = 90
+    beta = 90
+    gamma = 90
+    return a,b,c,alpha,beta,gamma
+
