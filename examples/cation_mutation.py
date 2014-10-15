@@ -8,7 +8,7 @@ import smact.distorter as distort
 import numpy as np
 
 # Build the input
-test_case = builder.cubic_perovskite(['Ba','Ti','O'],[2,2,2])
+smact_lattice, test_case = builder.cubic_perovskite(['Ba','Ti','O'],[2,2,2])
 
 
 print "------------------------------"
