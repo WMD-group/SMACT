@@ -16,8 +16,11 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.                   #
 #                                                                              #
 ################################################################################
+import smact.core as core
+import numpy as np
+import csv
 
-def perovskite_parameters(shannon_radius): #Cubic Pervoskite
+def cubic_perovskite(shannon_radius): #Cubic Pervoskite
     '''The lattice parameters of the cubic perovskite structure
     Args:
 	shannon_radius : a list containing the radii of the a,b,c ions
@@ -30,11 +33,11 @@ def perovskite_parameters(shannon_radius): #Cubic Pervoskite
     a = max(limiting_factors)
     b = a
     c = a
-    space = a * np.sqrt(3) - 2 * shannon_radius[1]
+#    space = a * np.sqrt(3) - 2 * shannon_radius[1]
     alpha = 90
     beta = 90
     gamma = 90
-    return a,b,c,space,alpha,beta,gamma
+    return a,b,c,alpha,beta,gamma
 
 def wurtzite(shannon_radius):
     '''The lattice parameters of the wurtzite structure
