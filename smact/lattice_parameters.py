@@ -2,7 +2,7 @@
 # This script can calculate roughly the lattice parameters of a lattice type, based 
 # on the radii of the species on each site.
 ################################################################################
-# Copyright Tim Gauntlett   (2014)                                                         #
+# Copyright Tim Gauntlett, Keith Butler   (2014)                               #
 #                                                                              #
 # This file is part of SMACT: parameters.py is free software: you can          #
 # redistribute it and/or modify it under the terms of the GNU General Public   #
@@ -152,3 +152,79 @@ def bct(covalent_radius):
     gamma = 90
     return a,b,c,alpha,beta,gamma
 
+#B1
+def rocksalt(shannon_radius):
+    '''The lattice parameters of rocksalt
+    Args:
+	shannon_radius : a list containing the radii of the a,b ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    limiting_factors=[2*2**0.2*shannon_radius[0],2*2**0.2*shannon_radius[1],2*shannon_radius[0]+2*shannon_radius[1]]
+    a = max(limiting_factors)
+    b = a
+    c = a
+    alpha = 90
+    beta = 90
+    gamma = 90
+    return a,b,c,alpha,beta,gamma
+
+#B2    
+def b2(shannon_radius):
+    '''The lattice parameters of b2
+    Args:
+	shannon_radius : a list containing the radii of the a,b ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    limiting_factors=[2*(shannon_radius[0]+shannon_radius[0])/np.sqrt(3),2*shannon_radius[1],2*shannon_radius[0]]
+    a = max(limiting_factors)
+    b = a
+    c = a
+    alpha = 90
+    beta = 90
+    gamma = 90
+    return a,b,c,alpha,beta,gamma
+
+#B3    
+def zincblende(shannon_radius):
+    '''The lattice parameters of Zinc Blende
+    Args:
+	shannon_radius : a list containing the radii of the a,b ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(1./3.)]
+    a = max(limiting_factors)
+    b = a
+    c = a
+    alpha = 90
+    beta = 90
+    gamma = 90
+    return a,b,c,alpha,beta,gamma
+
+
+## Zn-S-Zn angle is ~109.5 degrees (from a tetrahedron). It is exactly 2*invCos(-1/3).
+## The distance of that Zn-Zn (diagonally to half the face) is (using the cosine rule) is
+# root[2(r1+r2)^2 - 2(r1+r2)^(2)cos(ZnSZn angle)].
+
+#B10
+def b10(shannon_radius): #Litharge
+    '''The lattice parameters of Litharge
+    Args:
+	shannon_radius : a list containing the radii of the a,b ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    limiting_factors=[4*(max(shannon_radius))/np.sqrt(2), sum(shannon_radius)*1.31]## Explained below.
+    a = max(limiting_factors)
+    b = a
+    c = a*1.26 #Value taken for PbO http://www.mindat.org/min-2466.html#
+    alpha = 90
+    beta = 90
+    gamma = 90
+    return a,b,c,alpha,beta,gamma
