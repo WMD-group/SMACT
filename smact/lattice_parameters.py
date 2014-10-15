@@ -24,7 +24,8 @@ def perovskite_parameters(shannon_radius): #Cubic Pervoskite
     Returns:
 	a,b,c : real number values of the lattice constants
 	alpha,beta,gamma : real number values of the lattice angles
-	'''
+    '''
+
     limiting_factors=[2*sum(shannon_radius[1:])]
     a = max(limiting_factors)
     b = a
@@ -35,4 +36,33 @@ def perovskite_parameters(shannon_radius): #Cubic Pervoskite
     gamma = 90
     return a,b,c,space,alpha,beta,gamma
 
-
+def wurtzite(shannon_radius):
+    '''The lattice parameters of the wurtzite structure
+    Args:
+	shannon_radius : a list containing the radii of the a,b ions
+    Returns:
+	a,b,c : real number values of the lattice constants
+	alpha,beta,gamma : real number values of the lattice angles
+    '''
+    shannon_radius.sort(reverse=True) # Geometry assumes atom A is larger
+    # "Ideal" wurtzite structure
+    # c/a = 1.633, u = 0.375
+    #
+    alpha = 90
+    beta = 90
+    gamma = 120
+    # 
+    # Scenario A: A atoms are touching
+    #   i.e. height is that of two tetrahegons with side length a
+    #    = 2 * sqrt(2/3) * a
+    if shannon_radius[0] > 0.817*(shannon_radius[0]+shannon_radius[1]):
+        a = 2 * shannon_radius[0]
+        b = a
+        c = 2 * np.sqrt(2./3.) * a
+    else:
+        # Scenario B: regular wurtzite, similar sizes
+        a = 2*0.817*(shannon_radius[0]+shannon_radius[1])  # 0.817 is sin(109.6/2)
+        b = a
+        c = (shannon_radius[0]+shannon_radius[1])*(2+2*0.335)  # 0.335 is sin(109.6-90)
+#    inner_space = a * (6**0.5) - (4*shannon_radius[0])
+    return a,b,c,alpha,beta,gamma
