@@ -25,9 +25,16 @@ class TestSequenceFunctions(unittest.TestCase):
             4.5878238674779128)
 
     def test_builder_ZnS(self):
-	ZnS = wurtzite(['Zn','S'])
+	ZnS, sys_ZnS = wurtzite(['Zn','S'])
 	self.assertEqual((ZnS.sites[0].position[2]),0)
 	self.assertEqual((ZnS.sites[0].position[0]),2./3.)
+
+    def test_charge_neutrality_ternary(self):
+	ox = [1,-2,1]
+	is_neutral,neutral_comobs = core.charge_neutrality(ox)
+	self.assertEqual((is_neutral),True)
+	self.assertEqual(len(neutral_comobs),7)
+	self.assertEqual(neutral_comobs[2],[3, 2, 1])
 '''    
 
     def test_compound_library(self):
