@@ -36,7 +36,20 @@ def cubic_perovskite(species,cell_par=[6,6,6,90,90,90],repetitions=[1,1,1]):
          for site in zip(system.get_scaled_positions(),oxidation_states):
                   sites_list.append(Site(site[0],site[1]))
 	
-         return Lattice(sites_list, oxidation_states)
+         return Lattice(sites_list, oxidation_states), system
+
+def wurtzite(species, cell_par=[2,2,6,90,90,120],repetitions=[1,1,1]):
+          system = crystal((species),
+          basis=[(2./3.,1./3.,0),(2./3.,1./3.,5./8.)],
+          spacegroup=186, size = repetitions, cellpar=[3, 3, 6, 90,90,120])
+
+	  sites_list = []
+	  oxidation_states = [[1],[2],[3],[4]] + [[-1],[-2],[-3],[-4]]
+	
+	  for site in zip(system.get_scaled_positions(),oxidation_states):
+                  sites_list.append(Site(site[0],site[1]))
+
+	  return Lattice(sites_list, oxidation_states), system
 
 #----- Old-style definitions  -------------------------------------------------------------------------
 
@@ -47,9 +60,5 @@ def cubic_perovskite(species,cell_par=[6,6,6,90,90,90],repetitions=[1,1,1]):
 
 #          return system
 
-# def wurtzite(species, cell_par=[2,2,6,90,90,120],repetitions=[1,1,1]):
-#          system = crystal((species),
-#          basis=[(2./3.,1./3.,0),(2./3.,1./3.,5./8.)],
-#          spacegroup=186, size = repetitions, cellpar=[3, 3, 6, 90,90,120])
 
 #          return system
