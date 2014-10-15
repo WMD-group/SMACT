@@ -24,7 +24,6 @@ import numpy as np
 import csv
 
 def E2_1(shannon_radius): #Cubic Pervoskite
-    print shannon_radius
     limiting_factors=[2*sum(shannon_radius[1:])]
     a = max(limiting_factors)
     b = a
@@ -64,14 +63,6 @@ with open('data/shannon_radii.csv','rU') as f:
                 b_cood.append(row[2])
                 b_shannon.append(row[3])
         i+=1
-'''
-for i, stuff in enumerate(b_sym):
-    print stuff
-    print a_shannon[i]
-    print '======================================'
-    print b_sym[i]
-    print b_shannon[i]
-'''   
 
 for j, bsymbol in enumerate(b_sym):
     for i, symbol in enumerate(a_sym):
