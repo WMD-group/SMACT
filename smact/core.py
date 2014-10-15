@@ -309,3 +309,49 @@ def lattices_are_same(lattice1, lattice2):
     return lattices_are_same
 
 #------------------------------------------------------------------------------------------
+def charge_neutrality(oxidations, stoichs=False, threshold = 5):
+    '''Given a list of oxidation states of arbitrary length it serches for neutral ratios in a given ratio of sites (stoichs) or up to a given threshold
+       For the moment it just iterates through binaries, ternaries ... TODO: make it general (KTB)
+    Args:
+	oxidations : list of integers
+	stoichs : stoichiometric ratios for each site (if provided)
+	threshold : single threshold to go up to if stoichs are not provided
+    Returns:
+	exists : bool to say if a ratio exists
+	site_ratios : ration that gives neutrality
+    '''
+    allowed_ratios = []
+    ratio_exists = False
+    if not stoichs:
+	stoichs = []
+	for i in range(len(oxidations)):
+	    stoichs.append(range(1,threshold + 1))
+
+    if len(oxidations) == 2:
+	for i in stoichs[0]:
+	    for j in stoichs[1]:	
+		if i*oxidations[0] + j*oxidations[1] == 0:
+		    if j == 1:
+			allowed_ratios.append([i,j])
+			ratio_exists = True
+		    elif j%i != 0:
+			allowed_ratios.append([i,j])
+			ratio_exists = True
+
+    if len(oxidations) == 3:
+	for i in stoichs[0]:
+	    for j in stoichs[1]:	
+	        for k in stoichs[2]:	
+		    if i*oxidations[0] + j*oxidations[1] + k*oxidations[2] == 0:
+		        if j == 1 and k == 1:
+			    allowed_ratios.append([i,j,k])
+			    ratio_exists = True
+		        elif j%i != 0 and k%i != 0:
+			    allowed_ratios.append([i,j,k])
+			    ratio_exists = True
+		
+
+
+    return ratio_exists, allowed_ratios
+    
+#------------------------------------------------------------------------------------------
