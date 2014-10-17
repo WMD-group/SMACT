@@ -1,0 +1,57 @@
+\hypertarget{namespacesmact_1_1properties_1_1_band__gap__simple}{}\section{smact.\+properties.\+Band\+\_\+gap\+\_\+simple Namespace Reference}
+\label{namespacesmact_1_1properties_1_1_band__gap__simple}\index{smact.\+properties.\+Band\+\_\+gap\+\_\+simple@{smact.\+properties.\+Band\+\_\+gap\+\_\+simple}}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacesmact_1_1properties_1_1_band__gap__simple_a5728157c4b36fde7364fa3bbf29fc114}{band\+\_\+gap\+\_\+simple}
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+tuple \hyperlink{namespacesmact_1_1properties_1_1_band__gap__simple_abe4d22f74e3d7975f257f0189add69b8}{parser}
+\item 
+tuple \hyperlink{namespacesmact_1_1properties_1_1_band__gap__simple_af498c67d7752b84a45f01872c6ba2430}{args} = parser.\+parse\+\_\+args()
+\item 
+\hyperlink{namespacesmact_1_1properties_1_1_band__gap__simple_a25cb7d2a569d44a7a849af519c43e115}{verbose\+\_\+flag} = False
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{namespacesmact_1_1properties_1_1_band__gap__simple_a5728157c4b36fde7364fa3bbf29fc114}{}\index{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple@{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple}!band\+\_\+gap\+\_\+simple@{band\+\_\+gap\+\_\+simple}}
+\index{band\+\_\+gap\+\_\+simple@{band\+\_\+gap\+\_\+simple}!smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple@{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple}}
+\subsubsection[{band\+\_\+gap\+\_\+simple}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+properties.\+Band\+\_\+gap\+\_\+simple.\+band\+\_\+gap\+\_\+simple (
+\begin{DoxyParamCaption}
+\item[{}]{verbose = {\ttfamily False}, }
+\item[{}]{Anion = {\ttfamily None}, }
+\item[{}]{Cation = {\ttfamily None}, }
+\item[{}]{Distance = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1properties_1_1_band__gap__simple_a5728157c4b36fde7364fa3bbf29fc114}
+\begin{DoxyVerb}Estimates the band gap from elemental data.
+
+Args:
+    Anion: Element symbol of the dominant anion in the system.
+    Cation: Element symbol of the the dominant cation in the system.
+    Distance: Nuclear separation between anion and cation i.e. sum of ionic
+            radii.
+            verbose: An optional True/False flag. If True, additional information is
+            printed to the standard output. [Defult: False]
+
+            Returns: Band gap as a float in eV. \end{DoxyVerb}
+ 
+
+\subsection{Variable Documentation}
+\hypertarget{namespacesmact_1_1properties_1_1_band__gap__simple_af498c67d7752b84a45f01872c6ba2430}{}\index{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple@{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple}!args@{args}}
+\index{args@{args}!smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple@{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple}}
+\subsubsection[{args}]{\setlength{\rightskip}{0pt plus 5cm}tuple smact.\+properties.\+Band\+\_\+gap\+\_\+simple.\+args = parser.\+parse\+\_\+args()}\label{namespacesmact_1_1properties_1_1_band__gap__simple_af498c67d7752b84a45f01872c6ba2430}
+\hypertarget{namespacesmact_1_1properties_1_1_band__gap__simple_abe4d22f74e3d7975f257f0189add69b8}{}\index{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple@{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple}!parser@{parser}}
+\index{parser@{parser}!smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple@{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple}}
+\subsubsection[{parser}]{\setlength{\rightskip}{0pt plus 5cm}tuple smact.\+properties.\+Band\+\_\+gap\+\_\+simple.\+parser}\label{namespacesmact_1_1properties_1_1_band__gap__simple_abe4d22f74e3d7975f257f0189add69b8}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+1 = argparse.ArgumentParser(
+2         description =\textcolor{stringliteral}{"""Compound band gap estimates from elemental data."""})
+\end{DoxyCode}
+\hypertarget{namespacesmact_1_1properties_1_1_band__gap__simple_a25cb7d2a569d44a7a849af519c43e115}{}\index{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple@{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple}!verbose\+\_\+flag@{verbose\+\_\+flag}}
+\index{verbose\+\_\+flag@{verbose\+\_\+flag}!smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple@{smact\+::properties\+::\+Band\+\_\+gap\+\_\+simple}}
+\subsubsection[{verbose\+\_\+flag}]{\setlength{\rightskip}{0pt plus 5cm}smact.\+properties.\+Band\+\_\+gap\+\_\+simple.\+verbose\+\_\+flag = False}\label{namespacesmact_1_1properties_1_1_band__gap__simple_a25cb7d2a569d44a7a849af519c43e115}
