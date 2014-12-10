@@ -334,6 +334,7 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
 		    if j == 1:
 			allowed_ratios.append([i,j])
 			ratio_exists = True
+# Test to make sure that ratios do not reduce to some simpler ratio
 		    elif i%j != 0 and j%1 != 0:
 			allowed_ratios.append([i,j])
 			ratio_exists = True
@@ -346,11 +347,28 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
 		        if j == 1 and k == 1:
 			    allowed_ratios.append([i,j,k])
 			    ratio_exists = True
-		        elif i%j != 0 or i%k != 0: 
-			    if j%i != 0 or k%i !=0:
-			        allowed_ratios.append([i,j,k])
-			        ratio_exists = True
-		
+			else:
+			    for x in i, j, k, l:
+                                    for y in i, j, k, l:
+                                        if x%y != 0:
+			                    allowed_ratios.append([i,j,k])
+			        	    ratio_exists = True
+
+    if len(oxidations) == 4:
+	for i in stoichs[0]:
+	    for j in stoichs[1]:
+	    	for k in stoichs[2]:
+	    	    for l in stoichs[3]:
+			if i*oxidations[0] + j*oxidations[1] + k*oxidations[2] + l*oxidations[3] == 0:
+			    if j == 1 and k == 1 and l == 1:
+				allowed_ratios.append([i,j,k,l])
+				ratio_exists = True
+			    else:
+			    	for x in i, j, k, l:
+				    for y in i, j, k, l:
+					if x%y != 0:
+					    allowed_ratios.append([i,j,k,l])
+                            		    ratio_exists = True	
 
 
     return ratio_exists, allowed_ratios
