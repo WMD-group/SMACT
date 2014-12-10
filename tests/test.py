@@ -4,7 +4,6 @@ import unittest
 from smact.properties.compound_electroneg import compound_electroneg
 from smact.builder import wurtzite
 from smact.lattice import *
-import copy
 import os
 import smact.core
 
@@ -17,21 +16,26 @@ class TestSequenceFunctions(unittest.TestCase):
         Pt = smact.core.Element('Pt')
         self.assertEqual(Pt.name,'Platinum')
         self.assertEqual(Pt.ionpot,8.9588)
+        self.assertEqual(Pt.number,78)
 
 #TODO(AJJ): Implement warnings in a testable way. Have a Pu testcase.
-    
     def test_compound_eneg_brass(self):
         self.assertEqual(compound_electroneg(
             elements=["Cu","Zn"], stoichs=[0.5, 0.5]),
             4.5878238674779128)
 
     def test_builder_ZnS(self):
-	ZnS = wurtzite(['Zn','S'])
-	self.assertEqual(round(ZnS.positions[0,0],2),1.5)
-	self.assertEqual(round(ZnS.positions[1,1],2),1.73)
-	self.assertEqual(round(ZnS.positions[2,2],2),3.75)
-	self.assertEqual(round(ZnS.cell[0,0],2),3.0)
-	self.assertEqual(round(ZnS.cell[1,0],2),-1.5)
+	ZnS, sys_ZnS = wurtzite(['Zn','S'])
+	self.assertEqual((ZnS.sites[0].position[2]),0)
+	self.assertEqual((ZnS.sites[0].position[0]),2./3.)
+
+    def test_charge_neutrality_ternary(self):
+	ox = [1,-2,1]
+	is_neutral,neutral_comobs = core.charge_neutrality(ox)
+	self.assertEqual((is_neutral),True)
+	self.assertEqual(len(neutral_comobs),7)
+	self.assertEqual(neutral_comobs[2],[3, 2, 1])
+'''    
 
     def test_compound_library(self):
         """A compound test, this covers builder, oxidation_data and the possible_compositions functions"""
@@ -64,6 +68,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(perovskite_compositions[20][1],'Ge4')
         self.assertEqual(perovskite_compositions[32][0],'S2')
 #--------------------------------------------------------------------------------------------------------
+'''
 
 if __name__ == '__main__':
     unittest.main()

@@ -19,9 +19,9 @@ f = open(smact_directory + 'data/oxidationstates.data','r')
 lines = f.readlines()
 f.close()
 for line in lines:
-    inp = line.split()
+    row = line.split()
     for item in search_space:
-        if inp[0].startswith(item): 
+        if row[0].startswith(item): 
     	    key = inp[0]
     	    elements[key] = inp[1]
 

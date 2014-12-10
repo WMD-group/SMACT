@@ -1,0 +1,96 @@
+\hypertarget{namespacesmact_1_1core}{}\section{smact.\+core Namespace Reference}
+\label{namespacesmact_1_1core}\index{smact.\+core@{smact.\+core}}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classsmact_1_1core_1_1_element}{Element}
+\item 
+class \hyperlink{classsmact_1_1core_1_1_species}{Species}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacesmact_1_1core_a3e8b27f822e17a79e50b1399825564ff}{ordered\+\_\+elements}
+\item 
+def \hyperlink{namespacesmact_1_1core_a5a32e4b9b50d3db379ede8d7b8b1081a}{are\+\_\+eq}
+\item 
+def \hyperlink{namespacesmact_1_1core_abd4953dbc9b28e11861b3b63092ec4fa}{lattices\+\_\+are\+\_\+same}
+\item 
+def \hyperlink{namespacesmact_1_1core_a523386aa44322d0a2670672b4535bab3}{charge\+\_\+neutrality}
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+tuple \hyperlink{namespacesmact_1_1core_aaa14f990a82d90eaab5ad3667e72453e}{smact\+\_\+directory} = os.\+path.\+dirname(\+\_\+\+\_\+file\+\_\+\+\_\+)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{namespacesmact_1_1core_a5a32e4b9b50d3db379ede8d7b8b1081a}{}\index{smact\+::core@{smact\+::core}!are\+\_\+eq@{are\+\_\+eq}}
+\index{are\+\_\+eq@{are\+\_\+eq}!smact\+::core@{smact\+::core}}
+\subsubsection[{are\+\_\+eq}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+core.\+are\+\_\+eq (
+\begin{DoxyParamCaption}
+\item[{}]{A, }
+\item[{}]{B, }
+\item[{}]{tolerance = {\ttfamily 1e-\/4}}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1core_a5a32e4b9b50d3db379ede8d7b8b1081a}
+\begin{DoxyVerb}Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
+    Args:
+    A/B: arrays
+    tolerance: numerical precision for equality condition
+    Returns:
+    True/False
+\end{DoxyVerb}
+ \hypertarget{namespacesmact_1_1core_a523386aa44322d0a2670672b4535bab3}{}\index{smact\+::core@{smact\+::core}!charge\+\_\+neutrality@{charge\+\_\+neutrality}}
+\index{charge\+\_\+neutrality@{charge\+\_\+neutrality}!smact\+::core@{smact\+::core}}
+\subsubsection[{charge\+\_\+neutrality}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+core.\+charge\+\_\+neutrality (
+\begin{DoxyParamCaption}
+\item[{}]{oxidations, }
+\item[{}]{stoichs = {\ttfamily False}, }
+\item[{}]{threshold = {\ttfamily 5}}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1core_a523386aa44322d0a2670672b4535bab3}
+\begin{DoxyVerb}Given a list of oxidation states of arbitrary length it serches for neutral ratios in a given ratio of sites (stoichs) or up to a given threshold
+   For the moment it just iterates through binaries, ternaries ... TODO: make it general (KTB)
+Args:
+oxidations : list of integers
+stoichs : stoichiometric ratios for each site (if provided)
+threshold : single threshold to go up to if stoichs are not provided
+Returns:
+exists : bool to say if a ratio exists
+site_ratios : ration that gives neutrality
+\end{DoxyVerb}
+ \hypertarget{namespacesmact_1_1core_abd4953dbc9b28e11861b3b63092ec4fa}{}\index{smact\+::core@{smact\+::core}!lattices\+\_\+are\+\_\+same@{lattices\+\_\+are\+\_\+same}}
+\index{lattices\+\_\+are\+\_\+same@{lattices\+\_\+are\+\_\+same}!smact\+::core@{smact\+::core}}
+\subsubsection[{lattices\+\_\+are\+\_\+same}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+core.\+lattices\+\_\+are\+\_\+same (
+\begin{DoxyParamCaption}
+\item[{}]{lattice1, }
+\item[{}]{lattice2}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1core_abd4953dbc9b28e11861b3b63092ec4fa}
+\begin{DoxyVerb}Checks for the equivalence of two lattices
+    Args:
+    lattice1,lattice2 : ASE crystal class
+    Returns:
+    lattices_are_same : boolean \end{DoxyVerb}
+ \hypertarget{namespacesmact_1_1core_a3e8b27f822e17a79e50b1399825564ff}{}\index{smact\+::core@{smact\+::core}!ordered\+\_\+elements@{ordered\+\_\+elements}}
+\index{ordered\+\_\+elements@{ordered\+\_\+elements}!smact\+::core@{smact\+::core}}
+\subsubsection[{ordered\+\_\+elements}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+core.\+ordered\+\_\+elements (
+\begin{DoxyParamCaption}
+\item[{}]{x, }
+\item[{}]{y}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1core_a3e8b27f822e17a79e50b1399825564ff}
+\begin{DoxyVerb}Function to return a list of element symbols, ordered by proton number in the range x -> y
+Args:
+x,y : integers
+Returns:
+ordered_elements : List of element symbols
+\end{DoxyVerb}
+ 
+
+\subsection{Variable Documentation}
+\hypertarget{namespacesmact_1_1core_aaa14f990a82d90eaab5ad3667e72453e}{}\index{smact\+::core@{smact\+::core}!smact\+\_\+directory@{smact\+\_\+directory}}
+\index{smact\+\_\+directory@{smact\+\_\+directory}!smact\+::core@{smact\+::core}}
+\subsubsection[{smact\+\_\+directory}]{\setlength{\rightskip}{0pt plus 5cm}string smact.\+core.\+smact\+\_\+directory = os.\+path.\+dirname(\+\_\+\+\_\+file\+\_\+\+\_\+)}\label{namespacesmact_1_1core_aaa14f990a82d90eaab5ad3667e72453e}

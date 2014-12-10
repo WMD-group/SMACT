@@ -18,12 +18,55 @@
 import numpy as np
 
 class Lattice(object):
-      """A class of objects to hold the structure stoichiometry"""
+      """A unique set of Sites
 
-      def __init__(self, sites, site_ratios, site_oxidations):
-	self.sites = sites
-	self.site_ratios = site_ratios
-	self.site_oxidations = site_oxidations
+      Lattice objects define a general crystal structure, with a space group and
+      a collection of Site objects. These Site objects have their own fractional
+      coordinates and a list of possible oxidation states (see the Site class).
+
+      Specific crystal structures with elements assigned to sites are
+      "materials" and use the Atoms class from the Atomic Simulation
+      Environment.
+
+      Attributes: 
+          basis_sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
+          comprising the basis sites in Cartesian coordinates
+
+          space_group: Integer space group number according to the
+          International Tables for Crystallography.  
+
+          structurbericht:
+          Structurbericht identity, if applicable (e.g. 'B1')
+
+      Methods:
+          lattice_vector_calc():
+
+      """
+
+      def __init__(self, sites, space_group=1, strukturbericht=False):
+            self.sites = sites
+            self.space_group = space_group
+            self.strukturbericht = strukturbericht
+
+class Site(object):
+      """
+      A single lattice site with a list of possible oxidation states
+
+      The Site object is primarily used within Lattice objects.
+
+      Attributes:
+          position: A list of fractional coordinates [x,y,z]
+          oxidation_states: A list of possible oxidation states e.g. [-1,0,1]
+      
+      """ 
+      
+      def __init__(self, position, oxidation_states=[0]):
+            self.position = position
+            self.oxidation_states = oxidation_states
+
+
+########## Everything below this is probably broken ##########
+
 #------------------------------------------------------------------------------------
 def check_lattice_charges(charges, site_elements, sites):
       """
@@ -107,7 +150,7 @@ def possible_compositions(crystal, elements):
 		                    site_elements = check_lattice_charges(charges, site_elements, sites)
 			    if 5 <= len(atom):
 			    	for site_5 in atom[4]:
-				    charges[4] = int(elements[site_5]) * crystal_site_ratios[4] 
+				    charges[4] = int(elements[site_5]) * crystal.site_ratios[4] 
 	                            if len(atom) == 5:
 	                                sites = [site_1, site_2, site_3, site_4]
 		                        site_elements = check_lattice_charges(charges, site_elements, sites)
