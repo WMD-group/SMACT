@@ -177,7 +177,17 @@ class Element(object):
 
         self.coord_envs = coord_envs
 
-     
+		with open(smact_directory + 'data/SSE.csv','r') as f: 
+			print "Reading the SSE"
+    		while True:
+		        l=f.readline()
+		        if l.split(",")[0] == symbol:
+		            self.SSE = float(l.split(",")[2])
+		            break
+		        elif not l:
+		            print 'WARNING: Element {0} not found in SSE.csv'.format(symbol)
+		            self.SSE = False
+		            break
 
 #------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------#
