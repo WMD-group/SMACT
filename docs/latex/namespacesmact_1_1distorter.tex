@@ -1,0 +1,74 @@
+\hypertarget{namespacesmact_1_1distorter}{}\section{smact.\+distorter Namespace Reference}
+\label{namespacesmact_1_1distorter}\index{smact.\+distorter@{smact.\+distorter}}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacesmact_1_1distorter_a0ac75ed2f6cb305b3c8596d94517eec6}{get\+\_\+sg}
+\item 
+def \hyperlink{namespacesmact_1_1distorter_a1ec14de462a0176842705f8fc4c9c39b}{get\+\_\+inequivalent\+\_\+sites}
+\item 
+def \hyperlink{namespacesmact_1_1distorter_ade340d55f2d7f76740c01bbc79e3be91}{make\+\_\+substitution}
+\item 
+def \hyperlink{namespacesmact_1_1distorter_a39d7cc60d45b249ab88edc3ec929e68b}{build\+\_\+sub\+\_\+lattice}
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{namespacesmact_1_1distorter_a39d7cc60d45b249ab88edc3ec929e68b}{}\index{smact\+::distorter@{smact\+::distorter}!build\+\_\+sub\+\_\+lattice@{build\+\_\+sub\+\_\+lattice}}
+\index{build\+\_\+sub\+\_\+lattice@{build\+\_\+sub\+\_\+lattice}!smact\+::distorter@{smact\+::distorter}}
+\subsubsection[{build\+\_\+sub\+\_\+lattice}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+distorter.\+build\+\_\+sub\+\_\+lattice (
+\begin{DoxyParamCaption}
+\item[{}]{lattice, }
+\item[{}]{symbol}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1distorter_a39d7cc60d45b249ab88edc3ec929e68b}
+\begin{DoxyVerb}Generate a sub-lattice of the lattice based on equivalent atomic species
+
+Args:
+    lattice: ASE crystal class
+symbol: The name of the species whose sub-lattice you wish to build
+
+Returns:
+sub_lattice: Cartesian coordinates of the sub-lattice of symbol\end{DoxyVerb}
+ \hypertarget{namespacesmact_1_1distorter_a1ec14de462a0176842705f8fc4c9c39b}{}\index{smact\+::distorter@{smact\+::distorter}!get\+\_\+inequivalent\+\_\+sites@{get\+\_\+inequivalent\+\_\+sites}}
+\index{get\+\_\+inequivalent\+\_\+sites@{get\+\_\+inequivalent\+\_\+sites}!smact\+::distorter@{smact\+::distorter}}
+\subsubsection[{get\+\_\+inequivalent\+\_\+sites}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+distorter.\+get\+\_\+inequivalent\+\_\+sites (
+\begin{DoxyParamCaption}
+\item[{}]{sub\+\_\+lattice, }
+\item[{}]{lattice}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1distorter_a1ec14de462a0176842705f8fc4c9c39b}
+\begin{DoxyVerb}Given a sub lattice, returns symmetry unique sites for substitutions
+
+Args:
+sub_lattice: array containing Cartesian coordinates of the sub-lattice of interest
+lattice: ASE crystal class, the total lattice\end{DoxyVerb}
+ \hypertarget{namespacesmact_1_1distorter_a0ac75ed2f6cb305b3c8596d94517eec6}{}\index{smact\+::distorter@{smact\+::distorter}!get\+\_\+sg@{get\+\_\+sg}}
+\index{get\+\_\+sg@{get\+\_\+sg}!smact\+::distorter@{smact\+::distorter}}
+\subsubsection[{get\+\_\+sg}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+distorter.\+get\+\_\+sg (
+\begin{DoxyParamCaption}
+\item[{}]{lattice}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1distorter_a0ac75ed2f6cb305b3c8596d94517eec6}
+\begin{DoxyVerb}Get the space-group of the system
+
+Args:
+lattice: the ASE crystal class
+Returns:
+sg: integer number of the spacegroup\end{DoxyVerb}
+ \hypertarget{namespacesmact_1_1distorter_ade340d55f2d7f76740c01bbc79e3be91}{}\index{smact\+::distorter@{smact\+::distorter}!make\+\_\+substitution@{make\+\_\+substitution}}
+\index{make\+\_\+substitution@{make\+\_\+substitution}!smact\+::distorter@{smact\+::distorter}}
+\subsubsection[{make\+\_\+substitution}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+distorter.\+make\+\_\+substitution (
+\begin{DoxyParamCaption}
+\item[{}]{lattice, }
+\item[{}]{site, }
+\item[{}]{new\+\_\+species}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1distorter_ade340d55f2d7f76740c01bbc79e3be91}
+\begin{DoxyVerb}Change the atomic species @ site in lattice to new_species [atomic number]
+
+Args:
+lattice: ASE crystal class
+site: array, containing the Cartesian coordinates of the substitution site
+new_species: string, the new species\end{DoxyVerb}
+ 

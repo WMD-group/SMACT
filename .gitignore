@@ -34,3 +34,20 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Any .cif files generated from examples running
+*.cif
+*/*.cif
+*/*/*.cif
+
+# The LEGO development directory
+surface/*
+
+*.swp
+
+
+# Output file from compound library example
+examples/output.txt
+
+# Some of the examples are in development
+../examples/StuffedWurtzite/
