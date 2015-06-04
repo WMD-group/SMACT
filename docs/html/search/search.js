@@ -10,7 +10,7 @@ var indexSectionsWithContent =
   0: "_abcdefghilmnopqrsvwxz",
   1: "els",
   2: "s",
-  3: "_bcdlps",
+  3: "_bcdlmps",
   4: "_abcdefghlmopqrwz",
   5: "abcdehinoprsvx"
 };
