@@ -1,0 +1,75 @@
+\hypertarget{namespacesmact_1_1lattice}{}\section{smact.\+lattice Namespace Reference}
+\label{namespacesmact_1_1lattice}\index{smact.\+lattice@{smact.\+lattice}}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classsmact_1_1lattice_1_1_lattice}{Lattice}
+\item 
+class \hyperlink{classsmact_1_1lattice_1_1_site}{Site}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacesmact_1_1lattice_a0380cf2cee37daa74c90bbefa4a16246}{check\+\_\+lattice\+\_\+charges}
+\item 
+def \hyperlink{namespacesmact_1_1lattice_af33a880afcb916626bc20669a084457f}{possible\+\_\+compositions}
+\item 
+def \hyperlink{namespacesmact_1_1lattice_a480b77e0ed0d4874c376d27f41ee0b3c}{possible\+\_\+elements}
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{namespacesmact_1_1lattice_a0380cf2cee37daa74c90bbefa4a16246}{}\index{smact\+::lattice@{smact\+::lattice}!check\+\_\+lattice\+\_\+charges@{check\+\_\+lattice\+\_\+charges}}
+\index{check\+\_\+lattice\+\_\+charges@{check\+\_\+lattice\+\_\+charges}!smact\+::lattice@{smact\+::lattice}}
+\subsubsection[{check\+\_\+lattice\+\_\+charges}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+lattice.\+check\+\_\+lattice\+\_\+charges (
+\begin{DoxyParamCaption}
+\item[{}]{charges, }
+\item[{}]{site\+\_\+elements, }
+\item[{}]{sites}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1lattice_a0380cf2cee37daa74c90bbefa4a16246}
+\begin{DoxyVerb}This function checks the sum of the charges on the lattice sites in the crystal
+Additional explanation if needed
+
+Args:
+    charges: array of the charge contributions of each lattice site
+    site_elements: All possible elements which satisfy charge neutrality 
+    sites: list, the current set of elements under inspection
+
+Returns:
+    input site_elements array with appended neutral sites (???)\end{DoxyVerb}
+ \hypertarget{namespacesmact_1_1lattice_af33a880afcb916626bc20669a084457f}{}\index{smact\+::lattice@{smact\+::lattice}!possible\+\_\+compositions@{possible\+\_\+compositions}}
+\index{possible\+\_\+compositions@{possible\+\_\+compositions}!smact\+::lattice@{smact\+::lattice}}
+\subsubsection[{possible\+\_\+compositions}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+lattice.\+possible\+\_\+compositions (
+\begin{DoxyParamCaption}
+\item[{}]{crystal, }
+\item[{}]{elements}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1lattice_af33a880afcb916626bc20669a084457f}
+\begin{DoxyVerb}Seach for the elements which satisfy the possible oxidations and charge neutrality.
+
+Args:
+    crystal: A Lattice object defining the crystal class
+    elements: A list of the elemets you wish to search through
+Uses:
+atom : a list of possible atoms on each site of the lattice
+Returns:
+    list/array/dict of int/float/string of something useful (???)
+\end{DoxyVerb}
+ \hypertarget{namespacesmact_1_1lattice_a480b77e0ed0d4874c376d27f41ee0b3c}{}\index{smact\+::lattice@{smact\+::lattice}!possible\+\_\+elements@{possible\+\_\+elements}}
+\index{possible\+\_\+elements@{possible\+\_\+elements}!smact\+::lattice@{smact\+::lattice}}
+\subsubsection[{possible\+\_\+elements}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+lattice.\+possible\+\_\+elements (
+\begin{DoxyParamCaption}
+\item[{}]{elements, }
+\item[{}]{oxidations}
+\end{DoxyParamCaption}
+)}\label{namespacesmact_1_1lattice_a480b77e0ed0d4874c376d27f41ee0b3c}
+\begin{DoxyVerb}Identify possible atoms to occupy a site
+
+Args:
+    elements:
+    oxidations: 
+
+Returns: 
+    Array of atoms\end{DoxyVerb}
+ 

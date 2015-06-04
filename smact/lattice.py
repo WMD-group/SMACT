@@ -16,14 +16,58 @@
 ################################################################################
 
 import numpy as np
+import smact.core as core
 
 class Lattice(object):
-      """A class of objects to hold the structure stoichiometry"""
+      """A unique set of Sites
 
-      def __init__(self, sites, site_ratios, site_oxidations):
-	self.sites = sites
-	self.site_ratios = site_ratios
-	self.site_oxidations = site_oxidations
+      Lattice objects define a general crystal structure, with a space group and
+      a collection of Site objects. These Site objects have their own fractional
+      coordinates and a list of possible oxidation states (see the Site class).
+
+      Specific crystal structures with elements assigned to sites are
+      "materials" and use the Atoms class from the Atomic Simulation
+      Environment.
+
+      Attributes: 
+          basis_sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
+          comprising the basis sites in Cartesian coordinates
+
+          space_group: Integer space group number according to the
+          International Tables for Crystallography.  
+
+          structurbericht:
+          Structurbericht identity, if applicable (e.g. 'B1')
+
+      Methods:
+          lattice_vector_calc():
+
+      """
+
+      def __init__(self, sites, space_group=1, strukturbericht=False):
+            self.sites = sites
+            self.space_group = space_group
+            self.strukturbericht = strukturbericht
+
+class Site(object):
+      """
+      A single lattice site with a list of possible oxidation states
+
+      The Site object is primarily used within Lattice objects.
+
+      Attributes:
+          position: A list of fractional coordinates [x,y,z]
+          oxidation_states: A list of possible oxidation states e.g. [-1,0,1]
+      
+      """ 
+      
+      def __init__(self, position, oxidation_states=[0]):
+            self.position = position
+            self.oxidation_states = oxidation_states
+
+
+########## Everything below this is probably broken ##########
+
 #------------------------------------------------------------------------------------
 def check_lattice_charges(charges, site_elements, sites):
       """
@@ -56,24 +100,36 @@ def possible_compositions(crystal, elements):
        provide charge neutrality.
 
     Args:
+<<<<<<< HEAD
+        crystal: A Lattice object defining the crystal class
+        elements: A list of the elemets you wish to search through
+=======
         crystal: A lattice object defining the crystal class
         elements: Dictionary of elements and their allowable oxidation states
+>>>>>>> origin/new-classes
     Uses:
   	atom : a list of possible atoms on each site of the lattice
-
     Returns:
         list/array/dict of int/float/string of something useful (???)
-
     """
 
+    for site in crystal.sites:
+	composition = []
+	for ox in site.oxidation_states:
+	    total_charge = total_charge + ox
+
+
+'''
 # Initialise the array atom, containing possible elements for each sub lattice
     atom = []
 # Initialise the array, site_elements, containing compositions found
     site_elements = []
     i = 0
     while i < len(crystal.sites):
-        atom.append(possible_elements(elements, crystal.site_oxidations[i]))
+        atom.append(possible_elements(elements, crystal.sites[i].oxidation_states))
         i = i + 1
+    print atom
+for site in crystal
 # I could not think of an elegant way to generalise this. For now it loops through the possible
 # lattices until it reaches the number, then it goes no further. Therefore, many of the loops
 # here are redundant. 
@@ -107,13 +163,13 @@ def possible_compositions(crystal, elements):
 		                    site_elements = check_lattice_charges(charges, site_elements, sites)
 			    if 5 <= len(atom):
 			    	for site_5 in atom[4]:
-				    charges[4] = int(elements[site_5]) * crystal_site_ratios[4] 
+				    charges[4] = int(elements[site_5]) * crystal.site_ratios[4] 
 	                            if len(atom) == 5:
 	                                sites = [site_1, site_2, site_3, site_4]
 		                        site_elements = check_lattice_charges(charges, site_elements, sites)
 
     return site_elements
-
+'''
 #------------------------------------------------------------------------------------
 def possible_elements(elements, oxidations):
     """Identify possible atoms to occupy a site
@@ -128,8 +184,10 @@ def possible_elements(elements, oxidations):
     """
     atoms = []
     for element in elements:
+	elemental_oxidations = core.Element(element).oxidation_states
         for ox_state_a in oxidations:
-        	if int(elements[element]) == int(ox_state_a):
+	    for element_ox in elemental_oxidations:
+        	if int(element_ox) == int(ox_state_a):
         	    atoms.append(element)
     return atoms
 #------------------------------------------------------------------------------------

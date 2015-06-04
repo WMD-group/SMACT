@@ -1,0 +1,83 @@
+\hypertarget{classsmact_1_1core_1_1_species}{}\section{smact.\+core.\+Species Class Reference}
+\label{classsmact_1_1core_1_1_species}\index{smact.\+core.\+Species@{smact.\+core.\+Species}}
+Inheritance diagram for smact.\+core.\+Species\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classsmact_1_1core_1_1_species}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classsmact_1_1core_1_1_species_a186239ed056e1ff2a5c26c29d2fd87ff}{\+\_\+\+\_\+init\+\_\+\+\_\+}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classsmact_1_1core_1_1_species_aa7e923db8eba011ccd5cbf7da36707ec}{oxidation}
+\item 
+\hyperlink{classsmact_1_1core_1_1_species_a4e9691114a02162516af95d4974f1541}{coordination}
+\item 
+\hyperlink{classsmact_1_1core_1_1_species_a4b07462f361429921475d57e057cdd2b}{shannon\+\_\+radius}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Class providing data for elements in a given chemical environment
+
+In addition to the standard properties from the periodic table (inherited from the 
+Element class), Species objects use the oxidation state and coordination environment
+to provide further properties.
+
+Attributes: 
+    Species.symbol: Elemental symbol used to retrieve data
+
+    Species.name: Full name of element
+
+    Species.oxidation: Oxidation state of species (signed integer)
+
+    Species.coordination: Coordination number of species (integer)
+
+    Species.pauling_eneg: Pauling electronegativity (0.0 if unknown)
+
+    Species.ionpot: Ionisation potential in eV (0.0 if unknown)
+
+    Species.e_affinity: Electron affinity in eV (0.0 if unknown)
+
+    Species.eig: Electron eigenvalue (units unknown)
+    N.B. For Cu, Au and Ag this defaults to d-orbital.
+    TODO(DD): implement a way to select the desired orbital
+
+Raises:
+    NameError: Element not found in element.txt
+    Warning: Element not found in Eigenvalues.csv              \end{DoxyVerb}
+ 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classsmact_1_1core_1_1_species_a186239ed056e1ff2a5c26c29d2fd87ff}{}\index{smact\+::core\+::\+Species@{smact\+::core\+::\+Species}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!smact\+::core\+::\+Species@{smact\+::core\+::\+Species}}
+\subsubsection[{\+\_\+\+\_\+init\+\_\+\+\_\+}]{\setlength{\rightskip}{0pt plus 5cm}def smact.\+core.\+Species.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{symbol, }
+\item[{}]{oxidation, }
+\item[{}]{coordination}
+\end{DoxyParamCaption}
+)}\label{classsmact_1_1core_1_1_species_a186239ed056e1ff2a5c26c29d2fd87ff}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classsmact_1_1core_1_1_species_a4e9691114a02162516af95d4974f1541}{}\index{smact\+::core\+::\+Species@{smact\+::core\+::\+Species}!coordination@{coordination}}
+\index{coordination@{coordination}!smact\+::core\+::\+Species@{smact\+::core\+::\+Species}}
+\subsubsection[{coordination}]{\setlength{\rightskip}{0pt plus 5cm}smact.\+core.\+Species.\+coordination}\label{classsmact_1_1core_1_1_species_a4e9691114a02162516af95d4974f1541}
+\hypertarget{classsmact_1_1core_1_1_species_aa7e923db8eba011ccd5cbf7da36707ec}{}\index{smact\+::core\+::\+Species@{smact\+::core\+::\+Species}!oxidation@{oxidation}}
+\index{oxidation@{oxidation}!smact\+::core\+::\+Species@{smact\+::core\+::\+Species}}
+\subsubsection[{oxidation}]{\setlength{\rightskip}{0pt plus 5cm}smact.\+core.\+Species.\+oxidation}\label{classsmact_1_1core_1_1_species_aa7e923db8eba011ccd5cbf7da36707ec}
+\hypertarget{classsmact_1_1core_1_1_species_a4b07462f361429921475d57e057cdd2b}{}\index{smact\+::core\+::\+Species@{smact\+::core\+::\+Species}!shannon\+\_\+radius@{shannon\+\_\+radius}}
+\index{shannon\+\_\+radius@{shannon\+\_\+radius}!smact\+::core\+::\+Species@{smact\+::core\+::\+Species}}
+\subsubsection[{shannon\+\_\+radius}]{\setlength{\rightskip}{0pt plus 5cm}smact.\+core.\+Species.\+shannon\+\_\+radius}\label{classsmact_1_1core_1_1_species_a4b07462f361429921475d57e057cdd2b}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/\+K\+T\+B22/\+Source\+Tree/smact/smact/\hyperlink{core_8py}{core.\+py}\end{DoxyCompactItemize}
