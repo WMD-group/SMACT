@@ -177,7 +177,17 @@ class Element(object):
 
         self.coord_envs = coord_envs
 
-     
+# Read in the Solid State Energies from csv file
+	with open(smact_directory + 'data/SSE.csv','rU') as f: 
+            reader = csv.reader(f)#, delimiter=',', quoting=csv.QUOTE_NONE)
+            for row in reader:
+	        if row[0] == symbol:
+	            self.SSE = float(row[2])
+	            break
+	        elif not l:
+	            print 'WARNING: Element {0} not found in SSE.csv'.format(symbol)
+	            self.SSE = False
+	            break
 
 #------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------#

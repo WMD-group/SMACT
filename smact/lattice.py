@@ -16,6 +16,7 @@
 ################################################################################
 
 import numpy as np
+import smact.core as core
 
 class Lattice(object):
       """A unique set of Sites
@@ -70,8 +71,12 @@ class Site(object):
 #------------------------------------------------------------------------------------
 def check_lattice_charges(charges, site_elements, sites):
       """
-      This function checks the sum of the charges on the lattice sites in the crystal
-      Additional explanation if needed
+      This function checks the sum of the charges on the lattice sites in the crystal.
+      The formal oxidation states of each species are assumed.
+      
+      'This does not signify that the chemical bonds in the crystal 
+      are necessarily ionic in the sense of the quantum mechanics'
+                                              Linus Pauling (1929)
 
       Args:
           charges: array of the charge contributions of each lattice site
@@ -87,33 +92,44 @@ def check_lattice_charges(charges, site_elements, sites):
           site_elements.append(sites)
 # Need to use two lists, new contains the present composition; site_elements is the 
 # list of all news found.
-#
-# 
 
       return site_elements
 #------------------------------------------------------------------------------------
 def possible_compositions(crystal, elements):
-    """Seach for the elements which satisfy the possible oxidations and charge neutrality.
+    """Seach for the elements which satisfy the possible oxidation states and 
+       provide charge neutrality.
 
     Args:
+<<<<<<< HEAD
         crystal: A Lattice object defining the crystal class
+        elements: A list of the elemets you wish to search through
+=======
+        crystal: A lattice object defining the crystal class
         elements: Dictionary of elements and their allowable oxidation states
+>>>>>>> origin/new-classes
     Uses:
   	atom : a list of possible atoms on each site of the lattice
-
     Returns:
         list/array/dict of int/float/string of something useful (???)
-
     """
 
+    for site in crystal.sites:
+	composition = []
+	for ox in site.oxidation_states:
+	    total_charge = total_charge + ox
+
+
+'''
 # Initialise the array atom, containing possible elements for each sub lattice
     atom = []
 # Initialise the array, site_elements, containing compositions found
     site_elements = []
     i = 0
     while i < len(crystal.sites):
-        atom.append(possible_elements(elements, crystal.site_oxidations[i]))
+        atom.append(possible_elements(elements, crystal.sites[i].oxidation_states))
         i = i + 1
+    print atom
+for site in crystal
 # I could not think of an elegant way to generalise this. For now it loops through the possible
 # lattices until it reaches the number, then it goes no further. Therefore, many of the loops
 # here are redundant. 
@@ -153,7 +169,7 @@ def possible_compositions(crystal, elements):
 		                        site_elements = check_lattice_charges(charges, site_elements, sites)
 
     return site_elements
-
+'''
 #------------------------------------------------------------------------------------
 def possible_elements(elements, oxidations):
     """Identify possible atoms to occupy a site
@@ -168,9 +184,10 @@ def possible_elements(elements, oxidations):
     """
     atoms = []
     for element in elements:
+	elemental_oxidations = core.Element(element).oxidation_states
         for ox_state_a in oxidations:
-        	if int(elements[element]) == int(ox_state_a):
+	    for element_ox in elemental_oxidations:
+        	if int(element_ox) == int(ox_state_a):
         	    atoms.append(element)
     return atoms
 #------------------------------------------------------------------------------------
-
