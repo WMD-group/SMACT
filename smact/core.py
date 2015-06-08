@@ -125,7 +125,7 @@ class Element(object):
                     break
         # If the for loop exits without breaking, the element was not found. Report error:
         else:  
-            raise NameError('Element {0} not found in element.txt'.format(symbol))
+            #raise NameError('Element {0} not found in element.txt'.format(symbol))
         
         # Set attributes
         self.symbol=          str(symbol)
@@ -146,7 +146,7 @@ class Element(object):
                     break
                 # Check for end of file
                 elif not l:
-                    print 'WARNING: Element {0} not found in Eigenvalues.csv'.format(symbol)
+                    #print 'WARNING: Element {0} not found in Eigenvalues.csv'.format(symbol)
                     self.eig = False
                     break
 
@@ -159,7 +159,7 @@ class Element(object):
                     break
                 # Check for end of file
                 elif not l:
-                    print 'WARNING: Element {0} not found in Eigenvalues_s.csv'.format(symbol)
+                    #print 'WARNING: Element {0} not found in Eigenvalues_s.csv'.format(symbol)
                     self.eig_s = False
                     break
 
@@ -185,7 +185,7 @@ class Element(object):
 	            self.SSE = float(row[2])
 	            break
 	        elif not l:
-	            print 'WARNING: Element {0} not found in SSE.csv'.format(symbol)
+	            #print 'WARNING: Element {0} not found in SSE.csv'.format(symbol)
 	            self.SSE = False
 	            break
 
