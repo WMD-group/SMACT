@@ -124,7 +124,7 @@ class Element(object):
                     elementdata = l
                     break
         # If the for loop exits without breaking, the element was not found. Report error:
-        else:  
+        #else:  
             #raise NameError('Element {0} not found in element.txt'.format(symbol))
         
         # Set attributes
