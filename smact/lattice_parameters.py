@@ -231,3 +231,17 @@ def b10(shannon_radius): #Litharge
     beta = 90
     gamma = 90
     return a,b,c,alpha,beta,gamma
+
+def stuffed_wurtzite(shannon_radii):
+    ''' The stuffed wortzite structure (e.g. LiGaGe) space group P63/mc
+    '''
+    rac = shannon_radii[2]+ shannon_radii[1]
+    x = rac*np.sin(np.radians(19.5))
+    c = 2*rac + x
+    y = rac*np.sin(np.radians(70.5))
+    a = y*np.sin(np.radians(120))/np.sin(np.radians(30))
+    b = a
+    alpha = 90
+    beta  = 90
+    gamma = 120
+    return a,b,c,alpha,beta,gamma
