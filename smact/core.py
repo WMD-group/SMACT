@@ -87,11 +87,11 @@ class Element(object):
         crustal_abundance = False
 
         for line in data:
-			if not line.startswith("#"):
-				l = line.split()
-				if (l[0] == symbol):
-					if len (l)>1:
-						crustal_abundance = l[1]
+		if not line.startswith("#"):
+		    l = line.split()
+		    if (l[0] == symbol):
+		 	if len (l)>1:
+			    crustal_abundance = l[1]
 
 									
         self.crustal_abundance = crustal_abundance	
