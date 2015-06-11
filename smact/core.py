@@ -394,18 +394,6 @@ def pauling_test(ox, paul):
 	Returns:
 	    makes_sense : bool of whether the combination makes sense
 	'''
-        makes_sense = True
-        for i, ox_i in enumerate(ox):
-                for j, ox_j in enumerate(ox[i+1:]):
-                        #!print ox_i, ox_j, paul[i], paul[i+1+j]
-                        if ox_i < ox_j:
-                                if paul[i] < paul[i+1+j]:
-                                        makes_sense = False
-                        if ox_i > ox_j:
-                                if paul[i] > paul[i+1+j]:
-                                        makes_sense = False
-                        if ox_i == ox_j:
-                                if paul[i] != paul[i+1+j]:
-                                        makes_sense = False
-        return makes_sense
+	return sorted(zip(paul,ox), key=lambda s: s[1])==sorted(zip(paul,ox), key=lambda s: s[0], reverse=True):
+	
 #------------------------------------------------------------------------------------------
