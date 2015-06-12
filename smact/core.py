@@ -394,6 +394,6 @@ def pauling_test(ox, paul):
 	Returns:
 	    makes_sense : bool of whether the combination makes sense
 	'''
-	return sorted(zip(paul,ox), key=lambda s: s[1])==sorted(zip(paul,ox), key=lambda s: s[0], reverse=True):
+	return sorted(zip(paul,ox), key=lambda s: s[1])==sorted(zip(paul,ox), key=lambda s: s[0], reverse=True)
 	
 #------------------------------------------------------------------------------------------
