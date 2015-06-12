@@ -384,16 +384,31 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
     return ratio_exists, allowed_ratios
     
 #------------------------------------------------------------------------------------------
-def pauling_test(ox, paul):
+def pauling_test(ox, paul, threshold=0.5):
 	''' Testting if a combination of ions makes chemical sense,
-	i.e. if A is more negative than B, then A should have a greater electronegativity than B
-	if not then it does not make Pauling sense.
+	ie positive ions should be of lower Pauling electronegativity
 	Args:
 	    ox : a list of the oxidation states of the compound
 	    paul : the Pauling electronegativities of the elements in the compound
+	    threshold : a tolerance for the allowd deviation from the Pauling criterion
 	Returns:
 	    makes_sense : bool of whether the combination makes sense
 	'''
-	return sorted(zip(paul,ox), key=lambda s: s[1])==sorted(zip(paul,ox), key=lambda s: s[0], reverse=True)
+	#return sorted(zip(paul,ox), key=lambda s: s[1])==sorted(zip(paul,ox), key=lambda s: s[0], reverse=True)
+        positive = []
+	negative = []
+	for i, state in enumerate(ox):
+	    if state > 0:
+		positive.append(paul[i])
+	    if state < 0:
+		negative.append(paul[i]) 
+	if len(positive) == 0 or len(negative) == 0:
+	    return False
+	if max(positive) - min(negative) > threshold:
+	    return False
+	else:
+	    return True
+
+ 
 	
 #------------------------------------------------------------------------------------------
