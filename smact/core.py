@@ -328,7 +328,7 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
 	threshold : single threshold to go up to if stoichs are not provided
     Returns:
 	exists : bool to say if a ratio exists
-	site_ratios : ration that gives neutrality
+	allowed_ratios : ratio that gives neutrality
     '''
     allowed_ratios = []
     ratio_exists = False
@@ -358,8 +358,8 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
 			    allowed_ratios.append([i,j,k])
 			    ratio_exists = True
 			else:
-			    for x in i, j, k, l:
-                                    for y in i, j, k, l:
+			    for x in i, j, k:
+                                    for y in i, j, k:
                                         if x%y != 0:
 			                    allowed_ratios.append([i,j,k])
 			        	    ratio_exists = True
@@ -393,13 +393,22 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
 			    	    for x in i, j, k, l, m:
 				        for y in i, j, k, l, m:
 					    if x%y != 0:
-					        allowed_ratios.append([i,j,k,l])
+					        allowed_ratios.append([i,j,k,l,m])
                             		        ratio_exists = True	
 
 
 
-    return ratio_exists, allowed_ratios
+#    return ratio_exists, allowed_ratios
+   
+#---DWD Alternative output to avoid duplicate ratios---------------------------------------
+    unique_ratios = []
+    for i in allowed_ratios:
+        if i not in unique_ratios:
+            unique_ratios.append(i)
     
+    return ratio_exists, unique_ratios
+
+ 
 #------------------------------------------------------------------------------------------
 def pauling_test(ox, paul, threshold=0.5):
 	''' Testting if a combination of ions makes chemical sense,
