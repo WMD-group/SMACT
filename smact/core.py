@@ -271,7 +271,7 @@ Returns:
 		elements.append(inp[0])
 	
     ordered_elements = []	
-    for i in range(x,y):
+    for i in range(x,y+1):
         ordered_elements.append(elements[i-1])
 		
     return ordered_elements
@@ -416,7 +416,7 @@ def pauling_test(ox, paul, threshold=0.5):
 	Args:
 	    ox : a list of the oxidation states of the compound
 	    paul : the Pauling electronegativities of the elements in the compound
-	    threshold : a tolerance for the allowd deviation from the Pauling criterion
+	    threshold : a tolerance for the allowed deviation from the Pauling criterion
 	Returns:
 	    makes_sense : bool of whether the combination makes sense
 	'''
