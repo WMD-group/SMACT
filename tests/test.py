@@ -33,8 +33,8 @@ class TestSequenceFunctions(unittest.TestCase):
 	ox = [1,-2,1]
 	is_neutral,neutral_comobs = core.charge_neutrality(ox)
 	self.assertEqual((is_neutral),True)
-	self.assertEqual(len(neutral_comobs),7)
-	self.assertEqual(neutral_comobs[2],[3, 2, 1])
+	self.assertEqual(len(neutral_comobs),9)
+	self.assertEqual(neutral_comobs[4],[3, 2, 1])
 '''    
 
     def test_compound_library(self):

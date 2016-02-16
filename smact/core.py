@@ -271,7 +271,7 @@ Returns:
 		elements.append(inp[0])
 	
     ordered_elements = []	
-    for i in range(x,y):
+    for i in range(x,y+1):
         ordered_elements.append(elements[i-1])
 		
     return ordered_elements
@@ -328,7 +328,7 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
 	threshold : single threshold to go up to if stoichs are not provided
     Returns:
 	exists : bool to say if a ratio exists
-	site_ratios : ration that gives neutrality
+	allowed_ratios : ratio that gives neutrality
     '''
     allowed_ratios = []
     ratio_exists = False
@@ -358,8 +358,8 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
 			    allowed_ratios.append([i,j,k])
 			    ratio_exists = True
 			else:
-			    for x in i, j, k, l:
-                                    for y in i, j, k, l:
+			    for x in i, j, k:
+                                    for y in i, j, k:
                                         if x%y != 0:
 			                    allowed_ratios.append([i,j,k])
 			        	    ratio_exists = True
@@ -379,10 +379,36 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
 					if x%y != 0:
 					    allowed_ratios.append([i,j,k,l])
                             		    ratio_exists = True	
+    if len(oxidations) == 5:
+	for i in stoichs[0]:
+	    for j in stoichs[1]:
+	    	for k in stoichs[2]:
+	    	    for l in stoichs[3]:
+	    	        for m in stoichs[4]:
+			    if i*oxidations[0] + j*oxidations[1] + k*oxidations[2] + l*oxidations[3] + m*oxidations[4] == 0:
+			        if j == 1 and k == 1 and l == 1 and m ==1:
+				    allowed_ratios.append([i,j,k,l,m])
+				    ratio_exists = True
+			        else:
+			    	    for x in i, j, k, l, m:
+				        for y in i, j, k, l, m:
+					    if x%y != 0:
+					        allowed_ratios.append([i,j,k,l,m])
+                            		        ratio_exists = True	
 
 
-    return ratio_exists, allowed_ratios
+
+#    return ratio_exists, allowed_ratios
+   
+#---DWD Alternative output to avoid duplicate ratios---------------------------------------
+    unique_ratios = []
+    for i in allowed_ratios:
+        if i not in unique_ratios:
+            unique_ratios.append(i)
     
+    return ratio_exists, unique_ratios
+
+ 
 #------------------------------------------------------------------------------------------
 def pauling_test(ox, paul, threshold=0.5):
 	''' Testting if a combination of ions makes chemical sense,
@@ -390,7 +416,7 @@ def pauling_test(ox, paul, threshold=0.5):
 	Args:
 	    ox : a list of the oxidation states of the compound
 	    paul : the Pauling electronegativities of the elements in the compound
-	    threshold : a tolerance for the allowd deviation from the Pauling criterion
+	    threshold : a tolerance for the allowed deviation from the Pauling criterion
 	Returns:
 	    makes_sense : bool of whether the combination makes sense
 	'''

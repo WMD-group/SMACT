@@ -1,12 +1,10 @@
 SMACT
 =====
 
-Semiconducting Materials by Analogy and Computational Techniques
-
-A collection of fast screening tools from elemental data.
+Semiconducting Materials by Analogy and Computational Techniques. A collection of fast screening tools from elemental data.
 
 Development of the next iteration is taking place on the new-classes branch:
-https://github.com/WMD-Bath/smact/tree/feature/new-classes
+https://github.com/WMD-Bath/SMACT/tree/feature/new-classes
 
 Contents
 --------
@@ -47,7 +45,7 @@ to your PYTHONPATH. e.g. in ~/.bashrc
 Usage
 -----
 
-At the moment there are no programs for general users; SMACT's features are
+At the moment there are no programs for general users. SMACT's features are
 accessed through Python scripts, importing classes and functions as needed.
 It is intended that SMACT will have a user-friendly interface eventually, and
 possibly even a GUI.
@@ -55,8 +53,8 @@ possibly even a GUI.
 License and attribution
 -----------------------
 
-SMACT is produced by the Walsh Materials Design group of the
-Department of Chemistry at the University of Bath, UK.  Python code
+SMACT is produced by the Walsh Materials Design group 
+at the University of Bath, UK.  Python code
 and original data tables are licensed under the GNU General Public
 License (GPL) v3.
 
@@ -67,20 +65,20 @@ included in the parent folder.
 References
 ----------
 
-B. R. Pamplin, "A systematic method of deriving new semiconducting
+[B. R. Pamplin, "A systematic method of deriving new semiconducting
 compounds by structural analogy", *J. Phys. Chem. Solids*
-**25**, 675 (1964)
+**25**, 675 (1964)](http://www.sciencedirect.com/science/article/pii/0022369764901763)
 
-S. Chen, X. G. Gong, A. Walsh and S.-H. Wei, "Electronic structure and stability
+[S. Chen, X. G. Gong, A. Walsh and S.-H. Wei, "Electronic structure and stability
 of quaternary chalcogenide semiconductors derived from cation cross-substitution
-of II-VI and I-III-VI2 compounds", *Physical Review B* **79**, 165211 (2009)
+of II-VI and I-III-VI2 compounds", *Physical Review B* **79**, 165211 (2009)](http://journals.aps.org/prb/abstract/10.1103/PhysRevB.79.165211)
+
+[Extended Mendeley Reading List](https://www.mendeley.com/groups/8113991/materials-design/overview/)
 
 Development notes
 -----------------
 
-This project is currently in an early state, and is being developed by
-members of the Walsh Materials Design group in the Department of
-Chemistry at the University of Bath, UK.
+This project is currently in an early state.
 
 Code style should comply with [PEP
 8](http://www.python.org/dev/peps/pep-0008) where possible.
@@ -96,7 +94,3 @@ it much easier to port to Python 3 if this is ever desired.
 
 Testing modules should be pass/fail and wrapped into **tests/test.py**.
 Tests need to be run from the main directory (i.e. with `python tests/test.py`).
-
-
-General To Do list:
--------------------
