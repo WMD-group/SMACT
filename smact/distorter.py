@@ -33,7 +33,14 @@ import ase
 import copy
 import smact.builder as builder
 import smact.core as core
-from pyspglib import spglib
+try:
+    from pyspglib import spglib
+except ImportError:
+    try:
+        from spglib import spglib
+    except ImportError:
+        raise Exception("Could not load spglib")
+    
 from ase.lattice.spacegroup import Spacegroup
 import numpy as np
 
