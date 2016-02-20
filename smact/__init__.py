@@ -287,11 +287,12 @@ def are_eq(A,B,tolerance=1e-4):
     return are_eq
 
 
-def lattices_are_same(lattice1, lattice2):
+def lattices_are_same(lattice1, lattice2, tolerance=1e-4):
     """Checks for the equivalence of two lattices
-        Args:
+
+    Args:
         lattice1,lattice2 : ASE crystal class
-        Returns:
+    Returns:
         lattices_are_same : boolean
         """
     lattices_are_same = False
@@ -299,7 +300,9 @@ def lattices_are_same(lattice1, lattice2):
     for site1 in lattice1:
         for site2 in lattice2:
             if site1.symbol == site2.symbol:
-                if are_eq(site1.position, site2.position):
+                if are_eq(site1.position,
+                          site2.position,
+                          tolerance=tolerance):
                     i += 1
     if i == len(lattice1):
         lattices_are_same = True
@@ -387,14 +390,17 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
 def pauling_test(ox, paul, threshold=0.5):
     """ Testing if a combination of ions makes chemical sense,
     ie positive ions should be of lower Pauling electronegativity
+
     Args:
         ox : a list of the oxidation states of the compound
         paul : the Pauling electronegativities of the elements in the compound
-        threshold : a tolerance for the allowed deviation from the Pauling criterion
+        threshold : a tolerance for the allowed deviation from the Pauling
+        criterion
+
     Returns:
         makes_sense : bool of whether the combination makes sense
+
     """
-    #return sorted(zip(paul,ox), key=lambda s: s[1])==sorted(zip(paul,ox), key=lambda s: s[0], reverse=True)
     positive = []
     negative = []
     for i, state in enumerate(ox):
