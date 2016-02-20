@@ -29,15 +29,19 @@ for equivalence.
 
 """
 
-import ase
 import copy
-import smact.builder as builder
 import smact.core as core
-from pyspglib import spglib
+try:
+    from pyspglib import spglib
+except ImportError:
+    try:
+        from spglib import spglib
+    except ImportError:
+        raise Exception("Could not load spglib")
+    
 from ase.lattice.spacegroup import Spacegroup
-import numpy as np
 
-#------------------------------------------------------------------------------------------
+
 def get_sg(lattice):
 
     """
@@ -54,7 +58,7 @@ def get_sg(lattice):
     spg_num = space_split[1].replace('(','').replace(')','')
     sg = Spacegroup(int(spg_num))
     return sg
-#------------------------------------------------------------------------------------------
+
 def get_inequivalent_sites(sub_lattice, lattice):
     """Given a sub lattice, returns symmetry unique sites for substitutions
 
@@ -86,7 +90,7 @@ def make_substitution(lattice,site,new_species):
 
     Args:
 	lattice: ASE crystal class
-	site: array, containing the Cartesian coordinates of the substitution site
+	site: list, containing the Cartesian coordinates of the substitution site
 	new_species: string, the new species
 
      """
@@ -96,9 +100,9 @@ def make_substitution(lattice,site,new_species):
     new_lattice = copy.deepcopy(lattice)
     lattice_sites = new_lattice.get_scaled_positions()
     for lattice_site in lattice_sites:
-	if core.are_eq(lattice_site, site):
-	    new_lattice[i].symbol = new_species
-	i = i + 1
+        if core.are_eq(lattice_site, site):
+            new_lattice[i].symbol = new_species
+        i = i + 1
     return new_lattice
 #------------------------------------------------------------------------------------------
 def build_sub_lattice(lattice,symbol):

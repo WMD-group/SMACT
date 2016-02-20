@@ -1,7 +1,7 @@
 SMACT
 =====
 
-Semiconducting Materials by Analogy and Computational Techniques. A collection of fast screening tools from elemental data.
+Semiconducting Materials from Analogy and Chemical Theory. A collection of fast screening tools from elemental data.
 
 Development of the next iteration is taking place on the new-classes branch:
 https://github.com/WMD-Bath/SMACT/tree/feature/new-classes

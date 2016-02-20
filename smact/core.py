@@ -18,13 +18,11 @@
 """
 Core classes and functions for SMACT
 """
-import os # get correct path for datafiles when called from another directory
-smact_directory = os.path.dirname(__file__)
+from os import path # get correct path for datafiles when called from another directory
+import smact
 import csv
 # Append a trailing slash to make coherent directory name - this would select the
 # root directory in the case of no prefix, so we need to check
-if smact_directory:
-    smact_directory = smact_directory + '/'
 
 class Element(object):
     """Class providing standard chemical data for elements."""
@@ -64,24 +62,26 @@ class Element(object):
             
         """
         # Import oxidation states from oxidation_states.txt
-        with open(smact_directory + 'data/oxidation_states.txt','r') as f:
+        with open(path.join(smact.data_directory,
+                            'oxidation_states.txt'),'r') as f:
             data = f.readlines()
         oxidation_states = False
         for line in data:
-                        if not line.startswith('#'):
-                                l = line.split()
-                                if (l[0] == symbol):
-                                        if len(l)>1:
-                                                oxidation_states = l[1:]
-                                                for location, value in enumerate(oxidation_states):
-                                                        oxidation_states[location] = int(value)
-                                        else:
-                                            oxidation_states = []
+            if not line.startswith('#'):
+                l = line.split()
+                if (l[0] == symbol):
+                    if len(l)>1:
+                        oxidation_states = l[1:]
+                        for location, value in enumerate(oxidation_states):
+                                oxidation_states[location] = int(value)
+                    else:
+                        oxidation_states = []
                                         
         self.oxidation_states = oxidation_states
 
         # Import crustal abundance from crustal_abundance.txt
-        with open(smact_directory + 'data/crustal_abundance.txt','r') as f:
+        with open(path.join(smact.data_directory,
+                            'crustal_abundance.txt'), 'r') as f:
             data = f.readlines()
 
         crustal_abundance = False
@@ -89,15 +89,14 @@ class Element(object):
         for line in data:
 		if not line.startswith("#"):
 		    l = line.split()
-		    if (l[0] == symbol):
-		 	if len (l)>1:
+		    if (l[0] == symbol) and len(l) > 1:
 			    crustal_abundance = l[1]
-
 									
         self.crustal_abundance = crustal_abundance	
 
         # Import HHI's from HHI's.txt
-        with open(smact_directory + "data/HHIs.txt",'r') as f:
+        with open(path.join(smact.data_directory,
+                            "HHIs.txt"), 'r') as f:
 	        data = f.readlines() 
         HHI_p, HHI_R = [False, False]
         for line in data:
@@ -107,14 +106,12 @@ class Element(object):
 					if len(l)>1:
 					    HHI_p, HHI_R = l[1:3]
         self.HHI_p = HHI_p
-        self.HHI_R = HHI_R								
-                        
-
-                                       
+        self.HHI_R = HHI_R                                       
 
         # Import general data from Openbabel-derived data table:
         # Import whole file
-        with open(smact_directory + 'data/element.txt','r') as f:
+        with open(path.join(smact.data_directory,
+                            'element.txt'), 'r') as f:
             data = f.readlines()
         # Iterate through data file, ignoring comments and checking line against symbol
         for line in data:
@@ -138,7 +135,8 @@ class Element(object):
         self.e_affinity =     float(elementdata[10])
 
         # Load eigenvalue data from data table by iterating through CSV file
-        with open(smact_directory + 'data/Eigenvalues.csv','r') as f:            
+        with open(path.join(smact.data_directory,
+                            'Eigenvalues.csv'),'r') as f:            
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:
@@ -146,12 +144,12 @@ class Element(object):
                     break
                 # Check for end of file
                 elif not l:
-                    #print 'WARNING: Element {0} not found in Eigenvalues.csv'.format(symbol)
                     self.eig = False
                     break
 
         # Load s-eigenvalue data from data table by iterating through CSV file
-        with open(smact_directory + 'data/Eigenvalues_s.csv','r') as f:
+        with open(path.join(smact.data_directory,
+                            'Eigenvalues_s.csv'), 'r') as f:
             while True:
                 l=f.readline()
                 if l.split(",")[0] == symbol:
@@ -159,18 +157,18 @@ class Element(object):
                     break
                 # Check for end of file
                 elif not l:
-                    #print 'WARNING: Element {0} not found in Eigenvalues_s.csv'.format(symbol)
                     self.eig_s = False
                     break
 
     
-#------------------------------------------------------------------------------------------#
-# THIS WAS CREATED BY TIM GAUNTLETT. PLEASE CHECK                                          #
-#------------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------#
+# THIS WAS CREATED BY TIM GAUNTLETT. PLEASE CHECK                            #
+#----------------------------------------------------------------------------#
         # Load coordination environments
         coord_envs = []
-        with open(smact_directory + 'data/shannon_radii.csv','rU') as f:
-            reader = csv.reader(f) #, delimiter=',', quoting=csv.QUOTE_NONE)
+        with open(path.join(smact.data_directory,
+                            'shannon_radii.csv'), 'rU') as f:
+            reader = csv.reader(f)
             for row in reader:
                     if row[0] == symbol:
                         coord_envs.append(row[2])
@@ -178,32 +176,15 @@ class Element(object):
         self.coord_envs = coord_envs
 
 # Read in the Solid State Energies from csv file
-	with open(smact_directory + 'data/SSE.csv','rU') as f: 
-            reader = csv.reader(f)#, delimiter=',', quoting=csv.QUOTE_NONE)
+        with open(path.join(smact.data_directory, 'SSE.csv'), 'rU') as f: 
+            reader = csv.reader(f)
             for row in reader:
-	        if row[0] == symbol:
-	            self.SSE = float(row[2])
-	            break
-	        elif not l:
-	            #print 'WARNING: Element {0} not found in SSE.csv'.format(symbol)
-	            self.SSE = False
-	            break
-
-#------------------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------------------#
-
-        # # Load ionic radii data from data table by iterating through CSV file
-        # with open(smact_directory + 'data/ionic_radii.csv','r') as f:
-        #     while True:
-        #         l=f.readline()
-        #         if l.split(",")[0] == symbol:
-        #             self.ionic = float(l.split(",")[1])
-        #             break
-        #         # Check for end of file
-        #         elif not l:
-        #             print 'WARNING: Element {0} not found in ionic_radii.csv'.format(symbol)
-        #             self.ionic = False
-        #             break
+                if row[0] == symbol:
+                    self.SSE = float(row[2])
+                    break
+                elif not l:
+                    self.SSE = False
+                    break
 
 #------------------------------------------------------------------------------------------
 
@@ -211,9 +192,10 @@ class Species(Element):
     """
     Class providing data for elements in a given chemical environment
 
-    In addition to the standard properties from the periodic table (inherited from the 
-    Element class), Species objects use the oxidation state and coordination environment
-    to provide further properties.
+    In addition to the standard properties from the periodic table
+    (inherited from the  Element class), Species objects use the
+    oxidation state and coordination environment to provide further
+    properties.
 
     Attributes: 
         Species.symbol: Elemental symbol used to retrieve data
@@ -245,10 +227,13 @@ class Species(Element):
         self.oxidation = oxidation
         self.coordination = coordination
         # Load shannon radii
-        with open(smact_directory + 'data/shannon_radii.csv','rU') as f:
+        with open(path.join(smact.data_directory,
+                            'shannon_radii.csv'),'rU') as f:
             reader = csv.reader(f)
             for row in reader:
-                if row[0] == symbol and int(row[1]) == oxidation and row[2] == coordination:
+                if (row[0] == symbol
+                    and int(row[1]) == oxidation
+                    and row[2] == coordination):
                     shannon_radius = row[3]
 
         self.shannon_radius = shannon_radius
@@ -263,7 +248,8 @@ Args:
 Returns:
 	ordered_elements : List of element symbols
     """
-    with open(smact_directory + 'data/ordered_periodic.txt','r') as f:
+    with open(path.join(smact.data_directory,
+                        'ordered_periodic.txt'), 'r') as f:
     	data = f.readlines()
     elements = []
     for line in data:
@@ -276,7 +262,6 @@ Returns:
 		
     return ordered_elements
 		
-
 
 #------------------------------------------------------------------------------------------
 
