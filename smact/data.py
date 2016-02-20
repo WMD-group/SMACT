@@ -16,20 +16,19 @@
 ################################################################################
 
 def get_mulliken(symbol):
-    """Gets Mulliken electroneg from the IE and EA"""
-    from smact.core import Element
+    """Get Mulliken electronegativity from the IE and EA
+
+    Arguments:
+        symbol (string): Element label
+
+    Returns:
+        mulliken (float): Mulliken electronegativity
+
+    """
+    from smact import Element
     A = Element(symbol)
     mulliken=(A.ionpot+A.e_affinity)/2.0
     return mulliken
-
-# AJJ: commenting this out while incomplete to avoid breaking things
-#"""Need to link to database of eigenvalues (solid_properties.txt) """
-#def get_eig(element):
-#
-#   from **** import ****
-#   A = ****
-#   eig= ****
-#   return eig
 
 
 ################################################################################
@@ -40,32 +39,56 @@ def get_mulliken(symbol):
 
 def get_pauling(symbol):
     """Pauling electronegativity of specified element.
-    Drawn from Open Babel data table."""
-    from smact.core import Element
+
+    Drawn from Open Babel data table.
+
+    Arguments:
+        symbol (string): Element label
+
+    Returns:
+        pauling_eneg (float): Pauling electronegativity
+
+    """
+    from smact import Element
     A = Element(symbol)
     return A.pauling_eneg
 
 def get_covalent(symbol):
     """Covalent radius of specified element.
-    Drawn from Open Babel data table."""
-    from smact.core import Element
+    Drawn from Open Babel data table.
+
+    Arguments:
+        symbol (string): Element label
+
+    Returns:
+        covalent_radius (float): Covalent radius
+    """
+    from smact import Element
     A = Element(symbol)
     return A.covalent_radius
 
 def get_eig(symbol):
-    from smact.core import Element
+    """Eigenvalue of specified element.
+
+    Arguments:
+        symbol (string): Element label
+
+    Returns:
+        eig (float): Eigenvalue
+    """    
+    from smact import Element
     A=Element(symbol)
     return A.eig
 
 def get_eig_s(symbol):
-    from smact.core import Element
+    """Eigenvalue of s-orbital in specified element.
+
+    Arguments:
+        symbol (string): Element label
+
+    Returns:
+        eig_s (float): Eigenvalue
+    """        
+    from smact import Element
     A=Element(symbol)
     return A.eig_s
-
-def get_ionic(symbol):
-    from smact.core import Element
-    A=Element(symbol)
-    return A.ionic
-
-
-

@@ -16,7 +16,6 @@
 #                                                                              #
 ################################################################################
 
-import sys
 from numpy import product
 from smact.data import get_pauling
 

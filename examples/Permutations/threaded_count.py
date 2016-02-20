@@ -6,9 +6,7 @@
 import itertools;
 import time;
 
-import numpy as np;
-
-import smact.core as core;
+import smact
 
 from multiprocessing import Pool;
 
@@ -28,11 +26,11 @@ def _Kernel(elementList):
     for oxidationStates in itertools.product(*[element.oxidation_states for element in elementList]):
         combinationCount = combinationCount + 1;
         
-        ret1, ret2 = core.charge_neutrality(oxidationStates, threshold = 1);
+        ret1, ret2 = smact.charge_neutrality(oxidationStates, threshold = 1);
         
         if ret1:
             chargeNeutralCount = chargeNeutralCount + 1;
-            if core.pauling_test(oxidationStates, electronegativities):
+            if smact.pauling_test(oxidationStates, electronegativities):
                 paulingSensibleCount = paulingSensibleCount + 1;
     
     return (combinationCount, chargeNeutralCount, paulingSensibleCount);
@@ -45,11 +43,11 @@ def _Kernel(elementList):
 #COMMENT: When using multiprocessing, the "main" code *must* be enclosed in this block - otherwise, bad things happen (at least, they do on Windows...).
 
 if __name__ == "__main__":
-    elementList = core.ordered_elements(1, 100);
+    elementList = smact.ordered_elements(1, 100);
 
     startTime = time.time();
     
-    searchPrimitives = [core.Element(element) for element in elementList];
+    searchPrimitives = [smact.Element(element) for element in elementList];
 
     threadPool = Pool(4);
     

@@ -30,7 +30,7 @@ for equivalence.
 """
 
 import copy
-import smact.core as core
+import smact
 try:
     from pyspglib import spglib
 except ImportError:
@@ -73,12 +73,12 @@ def get_inequivalent_sites(sub_lattice, lattice):
         new_site = True
 # Check against the existing members of the list of inequivalent sites
         for inequiv_site in inequivalent_sites:
-	    if core.are_eq(site, inequiv_site) == True:
+	    if smact.are_eq(site, inequiv_site) == True:
 	        new_site = False
 # Check against symmetry related members of the list of inequivalent sites
             equiv_inequiv_sites,junk = sg.equivalent_sites(inequiv_site)    	
 	    for equiv_inequiv_site in equiv_inequiv_sites:
-	        if core.are_eq(site, equiv_inequiv_site) == True:
+	        if smact.are_eq(site, equiv_inequiv_site) == True:
 	   	    new_site = False
         if new_site == True:
 	    inequivalent_sites.append(site)
@@ -100,7 +100,7 @@ def make_substitution(lattice,site,new_species):
     new_lattice = copy.deepcopy(lattice)
     lattice_sites = new_lattice.get_scaled_positions()
     for lattice_site in lattice_sites:
-        if core.are_eq(lattice_site, site):
+        if smact.are_eq(lattice_site, site):
             new_lattice[i].symbol = new_species
         i = i + 1
     return new_lattice
