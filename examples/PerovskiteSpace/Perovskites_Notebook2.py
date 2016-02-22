@@ -3,26 +3,14 @@
 
 # In[22]:
 
-get_ipython().magic(u'matplotlib inline')
+# get_ipython().magic(u'matplotlib inline')
 import smact.lattice as lattice
-import smact.builder as builder
-import smact.core as core
-import copy
-import os
+import smact
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-
-
-# In[2]:
-
-# get correct path for datafiles when called from another directory
-smact_directory = '../../smact'
-# Append a trailing slash to make coherent directory name - this would select the
-# root directory in the case of no prefix, so we need to check
-if smact_directory:
-    smact_directory = smact_directory + '/'
+from os import path
 
 
 # In[3]:
@@ -35,7 +23,7 @@ perovskite = lattice.Lattice([site_A,site_B,site_C],space_group=221)
 
 # In[4]:
 
-search = core.ordered_elements(3,87)
+search = smact.ordered_elements(3,87)
 
 
 # In[5]:
@@ -44,7 +32,7 @@ A_list = []
 B_list = []
 C_list = [['O',-2,1.35],['S',-2,1.84],['Se',-2,1.98],['F',-1,1.285],['Br',-1,1.96],['I',-1,2.2]]
 for element in search:
-    with open(smact_directory + 'data/shannon_radii.csv','rU') as f:
+    with open(path.join(smact.data_directory, 'shannon_radii.csv'), 'rU') as f:
         reader = csv.reader(f)
         r_shannon=False
         for row in reader:
@@ -74,10 +62,10 @@ for C in C_list:
                 if C[0] != A[0] and C[0] != B[0]:
                     if int(A[1])+int(B[1])+3*int(C[1]) == 0:
                          charge_balanced.append([A[0],B[0],C[0]])
-                         paul_a = core.Element(A[0]).pauling_eneg
-                         paul_b = core.Element(B[0]).pauling_eneg
-                         paul_c = core.Element(C[0]).pauling_eneg
-                         electroneg_makes_sense = core.pauling_test([A[1],B[1],C[1]], [paul_a,paul_b,paul_c])
+                         paul_a = smact.Element(A[0]).pauling_eneg
+                         paul_b = smact.Element(B[0]).pauling_eneg
+                         paul_c = smact.Element(C[0]).pauling_eneg
+                         electroneg_makes_sense = smact.pauling_test([A[1],B[1],C[1]], [paul_a,paul_b,paul_c])
                          if electroneg_makes_sense:
                              pauling_perov.append([A[0],B[0],C[0]])
                          tol = (float(A[2]) + C[2])/(np.sqrt(2)*(float(B[2])+C[2]))

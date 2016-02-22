@@ -18,9 +18,8 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.                   #
 #                                                                              #
 ################################################################################
-import ase
-from ase.lattice.spacegroup import crystal
-from ase.utils.geometry import cut, stack
+
+from ase.utils.geometry import cut
 
 def cut100(crystal,nlayers=6):
     """Cleave the 100 surface"""

@@ -19,7 +19,7 @@
 #                                                                              #
 ################################################################################
 
-import smact.core as core
+import smact
 import numpy as np
 
 import sys
@@ -207,136 +207,140 @@ e_lattices = [E2_1]
 
 #------------------------------------------------------------------------------------------
 
-crystal_elements = raw_input('Which elements? Separate chemical symbols with a space. ')
-crystal_elements = crystal_elements.split()
+def main():
 
-perov=False
-if len(crystal_elements) == 3:
-    perov = query_yes_no("Are you looking for Perovskites?")
-print perov
+    crystal_elements = raw_input('Which elements? Separate chemical symbols with a space. ')
+    crystal_elements = crystal_elements.split()
+
+    perov=False
+    if len(crystal_elements) == 3:
+        perov = query_yes_no("Are you looking for Perovskites?")
+    print perov
 
 
 
-# Processing Lattices
-#------------------------------------------------------------------------------------------
+    # Processing Lattices
+    #------------------------------------------------------------------------------------------
 
-## A-types
-print (" \n=========================================")
-print ("    AAA         ####### ##   ## #####  #####")
-print ("   AA A           ##     ## ## ##  ## ##")
-print ("  AAAAAA  ####   ##      ##   #####  #####")
-print (" AA   AA        ##      ##   ##     ##")
-print ("AA     AA      ##      ##   ##     #####")
-print ("=========================================")
-print (" \n ### A type lattices ###\n ")
+    ## A-types
+    print (" \n=========================================")
+    print ("    AAA         ####### ##   ## #####  #####")
+    print ("   AA A           ##     ## ## ##  ## ##")
+    print ("  AAAAAA  ####   ##      ##   #####  #####")
+    print (" AA   AA        ##      ##   ##     ##")
+    print ("AA     AA      ##      ##   ##     #####")
+    print ("=========================================")
+    print (" \n ### A type lattices ###\n ")
 
-for lattice in a_lattices:
-    print (' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  ')
+    for lattice in a_lattices:
+        print (' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  ')
+        for elements in crystal_elements:
+            x = smact.Element(elements)
+            a,b,c,alpha,beta,gamma = lattice(x.covalent_radius)
+            print elements,"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma
+    print ' \n Key :: Element a b c alpha beta gamma \n///////////////////////////////////////////////////////////////////////////////////////\n '
+
+
+
+
+
+
+
+    import csv
+    oxidation =[]
+    coordination =[]
+
+    # Raw input processing
+
+    i=0
     for elements in crystal_elements:
-        x = core.Element(elements)
-        a,b,c,alpha,beta,gamma = lattice(x.covalent_radius)
-        print elements,"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma
-print ' \n Key :: Element a b c alpha beta gamma \n///////////////////////////////////////////////////////////////////////////////////////\n '
-
-
-
-
-
-
-
-import csv
-oxidation =[]
-coordination =[]
-
-# Raw input processing
-
-i=0
-for elements in crystal_elements:
-    poss_ox = []
-    poss_cood = []
-    with open('data/shannon_radii.csv','rU') as f:
-        reader = csv.reader(f)
-        for row in reader:
-            if row[0] == elements:
-                poss_ox.append(row[1])
-                poss_cood.append(row[2])
-    poss_ox_clean = [] ### Duplicates removed
-    for ox in poss_ox:
-        if ox not in poss_ox_clean:
-            poss_ox_clean.append(ox)
-    print elements
-    print poss_ox_clean
-    if len(poss_ox_clean) == 1:
-        oxidation.append(int(poss_ox_clean[0]))
-    else:
-        oxidation.append(int(raw_input('Oxidation state of ' + elements + ' ')))
-    poss_co_clean = [] ### Duplicates removed
-    with open('data/shannon_radii.csv','rU') as f:
-        reader = csv.reader(f)
+        poss_ox = []
         poss_cood = []
-        for row in reader:
-            if row[0] == elements and int(row[1]) == int(oxidation[-1]):
-                poss_cood.append(row[2])
-    for co in poss_cood:
-        if co not in poss_co_clean:
-            poss_co_clean.append(co)
-    print elements
-    print poss_co_clean
-    if len(poss_co_clean) == 1:
-        coordination.append(poss_co_clean[0])
-    else: 
-        coordination.append(raw_input('Coordination state of ' + elements + ' '))
-    
-    print elements,oxidation[i],coordination[i]
-    i+=1
-    
-## B-types
-#-------------------------------------------------------------------------------------#    
-print (" \n=========================================")
-print ("    BBBB     ####### ##   ## #####  #####")
-print ("   BB BB       ##     ## ## ##  ## ##")
-print ("  BBBB   ###  ##      ##   #####  #####")
-print (" BB BB       ##      ##   ##     ##")
-print ("BBBB        ##      ##   ##     #####")
-print ("=========================================")
+        with open('data/shannon_radii.csv','rU') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if row[0] == elements:
+                    poss_ox.append(row[1])
+                    poss_cood.append(row[2])
+        poss_ox_clean = [] ### Duplicates removed
+        for ox in poss_ox:
+            if ox not in poss_ox_clean:
+                poss_ox_clean.append(ox)
+        print elements
+        print poss_ox_clean
+        if len(poss_ox_clean) == 1:
+            oxidation.append(int(poss_ox_clean[0]))
+        else:
+            oxidation.append(int(raw_input('Oxidation state of ' + elements + ' ')))
+        poss_co_clean = [] ### Duplicates removed
+        with open('data/shannon_radii.csv','rU') as f:
+            reader = csv.reader(f)
+            poss_cood = []
+            for row in reader:
+                if row[0] == elements and int(row[1]) == int(oxidation[-1]):
+                    poss_cood.append(row[2])
+        for co in poss_cood:
+            if co not in poss_co_clean:
+                poss_co_clean.append(co)
+        print elements
+        print poss_co_clean
+        if len(poss_co_clean) == 1:
+            coordination.append(poss_co_clean[0])
+        else: 
+            coordination.append(raw_input('Coordination state of ' + elements + ' '))
 
-print (" \n ### B type lattices ###\n ")
-
-for lattice in b_lattices:
-    print (' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  ')
-    shannon_radius = []
-    for i, elements in enumerate(crystal_elements):
         print elements,oxidation[i],coordination[i]
-        x = core.Species(elements,oxidation[i],coordination[i])
-        shannon_radius.append(float(x.shannon_radius))
-    a,b,c,alpha,beta,gamma = lattice(shannon_radius)
-    if lattice.__name__ == 'wurtzite':
-        inner_space = a * (6**0.5) - (4*shannon_radius[0])
-        print ("With a gap in the middle of " + "%.2f"%inner_space+" (diameter)")
-    print crystal_elements[0:2],"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma
+        i+=1
+
+    ## B-types
+    #-------------------------------------------------------------------------------------#    
+    print (" \n=========================================")
+    print ("    BBBB     ####### ##   ## #####  #####")
+    print ("   BB BB       ##     ## ## ##  ## ##")
+    print ("  BBBB   ###  ##      ##   #####  #####")
+    print (" BB BB       ##      ##   ##     ##")
+    print ("BBBB        ##      ##   ##     #####")
+    print ("=========================================")
+
+    print (" \n ### B type lattices ###\n ")
+
+    for lattice in b_lattices:
+        print (' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  ')
+        shannon_radius = []
+        for i, elements in enumerate(crystal_elements):
+            print elements,oxidation[i],coordination[i]
+            x = smact.Species(elements,oxidation[i],coordination[i])
+            shannon_radius.append(float(x.shannon_radius))
+        a,b,c,alpha,beta,gamma = lattice(shannon_radius)
+        if lattice.__name__ == 'wurtzite':
+            inner_space = a * (6**0.5) - (4*shannon_radius[0])
+            print ("With a gap in the middle of " + "%.2f"%inner_space+" (diameter)")
+        print crystal_elements[0:2],"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma
 
 
 
-# E Types
-#-------------------------------------------------------------------------------------#
-print (" \n=========================================")
-print ("    EEEEE   ####### ##   ## #####  #####")
-print ("   EE         ##     ## ## ##  ## ##")
-print ("  EEEE  ###  ##      ##   #####  #####")
-print (" EE         ##      ##   ##     ##")
-print ("EEEEE      ##      ##   ##     #####")
-print ("=========================================")
+    # E Types
+    #-------------------------------------------------------------------------------------#
+    print (" \n=========================================")
+    print ("    EEEEE   ####### ##   ## #####  #####")
+    print ("   EE         ##     ## ## ##  ## ##")
+    print ("  EEEE  ###  ##      ##   #####  #####")
+    print (" EE         ##      ##   ##     ##")
+    print ("EEEEE      ##      ##   ##     #####")
+    print ("=========================================")
 
-print (" \n ### E type lattices ###\n ")
+    print (" \n ### E type lattices ###\n ")
 
-for lattice in e_lattices:
-    print (' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  ')
-    shannon_radius = []
-    for i, elements in enumerate(crystal_elements):
-        print elements,oxidation[i],coordination[i]
-        x = core.Species(elements,oxidation[i],coordination[i])
-        shannon_radius.append(float(x.shannon_radius))
-    a,b,c,space,alpha,beta,gamma = lattice(shannon_radius)
-    print crystal_elements[0:],"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma
-    print ("With a gap in the middle of " + "%.2f"%space+" (diameter)")
+    for lattice in e_lattices:
+        print (' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  ')
+        shannon_radius = []
+        for i, elements in enumerate(crystal_elements):
+            print elements,oxidation[i],coordination[i]
+            x = smact.Species(elements,oxidation[i],coordination[i])
+            shannon_radius.append(float(x.shannon_radius))
+        a,b,c,space,alpha,beta,gamma = lattice(shannon_radius)
+        print crystal_elements[0:],"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma
+        print ("With a gap in the middle of " + "%.2f"%space+" (diameter)")
 
+if __name__ == '__main__':
+    main()
