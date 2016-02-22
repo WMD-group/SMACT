@@ -16,9 +16,8 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.                   #
 #                                                                              #
 ################################################################################
-import smact.core as core
+
 import numpy as np
-import csv
 
 def cubic_perovskite(shannon_radius): #Cubic Pervoskite
     '''The lattice parameters of the cubic perovskite structure

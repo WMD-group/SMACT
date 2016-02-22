@@ -21,7 +21,6 @@
 ###############################################################################
 
 import smact
-import smact.core as core
 import smact.lattice_parameters as lattice_parameters
 import numpy as np
 from os import path
@@ -91,7 +90,7 @@ upper_n = 100
 lower_n = 1
 
 all_elements = []
-element_set = core.ordered_elements(lower_n, upper_n)     # The safety valve!
+element_set = smact.ordered_elements(lower_n, upper_n)     # The safety valve!
 
 # Form a separate complete list of elements for quickly accessing proton
 # numbers with index()
@@ -144,8 +143,8 @@ for a_element in tetra_coord_elements:
                              beta, gamma) = lattice_parameters.wurtzite(g)
                             # Calculate the space inside the cage
                             inner_space = inner_space = a * (6**0.5) - (4*g[0])
-                            hhi_a = core.Element(a_element).HHI_p
-                            hhi_b = core.Element(b_element).HHI_p
+                            hhi_a = smact.Element(a_element).HHI_p
+                            hhi_b = smact.Element(b_element).HHI_p
                             hhi_rp = (float(hhi_a) * float(hhi_b))**0.5
                             holes[all_elements.index(a_element),
                                   all_elements.index(b_element)] = inner_space
@@ -172,8 +171,8 @@ for a_element in tetra_coord_elements:
                                      gamma) = lattice_parameters.wurtzite(g)
                                     # Calculate the space inside the cage
                                     inner_space = a * (6**0.5) - (4 * g[0])
-                                    hhi_a = core.Element(a_element).HHI_p
-                                    hhi_b = core.Element(b_element).HHI_p
+                                    hhi_a = smact.Element(a_element).HHI_p
+                                    hhi_b = smact.Element(b_element).HHI_p
                                     hhi_rp = (float(hhi_a) * float(hhi_b))**0.5
                                     holes[all_elements.index(a_element),
                                           all_elements.index(b_element)] = inner_space
@@ -191,8 +190,8 @@ for a_element in tetra_coord_elements:
                                     (a, b, c, alpha, beta, gamma) = lattice_parameters.wurtzite(g)
                                     # Calculate the space inside the cage
                                     inner_space = inner_space = a * (6**0.5) - (4*g[0])
-                                    hhi_a = core.Element(a_element).HHI_p
-                                    hhi_b = core.Element(b_element).HHI_p
+                                    hhi_a = smact.Element(a_element).HHI_p
+                                    hhi_b = smact.Element(b_element).HHI_p
                                     hhi_rp = (float(hhi_a)*float(hhi_b))**0.5
                                     holes[all_elements.index(a_element), all_elements.index(b_element)] = inner_space
                                     matrix_hhi[all_elements.index(a_element), all_elements.index(b_element)] = hhi_rp

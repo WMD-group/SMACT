@@ -1,7 +1,8 @@
 #!12/12/2014
 
-import smact.core as core
+import smact
 import itertools
+from os import path
 
 def pauling_test(ox, paul):
 	makes_sense = True
@@ -19,23 +20,23 @@ def pauling_test(ox, paul):
 					makes_sense = False
 	return makes_sense
 
-with open('element.txt','r') as f:
+with open(path.join(smact.data_directory, 'element.txt'),'r') as f:
 	data = f.readlines()
 
 list_of_elements = []
 
-list_of_elements = core.ordered_elements(1,16)
+list_of_elements = smact.ordered_elements(1,16)
 
 #for line in data:
 #	if not line.startswith('#'):
 #		species = line.split()
 #		if int(species[0]) > 0 and int(species[0]) < 81:
-#			#if len(core.Element(species[1]).oxidation_states) > 0:
-#			if core.Element(species[1]).oxidation_states:
+#			#if len(smact.Element(species[1]).oxidation_states) > 0:
+#			if smact.Element(species[1]).oxidation_states:
 #			    list_of_elements.append(species[1])
 
 print(list_of_elements)
-list_of_elements=tuple(core.ordered_elements(1,16))
+list_of_elements=tuple(smact.ordered_elements(1,16))
 print(list_of_elements)
 
 print(enumerate(list_of_elements))
@@ -55,20 +56,20 @@ for ternary in itertools.combinations(list_of_elements,3):
     ele_a,ele_b,ele_c = ternary
 #for i, ele_a in enumerate(list_of_elements):
     element_count = element_count + 1
-    paul_a = core.Element(ele_a).pauling_eneg
-    for ox_a in [0,-1,-2]: #core.Element(ele_a).oxidation_states:
+    paul_a = smact.Element(ele_a).pauling_eneg
+    for ox_a in [0,-1,-2]: #smact.Element(ele_a).oxidation_states:
         ion_count = ion_count + 1
 #		for j, ele_b in enumerate(list_of_elements[i+1:]):
 	element_count = element_count + 1
-#	paul_b = core.Element(ele_b).pauling_eneg
+#	paul_b = smact.Element(ele_b).pauling_eneg
         paul_b=0.2
-        for ox_b in [0,1,2]:#core.Element(ele_b).oxidation_states:
+        for ox_b in [0,1,2]:#smact.Element(ele_b).oxidation_states:
 	    ion_count = ion_count + 1
 #				for k, ele_c in enumerate(list_of_elements[i+j+2:]):
 	    element_count = element_count + 1
-#	    paul_c = core.Element(ele_c).pauling_eneg
+#	    paul_c = smact.Element(ele_c).pauling_eneg
             paul_c=0.2
-            for ox_c in [0,1,2]:#core.Element(ele_c).oxidation_states:
+            for ox_c in [0,1,2]:#smact.Element(ele_c).oxidation_states:
 	        ion_count = ion_count + 1
 		element = [ele_a, ele_b, ele_c]
 #						print element
@@ -79,7 +80,7 @@ for ternary in itertools.combinations(list_of_elements,3):
                 ox=oxidation_states
                 electroneg_makes_sense = True #sorted(zip(paul,ox), key=lambda s: s[1])==sorted(zip(paul,ox), key=lambda s: s[0], reverse=True)
 #                electroneg_makes_sense = pauling_test(oxidation_states, pauling_electro)
-		cn_e, cn_r = core.charge_neutrality([ox_a, ox_b, ox_c],threshold=1)
+		cn_e, cn_r = smact.charge_neutrality([ox_a, ox_b, ox_c],threshold=1)
 		if cn_e:
 		    charge_neutral_count = charge_neutral_count + 1
 		if electroneg_makes_sense:

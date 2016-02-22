@@ -15,10 +15,9 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.                   #
 #                                                                              #
 ################################################################################
-import sys
+import smact
 from numpy import sqrt
-from smact.data import get_eig, get_eig_s
-import smact.core as core
+
 
 def band_gap_simple(verbose=False,Anion=None,Cation=None,Distance=None):
 
@@ -53,11 +52,11 @@ def band_gap_simple(verbose=False,Anion=None,Cation=None,Distance=None):
 		d = float(raw_input("Enter internuclear separation (Angstroms): "))
 	
 	# Calculate values of equation components 
-	V1_Cat = (core.Element(Cat).eig - core.Element(Cat).eig_s)/4
-	V1_An = (core.Element(An).eig - core.Element(An).eig_s)/4
+	V1_Cat = (smact.Element(Cat).eig - smact.Element(Cat).eig_s)/4
+	V1_An = (smact.Element(An).eig - smact.Element(An).eig_s)/4
 	V1_bar = (V1_An + V1_Cat)/2
 	V2 = 2.16 * hbarsq_over_m / (d**2)
-	V3 = (core.Element(Cat).eig - core.Element(An).eig)/2
+	V3 = (smact.Element(Cat).eig - smact.Element(An).eig)/2
 	alpha_m = (1.11*V1_bar)/sqrt(V2**2 + V3**2)
 
 	# Calculate Band gap

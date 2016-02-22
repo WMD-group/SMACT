@@ -16,7 +16,7 @@
 ################################################################################
 
 import numpy as np
-import smact.core as core
+import smact
 
 class Lattice(object):
       """A unique set of Sites
@@ -184,7 +184,7 @@ def possible_elements(elements, oxidations):
     """
     atoms = []
     for element in elements:
-	elemental_oxidations = core.Element(element).oxidation_states
+	elemental_oxidations = smact.Element(element).oxidation_states
         for ox_state_a in oxidations:
 	    for element_ox in elemental_oxidations:
         	if int(element_ox) == int(ox_state_a):
