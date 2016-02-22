@@ -321,8 +321,6 @@ def charge_neutrality(oxidations, stoichs=False, threshold = 5):
 	stoichs = []
 	for i in range(len(oxidations)):
 	    stoichs.append(range(1,threshold + 1))
-    print stoichs[0]
-    print stoichs[1]
     if len(oxidations) == 2:
 	for i in stoichs[0]:
 	    for j in stoichs[1]:	
