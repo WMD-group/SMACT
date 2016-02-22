@@ -94,7 +94,7 @@ class Element(object):
             if not line.startswith("#"):
                 l = line.split()
                 if (l[0] == symbol) and len(l) > 1:
-                    crustal_abundance = l[1]
+                    crustal_abundance = float(l[1])
 
         self.crustal_abundance = crustal_abundance
 
@@ -265,6 +265,19 @@ def ordered_elements(x,y):
 
     return ordered_elements
 
+def element_dictionary(elements):
+    '''
+    Given a list of element names this returns a dictionary containing all of the information about those elements. This can lead to significant speedups in iterative scripts where the element object is constantly referred to.
+    Args:
+        elements : a list of the element names
+    Returns:
+        element_dictionary : a dictionary with element names as keys and smact.Elements as data,
+    '''
+    dictionary = {}
+    for ele in elements:
+        dictionary[ele] = Element(ele)
+    return dictionary
+    
 
 def are_eq(A,B,tolerance=1e-4):
     """Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
