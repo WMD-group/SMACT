@@ -109,8 +109,8 @@ class Element(object):
                 if (l[0] == symbol):
                     if len(l)>1:
                         HHI_p, HHI_R = l[1:3]
-        self.HHI_p = HHI_p
-        self.HHI_R = HHI_R
+        self.HHI_p = float(HHI_p)
+        self.HHI_R = float(HHI_R)
 
         # Import general data from Openbabel-derived data table:
         # Import whole file
