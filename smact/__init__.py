@@ -265,18 +265,22 @@ def ordered_elements(x,y):
 
     return ordered_elements
 
-def element_dictionary(elements):
-    '''
-    Given a list of element names this returns a dictionary containing all of the information about those elements. This can lead to significant speedups in iterative scripts where the element object is constantly referred to.
+def element_dictionary(elements=None):
+    """
+    Create a dictionary of initialised smact.Element objects
+
+    Accessing an Element from a dict is significantly faster than
+    repeadedly initialising them on-demand within nested loops.
+
     Args:
-        elements : a list of the element names
+        elements (iterable of strings) : Elements to include. If None, use all elements up to 103.
     Returns:
-        element_dictionary : a dictionary with element names as keys and smact.Elements as data,
-    '''
-    dictionary = {}
-    for ele in elements:
-        dictionary[ele] = Element(ele)
-    return dictionary
+        element_dictionary (dict): Dictionary with element symbols as keys and smact.Element objects as data
+    
+    """
+    if elements == None:
+        elements = ordered_elements(1,103)
+    return {symbol: Element(symbol) for symbol in elements}
     
 
 def are_eq(A,B,tolerance=1e-4):
@@ -352,7 +356,6 @@ def charge_neutrality_iter(oxidations, stoichs=False, threshold=5):
         threshold : single threshold to go up to if stoichs are not provided
 
     Returns:
-        exists : bool to say if a ratio exists
         allowed_ratios : ratio that gives neutrality
     """    
     if not stoichs:

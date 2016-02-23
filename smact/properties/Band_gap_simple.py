@@ -19,7 +19,8 @@ import smact
 from numpy import sqrt
 
 
-def band_gap_simple(verbose=False,anion=None,cation=None,distance=None):
+def band_gap_simple(verbose=False, anion=None, cation=None,
+                    distance=None, elements_dict=None):
 
     """
     Estimates the band gap from elemental data.
@@ -36,10 +37,14 @@ def band_gap_simple(verbose=False,anion=None,cation=None,distance=None):
                 i.e. sum of ionic radii.
         verbose: An optional True/False flag. If True, additional information is
                 printed to the standard output. [Defult: False]
+        elements_dict (dict): Element symbol keys with smact.Element
+                objects values. This may be provided to prevent
+                excessive reading of data files.
 
     Returns (float): Band gap in eV.
 
     """
+
     # Set constants
     hbarsq_over_m = 7.62
 
@@ -57,12 +62,17 @@ def band_gap_simple(verbose=False,anion=None,cation=None,distance=None):
     if not distance:
         d = float(raw_input("Enter internuclear separation (Angstroms): "))
 
+    # Get elemental data:
+    if not elements_dict:
+        elements_dict = smact.element_dictionary((An, Cat))
+    An, Cat = elements_dict[An], elements_dict[Cat]
+
     # Calculate values of equation components
-    V1_Cat = (smact.Element(Cat).eig - smact.Element(Cat).eig_s)/4
-    V1_An = (smact.Element(An).eig - smact.Element(An).eig_s)/4
+    V1_Cat = (Cat.eig - Cat.eig_s)/4
+    V1_An = (An.eig - An.eig_s)/4
     V1_bar = (V1_An + V1_Cat)/2
     V2 = 2.16 * hbarsq_over_m / (d**2)
-    V3 = (smact.Element(Cat).eig - smact.Element(An).eig)/2
+    V3 = (Cat.eig - An.eig)/2
     alpha_m = (1.11*V1_bar)/sqrt(V2**2 + V3**2)
 
     # Calculate Band gap [(3-43) Harrison 1980 ]

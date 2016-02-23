@@ -16,10 +16,12 @@
 #                                                                              #
 ################################################################################
 
+import smact
 from numpy import product
 from smact.data import get_mulliken
 
-def compound_electroneg(verbose=False,elements=None,stoichs=None):
+def compound_electroneg(verbose=False,elements=None,stoichs=None,
+                        elements_dict=None):
 
     """Estimate Mulliken electronegativity of compound from elemental data.
         Uses get_mulliken function which uses elemental ionisation potentials
@@ -38,6 +40,8 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
         integers  will be offered.
         verbose: An optional True/False flag. If True, additional information is
                printed to the standard output. [Default: False]
+        elements_dict: Dictionary of smact.Element objects; can be provided to
+                prevent multiple reads of data files
 
     Returns:
         Electronegativity: Estimated electronegativity as a float.
@@ -58,12 +62,14 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
     if not stoichs:
         stoichslist = list(raw_input("Enter stoichiometries (space separated): ").split(" "))
 
+    if not elements_dict:
+        elements_dict = smact.element_dictionary(elements)
+
     # Convert stoichslist from string to float
     stoichslist = map(float, stoichslist)
-
+    
     # Get mulliken values for each element
-    for i in range(0,len(elementlist)):
-        elementlist[i]=get_mulliken(elementlist[i])
+    elementlist = [get_mulliken(elements_dict[el]) for el in elementlist]
 
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.
@@ -71,7 +77,7 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
         print "Electronegativities of elements=", elementlist
 
     # Raise each electronegativity to its appropriate power
-    # to account for stoichiometry.
+    # to account for stoichiometry.   
     for i in range(0,len(elementlist)):
         elementlist[i]=[elementlist[i]**stoichslist[i]]
 

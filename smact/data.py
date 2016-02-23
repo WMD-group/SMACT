@@ -15,19 +15,25 @@
 #  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
 ################################################################################
 
-def get_mulliken(symbol):
+import smact
+
+def get_mulliken(element):
     """Get Mulliken electronegativity from the IE and EA
 
     Arguments:
-        symbol (string): Element label
+        symbol (smact.Element or str): Element object or symbol
 
     Returns:
         mulliken (float): Mulliken electronegativity
 
     """
-    from smact import Element
-    A = Element(symbol)
-    mulliken=(A.ionpot+A.e_affinity)/2.0
+    if type(element) == str:       
+        element = smact.Element(element)
+    elif type(element) != smact.Element:
+        raise Exception("Unexpected type: {0}".format(type(element)))        
+
+    mulliken = (element.ionpot+element.e_affinity)/2.0
+
     return mulliken
 
 
