@@ -28,6 +28,12 @@ class TestSequenceFunctions(unittest.TestCase):
             smact.ordered_elements(52,52),
             ['Te']
             )
+    def test_element_dictionary(self):
+        newlist = ['O','Rb','W']
+        dictionary = smact.element_dictionary(newlist)
+        self.assertEqual(dictionary['O'].crustal_abundance, 461000.0)
+        self.assertEqual(dictionary['Rb'].oxidation_states,[-1, 1])
+        self.assertEqual(dictionary['W'].name,'Tungsten')
 
     def test_are_eq(self):
         self.assertTrue(
