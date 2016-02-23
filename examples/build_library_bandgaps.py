@@ -8,7 +8,10 @@ import copy
 # Generate a dictionary elements, form the dataset oxidationstates.data
 # Dictionary contains elements and their oxidation states
 # Reduce the regions of the periodic table to visit, by using search_space
-search_space = {'Li','Be','Na','Mg','K','Ca','Rb','Sr','Cs','Ba','Al','Si','Ga','Ge','As','In','Sn','Sb','Te','Tl','Pb','Bi','Po','At','S','O','Se','F','Cl','Br','Zn','Cu','I'}
+search_space = ('Li', 'Be', 'Na', 'Mg', 'K', 'Ca', 'Rb', 'Sr', 'Cs', 'Ba',
+    'Al', 'Si', 'Ga', 'Ge', 'As', 'In', 'Sn', 'Sb', 'Te', 'Tl', 'Pb', 'Bi',
+    'Po', 'At', 'S', 'O', 'Se', 'F', 'Cl', 'Br', 'Zn', 'Cu', 'I')
+
 # Get the list of possible constituent elements
 
 # Generate list of binary compositions which satisfy charge neutrality
@@ -25,7 +28,6 @@ for i, ele_a in enumerate(search_space):
 print len(neutral_species)
 
 # Calculate Band Gap and Mulliken electronegativity for each composition and write to file
-# using compound_electroneg function from compound_electroneg.py
 out = open("output.txt","w")
 print "no. ", "band gap ", "Mulliken e-neg ", "internuclear dist"
 out.write("no. " +", " + "band gap " +", " + "Mulliken e-neg " +", " + "internuclear dist" + "\n")

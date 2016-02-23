@@ -4,9 +4,9 @@
 # Copyright Daniel Davies, Adam J. Jackson (2013)                              #
 #                                                                              #
 # This file is part of SMACT: compound_electroneg_pauling.py is free software: #
-# you can redistribute it and/or modify it under the terms of the GNU 		   #
+# you can redistribute it and/or modify it under the terms of the GNU          #
 # General Public License as published by the Free Software Foundation, either  #
-# version 3 of the License, or (at your option) any later version.			   #											                         
+# version 3 of the License, or (at your option) any later version.             #
 # This program is distributed in the hope that it will be useful, but WITHOUT  #
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or        #
 # FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for    #
@@ -21,8 +21,12 @@ from smact.data import get_pauling
 
 def compound_electroneg_pauling(verbose=True,elements=None,stoichs=None):
 
-    """Estimate Mulliken electronegativity of compound from elemental data
-		based on Pauling electronegativities. Scaling factor of 2.86 used.
+    """
+    Estimate Mulliken electronegativity of compound from elemental data
+
+    The estimate is based on Pauling electronegativities. A scaling
+    factor of 2.86 is applied; his brings the electronegativities to a
+    Mulliken-like scale, allowing or estimation of Fermi level.
 
     Geometric mean is used (n-th root of product of components), e.g.:
 
@@ -30,11 +34,11 @@ def compound_electroneg_pauling(verbose=True,elements=None,stoichs=None):
 
     Args:
         elements: A list of elements given as standard elemental symbols.
-		Optional: if not used, interactive input of space separated
-		elemental symbols will be offered.
+        Optional: if not used, interactive input of space separated
+        elemental symbols will be offered.
         stoichs: A list of stoichiometries, given as integers or floats.
-		Optional: if not used, interactive input of space separated
-		integers  will be offered.
+        Optional: if not used, interactive input of space separated
+        integers  will be offered.
         verbose: An optional True/False flag. If True, additional information is
                printed to the standard output. [Default: False]
 
@@ -44,20 +48,19 @@ def compound_electroneg_pauling(verbose=True,elements=None,stoichs=None):
 
     Raises:
         (There are no special error messages for this function.)
-    
+
     """
     if elements:
-	elementlist = elements
+        elementlist = elements
     if stoichs:
-	stoichslist = stoichs
-    
+        stoichslist = stoichs
+
     """Get elements and stoichiometries if not provided as argument"""
     if not elements:
-        elementlist = list(raw_input("Enter elements (space separated): ").split(" "))	    
+        elementlist = list(raw_input("Enter elements (space separated): ").split(" "))
     if not stoichs:
         stoichslist = list(raw_input("Enter stoichiometries (space separated): ").split(" "))
 
-  
     """Convert stoichslist from string to float"""
     stoichslist=map(float, stoichslist)
 
@@ -83,7 +86,7 @@ def compound_electroneg_pauling(verbose=True,elements=None,stoichs=None):
     """Print optional formatted output."""
     if verbose:
         print "Geometric mean = Compound 'electronegativity'=", compelectroneg
-      
+
     return compelectroneg
 
 """Wrapper for command line usage: argparse passes command line arguments
@@ -115,4 +118,3 @@ if __name__ == "__main__":
 
     print compound_electroneg_pauling(verbose=verbose_flag,elements=args.elements,
                               stoichs=args.stoichiometry)
-

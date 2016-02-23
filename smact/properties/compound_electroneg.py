@@ -22,8 +22,8 @@ from smact.data import get_mulliken
 def compound_electroneg(verbose=False,elements=None,stoichs=None):
 
     """Estimate Mulliken electronegativity of compound from elemental data.
-		Uses get_mulliken function which uses elemental ionisation potentials
-		and electron affinities. 
+        Uses get_mulliken function which uses elemental ionisation potentials
+        and electron affinities.
 
     Geometric mean is used (n-th root of product of components), e.g.:
 
@@ -31,11 +31,11 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
 
     Args:
         elements: A list of elements given as standard elemental symbols.
-		Optional: if not used, interactive input of space separated
-		elemental symbols will be offered.
+        Optional: if not used, interactive input of space separated
+        elemental symbols will be offered.
         stoichs: A list of stoichiometries, given as integers or floats.
-		Optional: if not used, interactive input of space separated
-		integers  will be offered.
+        Optional: if not used, interactive input of space separated
+        integers  will be offered.
         verbose: An optional True/False flag. If True, additional information is
                printed to the standard output. [Default: False]
 
@@ -45,46 +45,43 @@ def compound_electroneg(verbose=False,elements=None,stoichs=None):
 
     Raises:
         (There are no special error messages for this function.)
-    
+
     """
     if elements:
-	elementlist = elements
+        elementlist = elements
     if stoichs:
-	stoichslist = stoichs
-    
-    """Get elements and stoichiometries if not provided as argument"""
+        stoichslist = stoichs
+
+    # Get elements and stoichiometries if not provided as argument
     if not elements:
-        elementlist = list(raw_input("Enter elements (space separated): ").split(" "))	    
+        elementlist = list(raw_input("Enter elements (space separated): ").split(" "))
     if not stoichs:
         stoichslist = list(raw_input("Enter stoichiometries (space separated): ").split(" "))
 
-  
-    """Convert stoichslist from string to float"""
-    stoichslist=map(float, stoichslist)
+    # Convert stoichslist from string to float
+    stoichslist = map(float, stoichslist)
 
-    """Get mulliken values for each element"""
+    # Get mulliken values for each element
     for i in range(0,len(elementlist)):
         elementlist[i]=get_mulliken(elementlist[i])
 
-    """Print optional list of element electronegativities.
-    This may be a useful sanity check in case of a suspicious result.
-    """
+    # Print optional list of element electronegativities.
+    # This may be a useful sanity check in case of a suspicious result.
     if verbose:
         print "Electronegativities of elements=", elementlist
 
-    """Raise each electronegativity to its appropriate power
-    to account for stoichiometry.
-    """
+    # Raise each electronegativity to its appropriate power
+    # to account for stoichiometry.
     for i in range(0,len(elementlist)):
         elementlist[i]=[elementlist[i]**stoichslist[i]]
-    """Calculate geometric mean (n-th root of product)"""
+
+    # Calculate geometric mean (n-th root of product)
     prod = product(elementlist)
     compelectroneg = (prod)**(1.0/(sum(stoichslist)))
 
-    """Print optional formatted output."""
     if verbose:
         print "Geometric mean = Compound 'electronegativity'=", compelectroneg
-      
+
     return compelectroneg
 
 """Wrapper for command line usage: argparse passes command line arguments
