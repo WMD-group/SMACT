@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
-from smact.properties.compound_electroneg import compound_electroneg
+from smact.properties import compound_electroneg
 from smact.builder import wurtzite
 import smact.lattice
 import smact

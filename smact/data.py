@@ -43,21 +43,22 @@ def get_mulliken(element):
 #### desired property, as in the wrappers below.                            ####
 ################################################################################
 
-def get_pauling(symbol):
+def get_pauling(element):
     """Pauling electronegativity of specified element.
 
-    Drawn from Open Babel data table.
-
     Arguments:
-        symbol (string): Element label
+        symbol (smact.Element or str): Element object or symbol
 
     Returns:
         pauling_eneg (float): Pauling electronegativity
 
     """
-    from smact import Element
-    A = Element(symbol)
-    return A.pauling_eneg
+    if type(element) == str:       
+        element = smact.Element(element)
+    elif type(element) != smact.Element:
+        raise Exception("Unexpected type: {0}".format(type(element)))        
+
+    return element.pauling_eneg
 
 def get_covalent(symbol):
     """Covalent radius of specified element.
