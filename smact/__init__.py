@@ -420,8 +420,13 @@ def pauling_test(ox, paul, threshold=0.5):
         if state > 0:
             positive.append(paul[i])
         if state < 0:
-            negative.append(paul[i])
+	    if paul[i] in negative: # Reject materials where the same anion occupies two sites.
+                return False
+            else:
+                negative.append(paul[i])
     if len(positive) == 0 or len(negative) == 0:
+        return False
+    if max(positive) == min(negative):
         return False
     if max(positive) - min(negative) > threshold:
         return False
