@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
-from smact.properties.compound_electroneg import compound_electroneg
+from smact.properties import compound_electroneg
 from smact.builder import wurtzite
 import smact.lattice
 import smact
@@ -34,6 +34,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(dictionary['O'].crustal_abundance, 461000.0)
         self.assertEqual(dictionary['Rb'].oxidation_states,[-1, 1])
         self.assertEqual(dictionary['W'].name,'Tungsten')
+        self.assertTrue('Rn' in smact.element_dictionary())
 
     def test_are_eq(self):
         self.assertTrue(

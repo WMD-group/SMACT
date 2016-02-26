@@ -3,8 +3,7 @@ SMACT
 
 Semiconducting Materials from Analogy and Chemical Theory. A collection of fast screening tools from elemental data.
 
-Development of the next iteration is taking place on the new-classes branch:
-https://github.com/WMD-Bath/SMACT/tree/feature/new-classes
+[![Documentation Status](https://readthedocs.org/projects/smact/badge/?version=latest)](http://smact.readthedocs.org/en/latest/?badge=latest)
 
 Contents
 --------

@@ -1,39 +1,38 @@
 import smact
 from smact.properties.Band_gap_simple import band_gap_simple
-import copy
+from smact.properties.compound_electroneg import compound_electroneg
+import itertools
 
-# Get correct directory if calling from elsewhere
-# (if statement needed in case of empty response)
+# Examine a subset of periodic table
+search_space = ('Li', 'Be', 'Na', 'Mg', 'K', 'Ca', 'Rb', 'Sr', 'Cs', 'Ba',
+    'Al', 'Si', 'Ga', 'Ge', 'As', 'In', 'Sn', 'Sb', 'Te', 'Tl', 'Pb', 'Bi',
+    'Po', 'At', 'S', 'O', 'Se', 'F', 'Cl', 'Br', 'Zn', 'Cu', 'I')
 
-# Generate a dictionary elements, form the dataset oxidationstates.data
-# Dictionary contains elements and their oxidation states
-# Reduce the regions of the periodic table to visit, by using search_space
-search_space = {'Li','Be','Na','Mg','K','Ca','Rb','Sr','Cs','Ba','Al','Si','Ga','Ge','As','In','Sn','Sb','Te','Tl','Pb','Bi','Po','At','S','O','Se','F','Cl','Br','Zn','Cu','I'}
-# Get the list of possible constituent elements
+elements = smact.element_dictionary(search_space)
 
-# Generate list of binary compositions which satisfy charge neutrality
-neutral_species = []
-for i, ele_a in enumerate(search_space):
-    for ox_a in smact.Element(ele_a).oxidation_states:
-        for j, ele_b in enumerate(search_space):
-            if j > i:
-                for ox_b in smact.Element(ele_b).oxidation_states:
-                    neutral_exists, neutral_ratios = smact.charge_neutrality([ox_a,ox_b],threshold = 4)
-                    if neutral_exists:
-                        combo = [smact.Element(ele_a).symbol, smact.Element(ele_b).symbol]
-                        neutral_species.append([combo,neutral_ratios])
-print len(neutral_species)
+# Set up a generator for charge-neutral binary compounds
+def binary_generator(search_space, elements):
+    # Iterate over all binary combinations (e.g. (Li, Be), (Li, Na)...)    
+    for el_a, el_b in itertools.combinations(search_space, 2):
+        # Read possible oxidation states from element dictionary
+        for ox_combo in itertools.product(elements[el_a].oxidation_states,
+                                          elements[el_b].oxidation_states):
+            # When a legal combination is found, yield it
+            # and move onto next binary combination
+            success, stoichs = smact.charge_neutrality(ox_combo)
+            if success:
+                yield (el_a, el_b, stoichs[0])
+                break
 
-# Calculate Band Gap and Mulliken electronegativity for each composition and write to file
-# using compound_electroneg function from compound_electroneg.py
-out = open("output.txt","w")
-print "no. ", "band gap ", "Mulliken e-neg ", "internuclear dist"
-out.write("no. " +", " + "band gap " +", " + "Mulliken e-neg " +", " + "internuclear dist" + "\n")
+print "no. \tband gap \tMulliken e-neg \tinternuclear dist"
 
-element_compositions = copy.deepcopy(neutral_species)
+# Run the generator and calculate properties
+for i, (el_a, el_b, stoich) in enumerate(binary_generator(search_space, elements)):
+    distance = elements[el_a].covalent_radius + elements[el_b].covalent_radius
+    band_gap = band_gap_simple(False, el_a, el_b, distance,
+                               elements_dict=elements)
+    electroneg = compound_electroneg(elements=(el_a, el_b), stoichs=stoich,
+                                     elements_dict=elements)
 
-for combo in neutral_species:
-    dist = smact.Element(combo[0][0]).covalent_radius + smact.Element(combo[0][1]).covalent_radius
-    bandgap = band_gap_simple(False, combo[0][0], combo[0][1], dist)
-
-    print combo[0][0], combo[0][1], bandgap
+    print "{0}  \t{1:5.2f}  \t\t{2:5.3f}  \t\t{3:6.2f}".format(i, band_gap,
+                                                electroneg, distance)

@@ -15,19 +15,25 @@
 #  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
 ################################################################################
 
-def get_mulliken(symbol):
+import smact
+
+def get_mulliken(element):
     """Get Mulliken electronegativity from the IE and EA
 
     Arguments:
-        symbol (string): Element label
+        symbol (smact.Element or str): Element object or symbol
 
     Returns:
         mulliken (float): Mulliken electronegativity
 
     """
-    from smact import Element
-    A = Element(symbol)
-    mulliken=(A.ionpot+A.e_affinity)/2.0
+    if type(element) == str:       
+        element = smact.Element(element)
+    elif type(element) != smact.Element:
+        raise Exception("Unexpected type: {0}".format(type(element)))        
+
+    mulliken = (element.ionpot+element.e_affinity)/2.0
+
     return mulliken
 
 
@@ -37,21 +43,22 @@ def get_mulliken(symbol):
 #### desired property, as in the wrappers below.                            ####
 ################################################################################
 
-def get_pauling(symbol):
+def get_pauling(element):
     """Pauling electronegativity of specified element.
 
-    Drawn from Open Babel data table.
-
     Arguments:
-        symbol (string): Element label
+        symbol (smact.Element or str): Element object or symbol
 
     Returns:
         pauling_eneg (float): Pauling electronegativity
 
     """
-    from smact import Element
-    A = Element(symbol)
-    return A.pauling_eneg
+    if type(element) == str:       
+        element = smact.Element(element)
+    elif type(element) != smact.Element:
+        raise Exception("Unexpected type: {0}".format(type(element)))        
+
+    return element.pauling_eneg
 
 def get_covalent(symbol):
     """Covalent radius of specified element.
