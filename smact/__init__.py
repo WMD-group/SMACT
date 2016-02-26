@@ -28,43 +28,41 @@ from fractions import gcd
 from operator import mul as multiply
 
 class Element(object):
-    """Class providing standard chemical data for elements."""
-    def __init__(self, symbol):
-        """
-        Collection of standard elemental properties for given element.
-        Data is drawn from "data/element.txt", part of the Open Babel package.
-        element = element('Symbol')
+    """
+    Collection of standard elemental properties for given element.
+    Data is drawn from "data/element.txt", part of the Open Babel package.
+    element = element('Symbol')
 
-        Atoms with a defined oxidation state draw properties from the "Species" class.
+    Atoms with a defined oxidation state draw properties from the "Species" class.
 
-        Attributes:
-            Element.symbol (string): Elemental symbol used to retrieve data
+    Attributes:
+        Element.symbol (string): Elemental symbol used to retrieve data
 
-            Element.name (string): Full name of element
+        Element.name (string): Full name of element
 
-            Element.number (int): Proton number of element
+        Element.number (int): Proton number of element
 
-            Element.pauling_eneg (float): Pauling electronegativity (0.0 if unknown)
+        Element.pauling_eneg (float): Pauling electronegativity (0.0 if unknown)
 
-            Element.ionpot (float): Ionisation potential in eV (0.0 if unknown)
+        Element.ionpot (float): Ionisation potential in eV (0.0 if unknown)
 
-            Element.e_affinity (float): Electron affinity in eV (0.0 if unknown)
+        Element.e_affinity (float): Electron affinity in eV (0.0 if unknown)
 
-            Element.eig (float): Electron eigenvalue (units unknown)
+        Element.eig (float): Electron eigenvalue (units unknown).
             N.B. For Cu, Au and Ag this defaults to d-orbital.
-            TODO(DD): implement a way to select the desired orbital
 
-            Element.eig_s (float): Eigenvalue of s-orbital
+        Element.eig_s (float): Eigenvalue of s-orbital
 
-            Element.crustal_abundance (float): crustal abundance in the earths crust mg/kg taken from CRC
+        Element.crustal_abundance (float): crustal abundance in the earths crust mg/kg taken from CRC
 
-            Element.coord_envs (list): The allowed coordination enviroments for the ion.
+        Element.coord_envs (list): The allowed coordination enviroments for the ion.
 
-        Raises:
-            NameError: Element not found in element.txt
-            Warning: Element not found in Eigenvalues.csv
+    Raises:
+        NameError: Element not found in element.txt
+        Warning: Element not found in Eigenvalues.csv
 
-        """
+    """
+    def __init__(self, symbol):
         # Import oxidation states from oxidation_states.txt
         with open(path.join(data_directory,
                             'oxidation_states.txt'),'r') as f:
@@ -217,8 +215,7 @@ class Species(Element):
         Species.e_affinity: Electron affinity in eV (0.0 if unknown)
 
         Species.eig: Electron eigenvalue (units unknown)
-        N.B. For Cu, Au and Ag this defaults to d-orbital.
-        TODO(DD): implement a way to select the desired orbital
+            N.B. For Cu, Au and Ag this defaults to d-orbital.
 
     Raises:
         NameError: Element not found in element.txt
@@ -249,7 +246,7 @@ def ordered_elements(x,y):
     Args:
         x,y : integers
     Returns:
-        ordered_elements : List of element symbols
+        list: Ordered list of element symbols
     """
     with open(path.join(data_directory,
                         'ordered_periodic.txt'), 'r') as f:
@@ -273,24 +270,25 @@ def element_dictionary(elements=None):
     repeadedly initialising them on-demand within nested loops.
 
     Args:
-        elements (iterable of strings) : Elements to include. If None, use all elements up to 103.
+        elements (iterable of strings) : Elements to include. If None, 
+            use all elements up to 103.
     Returns:
-        element_dictionary (dict): Dictionary with element symbols as keys and smact.Element objects as data
-    
+        dict: Dictionary with element symbols as keys and smact.Element
+            objects as data
     """
     if elements == None:
         elements = ordered_elements(1,103)
     return {symbol: Element(symbol) for symbol in elements}
-    
+
 
 def are_eq(A,B,tolerance=1e-4):
     """Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
     Args:
-        A/B: arrays
+        A, B (lists): 1-D list of values for approximate equality comparison
         tolerance: numerical precision for equality condition
 
     Returns:
-        True/False
+        boolean
     """
     are_eq = True
     if len(A) != len(B):
@@ -310,7 +308,7 @@ def lattices_are_same(lattice1, lattice2, tolerance=1e-4):
     Args:
         lattice1,lattice2 : ASE crystal class
     Returns:
-        lattices_are_same : boolean
+        boolean
         """
     lattices_are_same = False
     i = 0
@@ -338,13 +336,17 @@ def _gcd_recursive(*args):
 def _isneutral(oxidations, stoichs):
     """
     Check if set of oxidation states is neutral in given stoichiometry
+
+    Args:
+        oxidations (tuple): Oxidation states of a set of oxidised elements
+        stoichs (tuple): Stoichiometry values corresponding to `oxidations`
     """
     return 0 == sum(itertools.imap(multiply, oxidations, stoichs))
-    
+
 def charge_neutrality_iter(oxidations, stoichs=False, threshold=5):
     """
     Iterator for charge-neutral stoichiometries
-    
+
     Given a list of oxidation states of arbitrary length, yield ratios in which
     these form a charge-neutral compound. Stoichiometries may be provided as a
     set of legal stoichiometries per site (e.g. a known family of compounds);
@@ -355,15 +357,15 @@ def charge_neutrality_iter(oxidations, stoichs=False, threshold=5):
         stoichs : stoichiometric ratios for each site (if provided)
         threshold : single threshold to go up to if stoichs are not provided
 
-    Returns:
-        allowed_ratios : ratio that gives neutrality
-    """    
+    Yields:
+        tuple: ratio that gives neutrality
+    """
     if not stoichs:
         stoichs = [range(1,threshold+1)] * len(oxidations)
 
     # First filter: remove combinations which have a common denominator
     # greater than 1 (i.e. Use simplest form of each set of ratios)
-    # Second filter: return only charge-neutral combinations    
+    # Second filter: return only charge-neutral combinations
     return itertools.ifilter(
         lambda x: _isneutral(oxidations, x) and _gcd_recursive(*x) == 1,
         # Generator: enumerate all combinations of stoichiometry
@@ -373,7 +375,7 @@ def charge_neutrality_iter(oxidations, stoichs=False, threshold=5):
 def charge_neutrality(oxidations, stoichs=False, threshold=5):
     """
     Get a list of charge-neutral compounds
-    
+
     Given a list of oxidation states of arbitrary length, yield ratios in which
     these form a charge-neutral compound. Stoichiometries may be provided as a
     set of legal stoichiometries per site (e.g. a known family of compounds);
@@ -392,8 +394,13 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
             to this value will be tried.
 
     Returns:
-        exists (bool): True if any ratio exists, otherwise False
-        allowed_ratios (list of tuples): Ratios of atoms in given oxidation
+        (exists, allowed_ratios) (tuple):
+
+        exists *bool*:
+            True ifc any ratio exists, otherwise False
+
+        allowed_ratios *list of tuples*:
+            Ratios of atoms in given oxidation
             states which yield a charge-neutral structure
     """
     allowed_ratios = [x for x in charge_neutrality_iter(oxidations,
@@ -404,17 +411,20 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
 
 
 def pauling_test(ox, paul, threshold=0.5):
-    """ Testing if a combination of ions makes chemical sense,
-    ie positive ions should be of lower Pauling electronegativity
+    """ Check if a combination of ions makes chemical sense,
+        (i.e. positive ions should be of lower Pauling electronegativity)
 
     Args:
-        ox : a list of the oxidation states of the compound
-        paul : the Pauling electronegativities of the elements in the compound
-        threshold : a tolerance for the allowed deviation from the Pauling
-        criterion
+        ox (list):  oxidation states of the compound
+        paul (list): the corresponding  Pauling electronegativities
+            of the elements in the compound
+        threshold (float): a tolerance for the allowed deviation from
+            the Pauling criterion
 
     Returns:
-        makes_sense : bool of whether the combination makes sense
+        makes_sense (bool):
+            True if positive ions have lower
+            electronegativity than negative ions
 
     """
     positive = []
