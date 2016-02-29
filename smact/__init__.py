@@ -410,7 +410,7 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
             allowed_ratios)
 
 
-def pauling_test(ox, paul, threshold=0.5):
+def pauling_test(symbols, ox, paul, repeat_anions=True, repeat_cations=True, threshold=0.5):
     """ Check if a combination of ions makes chemical sense,
         (i.e. positive ions should be of lower Pauling electronegativity)
 
@@ -420,6 +420,9 @@ def pauling_test(ox, paul, threshold=0.5):
             of the elements in the compound
         threshold (float): a tolerance for the allowed deviation from
             the Pauling criterion
+	repeat_anions : boolean, can an anion repeat in different oxidation states in the same compound.
+	repeat_cations : as above, but for cations.
+        symbols : list of the chemical symbols of each site.
 
     Returns:
         makes_sense (bool):
@@ -429,14 +432,28 @@ def pauling_test(ox, paul, threshold=0.5):
     """
     positive = []
     negative = []
+    pos_ele = []
+    neg_ele = []
     for i, state in enumerate(ox):
         if state > 0:
-            positive.append(paul[i])
+            if repeat_cations:
+                positive.append(paul[i])
+	    elif symbols[i] in pos_ele: # Reject materials where the same cation occupies two sites.
+                return False
+            else:
+                positive.append(paul[i])
+                pos_ele.append(symbols[i])
+
         if state < 0:
-	    if paul[i] in negative: # Reject materials where the same anion occupies two sites.
+            if repeat_anions:
+                negative.append(paul[i])
+	    elif symbols[i] in neg_ele: # Reject materials where the same anion occupies two sites.
                 return False
             else:
                 negative.append(paul[i])
+                neg_ele.append(symbols[i])
+
+
     if len(positive) == 0 or len(negative) == 0:
         return False
     if max(positive) == min(negative):
