@@ -94,7 +94,8 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
     Uses Mulliken electronegativity by default, which uses elemental
     ionisation potentials and electron affinities. Alternatively, can
     use Pauling electronegativity, re-scaled by factor 2.86 to achieve
-    same scale as Mulliken method.
+    same scale as Mulliken method (Nethercot, 1974)
+    DOI:10.1103/PhysRevLett.33.1088 .
 
     Geometric mean is used (n-th root of product of components), e.g.:
 
