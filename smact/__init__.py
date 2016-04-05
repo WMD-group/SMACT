@@ -69,7 +69,7 @@ class Element(object):
 
         oxdation_states = data_loader.GetElementOxidationStates(symbol);
         
-        if oxisation_states != None:
+        if oxidation_states != None:
             # Forces a "deep" copy of the list of oxidation states from the cache.
             # If not, the class field would store a reference to the cached list, and any changes made to it (e.g. del) would be propagated to new instances of the Element class constructed with the same symbol.
             
