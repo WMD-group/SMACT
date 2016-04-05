@@ -27,6 +27,8 @@ import csv
 from fractions import gcd
 from operator import mul as multiply
 
+import smact.data_loader;
+
 class Element(object):
     """
     Collection of standard elemental properties for given element.
@@ -63,132 +65,69 @@ class Element(object):
 
     """
     def __init__(self, symbol):
-        # Import oxidation states from oxidation_states.txt
-        with open(path.join(data_directory,
-                            'oxidation_states.txt'),'r') as f:
-            data = f.readlines()
-        oxidation_states = False
-        for line in data:
-            if not line.startswith('#'):
-                l = line.split()
-                if (l[0] == symbol):
-                    if len(l)>1:
-                        oxidation_states = l[1:]
-                        for location, value in enumerate(oxidation_states):
-                            oxidation_states[location] = int(value)
-                    else:
-                        oxidation_states = []
+        # Set oxidation states.
 
-        self.oxidation_states = oxidation_states
+        self.oxidation_states = data_loader.GetElementOxidationStates(symbol)
 
-        # Import crustal abundance from crustal_abundance.txt
-        with open(path.join(data_directory,
-                            'crustal_abundance.txt'), 'r') as f:
-            data = f.readlines()
+        # Set crustal abundance.
+        
+        self.crustal_abundance = data_loader.GetElementCrustalAbundance(symbol)
 
-        crustal_abundance = False
+        # Set HHIs.
 
-        for line in data:
-            if not line.startswith("#"):
-                l = line.split()
-                if (l[0] == symbol) and len(l) > 1:
-                    crustal_abundance = float(l[1])
+        HHIR_scores = data_loader.GetElementHHIs(symbol);
+        
+        if HHIR_scores != None:
+            HHI_p, HHI_R = HHIR_scores;
+            
+            self.HHI_p = HHI_p
+            self.HHI_R = HHI_R
+        else:
+            self.HHI_p = None;
+            self.HHI_R = None;
+        
+        dataset = data_loader.GetElementOpenBabelDerivedData(symbol);
+        
+        if dataset == None:
+            raise NameError("Open Babel-derived element data for %s not found." % (symbol));
 
-        self.crustal_abundance = crustal_abundance
+        # Set data from the Open Babel-derived dataset.
+        
+        self.symbol = symbol
+        self.name = dataset['Name']
+        self.number = dataset['Number']
+        self.covalent_radius = dataset['RCov']
+        #self.vdw_radius = dataset['RVdW']
+        self.pauling_eneg = dataset['ElNeg.']
+        self.ionpot = dataset['Ionization']
+        self.e_affinity = dataset['ElAffinity']
 
-        # Import HHI's from HHI's.txt
-        with open(path.join(data_directory,
-                            "HHIs.txt"), 'r') as f:
-            data = f.readlines()
-        HHI_p, HHI_R = [False, False]
-        for line in data:
-            if not line.startswith("#"):
-                l = line.split()
-                if (l[0] == symbol):
-                    if len(l)>1:
-                        HHI_p, HHI_R = l[1:3]
-        self.HHI_p = float(HHI_p)
-        self.HHI_R = float(HHI_R)
+        # Set eigenvalue data.
+        
+        self.eig = data_loader.GetElementEigenvalue(symbol);
 
-        # Import general data from Openbabel-derived data table:
-        # Import whole file
-        with open(path.join(data_directory,
-                            'element.txt'), 'r') as f:
-            data = f.readlines()
-        # Iterate through data file, ignoring comments and checking line against symbol
-        for line in data:
-            if not line.startswith('#'):
-                l = line.split()
-                if (l[1] == symbol):
-                    elementdata = l
-                    break
-        # If the for loop exits without breaking, the element was not found. Report error:
-        #else:
-            #raise NameError('Element {0} not found in element.txt'.format(symbol))
+        # Set s-eigenvalue data.
+        
+        self.eig_s = data_loader.GetElementSEigenvalue(symbol);
+        
+        # Set coordination-environment data from the Shannon-radius data.
+        
+        shannon_data = data_loader.GetElementShannonRadiusData(symbol);
+        
+        if shannon_data != None:
+            self.coord_envs = [dataset['coordination'] for dataset in shannon_data];
+        else:
+            self.coord_envs = None;
+        
+        # Set SSE from the SSE dataset.
+        
+        sse_data = data_loader.GetElementSSEData(symbol);
+        
+        if sse_data != None:
+            self.SSE = sse_data['SolidStateEnergy'];
+        else:
+            self.SSE = None;
 
-        # Set attributes
-        self.symbol=          str(symbol)
-        self.name=            str(elementdata[14])
-        self.number=          int(elementdata[0])
-        self.covalent_radius= float(elementdata[3])
-#        self.vdw_radius=      float(elementdata[5])
-        self.pauling_eneg=    float(elementdata[8])
-        self.ionpot=          float(elementdata[9])
-        self.e_affinity =     float(elementdata[10])
-
-        # Load eigenvalue data from data table by iterating through CSV file
-        with open(path.join(data_directory,
-                            'Eigenvalues.csv'),'r') as f:
-            while True:
-                l=f.readline()
-                if l.split(",")[0] == symbol:
-                    self.eig = float(l.split(",")[1])
-                    break
-                # Check for end of file
-                elif not l:
-                    self.eig = False
-                    break
-
-        # Load s-eigenvalue data from data table by iterating through CSV file
-        with open(path.join(data_directory,
-                            'Eigenvalues_s.csv'), 'r') as f:
-            while True:
-                l=f.readline()
-                if l.split(",")[0] == symbol:
-                    self.eig_s = float(l.split(",")[1])
-                    break
-                # Check for end of file
-                elif not l:
-                    self.eig_s = False
-                    break
-
-
-#----------------------------------------------------------------------------#
-# THIS WAS CREATED BY TIM GAUNTLETT. PLEASE CHECK                            #
-#----------------------------------------------------------------------------#
-        # Load coordination environments
-        coord_envs = []
-        with open(path.join(data_directory,
-                            'shannon_radii.csv'), 'rU') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                    if row[0] == symbol:
-                        coord_envs.append(row[2])
-
-        self.coord_envs = coord_envs
-
-# Read in the Solid State Energies from csv file
-        with open(path.join(data_directory, 'SSE.csv'), 'rU') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                if row[0] == symbol:
-                    self.SSE = float(row[2])
-                    break
-                elif not l:
-                    self.SSE = False
-                    break
-
-#------------------------------------------------------------------------------------------
 
 class Species(Element):
     """
@@ -225,19 +164,19 @@ class Species(Element):
 
     def __init__(self,symbol,oxidation,coordination):
         Element.__init__(self,symbol)
+        
         self.oxidation = oxidation
         self.coordination = coordination
-        # Load shannon radii
-        with open(path.join(data_directory,
-                            'shannon_radii.csv'),'rU') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                if (row[0] == symbol
-                    and int(row[1]) == oxidation
-                    and row[2] == coordination):
-                    shannon_radius = row[3]
-
-        self.shannon_radius = shannon_radius
+        
+        # Get shannon radius for the oxidation state and coordination.
+        
+        self.shannon_radius = None;
+        
+        shannon_data = data_loader.GetElementShannonRadiusData(symbol);
+        
+        for dataset in shannon_Data:
+            if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
+                self.shannon_radius = dataset['crystal_radius'];
 
 
 def ordered_elements(x,y):
