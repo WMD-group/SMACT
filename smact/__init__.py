@@ -67,7 +67,7 @@ class Element(object):
     def __init__(self, symbol):
         # Set oxidation states.
 
-        oxdation_states = data_loader.GetElementOxidationStates(symbol);
+        oxidation_states = data_loader.GetElementOxidationStates(symbol);
         
         if oxidation_states != None:
             # Forces a "deep" copy of the list of oxidation states from the cache.
