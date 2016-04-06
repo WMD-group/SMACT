@@ -48,7 +48,7 @@ def ToggleWarnings(enable):
 
 _ElementOxidationStates = None;
 
-def GetElementOxidationStates(symbol, copy = True):
+def LookupElementOxidationStates(symbol, copy = True):
     """
     Retrieve a list of known oxidation states for an element.
     
@@ -92,7 +92,7 @@ def GetElementOxidationStates(symbol, copy = True):
 
 _ElementCrustalAbundances = None;
 
-def GetElementCrustalAbundance(symbol):
+def LookupElementCrustalAbundance(symbol):
     """
     Retrieve the crustal abundance for an element.
     
@@ -129,7 +129,7 @@ def GetElementCrustalAbundance(symbol):
 
 _ElementHHIs = None;
 
-def GetElementHHIs(symbol):
+def LookupElementHHIs(symbol):
     """
     Retrieve the HHI_R and HHI_p scores for an element.
     
@@ -147,11 +147,12 @@ def GetElementHHIs(symbol):
 
         with open(os.path.join(data_directory, "HHIs.txt"), 'r') as file:
             for line in file:
-                items = line.strip();
+                line = line.strip();
                 
                 if line[0] != '#':
                     items = line.split();
-                    
+
+                    _ElementHHIs[items[0]] = (float(items[1]), float(items[2]));
 
     if symbol in _ElementHHIs:
         return _ElementHHIs[symbol];
@@ -165,7 +166,7 @@ def GetElementHHIs(symbol):
 
 _ElementOpenBabelDerivedData = None;
 
-def GetElementOpenBabelDerivedData(symbol, copy = True):
+def LookupElementOpenBabelDerivedData(symbol, copy = True):
     """
     Retrieve the Open Banel-derived data for an element.
     
@@ -277,7 +278,7 @@ def GetElementOpenBabelDerivedData(symbol, copy = True):
 
 _ElementEigenvalues = None;
 
-def GetElementEigenvalue(symbol):
+def LookupElementEigenvalue(symbol):
     """
     Retrieve the eigenvalue for an element.
     
@@ -315,7 +316,7 @@ def GetElementEigenvalue(symbol):
 
 _ElementSEigenvalues = None;
 
-def GetElementSEigenvalue(symbol):
+def LookupElementSEigenvalue(symbol):
     """
     Retrieve the s eigenvalue for an element.
     
@@ -353,7 +354,7 @@ def GetElementSEigenvalue(symbol):
 
 _ElementShannonRadiiData = None;
 
-def GetElementShannonRadiusData(symbol, copy = True):
+def LookupElementShannonRadiusData(symbol, copy = True):
     """
     Retrieve Shannon radii for known oxidation states/coordination environments of an element.
     
@@ -397,10 +398,10 @@ def GetElementShannonRadiusData(symbol, copy = True):
     
     if symbol in _ElementShannonRadiiData:
         if copy:
-            # _ElementShannonRadiiData stores dictionaries -> if copy is set, use the dict.copy() function.
-            # The values are all Python "value types", so nothing further is required to make a deep copy.
+            # _ElementShannonRadiiData stores a list of dictionaries -> if copy is set, copy the list and use the dict.copy() function on each element.
+            # The dictionary values are all Python "value types", so nothing further is required to make a deep copy.
             
-            return _ElementShannonRadiiData[symbol].copy();
+            return [item.copy() for item in _ElementShannonRadiiData[symbol]];
         else:
             return _ElementShannonRadiiData[symbol];
     else:
@@ -413,7 +414,7 @@ def GetElementShannonRadiusData(symbol, copy = True):
 
 _ElementSSEData = None;
 
-def GetElementSSEData(symbol):
+def LookupElementSSEData(symbol):
     """
     Retrieve the solid-state energy (SSE) data for an element.
     

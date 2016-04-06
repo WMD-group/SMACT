@@ -67,7 +67,7 @@ class Element(object):
     def __init__(self, symbol):
         # Set oxidation states.
 
-        oxidation_states = data_loader.GetElementOxidationStates(symbol);
+        oxidation_states = data_loader.LookupElementOxidationStates(symbol);
         
         # The Get*() function for this data implicitly makes a deep copy of the cached data.
         
@@ -75,11 +75,11 @@ class Element(object):
 
         # Set crustal abundance.
         
-        self.crustal_abundance = data_loader.GetElementCrustalAbundance(symbol)
+        self.crustal_abundance = data_loader.LookupElementCrustalAbundance(symbol)
 
         # Set HHIs.
 
-        HHIR_scores = data_loader.GetElementHHIs(symbol);
+        HHIR_scores = data_loader.LookupElementHHIs(symbol);
         
         if HHIR_scores != None:
             HHI_p, HHI_R = HHIR_scores;
@@ -93,7 +93,7 @@ class Element(object):
         # Set data from the Open Babel-derived dataset.
         # Since the class stores values from the dictionary returned by the Get*() function, and not a reference to it, it is safe to use copy = False.
         
-        dataset = data_loader.GetElementOpenBabelDerivedData(symbol, copy = False);
+        dataset = data_loader.LookupElementOpenBabelDerivedData(symbol, copy = False);
         
         if dataset == None:
             raise NameError("Open Babel-derived element data for %s not found." % (symbol));
@@ -109,16 +109,16 @@ class Element(object):
 
         # Set eigenvalue data.
         
-        self.eig = data_loader.GetElementEigenvalue(symbol);
+        self.eig = data_loader.LookupElementEigenvalue(symbol);
 
         # Set s-eigenvalue data.
         
-        self.eig_s = data_loader.GetElementSEigenvalue(symbol);
+        self.eig_s = data_loader.LookupElementSEigenvalue(symbol);
         
         # Set coordination-environment data from the Shannon-radius data.
         # As above, it is safe to use copy = False with this Get* function.
         
-        shannon_data = data_loader.GetElementShannonRadiusData(symbol, copy = False);
+        shannon_data = data_loader.LookupElementShannonRadiusData(symbol, copy = False);
         
         if shannon_data != None:
             self.coord_envs = [dataset['coordination'] for dataset in shannon_data];
@@ -127,7 +127,7 @@ class Element(object):
         
         # Set SSE from the SSE dataset.
         
-        sse_data = data_loader.GetElementSSEData(symbol);
+        sse_data = data_loader.LookupElementSSEData(symbol);
         
         if sse_data != None:
             self.SSE = sse_data['SolidStateEnergy'];
