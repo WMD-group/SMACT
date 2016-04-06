@@ -417,6 +417,8 @@ def GetElementSSEData(symbol):
     """
     Retrieve the solid-state energy (SSE) data for an element.
     
+    Taken from J. Am. Chem. Soc., 2011, 133 (42), pp 16852-16960, DOI: 10.1021/ja204670s 
+
     Args:
         symbol : the atomic symbol of the element to look up.
     
@@ -451,3 +453,84 @@ def GetElementSSEData(symbol):
             print("WARNING: Solid-state energy data for element {0} not found.".format(symbol));
         
         return None;
+
+# Loader and cache for the revised (2015) element solid-state energy (SSE) datasets.
+
+_ElementSSE2015Data = None;
+
+def GetElementSSE2015Data(symbol):
+    """
+    Retrieve the solid-state energy (SSE2015) data for an element.
+    
+    Taken from J. Solid State Chem., 2015, 231, pp 138-144, DOI: 10.1016/j.jssc.2015.07.037
+
+    Args:
+        symbol : the atomic symbol of the element to look up.
+    
+    Returns:
+        A dictionary containing the SSE2015 dataset for the element, or None if the element was not found among the external data.
+    """
+    
+    global _ElementSSE2015Data;
+    
+    if _ElementSSE2015Data == None:
+        _ElementSSE2015Data = { };
+        
+        with open(os.path.join(data_directory, "SSE_2015.csv"), 'rU') as file:
+            reader = csv.reader(file)
+            
+            for row in reader:
+                dataset = {
+                    'OxidationState' : int(row[1]),
+                    'SolidStateEnergy2015' : float(row[2])}
+                    
+                _ElementSSE2015Data[row[0]] = dataset;
+
+    if symbol in _ElementSSE2015Data:
+        return _ElementSSE2015Data[symbol];
+    else:
+        if _PrintWarnings:
+            print("WARNING: Solid-state energy (revised 2015) data for element {0} not found.".format(symbol));
+        
+        return None;
+
+# Loader and cache for the element solid-state energy (SSE) from Pauling eletronegativity datasets.
+
+_ElementSSEPaulingData = None;
+
+def GetElementSSEPaulingData(symbol):
+    """
+    Retrieve the solid-state energy (SSEPauling) data for an element from the regression fit when SSE2015 is plotted against Pauling electronegativity. 
+    
+    Taken from J. Solid State Chem., 2015, 231, pp 138-144, DOI: 10.1016/j.jssc.2015.07.037
+
+    Args:
+        symbol : the atomic symbol of the element to look up.
+    
+    Returns:
+        A dictionary containing the SSE2015 dataset for the element, or None if the element was not found among the external data.
+    """
+    
+    global _ElementSSEPaulingData;
+    
+    if _ElementSSEPaulingData == None:
+        _ElementSSEPaulingData = { };
+        
+        with open(os.path.join(data_directory, "SSE_Pauling.csv"), 'rU') as file:
+            reader = csv.reader(file)
+            
+            for row in reader:
+                dataset = {
+                    'SolidStateEnergyPauling' : float(row[1])}
+                    
+                _ElementSSEPaulingData[row[0]] = dataset;
+
+    if symbol in _ElementSSEPaulingData:
+        return _ElementSSEPaulingData[symbol];
+    else:
+        if _PrintWarnings:
+            print("WARNING: Solid-state energy data from Pauling electronegativity regression fit for element {0} not found.".format(symbol));
+        
+        return None;
+
+

@@ -134,6 +134,24 @@ class Element(object):
         else:
             self.SSE = None;
 
+        # Set SSE_2015 (revised) from the SSE_2015 dataset.
+
+        sse_2015_data = data_loader.GetElementSSE2015Data(symbol);
+
+        if sse_2015_data != None:
+            self.SSE2015 = sse_2015_data['SolidStateEnergy2015'];
+        else:
+            self.SSE2015 = None;
+
+        # Set SSE_Pauling from the SSE_Pauling dataset.
+
+        sse_Pauling_data = data_loader.GetElementSSEPaulingData(symbol);
+
+        if sse_Pauling_data != None:
+            self.SSEPauling = sse_Pauling_data['SolidStateEnergyPauling'];
+        else:
+            self.SSEPauling = None;
+
 
 class Species(Element):
     """
