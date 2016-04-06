@@ -48,12 +48,13 @@ def ToggleWarnings(enable):
 
 _ElementOxidationStates = None;
 
-def GetElementOxidationStates(symbol):
+def GetElementOxidationStates(symbol, copy = True):
     """
     Retrieve a list of known oxidation states for an element.
     
     Args:
         symbol : the atomic symbol of the element to look up.
+        copy : if True (default), return a copy of the oxidation-state list, rather than a reference to the cached data -- only use copy = False in performance-sensitive code and where the list will not be modified!
     
     Returns:
         A list of elements, or None if oxidation states for the element were not found in the external data.
@@ -74,7 +75,13 @@ def GetElementOxidationStates(symbol):
                     _ElementOxidationStates[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
 
     if symbol in _ElementOxidationStates:
-        return _ElementOxidationStates[symbol]
+        if copy:
+            # _ElementOxidationStates stores lists -> if copy is set, make an implicit deep copy.
+            # The elements of the lists are integers, which are "value types" in Python.
+            
+            return [oxidationState for oxidationState in _ElementOxidationStates[symbol]];
+        else:
+            return _ElementOxidationStates[symbol];
     else:
         if _PrintWarnings:
             print("WARNING: Oxidation states for element {0} not found.".format(symbol));
@@ -158,12 +165,13 @@ def GetElementHHIs(symbol):
 
 _ElementOpenBabelDerivedData = None;
 
-def GetElementOpenBabelDerivedData(symbol):
+def GetElementOpenBabelDerivedData(symbol, copy = True):
     """
     Retrieve the Open Banel-derived data for an element.
     
     Args:
         symbol : the atomic symbol of the element to look up.
+        copy : if True (default), return a copy of the data dictionary, rather than a reference to the cached object -- only use copy = False in performance-sensitive code and where you are certain the dictionary will not be modified!
     
     Returns:
         A dictionary containing the data read from the Open Babel table, keyed with the column headings.
@@ -252,7 +260,13 @@ def GetElementOpenBabelDerivedData(symbol):
                     _ElementOpenBabelDerivedData[items[1]] = dataset;
 
     if symbol in _ElementOpenBabelDerivedData:
-        return _ElementOpenBabelDerivedData[symbol];
+        if copy:
+            # _ElementOpenBabelDerivedData stores dictionaries -> if copy is set, use the dict.copy() function to return a copy.
+            # The values are all Python "value types", so explicitly cloning the elements is not necessary to make a deep copy.
+            
+            return _ElementOpenBabelDerivedData[symbol].copy();
+        else:
+            return _ElementOpenBabelDerivedData[symbol];
     else:
         if _PrintWarnings:
             print("WARNING: Open Babel-derived element data for {0} not found.".format(symbol));
@@ -339,12 +353,13 @@ def GetElementSEigenvalue(symbol):
 
 _ElementShannonRadiiData = None;
 
-def GetElementShannonRadiusData(symbol):
+def GetElementShannonRadiusData(symbol, copy = True):
     """
     Retrieve Shannon radii for known oxidation states/coordination environments of an element.
     
     Args:
         symbol : the atomic symbol of the element to look up.
+        copy : if True (default), return a copy of the data dictionary, rather than a reference to the cached object -- only use copy = False in performance-sensitive code and where you are certain the dictionary will not be modified!
     
     Returns:
         A list of Shannon radii datasets, or None if the element was not found among the external data.
@@ -381,7 +396,13 @@ def GetElementShannonRadiusData(symbol):
                     _ElementShannonRadiiData[key] = [dataset];
     
     if symbol in _ElementShannonRadiiData:
-        return _ElementShannonRadiiData[symbol];
+        if copy:
+            # _ElementShannonRadiiData stores dictionaries -> if copy is set, use the dict.copy() function.
+            # The values are all Python "value types", so nothing further is required to make a deep copy.
+            
+            return _ElementShannonRadiiData[symbol].copy();
+        else:
+            return _ElementShannonRadiiData[symbol];
     else:
         if _PrintWarnings:
             print("WARNING: Shannon-radius data for element {0} not found.".format(symbol));
@@ -415,13 +436,10 @@ def GetElementSSEData(symbol):
                 dataset = {
                     'AtomicNumber' : int(row[1]),
                     'SolidStateEnergy' : float(row[2]),
-                    
-                    #TODO: Someone must know what these fields are -- and they might be useful!
-                    
-                    'Unknown1' : float(row[3]),
-                    'Unknown2' : float(row[4]),
-                    'Unknown3' : float(row[5]),
-                    'Unknown4' : float(row[6])
+                    'IonisationPotential' : float(row[3]),
+                    'ElectronAffinity' : float(row[4]),
+                    'MullikenElectronegativity' : float(row[5]),
+                    'SolidStateRenormalisationEnergy' : float(row[6])
                     };
                 
                 _ElementSSEData[row[0]] = dataset;

@@ -69,11 +69,7 @@ class Element(object):
 
         oxidation_states = data_loader.GetElementOxidationStates(symbol);
         
-        if oxidation_states != None:
-            # Forces a "deep" copy of the list of oxidation states from the cache.
-            # If not, the class field would store a reference to the cached list, and any changes made to it (e.g. del) would be propagated to new instances of the Element class constructed with the same symbol.
-            
-            oxidation_states = list(oxidation_states);
+        # The Get*() function for this data implicitly makes a deep copy of the cached data.
         
         self.oxidation_states = oxidation_states;
 
@@ -93,13 +89,14 @@ class Element(object):
         else:
             self.HHI_p = None;
             self.HHI_R = None;
+    
+        # Set data from the Open Babel-derived dataset.
+        # Since the class stores values from the dictionary returned by the Get*() function, and not a reference to it, it is safe to use copy = False.
         
-        dataset = data_loader.GetElementOpenBabelDerivedData(symbol);
+        dataset = data_loader.GetElementOpenBabelDerivedData(symbol, copy = False);
         
         if dataset == None:
             raise NameError("Open Babel-derived element data for %s not found." % (symbol));
-
-        # Set data from the Open Babel-derived dataset.
         
         self.symbol = symbol
         self.name = dataset['Name']
@@ -119,8 +116,9 @@ class Element(object):
         self.eig_s = data_loader.GetElementSEigenvalue(symbol);
         
         # Set coordination-environment data from the Shannon-radius data.
+        # As above, it is safe to use copy = False with this Get* function.
         
-        shannon_data = data_loader.GetElementShannonRadiusData(symbol);
+        shannon_data = data_loader.GetElementShannonRadiusData(symbol, copy = False);
         
         if shannon_data != None:
             self.coord_envs = [dataset['coordination'] for dataset in shannon_data];
