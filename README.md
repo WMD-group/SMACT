@@ -64,6 +64,9 @@ included in the parent folder.
 References
 ----------
 
+[K. T. Butler, J. M. Frost, J. M. Skelton, K. L. Svane and A. Walsh, 
+"Computational materials design of crystalline solids", *Chemical Society Reviews* (2016)](http://pubs.rsc.org/en/content/articlelanding/2016/cs/c5cs00841g)
+
 [B. R. Pamplin, "A systematic method of deriving new semiconducting
 compounds by structural analogy", *J. Phys. Chem. Solids*
 **25**, 675 (1964)](http://www.sciencedirect.com/science/article/pii/0022369764901763)
@@ -72,12 +75,10 @@ compounds by structural analogy", *J. Phys. Chem. Solids*
 of quaternary chalcogenide semiconductors derived from cation cross-substitution
 of II-VI and I-III-VI2 compounds", *Physical Review B* **79**, 165211 (2009)](http://journals.aps.org/prb/abstract/10.1103/PhysRevB.79.165211)
 
-[Extended Mendeley Reading List](https://www.mendeley.com/groups/8113991/materials-design/overview/)
+[Mendeley Reading List](https://www.mendeley.com/groups/8113991/materials-design/overview/)
 
 Development notes
 -----------------
-
-This project is currently in an early state.
 
 Code style should comply with [PEP
 8](http://www.python.org/dev/peps/pep-0008) where possible.
@@ -86,7 +87,7 @@ style](http://google-styleguide.googlecode.com/svn/trunk/pyguide.html)
 is also helpful, including a good model for docstrings.
 Please use comments liberally when adding nontrivial features, and
 take the chance to clean up other people's code while looking at it.
-
+ 
 Although the project is based in Python 2.7.x, please use new-style classes and
 string formatting; as well as enjoying their elegance and power, this will make
 it much easier to port to Python 3 if this is ever desired.
