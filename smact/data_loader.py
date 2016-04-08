@@ -459,17 +459,18 @@ def LookupElementSSEData(symbol):
 
 _ElementSSE2015Data = None;
 
-def GetElementSSE2015Data(symbol):
+def GetElementSSE2015Data(symbol, copy = True):
     """
-    Retrieve the solid-state energy (SSE2015) data for an element.
+    Retrieve the solid-state energy (SSE2015) data for an element in an oxidation state.
     
     Taken from J. Solid State Chem., 2015, 231, pp 138-144, DOI: 10.1016/j.jssc.2015.07.037
 
     Args:
         symbol : the atomic symbol of the element to look up.
+        copy: if True (deafault), return a copy of the data dictionary, rather than a reference to a cached object -- only use copy = False in performance-sensitive code and where you are certain the dictionary will not be modified!
     
     Returns:
-        A dictionary containing the SSE2015 dataset for the element, or None if the element was not found among the external data.
+        A list of SSE datasets for the element, or None if the element was not found among the external data.
     """
     
     global _ElementSSE2015Data;
@@ -481,14 +482,24 @@ def GetElementSSE2015Data(symbol):
             reader = csv.reader(file)
             
             for row in reader:
+                # Elements can have multiple SSE values depending on their oxidation state
+                
+                key = row[0]
+                
                 dataset = {
                     'OxidationState' : int(row[1]),
                     'SolidStateEnergy2015' : float(row[2])}
                     
-                _ElementSSE2015Data[row[0]] = dataset;
+                if key in _ElementSSE2015Data:
+                    _ElementSSE2015Data[key].append(dataset)
+                else:
+                    _ElementSSE2015Data[key] = [dataset]
 
     if symbol in _ElementSSE2015Data:
-        return _ElementSSE2015Data[symbol];
+        if copy:
+            return [item.copy() for item in _ElementSSE2015Data[symbol]]
+        else:
+            return _ElementSSE2015Data[symbol]
     else:
         if _PrintWarnings:
             print("WARNING: Solid-state energy (revised 2015) data for element {0} not found.".format(symbol));
