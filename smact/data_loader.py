@@ -459,7 +459,7 @@ def LookupElementSSEData(symbol):
 
 _ElementSSE2015Data = None;
 
-def GetElementSSE2015Data(symbol, copy = True):
+def LookupElementSSE2015Data(symbol, copy = True):
     """
     Retrieve the solid-state energy (SSE2015) data for an element in an oxidation state.
     
@@ -510,7 +510,7 @@ def GetElementSSE2015Data(symbol, copy = True):
 
 _ElementSSEPaulingData = None;
 
-def GetElementSSEPaulingData(symbol):
+def LookupElementSSEPaulingData(symbol):
     """
     Retrieve the solid-state energy (SSEPauling) data for an element from the regression fit when SSE2015 is plotted against Pauling electronegativity. 
     

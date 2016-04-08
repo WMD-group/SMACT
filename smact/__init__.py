@@ -134,18 +134,9 @@ class Element(object):
         else:
             self.SSE = None;
 
-        # Set SSE_2015 (revised) from the SSE_2015 dataset.
-
-        sse_2015_data = data_loader.GetElementSSE2015Data(symbol);
-
-        if sse_2015_data != None:
-            self.SSE2015 = sse_2015_data['SolidStateEnergy2015'];
-        else:
-            self.SSE2015 = None;
-
         # Set SSE_Pauling from the SSE_Pauling dataset.
 
-        sse_Pauling_data = data_loader.GetElementSSEPaulingData(symbol);
+        sse_Pauling_data = data_loader.LookupElementSSEPaulingData(symbol);
 
         if sse_Pauling_data != None:
             self.SSEPauling = sse_Pauling_data['SolidStateEnergyPauling'];
@@ -196,11 +187,21 @@ class Species(Element):
         
         self.shannon_radius = None;
         
-        shannon_data = data_loader.GetElementShannonRadiusData(symbol);
+        shannon_data = data_loader.LookupElementShannonRadiusData(symbol);
         
-        for dataset in shannon_Data:
+        for dataset in shannon_data:
             if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
                 self.shannon_radius = dataset['crystal_radius'];
+
+        # Get SSE_2015 (revised) for the oxidation state.
+        
+        self.SSE_2015 = None
+
+        sse_2015_data = data_loader.LookupElementSSE2015Data(symbol);
+    
+        for dataset in sse_2015_data:
+            if dataset['OxidationState'] == oxidation:
+                self.SSE_2015 = dataset['SolidStateEnergy2015']
 
 
 def ordered_elements(x,y):
