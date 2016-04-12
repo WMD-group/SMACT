@@ -369,7 +369,8 @@ def pauling_test(symbols, ox, paul, repeat_anions=True, repeat_cations=True, thr
             of the elements in the compound
         threshold (float): a tolerance for the allowed deviation from
             the Pauling criterion
-	repeat_anions : boolean, can an anion repeat in different oxidation states in the same compound.
+	repeat_anions : boolean, allow an anion to repeat in different oxidation
+        states in the same compound.
 	repeat_cations : as above, but for cations.
         symbols : list of the chemical symbols of each site.
 
@@ -387,7 +388,8 @@ def pauling_test(symbols, ox, paul, repeat_anions=True, repeat_cations=True, thr
         if state > 0:
             if repeat_cations:
                 positive.append(paul[i])
-	    elif symbols[i] in pos_ele: # Reject materials where the same cation occupies two sites.
+            elif symbols[i] in pos_ele: # Reject materials where the same
+                                        # cation occupies two sites.
                 return False
             else:
                 positive.append(paul[i])
@@ -396,7 +398,8 @@ def pauling_test(symbols, ox, paul, repeat_anions=True, repeat_cations=True, thr
         if state < 0:
             if repeat_anions:
                 negative.append(paul[i])
-	    elif symbols[i] in neg_ele: # Reject materials where the same anion occupies two sites.
+            elif symbols[i] in neg_ele: # Reject materials where the same
+                                        # anion occupies two sites.
                 return False
             else:
                 negative.append(paul[i])

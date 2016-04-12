@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright J. M. Sketon, D. W. Davies (2016)                                 #
+# Copyright J. M. Skelton, D. W. Davies, A. J. Jackson (2016)                 #
 #                                                                             #
 # This file is part of SMACT: smact.__init__ is free software: you can        #
 # redistribute it and/or modify it under the terms of the GNU General Public  #
@@ -66,15 +66,17 @@ def lookup_element_oxidation_states(symbol, copy=True):
     Retrieve a list of known oxidation states for an element.
 
     Args:
-        symbol : the atomic symbol of the element to look up.
-        copy : if True (default), return a copy of the oxidation-state
-            list, rather than a reference to the cached data -- only use
-            copy=False in performance-sensitive code and where the list
-            will not be modified!
+        symbol (str) : the atomic symbol of the element to look up.
+        copy (Optional(bool)): if True (default), return a copy of the
+            oxidation-state list, rather than a reference to the cached
+            data -- only use copy=False in performance-sensitive code
+            and where the list will not be modified!
 
     Returns:
-        A list of elements, or None if oxidation states for the Element
-        were not found in the external data.
+        list: List of known oxidation states for the element.
+
+            Return None if oxidation states for the Element were not
+            found in the external data.
     """
 
     global _el_ox_states
@@ -112,7 +114,7 @@ def lookup_element_crustal_abundance(symbol):
     Retrieve the crustal abundance for an element.
 
     Args:
-        symbol : the atomic symbol of the element to look up.
+        symbol (str) : the atomic symbol of the element to look up.
 
     Returns:
         The crustal abundance, or None if a value for the element was not found
@@ -195,11 +197,12 @@ def lookup_element_open_babel_derived_data(symbol, copy=True):
     Retrieve the Open Banel-derived data for an element.
 
     Args:
-        symbol : the atomic symbol of the element to look up.
-        copy : if True (default), return a copy of the data dictionary,
-            rather than a reference to the cached object -- only used
-            copy=False in performance-sensitive code and where you are
-            certain the dictionary will not be modified!
+        symbol (str) : the atomic symbol of the element to look up.
+
+    copy (Optional(bool)) : if True (default), return a copy of the data
+        dictionary, rather than a reference to the cached object --
+        only used copy=False in performance-sensitive code and where
+        you are certain the dictionary will not be modified!
 
     Returns:
         A dictionary containing the data read from the Open Babel table,
@@ -328,12 +331,15 @@ def lookup_element_eigenvalue(symbol):
     """
     Retrieve the eigenvalue for an element.
 
+    If the element is not found in the data table, or has a value of 0.0,
+    a value of None is returned. The data table is "Eigenvalues.csv".
+
     Args:
-        symbol : the atomic symbol of the element to look up.
+        symbol (float): the atomic symbol of the element to look up.
 
     Returns:
-        The eigenvalue, or None if an eigenvalue was not found in
-        the external data.
+        float: The eigenvalue, if a non-zero eigenvalue was found in the data.
+            Otherwise, return None.
     """
 
     global _element_eigenvalues
@@ -353,7 +359,11 @@ def lookup_element_eigenvalue(symbol):
                 _element_eigenvalues[row[0]] = float(row[1])
 
     if symbol in _element_eigenvalues:
-        return _element_eigenvalues[symbol]
+        eig = _element_eigenvalues[symbol]
+        if eig == 0.:
+            return None
+        else:
+            return eig
     else:
         if _print_warnings:
             print("WARNING: Eigenvalue data for "
@@ -370,12 +380,15 @@ def lookup_element_s_eigenvalue(symbol):
     """
     Retrieve the s eigenvalue for an element.
 
+    If the element is not found in the data table, or has a value of 0.0,
+    a value of None is returned. The data table is "Eigenvalues_s.csv".
+
     Args:
-        symbol : the atomic symbol of the element to look up.
+        symbol (float): the atomic symbol of the element to look up.
 
     Returns:
-        The s eigenvalue, or None if an s eigenvalue was not found in
-        the external data.
+        float: s eigenvalue, if a non-zero eigenvalue was found in
+            the external data. Otherwise, return None.
     """
 
     global _element_seigenvalues
@@ -392,10 +405,15 @@ def lookup_element_s_eigenvalue(symbol):
             next(reader)
 
             for row in reader:
-                _element_eigenvalues[row[0]] = float(row[1])
+                _element_seigenvalues[row[0]] = float(row[1])
 
     if symbol in _element_seigenvalues:
-        return _element_seigenvalues[symbol]
+        eig = _element_seigenvalues[symbol]
+        if eig == 0.:
+            return None
+        else:
+            return eig
+
     else:
         if _print_warnings:
             print("WARNING: s-eigenvalue data for element {0}"
@@ -416,15 +434,32 @@ def lookup_element_shannon_radius_data(symbol, copy=True):
     environments of an element.
 
     Args:
-        symbol : the atomic symbol of the element to look up.
-        copy : if True (default), return a copy of the data dictionary,
-            rather than a reference to the cached object -- only use
-            copy=False in performance-sensitive code and where you are
-            certain the dictionary will not be modified!
+        symbol (str) : the atomic symbol of the element to look up.
+
+    copy (Optional(bool)): if True (default), return a copy of the data
+        dictionary, rather than a reference to the cached object --
+        only use copy=False in performance-sensitive code and where
+        you are certain the dictionary will not be modified!
 
     Returns:
-        A list of Shannon radii datasets, or None if the element was not
-        found among the external data.
+        list:
+            Shannon radii datasets.
+
+        Returns None if the element was not found among the external
+        data.
+
+        Shannon radii datasets are dictionaries with the keys:
+
+        charge
+            *int* charge
+        coordination
+            *int* coordination
+        crystal_radius
+            *float*
+        ionic_radius
+            *float*
+        comment
+            *str*
     """
 
     global _element_shannon_radii_data

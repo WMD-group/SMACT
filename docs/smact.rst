@@ -23,6 +23,7 @@ Submodules
 
    smact.builder
    smact.data
+   smact.data_loader
    smact.distorter
    smact.lattice
    smact.lattice_parameters
