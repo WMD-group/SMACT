@@ -67,23 +67,19 @@ class Element(object):
     def __init__(self, symbol):
         # Set oxidation states.
 
-        oxidation_states = data_loader.GetElementOxidationStates(symbol);
+        oxidation_states = data_loader.LookupElementOxidationStates(symbol);
         
-        if oxidation_states != None:
-            # Forces a "deep" copy of the list of oxidation states from the cache.
-            # If not, the class field would store a reference to the cached list, and any changes made to it (e.g. del) would be propagated to new instances of the Element class constructed with the same symbol.
-            
-            oxidation_states = list(oxidation_states);
+        # The Get*() function for this data implicitly makes a deep copy of the cached data.
         
         self.oxidation_states = oxidation_states;
 
         # Set crustal abundance.
         
-        self.crustal_abundance = data_loader.GetElementCrustalAbundance(symbol)
+        self.crustal_abundance = data_loader.LookupElementCrustalAbundance(symbol)
 
         # Set HHIs.
 
-        HHIR_scores = data_loader.GetElementHHIs(symbol);
+        HHIR_scores = data_loader.LookupElementHHIs(symbol);
         
         if HHIR_scores != None:
             HHI_p, HHI_R = HHIR_scores;
@@ -93,13 +89,14 @@ class Element(object):
         else:
             self.HHI_p = None;
             self.HHI_R = None;
+    
+        # Set data from the Open Babel-derived dataset.
+        # Since the class stores values from the dictionary returned by the Get*() function, and not a reference to it, it is safe to use copy = False.
         
-        dataset = data_loader.GetElementOpenBabelDerivedData(symbol);
+        dataset = data_loader.LookupElementOpenBabelDerivedData(symbol, copy = False);
         
         if dataset == None:
             raise NameError("Open Babel-derived element data for %s not found." % (symbol));
-
-        # Set data from the Open Babel-derived dataset.
         
         self.symbol = symbol
         self.name = dataset['Name']
@@ -112,15 +109,16 @@ class Element(object):
 
         # Set eigenvalue data.
         
-        self.eig = data_loader.GetElementEigenvalue(symbol);
+        self.eig = data_loader.LookupElementEigenvalue(symbol);
 
         # Set s-eigenvalue data.
         
-        self.eig_s = data_loader.GetElementSEigenvalue(symbol);
+        self.eig_s = data_loader.LookupElementSEigenvalue(symbol);
         
         # Set coordination-environment data from the Shannon-radius data.
+        # As above, it is safe to use copy = False with this Get* function.
         
-        shannon_data = data_loader.GetElementShannonRadiusData(symbol);
+        shannon_data = data_loader.LookupElementShannonRadiusData(symbol, copy = False);
         
         if shannon_data != None:
             self.coord_envs = [dataset['coordination'] for dataset in shannon_data];
@@ -129,12 +127,21 @@ class Element(object):
         
         # Set SSE from the SSE dataset.
         
-        sse_data = data_loader.GetElementSSEData(symbol);
+        sse_data = data_loader.LookupElementSSEData(symbol);
         
         if sse_data != None:
             self.SSE = sse_data['SolidStateEnergy'];
         else:
             self.SSE = None;
+
+        # Set SSE_Pauling from the SSE_Pauling dataset.
+
+        sse_Pauling_data = data_loader.LookupElementSSEPaulingData(symbol);
+
+        if sse_Pauling_data != None:
+            self.SSEPauling = sse_Pauling_data['SolidStateEnergyPauling'];
+        else:
+            self.SSEPauling = None;
 
 
 class Species(Element):
@@ -180,11 +187,21 @@ class Species(Element):
         
         self.shannon_radius = None;
         
-        shannon_data = data_loader.GetElementShannonRadiusData(symbol);
+        shannon_data = data_loader.LookupElementShannonRadiusData(symbol);
         
-        for dataset in shannon_Data:
+        for dataset in shannon_data:
             if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
                 self.shannon_radius = dataset['crystal_radius'];
+
+        # Get SSE_2015 (revised) for the oxidation state.
+        
+        self.SSE_2015 = None
+
+        sse_2015_data = data_loader.LookupElementSSE2015Data(symbol);
+    
+        for dataset in sse_2015_data:
+            if dataset['OxidationState'] == oxidation:
+                self.SSE_2015 = dataset['SolidStateEnergy2015']
 
 
 def ordered_elements(x,y):

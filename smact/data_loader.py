@@ -48,12 +48,13 @@ def ToggleWarnings(enable):
 
 _ElementOxidationStates = None;
 
-def GetElementOxidationStates(symbol):
+def LookupElementOxidationStates(symbol, copy = True):
     """
     Retrieve a list of known oxidation states for an element.
     
     Args:
         symbol : the atomic symbol of the element to look up.
+        copy : if True (default), return a copy of the oxidation-state list, rather than a reference to the cached data -- only use copy = False in performance-sensitive code and where the list will not be modified!
     
     Returns:
         A list of elements, or None if oxidation states for the element were not found in the external data.
@@ -74,7 +75,13 @@ def GetElementOxidationStates(symbol):
                     _ElementOxidationStates[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
 
     if symbol in _ElementOxidationStates:
-        return _ElementOxidationStates[symbol]
+        if copy:
+            # _ElementOxidationStates stores lists -> if copy is set, make an implicit deep copy.
+            # The elements of the lists are integers, which are "value types" in Python.
+            
+            return [oxidationState for oxidationState in _ElementOxidationStates[symbol]];
+        else:
+            return _ElementOxidationStates[symbol];
     else:
         if _PrintWarnings:
             print("WARNING: Oxidation states for element {0} not found.".format(symbol));
@@ -85,7 +92,7 @@ def GetElementOxidationStates(symbol):
 
 _ElementCrustalAbundances = None;
 
-def GetElementCrustalAbundance(symbol):
+def LookupElementCrustalAbundance(symbol):
     """
     Retrieve the crustal abundance for an element.
     
@@ -122,7 +129,7 @@ def GetElementCrustalAbundance(symbol):
 
 _ElementHHIs = None;
 
-def GetElementHHIs(symbol):
+def LookupElementHHIs(symbol):
     """
     Retrieve the HHI_R and HHI_p scores for an element.
     
@@ -140,11 +147,12 @@ def GetElementHHIs(symbol):
 
         with open(os.path.join(data_directory, "HHIs.txt"), 'r') as file:
             for line in file:
-                items = line.strip();
+                line = line.strip();
                 
                 if line[0] != '#':
                     items = line.split();
-                    
+
+                    _ElementHHIs[items[0]] = (float(items[1]), float(items[2]));
 
     if symbol in _ElementHHIs:
         return _ElementHHIs[symbol];
@@ -158,12 +166,13 @@ def GetElementHHIs(symbol):
 
 _ElementOpenBabelDerivedData = None;
 
-def GetElementOpenBabelDerivedData(symbol):
+def LookupElementOpenBabelDerivedData(symbol, copy = True):
     """
     Retrieve the Open Banel-derived data for an element.
     
     Args:
         symbol : the atomic symbol of the element to look up.
+        copy : if True (default), return a copy of the data dictionary, rather than a reference to the cached object -- only use copy = False in performance-sensitive code and where you are certain the dictionary will not be modified!
     
     Returns:
         A dictionary containing the data read from the Open Babel table, keyed with the column headings.
@@ -252,7 +261,13 @@ def GetElementOpenBabelDerivedData(symbol):
                     _ElementOpenBabelDerivedData[items[1]] = dataset;
 
     if symbol in _ElementOpenBabelDerivedData:
-        return _ElementOpenBabelDerivedData[symbol];
+        if copy:
+            # _ElementOpenBabelDerivedData stores dictionaries -> if copy is set, use the dict.copy() function to return a copy.
+            # The values are all Python "value types", so explicitly cloning the elements is not necessary to make a deep copy.
+            
+            return _ElementOpenBabelDerivedData[symbol].copy();
+        else:
+            return _ElementOpenBabelDerivedData[symbol];
     else:
         if _PrintWarnings:
             print("WARNING: Open Babel-derived element data for {0} not found.".format(symbol));
@@ -263,7 +278,7 @@ def GetElementOpenBabelDerivedData(symbol):
 
 _ElementEigenvalues = None;
 
-def GetElementEigenvalue(symbol):
+def LookupElementEigenvalue(symbol):
     """
     Retrieve the eigenvalue for an element.
     
@@ -301,7 +316,7 @@ def GetElementEigenvalue(symbol):
 
 _ElementSEigenvalues = None;
 
-def GetElementSEigenvalue(symbol):
+def LookupElementSEigenvalue(symbol):
     """
     Retrieve the s eigenvalue for an element.
     
@@ -339,12 +354,13 @@ def GetElementSEigenvalue(symbol):
 
 _ElementShannonRadiiData = None;
 
-def GetElementShannonRadiusData(symbol):
+def LookupElementShannonRadiusData(symbol, copy = True):
     """
     Retrieve Shannon radii for known oxidation states/coordination environments of an element.
     
     Args:
         symbol : the atomic symbol of the element to look up.
+        copy : if True (default), return a copy of the data dictionary, rather than a reference to the cached object -- only use copy = False in performance-sensitive code and where you are certain the dictionary will not be modified!
     
     Returns:
         A list of Shannon radii datasets, or None if the element was not found among the external data.
@@ -381,7 +397,13 @@ def GetElementShannonRadiusData(symbol):
                     _ElementShannonRadiiData[key] = [dataset];
     
     if symbol in _ElementShannonRadiiData:
-        return _ElementShannonRadiiData[symbol];
+        if copy:
+            # _ElementShannonRadiiData stores a list of dictionaries -> if copy is set, copy the list and use the dict.copy() function on each element.
+            # The dictionary values are all Python "value types", so nothing further is required to make a deep copy.
+            
+            return [item.copy() for item in _ElementShannonRadiiData[symbol]];
+        else:
+            return _ElementShannonRadiiData[symbol];
     else:
         if _PrintWarnings:
             print("WARNING: Shannon-radius data for element {0} not found.".format(symbol));
@@ -392,10 +414,12 @@ def GetElementShannonRadiusData(symbol):
 
 _ElementSSEData = None;
 
-def GetElementSSEData(symbol):
+def LookupElementSSEData(symbol):
     """
     Retrieve the solid-state energy (SSE) data for an element.
     
+    Taken from J. Am. Chem. Soc., 2011, 133 (42), pp 16852-16960, DOI: 10.1021/ja204670s 
+
     Args:
         symbol : the atomic symbol of the element to look up.
     
@@ -415,13 +439,10 @@ def GetElementSSEData(symbol):
                 dataset = {
                     'AtomicNumber' : int(row[1]),
                     'SolidStateEnergy' : float(row[2]),
-                    
-                    #TODO: Someone must know what these fields are -- and they might be useful!
-                    
-                    'Unknown1' : float(row[3]),
-                    'Unknown2' : float(row[4]),
-                    'Unknown3' : float(row[5]),
-                    'Unknown4' : float(row[6])
+                    'IonisationPotential' : float(row[3]),
+                    'ElectronAffinity' : float(row[4]),
+                    'MullikenElectronegativity' : float(row[5]),
+                    'SolidStateRenormalisationEnergy' : float(row[6])
                     };
                 
                 _ElementSSEData[row[0]] = dataset;
@@ -433,3 +454,95 @@ def GetElementSSEData(symbol):
             print("WARNING: Solid-state energy data for element {0} not found.".format(symbol));
         
         return None;
+
+# Loader and cache for the revised (2015) element solid-state energy (SSE) datasets.
+
+_ElementSSE2015Data = None;
+
+def LookupElementSSE2015Data(symbol, copy = True):
+    """
+    Retrieve the solid-state energy (SSE2015) data for an element in an oxidation state.
+    
+    Taken from J. Solid State Chem., 2015, 231, pp 138-144, DOI: 10.1016/j.jssc.2015.07.037
+
+    Args:
+        symbol : the atomic symbol of the element to look up.
+        copy: if True (deafault), return a copy of the data dictionary, rather than a reference to a cached object -- only use copy = False in performance-sensitive code and where you are certain the dictionary will not be modified!
+    
+    Returns:
+        A list of SSE datasets for the element, or None if the element was not found among the external data.
+    """
+    
+    global _ElementSSE2015Data;
+    
+    if _ElementSSE2015Data == None:
+        _ElementSSE2015Data = { };
+        
+        with open(os.path.join(data_directory, "SSE_2015.csv"), 'rU') as file:
+            reader = csv.reader(file)
+            
+            for row in reader:
+                # Elements can have multiple SSE values depending on their oxidation state
+                
+                key = row[0]
+                
+                dataset = {
+                    'OxidationState' : int(row[1]),
+                    'SolidStateEnergy2015' : float(row[2])}
+                    
+                if key in _ElementSSE2015Data:
+                    _ElementSSE2015Data[key].append(dataset)
+                else:
+                    _ElementSSE2015Data[key] = [dataset]
+
+    if symbol in _ElementSSE2015Data:
+        if copy:
+            return [item.copy() for item in _ElementSSE2015Data[symbol]]
+        else:
+            return _ElementSSE2015Data[symbol]
+    else:
+        if _PrintWarnings:
+            print("WARNING: Solid-state energy (revised 2015) data for element {0} not found.".format(symbol));
+        
+        return None;
+
+# Loader and cache for the element solid-state energy (SSE) from Pauling eletronegativity datasets.
+
+_ElementSSEPaulingData = None;
+
+def LookupElementSSEPaulingData(symbol):
+    """
+    Retrieve the solid-state energy (SSEPauling) data for an element from the regression fit when SSE2015 is plotted against Pauling electronegativity. 
+    
+    Taken from J. Solid State Chem., 2015, 231, pp 138-144, DOI: 10.1016/j.jssc.2015.07.037
+
+    Args:
+        symbol : the atomic symbol of the element to look up.
+    
+    Returns:
+        A dictionary containing the SSE2015 dataset for the element, or None if the element was not found among the external data.
+    """
+    
+    global _ElementSSEPaulingData;
+    
+    if _ElementSSEPaulingData == None:
+        _ElementSSEPaulingData = { };
+        
+        with open(os.path.join(data_directory, "SSE_Pauling.csv"), 'rU') as file:
+            reader = csv.reader(file)
+            
+            for row in reader:
+                dataset = {
+                    'SolidStateEnergyPauling' : float(row[1])}
+                    
+                _ElementSSEPaulingData[row[0]] = dataset;
+
+    if symbol in _ElementSSEPaulingData:
+        return _ElementSSEPaulingData[symbol];
+    else:
+        if _PrintWarnings:
+            print("WARNING: Solid-state energy data from Pauling electronegativity regression fit for element {0} not found.".format(symbol));
+        
+        return None;
+
+
