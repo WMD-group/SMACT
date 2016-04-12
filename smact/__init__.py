@@ -59,6 +59,8 @@ class Element(object):
 
         Element.coord_envs (list): The allowed coordination enviroments for the ion.
 
+        Element.mass (float) : Molar mass of the element.
+
     Raises:
         NameError: Element not found in element.txt
         Warning: Element not found in Eigenvalues.csv
@@ -106,6 +108,7 @@ class Element(object):
         self.pauling_eneg = dataset['ElNeg.']
         self.ionpot = dataset['Ionization']
         self.e_affinity = dataset['ElAffinity']
+        self.mass = dataset['Mass']
 
         # Set eigenvalue data.
         
