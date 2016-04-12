@@ -74,7 +74,7 @@ class Element(object):
 
         """
 
-        dataset = data_loader.LookupElementOpenBabelDerivedData(symbol, copy = False);
+        dataset = data_loader.lookup_element_open_babel_derived_data(symbol, copy = False);
 
         if dataset == None:
             raise NameError("Open Babel-derived element data for %s not found." % (symbol));
@@ -82,24 +82,24 @@ class Element(object):
         # Set coordination-environment data from the Shannon-radius data.
         # As above, it is safe to use copy = False with this Get* function.
 
-        shannon_data = data_loader.LookupElementShannonRadiusData(symbol, copy = False);
+        shannon_data = data_loader.lookup_element_shannon_radius_data(symbol, copy = False);
 
         if shannon_data != None:
             coord_envs = [row['coordination'] for row in shannon_data]
         else:
             coord_envs = None
 
-        HHIR_scores = data_loader.LookupElementHHIs(symbol)
+        HHIR_scores = data_loader.lookup_element_hhis(symbol)
         if HHIR_scores == None:
             HHIR_scores = (None, None)
 
-        sse_data = data_loader.LookupElementSSEData(symbol)
+        sse_data = data_loader.lookup_element_sse_data(symbol)
         if sse_data:
             sse = sse_data['SolidStateEnergy']
         else:
             sse = None
 
-        sse_Pauling_data = data_loader.LookupElementSSEPaulingData(symbol)
+        sse_Pauling_data = data_loader.lookup_element_sse_pauling_data(symbol)
         if sse_Pauling_data:
             sse_Pauling = sse_Pauling_data['SolidStateEnergyPauling']
         else:
@@ -109,10 +109,10 @@ class Element(object):
             ('coord_envs', coord_envs),
             ('covalent_radius', dataset['RCov']),
             ('crustal_abundance',
-             data_loader.LookupElementCrustalAbundance(symbol)),
+             data_loader.lookup_element_crustal_abundance(symbol)),
             ('e_affinity', dataset['ElAffinity']),
-            ('eig', data_loader.LookupElementEigenvalue(symbol)),
-            ('eig_s', data_loader.LookupElementSEigenvalue(symbol)),
+            ('eig', data_loader.lookup_element_eigenvalue(symbol)),
+            ('eig_s', data_loader.lookup_element_s_eigenvalue(symbol)),
             ('HHIR_p', HHIR_scores[0]),
             ('HHIR_R', HHIR_scores[1]),
             ('ionpot', dataset['Ionization']),
@@ -120,7 +120,7 @@ class Element(object):
             ('name', dataset['Name']),
             ('number', dataset['Number']),
             ('oxidation_states',
-             data_loader.LookupElementOxidationStates(symbol)),
+             data_loader.lookup_element_oxidation_states(symbol)),
             ('pauling_eneg', dataset['ElNeg.']),
             ('SSE', sse),
             ('SSEPauling', sse_Pauling),
@@ -172,7 +172,7 @@ class Species(Element):
 
         self.shannon_radius = None;
 
-        shannon_data = data_loader.LookupElementShannonRadiusData(symbol);
+        shannon_data = data_loader.lookup_element_shannon_radius_data(symbol);
 
         for dataset in shannon_data:
             if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
@@ -182,7 +182,7 @@ class Species(Element):
 
         self.SSE_2015 = None
 
-        sse_2015_data = data_loader.LookupElementSSE2015Data(symbol);
+        sse_2015_data = data_loader.lookup_element_sse2015_data(symbol);
 
         for dataset in sse_2015_data:
             if dataset['OxidationState'] == oxidation:
