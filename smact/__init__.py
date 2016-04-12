@@ -1,148 +1,131 @@
-################################################################################
-#  Copyright Adam J. Jackson, Daniel Davies (2013)                             #
-#                                                                              #
-#  This file is part of SMACT: smact.__init__ is free software: you can        #
-#  redistribute it and/or modify it under the terms of the GNU General Public  #
-#  License as published by the Free Software Foundation, either version 3 of   #
-#  the License, or (at your option) any later version.                         #
-#  This program is distributed in the hope that it will be useful, but WITHOUT #
-#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-#  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   #
-#  more details.                                                               #
-#  You should have received a copy of the GNU General Public License along with#
-#  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
-################################################################################
+###############################################################################
+# Copyright Adam J. Jackson, Daniel Davies (2013)                             #
+#                                                                             #
+# This file is part of SMACT: smact.__init__ is free software: you can        #
+# redistribute it and/or modify it under the terms of the GNU General Public  #
+# License as published by the Free Software Foundation, either version 3 of   #
+# the License, or (at your option) any later version.                         #
+# This program is distributed in the hope that it will be useful, but WITHOUT #
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   #
+# more details.                                                               #
+# You should have received a copy of the GNU General Public License along with#
+# this program.  If not, see <http://www.gnu.org/licenses/>.                  #
+###############################################################################
 """
 Semiconducting Materials from Analogy and Chemical Theory
 
 A collection of fast screening tools from elemental data
 """
 
-from os import path # get correct path for datafiles when called from another directory
+# get correct path for datafiles when called from another directory
+from os import path
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, 'data')
 import itertools
 
-import csv
 from fractions import gcd
 from operator import mul as multiply
 
-import smact.data_loader;
+from smact import data_loader
 
 class Element(object):
-    """
-    Collection of standard elemental properties for given element.
-    Data is drawn from "data/element.txt", part of the Open Babel package.
-    element = element('Symbol')
+    """Collection of standard elemental properties for given element.
 
-    Atoms with a defined oxidation state draw properties from the "Species" class.
+    Data is drawn from "data/element.txt", part of the Open Babel
+    package.
+
+    Atoms with a defined oxidation state draw properties from the
+    "Species" class.
 
     Attributes:
-        Element.symbol (string): Elemental symbol used to retrieve data
+    Element.symbol (string): Elemental symbol used to retrieve data
 
-        Element.name (string): Full name of element
+    Element.name (string): Full name of element
 
-        Element.number (int): Proton number of element
+    Element.number (int): Proton number of element
 
-        Element.pauling_eneg (float): Pauling electronegativity (0.0 if unknown)
+    Element.pauling_eneg (float): Pauling electronegativity (0.0 if unknown)
 
-        Element.ionpot (float): Ionisation potential in eV (0.0 if unknown)
+    Element.ionpot (float): Ionisation potential in eV (0.0 if unknown)
 
-        Element.e_affinity (float): Electron affinity in eV (0.0 if unknown)
+    Element.e_affinity (float): Electron affinity in eV (0.0 if unknown)
 
-        Element.eig (float): Electron eigenvalue (units unknown).
-            N.B. For Cu, Au and Ag this defaults to d-orbital.
+    Element.eig (float): Electron eigenvalue (units unknown).
+    N.B. For Cu, Au and Ag this defaults to d-orbital.
 
-        Element.eig_s (float): Eigenvalue of s-orbital
+    Element.eig_s (float): Eigenvalue of s-orbital
 
-        Element.crustal_abundance (float): crustal abundance in the earths crust mg/kg taken from CRC
+    Element.crustal_abundance (float): crustal abundance in the earths crust mg/kg taken from CRC
 
-        Element.coord_envs (list): The allowed coordination enviroments for the ion.
+    Element.coord_envs (list): The allowed coordination enviroments for the ion.
 
     Raises:
-        NameError: Element not found in element.txt
-        Warning: Element not found in Eigenvalues.csv
-
+    NameError: Element not found in element.txt
+    Warning: Element not found in Eigenvalues.csv
     """
     def __init__(self, symbol):
-        # Set oxidation states.
+        """Initialise Element class
 
-        oxidation_states = data_loader.LookupElementOxidationStates(symbol);
-        
-        # The Get*() function for this data implicitly makes a deep copy of the cached data.
-        
-        self.oxidation_states = oxidation_states;
+        Args:
+            symbol (str): Chemical element symbol (e.g. 'Fe')
 
-        # Set crustal abundance.
-        
-        self.crustal_abundance = data_loader.LookupElementCrustalAbundance(symbol)
+        """
 
-        # Set HHIs.
-
-        HHIR_scores = data_loader.LookupElementHHIs(symbol);
-        
-        if HHIR_scores != None:
-            HHI_p, HHI_R = HHIR_scores;
-            
-            self.HHI_p = HHI_p
-            self.HHI_R = HHI_R
-        else:
-            self.HHI_p = None;
-            self.HHI_R = None;
-    
-        # Set data from the Open Babel-derived dataset.
-        # Since the class stores values from the dictionary returned by the Get*() function, and not a reference to it, it is safe to use copy = False.
-        
         dataset = data_loader.LookupElementOpenBabelDerivedData(symbol, copy = False);
-        
+
         if dataset == None:
             raise NameError("Open Babel-derived element data for %s not found." % (symbol));
-        
-        self.symbol = symbol
-        self.name = dataset['Name']
-        self.number = dataset['Number']
-        self.covalent_radius = dataset['RCov']
-        #self.vdw_radius = dataset['RVdW']
-        self.pauling_eneg = dataset['ElNeg.']
-        self.ionpot = dataset['Ionization']
-        self.e_affinity = dataset['ElAffinity']
 
-        # Set eigenvalue data.
-        
-        self.eig = data_loader.LookupElementEigenvalue(symbol);
-
-        # Set s-eigenvalue data.
-        
-        self.eig_s = data_loader.LookupElementSEigenvalue(symbol);
-        
         # Set coordination-environment data from the Shannon-radius data.
         # As above, it is safe to use copy = False with this Get* function.
-        
+
         shannon_data = data_loader.LookupElementShannonRadiusData(symbol, copy = False);
-        
+
         if shannon_data != None:
-            self.coord_envs = [dataset['coordination'] for dataset in shannon_data];
+            coord_envs = [row['coordination'] for row in shannon_data]
         else:
-            self.coord_envs = None;
-        
-        # Set SSE from the SSE dataset.
-        
-        sse_data = data_loader.LookupElementSSEData(symbol);
-        
-        if sse_data != None:
-            self.SSE = sse_data['SolidStateEnergy'];
+            coord_envs = None
+
+        HHIR_scores = data_loader.LookupElementHHIs(symbol)
+        if HHIR_scores == None:
+            HHIR_scores = (None, None)
+
+        sse_data = data_loader.LookupElementSSEData(symbol)
+        if sse_data:
+            sse = sse_data['SolidStateEnergy']
         else:
-            self.SSE = None;
+            sse = None
 
-        # Set SSE_Pauling from the SSE_Pauling dataset.
-
-        sse_Pauling_data = data_loader.LookupElementSSEPaulingData(symbol);
-
-        if sse_Pauling_data != None:
-            self.SSEPauling = sse_Pauling_data['SolidStateEnergyPauling'];
+        sse_Pauling_data = data_loader.LookupElementSSEPaulingData(symbol)
+        if sse_Pauling_data:
+            sse_Pauling = sse_Pauling_data['SolidStateEnergyPauling']
         else:
-            self.SSEPauling = None;
+            sse_Pauling = None
 
+        for attribute, value in (
+            ('coord_envs', coord_envs),
+            ('covalent_radius', dataset['RCov']),
+            ('crustal_abundance',
+             data_loader.LookupElementCrustalAbundance(symbol)),
+            ('e_affinity', dataset['ElAffinity']),
+            ('eig', data_loader.LookupElementEigenvalue(symbol)),
+            ('eig_s', data_loader.LookupElementSEigenvalue(symbol)),
+            ('HHIR_p', HHIR_scores[0]),
+            ('HHIR_R', HHIR_scores[1]),
+            ('ionpot', dataset['Ionization']),
+            ('name', dataset['Name']),
+            ('number', dataset['Number']),
+            ('oxidation_states',
+             data_loader.LookupElementOxidationStates(symbol)),
+            ('pauling_eneg', dataset['ElNeg.']),
+            ('SSE', sse),
+            ('SSEPauling', sse_Pauling),
+            ('symbol', symbol),
+            #('vdw_radius', dataset['RVdW']),
+            ):
+
+            setattr(self, attribute, value)
 
 class Species(Element):
     """
@@ -179,26 +162,26 @@ class Species(Element):
 
     def __init__(self,symbol,oxidation,coordination):
         Element.__init__(self,symbol)
-        
+
         self.oxidation = oxidation
         self.coordination = coordination
-        
+
         # Get shannon radius for the oxidation state and coordination.
-        
+
         self.shannon_radius = None;
-        
+
         shannon_data = data_loader.LookupElementShannonRadiusData(symbol);
-        
+
         for dataset in shannon_data:
             if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
                 self.shannon_radius = dataset['crystal_radius'];
 
         # Get SSE_2015 (revised) for the oxidation state.
-        
+
         self.SSE_2015 = None
 
         sse_2015_data = data_loader.LookupElementSSE2015Data(symbol);
-    
+
         for dataset in sse_2015_data:
             if dataset['OxidationState'] == oxidation:
                 self.SSE_2015 = dataset['SolidStateEnergy2015']
@@ -234,7 +217,7 @@ def element_dictionary(elements=None):
     repeadedly initialising them on-demand within nested loops.
 
     Args:
-        elements (iterable of strings) : Elements to include. If None, 
+        elements (iterable of strings) : Elements to include. If None,
             use all elements up to 103.
     Returns:
         dict: Dictionary with element symbols as keys and smact.Element
