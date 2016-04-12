@@ -60,6 +60,8 @@ class Element(object):
 
     Element.coord_envs (list): The allowed coordination enviroments for the ion.
 
+        Element.mass (float) : Molar mass of the element.
+
     Raises:
     NameError: Element not found in element.txt
     Warning: Element not found in Eigenvalues.csv
@@ -114,6 +116,7 @@ class Element(object):
             ('HHIR_p', HHIR_scores[0]),
             ('HHIR_R', HHIR_scores[1]),
             ('ionpot', dataset['Ionization']),
+            ('mass', dataset['Mass']),
             ('name', dataset['Name']),
             ('number', dataset['Number']),
             ('oxidation_states',
@@ -124,7 +127,6 @@ class Element(object):
             ('symbol', symbol),
             #('vdw_radius', dataset['RVdW']),
             ):
-
             setattr(self, attribute, value)
 
 class Species(Element):
