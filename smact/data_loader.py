@@ -57,6 +57,13 @@ def _get_data_rows(filename):
             if line[0] != '#':
                 yield line.split()
 
+def float_or_None(x):
+    """Cast a string to a float or to a None"""
+    try:
+        return float(x)
+    except ValueError:
+        return None
+
 # Loader and cache for the element oxidation-state data.
 _el_ox_states = None
 
@@ -189,8 +196,39 @@ def lookup_element_hhis(symbol):
 
 # Loader and cache for the Open Babel-derived element data.
 
-_element_open_babel_derived_data = None
+_element_data = None
 
+def lookup_element_data(symbol, copy=True):
+    """
+    Retrieve tabulated data for an element.
+
+    The table "data/element_data.txt" contains a collection of relevant
+    atomic data. If a cache exists in the form of the module-level
+    variable _element_data, this is returned. Otherwise, a dictionary is
+    constructed from the data table and cached before returning it.
+
+    Args:
+        symbol (str) : Atomic symbol for lookup
+
+        copy (Optional(bool)) : if True (default), return a copy of the
+            data dictionary, rather than a reference to the cached
+            object -- only used copy=False in performance-sensitive code
+            and where you are certain the dictionary will not be
+            modified!
+
+    Returns (dict): Dictionary of data for given element, keyed by
+        column headings from data/element_data.txt
+    """
+
+    if _element_data is None:
+        _element_data = {}
+        keys = ('Symbol', 'Name', 'Z', 'Mass', 'r_cov', 'e_affinity',
+                'p_eig', 's_eig', 'Abundance', 'el_neg', 'ion_pot')
+        for items in _get_data_rows(os.path.join(data_directory,
+                                                 "element.txt")):
+            _element_data.update({items[1]: dict(zip(keys, items))})
+
+_element_open_babel_derived_data = None
 
 def lookup_element_open_babel_derived_data(symbol, copy=True):
     """
