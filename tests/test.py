@@ -91,7 +91,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertAlmostEqual(compound_electroneg(
             elements=["Cu","Zn"], stoichs=[0.5, 0.5],
             source='Pauling'),
-            4.98658039)
+            5.0638963259)
 
     ################ BUILDER ################
         
