@@ -74,15 +74,15 @@ class Element(object):
 
         """
 
-        dataset = data_loader.lookup_element_open_babel_derived_data(symbol, copy = False);
+        dataset = data_loader.lookup_element_data(symbol, copy=False)
 
         if dataset == None:
-            raise NameError("Open Babel-derived element data for %s not found." % (symbol));
+            raise NameError("Elemental data for {0} not found.".format(symbol))
 
         # Set coordination-environment data from the Shannon-radius data.
         # As above, it is safe to use copy = False with this Get* function.
 
-        shannon_data = data_loader.lookup_element_shannon_radius_data(symbol, copy = False);
+        shannon_data = data_loader.lookup_element_shannon_radius_data(symbol, copy=False)
 
         if shannon_data != None:
             coord_envs = [row['coordination'] for row in shannon_data]
@@ -107,21 +107,20 @@ class Element(object):
 
         for attribute, value in (
             ('coord_envs', coord_envs),
-            ('covalent_radius', dataset['RCov']),
-            ('crustal_abundance',
-             data_loader.lookup_element_crustal_abundance(symbol)),
-            ('e_affinity', dataset['ElAffinity']),
-            ('eig', data_loader.lookup_element_eigenvalue(symbol)),
-            ('eig_s', data_loader.lookup_element_s_eigenvalue(symbol)),
+            ('covalent_radius', dataset['r_cov']),
+            ('crustal_abundance', dataset['Abundance']),
+            ('e_affinity', dataset['e_affinity']),
+            ('eig', dataset['p_eig']),
+            ('eig_s', dataset['s_eig']),
             ('HHIR_p', HHIR_scores[0]),
             ('HHIR_R', HHIR_scores[1]),
-            ('ionpot', dataset['Ionization']),
+            ('ionpot', dataset['ion_pot']),
             ('mass', dataset['Mass']),
             ('name', dataset['Name']),
-            ('number', dataset['Number']),
+            ('number', dataset['Z']),
             ('oxidation_states',
              data_loader.lookup_element_oxidation_states(symbol)),
-            ('pauling_eneg', dataset['ElNeg.']),
+            ('pauling_eneg', dataset['el_neg']),
             ('SSE', sse),
             ('SSEPauling', sse_Pauling),
             ('symbol', symbol),

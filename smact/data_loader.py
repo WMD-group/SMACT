@@ -219,14 +219,39 @@ def lookup_element_data(symbol, copy=True):
     Returns (dict): Dictionary of data for given element, keyed by
         column headings from data/element_data.txt
     """
-
+    global _element_data
     if _element_data is None:
         _element_data = {}
         keys = ('Symbol', 'Name', 'Z', 'Mass', 'r_cov', 'e_affinity',
                 'p_eig', 's_eig', 'Abundance', 'el_neg', 'ion_pot')
         for items in _get_data_rows(os.path.join(data_directory,
-                                                 "element.txt")):
-            _element_data.update({items[1]: dict(zip(keys, items))})
+                                                 "element_data.txt")):
+            # First two columns are strings and should be left intact
+            # Everything else is numerical and should be cast to a float
+            # or, if not clearly a number, to None
+            clean_items = items[0:2] + map(float_or_None, items[2:])
+
+            _element_data.update({items[0]:
+                                  dict(zip(keys, clean_items))})
+
+    if symbol in _element_data:
+        if copy:
+            # _element_open_babel_derived_data stores dictionaries
+            # -> if copy is set, use the dict.copy() function to return
+            # a copy. The values are all Python "value types", so
+            # explicitly cloning the elements is not necessary to make
+            # a deep copy.
+
+            return _element_data[symbol].copy()
+        else:
+            return _element_data[symbol]
+    else:
+        if _print_warnings:
+            print("WARNING: Elemental data for {0}"
+                  " not found.".format(symbol))
+            print _element_data
+        return None
+
 
 _element_open_babel_derived_data = None
 

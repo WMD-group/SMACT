@@ -16,7 +16,7 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_Element_class_Pt(self):
         Pt = smact.Element('Pt')
         self.assertEqual(Pt.name,'Platinum')
-        self.assertEqual(Pt.ionpot,8.9588)
+        self.assertEqual(Pt.ionpot,8.95883)
         self.assertEqual(Pt.number,78)
 
     def test_ordered_elements(self):
