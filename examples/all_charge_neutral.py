@@ -26,7 +26,7 @@ def main():
     neutral_stoichs = {}
     for n in range(2,5):
         neutral_stoichs.update({n: {
-            ox_states: tuple(smact.charge_neutrality_iter(ox_states, threshold=8)) 
+            ox_states: tuple(smact.neutral_ratios_iter(ox_states, threshold=8)) 
                 for ox_states in oxidation_state_combinations[n]
             }
         })

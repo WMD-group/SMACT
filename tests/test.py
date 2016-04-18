@@ -60,9 +60,9 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertFalse(
             smact._isneutral((4, -1), (1, 3)))
 
-    def test_charge_neutrality_ternary(self):
+    def test_neutral_ratios(self):
         ox = [1, -2, 1]
-        is_neutral, neutral_combos = smact.charge_neutrality(ox)
+        is_neutral, neutral_combos = smact.neutral_ratios(ox)
         self.assertTrue((is_neutral))
         self.assertEqual(len(neutral_combos), 9)
         self.assertTrue((3, 2, 1) in neutral_combos)

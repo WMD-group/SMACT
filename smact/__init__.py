@@ -23,7 +23,7 @@ from os import path
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, 'data')
 import itertools
-from itertools import izip, imap
+from itertools import imap
 
 from fractions import gcd
 from operator import mul as multiply
@@ -292,7 +292,7 @@ def _isneutral(oxidations, stoichs):
     """
     return 0 == sum(imap(multiply, oxidations, stoichs))
 
-def charge_neutrality_iter(oxidations, stoichs=False, threshold=5):
+def neutral_ratios_iter(oxidations, stoichs=False, threshold=5):
     """
     Iterator for charge-neutral stoichiometries
 
@@ -321,7 +321,7 @@ def charge_neutrality_iter(oxidations, stoichs=False, threshold=5):
         itertools.product(*stoichs)
         )
 
-def charge_neutrality(oxidations, stoichs=False, threshold=5):
+def neutral_ratios(oxidations, stoichs=False, threshold=5):
     """
     Get a list of charge-neutral compounds
 
@@ -352,7 +352,7 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
             Ratios of atoms in given oxidation
             states which yield a charge-neutral structure
     """
-    allowed_ratios = [x for x in charge_neutrality_iter(oxidations,
+    allowed_ratios = [x for x in neutral_ratios_iter(oxidations,
                                                         stoichs=stoichs,
                                                         threshold=threshold)]
     return (len(allowed_ratios) > 0, allowed_ratios)

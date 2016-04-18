@@ -19,7 +19,7 @@ def binary_generator(search_space, elements):
                                           elements[el_b].oxidation_states):
             # When a legal combination is found, yield it
             # and move onto next binary combination
-            success, stoichs = smact.charge_neutrality(ox_combo)
+            success, stoichs = smact.neutral_ratios(ox_combo)
             if success:
                 yield (el_a, el_b, stoichs[0])
                 break

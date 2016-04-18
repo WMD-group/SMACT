@@ -89,7 +89,7 @@ if __name__ == '__main__':
         # Uses the tuples in oxidation_state_combinations as keys.
 
         neutral_stoichiometries = {
-            oxidation_states : len(list(smact.charge_neutrality_iter(oxidation_states, threshold = neutral_stoichiometries_threshold)))
+            oxidation_states : len(list(smact.neutral_ratios_iter(oxidation_states, threshold = neutral_stoichiometries_threshold)))
                 for oxidation_states in oxidation_state_combinations[n]
             }
 
