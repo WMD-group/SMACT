@@ -89,9 +89,9 @@ class Element(object):
         else:
             coord_envs = None
 
-        HHIR_scores = data_loader.lookup_element_hhis(symbol)
-        if HHIR_scores == None:
-            HHIR_scores = (None, None)
+        HHI_scores = data_loader.lookup_element_hhis(symbol)
+        if HHI_scores == None:
+            HHI_scores = (None, None)
 
         sse_data = data_loader.lookup_element_sse_data(symbol)
         if sse_data:
@@ -112,8 +112,8 @@ class Element(object):
             ('e_affinity', dataset['e_affinity']),
             ('eig', dataset['p_eig']),
             ('eig_s', dataset['s_eig']),
-            ('HHIR_p', HHIR_scores[0]),
-            ('HHIR_R', HHIR_scores[1]),
+            ('HHI_p', HHI_scores[0]),
+            ('HHI_R', HHI_scores[1]),
             ('ionpot', dataset['ion_pot']),
             ('mass', dataset['Mass']),
             ('name', dataset['Name']),
