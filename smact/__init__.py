@@ -23,6 +23,7 @@ from os import path
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, 'data')
 import itertools
+from itertools import izip, imap
 
 from fractions import gcd
 from operator import mul as multiply
@@ -337,7 +338,7 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
         oxidations (list of ints): Oxidation state of each site
         stoichs (list of positive ints): A selection of valid stoichiometric
             ratios for each site
-        threshold (int): Maximum stoichiometry coefficient; if no "stoichs"
+        threshold (int): Maximum stoichiometry coefficient; if no 'stoichs'
             argument is provided, all combinations of integer coefficients up
             to this value will be tried.
 
@@ -354,11 +355,173 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
     allowed_ratios = [x for x in charge_neutrality_iter(oxidations,
                                                         stoichs=stoichs,
                                                         threshold=threshold)]
-    return (len(allowed_ratios) > 0,
-            allowed_ratios)
+    return (len(allowed_ratios) > 0, allowed_ratios)
 
 
-def pauling_test(symbols, ox, paul, repeat_anions=True, repeat_cations=True, threshold=0.5):
+def _eneg_test_states(ox_states, enegs):
+    """
+    Internal function for checking electronegativity criterion
+    
+    This implementation is fast as it 'short-circuits' as soon as it
+    finds an invalid combination. However it may be that in some cases
+    redundant comparisons are made. Performance is very close between
+    this method and _eneg_test_states_alternate.
+
+    Args:
+        ox_states (list): oxidation states corresponding to species
+            in compound
+        enegs (list): Electronegativities corresponding to species in
+            compound
+
+    Returns:
+        bool : True if cations have higher electronegativity than
+            anions, otherwise False
+
+    """
+    for ((ox1, eneg1), (ox2, eneg2)) in itertools.combinations(zip(ox_states, enegs), 2):
+        if (ox1 > 0) and (ox2 < 0) and (eneg1 > eneg2):
+            return False
+        elif (ox1 < 0) and (ox2 > 0) and (eneg1 < eneg2):
+            return False
+    else:
+        return True
+
+def _eneg_test_states_threshold(ox_states, enegs, threshold=0):
+    """Internal function for checking electronegativity criterion
+    
+    This implementation is fast as it 'short-circuits' as soon as it
+    finds an invalid combination. However it may be that in some cases
+    redundant comparisons are made. Performance is very close between
+    this method and _eneg_test_states_alternate.
+
+    A 'threshold' option is added so that this constraint may be
+    relaxed somewhat.
+
+    Args:
+        ox_states (list): oxidation states corresponding to species
+            in compound
+        enegs (list): Electronegativities corresponding to species in
+            compound
+        threshold (Option(float)): a tolerance for the allowed deviation from
+            the Pauling criterion
+
+    Returns:
+        bool : True if cations have higher electronegativity than
+            anions, otherwise False
+
+    """
+    for ((ox1, eneg1), (ox2, eneg2)) in itertools.combinations(zip(ox_states, enegs), 2):
+        if (ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold):
+            return False
+        elif (ox1 < 0) and (ox2 > 0) and (eneg2 - eneg1) > threshold:
+            return False
+    else:
+        return True
+
+
+def _eneg_test_states_alternate(ox_states, enegs):
+    """Internal function for checking electronegativity criterion
+
+    This implementation appears to be slightly slower than
+    _eneg_test_states, but further testing is needed.
+
+    Args:
+        ox_states (list): oxidation states corresponding to species
+            in compound
+        enegs (list): Electronegativities corresponding to species in
+            compound
+
+    Returns:
+        bool : True if cations have higher electronegativity than
+            anions, otherwise False
+
+    """
+    min_cation_eneg, max_anion_eneg = 10, 0
+    for ox_state, eneg in izip(ox_states, enegs):
+        if ox_state < 1:
+            min_cation_eneg = min(eneg, min_cation_eneg)
+        else:
+            max_anion_eneg = max(eneg, max_anion_eneg)
+    return min_cation_eneg > max_anion_eneg
+
+def pauling_test_new(oxidation_states, electronegativities,
+                     symbols=[], repeat_anions=True,
+                     repeat_cations=True, threshold=0.):
+    """ Check if a combination of ions makes chemical sense,
+        (i.e. positive ions should be of lower electronegativity)
+
+    Args:
+        ox (list):  oxidation states of the compound
+        paul (list): the corresponding  Pauling electronegativities
+            of the elements in the compound
+        symbols (list) :  chemical symbols of each site.
+        threshold (float): a tolerance for the allowed deviation from
+            the Pauling criterion
+        repeat_anions : boolean, allow an anion to repeat in different
+            oxidation states in the same compound.
+        repeat_cations : as above, but for cations.
+
+    Returns:
+        bool:
+            True if positive ions have lower
+            electronegativity than negative ions
+
+"""
+
+    if repeat_anions and repeat_cations and threshold==0.:
+        return _eneg_test_states(oxidation_states,
+                                 electronegativities)
+
+    elif repeat_anions and repeat_cations:
+        return _eneg_test_states_threshold(oxidation_states,
+                    electronegativities, threshold=threshold)
+
+    else:
+        if _no_repeats(oxidation_states, symbols,
+                       repeat_anions=repeat_anions,
+                       repeat_cations=repeat_cations):
+            if threshold == 0.:
+                return _eneg_test_states(oxidation_states,
+                                         electronegativities)
+            else:
+                return _eneg_test_states_threshold(oxidation_states,
+                    electronegativities, threshold=threshold)
+
+def _no_repeats(oxidation_states, symbols,
+                repeat_anions=False, repeat_cations=False):
+    """
+    Check if any anion or cation appears twice.
+
+    Args:
+        oxidation_states (list): oxidation states of species
+        symbols (list): chemical symbols corresponding to oxidation
+            states
+        repeat_anions (bool): If True, anions may be repeated (e.g. O
+            in -1 and -2 states)
+        repeat_cations (bool): if True, cations may be repeated (e.g.
+            Cu in +1 and +2 states)
+
+    Returns: bool
+    """
+    if repeat_anions is False and repeat_cations is False:
+        return len(symbols) == len(set(symbols))
+    else:
+
+        anions, cations = [], []
+        for state, symbol in izip(oxidation_states, symbols):
+            if state > 0:
+                anions.append(symbol)
+            else:
+                cations.append(symbol)
+        if not repeat_anions and len(anions) != len(set(anions)):
+            return False
+        elif not repeat_cations and len(cations) != len(set(cations)):
+            return False
+        else:
+            return True
+
+
+def pauling_test(ox, paul, symbols, repeat_anions=True, repeat_cations=True, threshold=0.5):
     """ Check if a combination of ions makes chemical sense,
         (i.e. positive ions should be of lower Pauling electronegativity)
 
@@ -366,12 +529,12 @@ def pauling_test(symbols, ox, paul, repeat_anions=True, repeat_cations=True, thr
         ox (list):  oxidation states of the compound
         paul (list): the corresponding  Pauling electronegativities
             of the elements in the compound
+        symbols (list) :  chemical symbols of each site.
         threshold (float): a tolerance for the allowed deviation from
             the Pauling criterion
-	repeat_anions : boolean, allow an anion to repeat in different oxidation
+        repeat_anions : boolean, allow an anion to repeat in different oxidation
         states in the same compound.
-	repeat_cations : as above, but for cations.
-        symbols : list of the chemical symbols of each site.
+        repeat_cations : as above, but for cations.
 
     Returns:
         makes_sense (bool):
