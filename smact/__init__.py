@@ -23,6 +23,7 @@ from os import path
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, 'data')
 import itertools
+from itertools import imap
 
 from fractions import gcd
 from operator import mul as multiply
@@ -289,9 +290,9 @@ def _isneutral(oxidations, stoichs):
         oxidations (tuple): Oxidation states of a set of oxidised elements
         stoichs (tuple): Stoichiometry values corresponding to `oxidations`
     """
-    return 0 == sum(itertools.imap(multiply, oxidations, stoichs))
+    return 0 == sum(imap(multiply, oxidations, stoichs))
 
-def charge_neutrality_iter(oxidations, stoichs=False, threshold=5):
+def neutral_ratios_iter(oxidations, stoichs=False, threshold=5):
     """
     Iterator for charge-neutral stoichiometries
 
@@ -320,7 +321,7 @@ def charge_neutrality_iter(oxidations, stoichs=False, threshold=5):
         itertools.product(*stoichs)
         )
 
-def charge_neutrality(oxidations, stoichs=False, threshold=5):
+def neutral_ratios(oxidations, stoichs=False, threshold=5):
     """
     Get a list of charge-neutral compounds
 
@@ -337,7 +338,7 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
         oxidations (list of ints): Oxidation state of each site
         stoichs (list of positive ints): A selection of valid stoichiometric
             ratios for each site
-        threshold (int): Maximum stoichiometry coefficient; if no "stoichs"
+        threshold (int): Maximum stoichiometry coefficient; if no 'stoichs'
             argument is provided, all combinations of integer coefficients up
             to this value will be tried.
 
@@ -351,65 +352,7 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
             Ratios of atoms in given oxidation
             states which yield a charge-neutral structure
     """
-    allowed_ratios = [x for x in charge_neutrality_iter(oxidations,
+    allowed_ratios = [x for x in neutral_ratios_iter(oxidations,
                                                         stoichs=stoichs,
                                                         threshold=threshold)]
-    return (len(allowed_ratios) > 0,
-            allowed_ratios)
-
-
-def pauling_test(symbols, ox, paul, repeat_anions=True, repeat_cations=True, threshold=0.0):
-    """ Check if a combination of ions makes chemical sense,
-        (i.e. positive ions should be of lower Pauling electronegativity)
-
-    Args:
-        ox (list):  oxidation states of the compound
-        paul (list): the corresponding  Pauling electronegativities
-            of the elements in the compound
-        threshold (float): a tolerance for the allowed deviation from
-            the Pauling criterion
-	repeat_anions : boolean, allow an anion to repeat in different oxidation
-        states in the same compound.
-	repeat_cations : as above, but for cations.
-        symbols : list of the chemical symbols of each site.
-
-    Returns:
-        makes_sense (bool):
-            True if positive ions have lower
-            electronegativity than negative ions
-
-    """
-    positive = []
-    negative = []
-    pos_ele = []
-    neg_ele = []
-    for i, state in enumerate(ox):
-        if state > 0:
-            if repeat_cations:
-                positive.append(paul[i])
-            elif symbols[i] in pos_ele: # Reject materials where the same
-                                        # cation occupies two sites.
-                return False
-            else:
-                positive.append(paul[i])
-                pos_ele.append(symbols[i])
-
-        if state < 0:
-            if repeat_anions:
-                negative.append(paul[i])
-            elif symbols[i] in neg_ele: # Reject materials where the same
-                                        # anion occupies two sites.
-                return False
-            else:
-                negative.append(paul[i])
-                neg_ele.append(symbols[i])
-
-
-    if len(positive) == 0 or len(negative) == 0:
-        return False
-    if max(positive) == min(negative):
-        return False
-    if max(positive) - min(negative) > threshold:
-        return False
-    else:
-        return True
+    return (len(allowed_ratios) > 0, allowed_ratios)
