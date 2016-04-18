@@ -358,7 +358,7 @@ def charge_neutrality(oxidations, stoichs=False, threshold=5):
             allowed_ratios)
 
 
-def pauling_test(symbols, ox, paul, repeat_anions=True, repeat_cations=True, threshold=0.5):
+def pauling_test(symbols, ox, paul, repeat_anions=True, repeat_cations=True, threshold=0.0):
     """ Check if a combination of ions makes chemical sense,
         (i.e. positive ions should be of lower Pauling electronegativity)
 
