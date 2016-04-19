@@ -3,6 +3,7 @@
 import time
 import smact
 import itertools
+import smact.screening as screening
 
 from multiprocessing import Pool;
 
@@ -43,7 +44,7 @@ def count_element_combination(args):
         oxidation_states = [x[1] for x in state_combination]
         pauling_electronegativities = [x[2] for x in state_combination]
     
-        if smact.pauling_test(symbols, oxidation_states, pauling_electronegativities, threshold = pauling_test_threshold, repeat_anions = True, repeat_cations = True):
+        if screening.pauling_test(oxidation_states, pauling_electronegativities, symbols, threshold = pauling_test_threshold, repeat_anions = True, repeat_cations = True):
             count = count + neutral_stoichiometries_lookup_table[tuple(sorted(oxidation_states))]
 
     return count;
