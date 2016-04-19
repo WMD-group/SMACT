@@ -44,6 +44,8 @@
 #         Ref: CRC Handbook of Chemistry and Physics, 92nd Ed. (2011)         #
 #         Elements 95 (Am) and above are assigned the value 1.3 as            #
 #         recommended by Pauling (The Nature of the Chemical Bond, 1939)      #
+#         The value of 3.0 for Krypton was computed by Allen and Huheey (1980)#
+#         from the bond energy of KrF2. DOI: 10.1016/0022-1902(80)80132-1     #
 #                                                                             #
 # ion_pot: Ionisation potential in eV.                                        #
 #         Ref: NIST Atomic Spectra Database, http://physics.nist.gov/asd      #
@@ -87,7 +89,7 @@ Ge       Germanium    32    72.6300000000 1.20   1.232712     -6.63    -14.38  1
 As       Arsenic      33    74.9215950000 1.19   0.814        -7.91    -17.33  1.80e+00  2.18    9.7886
 Se       Selenium     34    78.9710000000 1.20   2.02067      -9.53    -20.32  5.00e-02  2.55    9.752392
 Br       Bromine      35    79.9040000000 1.20   3.3635880   -11.20    -23.35  2.40e+00  2.96    11.81381
-Kr       Krypton      36    83.7980000000 1.16   None        -13.00    -26.50  1.00e-04  None    13.9996049
+Kr       Krypton      36    83.7980000000 1.16   None        -13.00    -26.50  1.00e-04  3.0     13.9996049
 Rb       Rubidium     37    85.4678000000 2.20   0.485916      None     -3.94  9.00e+01  0.82    4.177128
 Sr       Strontium    38    87.6200000000 1.95   0.05206       None     -5.00  3.70e+02  0.95    5.69486720
 Y        Yttrium      39    88.9058400000 1.90   0.307         None     -5.53  3.30e+01  1.22    6.21726
