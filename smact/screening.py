@@ -105,6 +105,8 @@ def pauling_test_old(ox, paul, symbols, repeat_anions=True,
             electronegativity than negative ions
 
     """
+    if None in paul:
+        return False
     positive = []
     negative = []
     pos_ele = []
@@ -161,9 +163,11 @@ def eneg_states_test(ox_states, enegs):
 
     """
     for ((ox1, eneg1), (ox2, eneg2)) in combinations(zip(ox_states, enegs), 2):
-        if (ox1 > 0) and (ox2 < 0) and (eneg1 > eneg2):
+        if (ox1 > 0) and (ox2 < 0) and (eneg1 >= eneg2):
             return False
-        elif (ox1 < 0) and (ox2 > 0) and (eneg1 < eneg2):
+        elif (ox1 < 0) and (ox2 > 0) and (eneg1 <= eneg2):
+            return False
+        elif eneg1 is None or eneg2 is None:
             return False
     else:
         return True
@@ -200,6 +204,7 @@ def eneg_states_test_threshold(ox_states, enegs, threshold=0):
             return False
     else:
         return True
+
 
 
 def eneg_states_test_alternate(ox_states, enegs):
