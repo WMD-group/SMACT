@@ -69,11 +69,10 @@ def count_element_combination(args):
         oxidation_states = [x[1] for x in state_combination]
         pauling_electronegativities = [x[2] for x in state_combination]
 
-        if pauling_test(symbols, oxidation_states, pauling_electronegativities,
+        if pauling_test(oxidation_states, pauling_electronegativities, symbols = symbols,
                         threshold=pauling_test_threshold,
                         repeat_anions=True, repeat_cations=True):
             count += neutral_stoichs_lookup[tuple(sorted(oxidation_states))]
-
     return count
 
 
