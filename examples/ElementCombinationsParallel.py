@@ -5,7 +5,7 @@ import smact
 import itertools
 from sys import stdout
 
-from smact.screening import pauling_test
+from smact.screening import eneg_states_test
 from multiprocessing import Pool
 
 element_list = smact.ordered_elements(1, 103)
@@ -64,15 +64,18 @@ def count_element_combination(args):
                 for oxidation_state in element.oxidation_states
         ]
 
+    # Screen on charge neutrality and electronegativity ordering
+    # (eneg_states_test is a special case of pauling_test where threshold=0,
+    # repeat_anions=True, repeat_cations=True)
+
     for state_combination in itertools.combinations(oxidation_states_list, n):
-        symbols = [x[0] for x in state_combination]
         oxidation_states = [x[1] for x in state_combination]
         pauling_electronegativities = [x[2] for x in state_combination]
 
-        if pauling_test(oxidation_states, pauling_electronegativities, symbols = symbols,
-                        threshold=pauling_test_threshold,
-                        repeat_anions=True, repeat_cations=True):
-            count += neutral_stoichs_lookup[tuple(sorted(oxidation_states))]
+        sorted_states = tuple(sorted(oxidation_states))
+        if (neutral_stoichs_lookup[sorted_states] and
+            eneg_states_test(oxidation_states, pauling_electronegativities)):
+            count += neutral_stoichs_lookup[sorted_states]
     return count
 
 
