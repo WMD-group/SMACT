@@ -142,8 +142,6 @@ def main():
                 oxidation_states, threshold=neutral_stoichiometries_threshold)
                 for oxidation_states in oxidation_state_combinations[n]
             }
-
-        print neutral_stoichiometries
         
         start_time = time.time()
 
