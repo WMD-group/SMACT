@@ -25,7 +25,6 @@ mp_use = True
 mp_processes = 4
 mp_chunk_size = 10
 
-
 def print_status(text):
     "Refresh progress meter on one line"
     stdout.write(text + '\r')
@@ -131,18 +130,24 @@ def main():
         #
         # neutral_stoichiometries = {}
         # for oxidation_states in oxidation_state_combinations[n]:
-        #     count = count_iter(smact.neutral_ratios_iter(oxidation_states,
-        #                        threshold=neutral_stoichiometries_threshold))
+        #     count = n_neutral_ratios(oxidation_states)
         #     neutral_stoichiometries.update({oxidation_states: count})
 
+        def n_neutral_ratios(oxidation_states, threshold=8):
+            return len(smact.neutral_ratios(oxidation_states,
+                                            threshold=threshold)[1])
+       
         neutral_stoichiometries = {
-            oxidation_states: count_iter(smact.neutral_ratios_iter(
-                oxidation_states, threshold=neutral_stoichiometries_threshold))
+            oxidation_states: n_neutral_ratios(
+                oxidation_states, threshold=neutral_stoichiometries_threshold)
                 for oxidation_states in oxidation_state_combinations[n]
             }
 
+        print neutral_stoichiometries
+        
         start_time = time.time()
 
+        
         # Count the number of element combinations - this is needed for the
         # progress indicator.
 
