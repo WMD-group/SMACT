@@ -13,6 +13,7 @@ elements = smact.element_dictionary(element_list)
 
 max_n = 4
 neutral_stoichiometries_threshold = 8
+include_pauling_test = True
 pauling_test_threshold = 0.0
 
 # Number of times to report progress during the counting loop.
@@ -63,7 +64,8 @@ def count_element_combination(args):
                 for oxidation_state in element.oxidation_states
         ]
 
-    # Screen on charge neutrality and electronegativity ordering
+    # Screen on charge neutrality
+    # and on electronegativity ordering if include_pauling_test = True
     # (eneg_states_test is a special case of pauling_test where threshold=0,
     # repeat_anions=True, repeat_cations=True)
 
@@ -72,8 +74,12 @@ def count_element_combination(args):
         pauling_electronegativities = [x[2] for x in state_combination]
 
         sorted_states = tuple(sorted(oxidation_states))
-        if (neutral_stoichs_lookup[sorted_states] and
-            eneg_states_test(oxidation_states, pauling_electronegativities)):
+        
+        if include_pauling_test:
+            if (neutral_stoichs_lookup[sorted_states] and
+                eneg_states_test(oxidation_states, pauling_electronegativities)):
+                count += neutral_stoichs_lookup[sorted_states]
+        else:
             count += neutral_stoichs_lookup[sorted_states]
     return count
 
