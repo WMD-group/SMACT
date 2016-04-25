@@ -25,6 +25,8 @@ def _is_irreducible(stoichs):
         return False
 
 
+# Set to 103 for combinations of elements
+# or 403 for combinations of element in oxidation states 
 search_space = 103
 
             
