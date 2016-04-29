@@ -1,9 +1,11 @@
 SMACT
 =====
 
-Semiconducting Materials from Analogy and Chemical Theory. A collection of fast screening tools from elemental data.
+**Semiconducting Materials from Analogy and Chemical Theory** (SMACT) is a collection of fast screening tools from elemental data.
 
-"If you torture the data enough, nature will always confess." - Roland Coase (from 'How should economists choose?')
+![](SMACT.png)
+
+*If you torture the data enough, nature will always confess* - Roland Coase (from 'How should economists choose?')
 
 [![Documentation Status](https://readthedocs.org/projects/smact/badge/?version=latest)](http://smact.readthedocs.org/en/latest/?badge=latest)
 
@@ -46,10 +48,12 @@ to your PYTHONPATH. e.g. in ~/.bashrc
 Usage
 -----
 
-At the moment there are no programs for general users. SMACT's features are
+SMACT's features are
 accessed through Python scripts, importing classes and functions as needed.
 It is intended that SMACT will have a user-friendly interface eventually, and
-possibly even a GUI.
+possibly even a GUI. 
+
+In addition to the `examples` folder, some practical applications using are also available from [https://github.com/WMD-group/SMACT_practical](https://github.com/WMD-group/SMACT_practical).
 
 License and attribution
 -----------------------
@@ -77,7 +81,7 @@ compounds by structural analogy", *J. Phys. Chem. Solids*
 of quaternary chalcogenide semiconductors derived from cation cross-substitution
 of II-VI and I-III-VI2 compounds", *Physical Review B* **79**, 165211 (2009)](http://journals.aps.org/prb/abstract/10.1103/PhysRevB.79.165211)
 
-[Mendeley Reading List](https://www.mendeley.com/groups/8113991/materials-design/overview/)
+[Mendeley "Materials Design" Reading List](https://www.mendeley.com/groups/8113991/materials-design/overview/)
 
 Development notes
 -----------------
