@@ -3,6 +3,8 @@ SMACT
 
 Semiconducting Materials from Analogy and Chemical Theory. A collection of fast screening tools from elemental data.
 
+"If you torture the data enough, nature will always confess." - Roland Coase (from 'How should economists choose?')
+
 [![Documentation Status](https://readthedocs.org/projects/smact/badge/?version=latest)](http://smact.readthedocs.org/en/latest/?badge=latest)
 
 Contents
