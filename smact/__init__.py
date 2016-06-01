@@ -61,7 +61,15 @@ class Element(object):
 
     Element.coord_envs (list): The allowed coordination enviroments for the ion.
 
-        Element.mass (float) : Molar mass of the element.
+    Element.mass (float) : Molar mass of the element.
+
+    Element.HHI_p (float) : Herfindahl–Hirschman Index for elemental production
+
+    Element.HHI_R (float) : Herfindahl–Hirschman Index for elemental reserves
+
+    Element.SSE (float) : Solid State Energy
+
+    Element.SSEPauling (float) : SSE based on regression fit with Pauling electronegativity
 
     Raises:
     NameError: Element not found in element.txt
