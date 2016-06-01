@@ -40,40 +40,40 @@ class Element(object):
     "Species" class.
 
     Attributes:
-    Element.symbol (string): Elemental symbol used to retrieve data
+        Element.symbol (string): Elemental symbol used to retrieve data
 
-    Element.name (string): Full name of element
+        Element.name (string): Full name of element
 
-    Element.number (int): Proton number of element
+        Element.number (int): Proton number of element
 
-    Element.pauling_eneg (float): Pauling electronegativity (0.0 if unknown)
+        Element.pauling_eneg (float): Pauling electronegativity (0.0 if unknown)
 
-    Element.ionpot (float): Ionisation potential in eV (0.0 if unknown)
+        Element.ionpot (float): Ionisation potential in eV (0.0 if unknown)
 
-    Element.e_affinity (float): Electron affinity in eV (0.0 if unknown)
+        Element.e_affinity (float): Electron affinity in eV (0.0 if unknown)
 
-    Element.eig (float): Electron eigenvalue (units unknown).
-    N.B. For Cu, Au and Ag this defaults to d-orbital.
+        Element.eig (float): Electron eigenvalue (units unknown). N.B. For Cu, Au and Ag this defaults to d-orbital.
 
-    Element.eig_s (float): Eigenvalue of s-orbital
+        Element.eig_s (float): Eigenvalue of s-orbital
 
-    Element.crustal_abundance (float): crustal abundance in the earths crust mg/kg taken from CRC
+        Element.crustal_abundance (float): crustal abundance in the earths crust mg/kg taken from CRC
 
-    Element.coord_envs (list): The allowed coordination enviroments for the ion.
+        Element.coord_envs (list): The allowed coordination enviroments for the ion.
 
-    Element.mass (float) : Molar mass of the element.
+        Element.mass (float) : Molar mass of the element.
 
-    Element.HHI_p (float) : Herfindahl–Hirschman Index for elemental production
+        Element.HHI_p (float) : Herfindahl-Hirschman Index for elemental production
 
-    Element.HHI_R (float) : Herfindahl–Hirschman Index for elemental reserves
+        Element.HHI_R (float) : Hirfindahl-Hirschman Index for elemental reserves
 
-    Element.SSE (float) : Solid State Energy
+        Element.SSE (float) : Solid State Energy
 
-    Element.SSEPauling (float) : SSE based on regression fit with Pauling electronegativity
+        Element.SSEPauling (float) : SSE based on regression fit with Pauling electronegativity
 
     Raises:
-    NameError: Element not found in element.txt
-    Warning: Element not found in Eigenvalues.csv
+        NameError: Element not found in element.txt
+        Warning: Element not found in Eigenvalues.csv
+
     """
     def __init__(self, symbol):
         """Initialise Element class

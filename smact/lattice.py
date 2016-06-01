@@ -76,7 +76,7 @@ def check_lattice_charges(charges, site_elements, sites):
       
       'This does not signify that the chemical bonds in the crystal 
       are necessarily ionic in the sense of the quantum mechanics'
-                                              Linus Pauling (1929)
+      Linus Pauling (1929)
 
       Args:
           charges: array of the charge contributions of each lattice site
@@ -96,21 +96,17 @@ def check_lattice_charges(charges, site_elements, sites):
       return site_elements
 #------------------------------------------------------------------------------------
 def possible_compositions(crystal, elements):
-    """Seach for the elements which satisfy the possible oxidation states and 
-       provide charge neutrality.
+    """
+    Search for the elements which satisfy the possible oxidation states and 
+    provide charge neutrality.
 
     Args:
-<<<<<<< HEAD
         crystal: A Lattice object defining the crystal class
-        elements: A list of the elemets you wish to search through
-=======
-        crystal: A lattice object defining the crystal class
         elements: Dictionary of elements and their allowable oxidation states
->>>>>>> origin/new-classes
-    Uses:
-  	atom : a list of possible atoms on each site of the lattice
+
     Returns:
         list/array/dict of int/float/string of something useful (???)
+
     """
 
     for site in crystal.sites:
