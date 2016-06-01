@@ -228,7 +228,7 @@ def lookup_element_shannon_radius_data(symbol, copy=True):
     Args:
         symbol (str) : the atomic symbol of the element to look up.
 
-    copy (Optional(bool)): if True (default), return a copy of the data
+        copy (Optional(bool)): if True (default), return a copy of the data
         dictionary, rather than a reference to the cached object --
         only use copy=False in performance-sensitive code and where
         you are certain the dictionary will not be modified!
@@ -362,22 +362,23 @@ _element_sse2015_data = None
 
 
 def lookup_element_sse2015_data(symbol, copy=True):
-    """Retrieve SSE (2015) data for element in oxidation state.
+    """
+    Retrieve SSE (2015) data for element in oxidation state.
 
     Retrieve the solid-state energy (SSE2015) data for an element in an
     oxidation state.  Taken from J. Solid State Chem., 2015, 231,
     pp138-144, DOI: 10.1016/j.jssc.2015.07.037
 
     Args:
-    symbol : the atomic symbol of the element to look up.
-    copy: if True (default), return a copy of the data dictionary,
+        symbol : the atomic symbol of the element to look up.
+        copy: if True (default), return a copy of the data dictionary,
         rather than a reference to a cached object -- only use
         copy=False in performance-sensitive code and where you are
         certain the dictionary will not be modified!
 
     Returns:
-    A list of SSE datasets for the element, or None if the element was
-    not found among the external data.
+        A list of SSE datasets for the element, or None if the element was
+        not found among the external data.
     """
 
     global _element_sse2015_data
