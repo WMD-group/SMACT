@@ -29,5 +29,6 @@ Submodules
    smact.lattice_parameters
    smact.parameters
    smact.properties
+   smact.screening
    smact.surface
 
