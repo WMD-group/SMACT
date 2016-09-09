@@ -50,21 +50,17 @@ Usage
 
 SMACT's features are
 accessed through Python scripts, importing classes and functions as needed.
-It is intended that SMACT will have a user-friendly interface eventually, and
-possibly even a GUI. 
-
 In addition to the `examples` folder, some practical applications using are also available from [https://github.com/WMD-group/SMACT_practical](https://github.com/WMD-group/SMACT_practical).
 
 License and attribution
 -----------------------
 
-SMACT is produced by the Walsh Materials Design group 
-at the University of Bath, UK.  Python code
+SMACT is produced by the Walsh Materials Design group. Python code
 and original data tables are licensed under the GNU General Public
 License (GPL) v3.
 
 The following files have their own licenses: **data/elements.txt** is
-from the OpenBabel project and licensed under the GPL v2, which is
+from the [OpenBabel](http://openbabel.sourceforge.net) project and licensed under the GPL v2, which is
 included in the parent folder.
 
 References
