@@ -68,16 +68,15 @@ included in the parent folder.
 References
 ----------
 
-[K. T. Butler, J. M. Frost, J. M. Skelton, K. L. Svane and A. Walsh, 
+[D. W. Davies et al, 
+"Computational Screening of All Stoichiometric Inorganic Materials" *Chem* **1**, 617 (2016)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
+
+[K. T. Butler et al, 
 "Computational materials design of crystalline solids", *Chemical Society Reviews* (2016)](http://pubs.rsc.org/en/content/articlelanding/2016/cs/c5cs00841g)
 
 [B. R. Pamplin, "A systematic method of deriving new semiconducting
 compounds by structural analogy", *J. Phys. Chem. Solids*
 **25**, 675 (1964)](http://www.sciencedirect.com/science/article/pii/0022369764901763)
-
-[S. Chen, X. G. Gong, A. Walsh and S.-H. Wei, "Electronic structure and stability
-of quaternary chalcogenide semiconductors derived from cation cross-substitution
-of II-VI and I-III-VI2 compounds", *Physical Review B* **79**, 165211 (2009)](http://journals.aps.org/prb/abstract/10.1103/PhysRevB.79.165211)
 
 [Mendeley "Materials Design" Reading List](https://www.mendeley.com/groups/8113991/materials-design/overview/)
 
