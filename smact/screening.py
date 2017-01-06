@@ -1,4 +1,5 @@
-from itertools import izip, combinations
+from builtins import zip
+from itertools import combinations
 
 
 def pauling_test(oxidation_states, electronegativities,
@@ -70,7 +71,7 @@ def _no_repeats(oxidation_states, symbols,
     else:
 
         anions, cations = [], []
-        for state, symbol in izip(oxidation_states, symbols):
+        for state, symbol in zip(oxidation_states, symbols):
             if state > 0:
                 cations.append(symbol)
             else:
@@ -162,7 +163,7 @@ def eneg_states_test(ox_states, enegs):
             anions, otherwise False
 
     """
-    for ((ox1, eneg1), (ox2, eneg2)) in combinations(zip(ox_states, enegs), 2):
+    for ((ox1, eneg1), (ox2, eneg2)) in combinations(list(zip(ox_states, enegs)), 2):
         if (ox1 > 0) and (ox2 < 0) and (eneg1 >= eneg2):
             return False
         elif (ox1 < 0) and (ox2 > 0) and (eneg1 <= eneg2):
@@ -197,7 +198,7 @@ def eneg_states_test_threshold(ox_states, enegs, threshold=0):
             anions, otherwise False
 
     """
-    for ((ox1, eneg1), (ox2, eneg2)) in combinations(zip(ox_states, enegs), 2):
+    for ((ox1, eneg1), (ox2, eneg2)) in combinations(list(zip(ox_states, enegs)), 2):
         if (ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold):
             return False
         elif (ox1 < 0) and (ox2 > 0) and (eneg2 - eneg1) > threshold:
@@ -225,7 +226,7 @@ def eneg_states_test_alternate(ox_states, enegs):
 
     """
     min_cation_eneg, max_anion_eneg = 10, 0
-    for ox_state, eneg in izip(ox_states, enegs):
+    for ox_state, eneg in zip(ox_states, enegs):
         if ox_state < 1:
             min_cation_eneg = min(eneg, min_cation_eneg)
         else:

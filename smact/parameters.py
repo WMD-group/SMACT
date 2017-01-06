@@ -19,6 +19,10 @@
 #                                                                              #
 ################################################################################
 
+from __future__ import print_function
+from __future__ import division
+from builtins import input
+from past.utils import old_div
 import smact
 import numpy as np
 
@@ -36,7 +40,7 @@ def query_yes_no(question, default="yes"):
 
         while True:
             sys.stdout.write(question + prompt)
-            choice = raw_input().lower()
+            choice = input().lower()
             if default is not None and choice == '':
                 return valid[default]
             elif choice in valid:
@@ -73,7 +77,7 @@ def bcc(covalent_radius):
 def hcp(covalent_radius):
     a = 2 * covalent_radius
     b = a
-    c = (4./3.) * 6**0.5 * covalent_radius
+    c = (old_div(4.,3.)) * 6**0.5 * covalent_radius
     alpha = 90
     beta = 90
     gamma = 120
@@ -122,7 +126,7 @@ a_lattices = [fcc,bcc,hcp,diamond,bct]
 
 #B1
 def rocksalt(shannon_radius):
-    print shannon_radius
+    print(shannon_radius)
     limiting_factors=[2*2**0.2*shannon_radius[0],2*2**0.2*shannon_radius[1],2*shannon_radius[0]+2*shannon_radius[1]]
     a = max(limiting_factors)
     b = a
@@ -134,7 +138,7 @@ def rocksalt(shannon_radius):
 
 #B2    
 def b2(shannon_radius):
-    print shannon_radius
+    print(shannon_radius)
     limiting_factors=[2*(shannon_radius[0]+shannon_radius[0])/np.sqrt(3),2*shannon_radius[1],2*shannon_radius[0]]
     a = max(limiting_factors)
     b = a
@@ -146,8 +150,8 @@ def b2(shannon_radius):
     
 #B3    
 def zincblende(shannon_radius):
-    print shannon_radius
-    limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(1./3.)]
+    print(shannon_radius)
+    limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(old_div(1.,3.))]
     a = max(limiting_factors)
     b = a
     c = a
@@ -163,7 +167,7 @@ def zincblende(shannon_radius):
 
 #B4    
 def wurtzite(shannon_radius):
-    print shannon_radius
+    print(shannon_radius)
     ##limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(1./3.)]
     a = 2*0.827*(shannon_radius[0]+shannon_radius[1])  # 0.817 is sin(109.6/2)
     b = a
@@ -175,7 +179,7 @@ def wurtzite(shannon_radius):
 
 #B10
 def b10(shannon_radius): #Litharge
-    print shannon_radius
+    print(shannon_radius)
     limiting_factors=[4*(max(shannon_radius))/np.sqrt(2), sum(shannon_radius)*1.31]## Explained below.
     a = max(limiting_factors)
     b = a
@@ -192,7 +196,7 @@ b_lattices = [rocksalt,b2,zincblende,wurtzite,b10]
 #E2_1
 
 def E2_1(shannon_radius): #Cubic Pervoskite
-    print shannon_radius
+    print(shannon_radius)
     limiting_factors=[2*sum(shannon_radius[1:])]
     a = max(limiting_factors)
     b = a
@@ -209,13 +213,13 @@ e_lattices = [E2_1]
 
 def main():
 
-    crystal_elements = raw_input('Which elements? Separate chemical symbols with a space. ')
+    crystal_elements = input('Which elements? Separate chemical symbols with a space. ')
     crystal_elements = crystal_elements.split()
 
     perov=False
     if len(crystal_elements) == 3:
         perov = query_yes_no("Are you looking for Perovskites?")
-    print perov
+    print(perov)
 
 
 
@@ -233,12 +237,12 @@ def main():
     print (" \n ### A type lattices ###\n ")
 
     for lattice in a_lattices:
-        print (' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  ')
+        print((' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  '))
         for elements in crystal_elements:
             x = smact.Element(elements)
             a,b,c,alpha,beta,gamma = lattice(x.covalent_radius)
-            print elements,"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma
-    print ' \n Key :: Element a b c alpha beta gamma \n///////////////////////////////////////////////////////////////////////////////////////\n '
+            print(elements,"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma)
+    print(' \n Key :: Element a b c alpha beta gamma \n///////////////////////////////////////////////////////////////////////////////////////\n ')
 
 
 
@@ -266,12 +270,12 @@ def main():
         for ox in poss_ox:
             if ox not in poss_ox_clean:
                 poss_ox_clean.append(ox)
-        print elements
-        print poss_ox_clean
+        print(elements)
+        print(poss_ox_clean)
         if len(poss_ox_clean) == 1:
             oxidation.append(int(poss_ox_clean[0]))
         else:
-            oxidation.append(int(raw_input('Oxidation state of ' + elements + ' ')))
+            oxidation.append(int(input('Oxidation state of ' + elements + ' ')))
         poss_co_clean = [] ### Duplicates removed
         with open('data/shannon_radii.csv','rU') as f:
             reader = csv.reader(f)
@@ -282,14 +286,14 @@ def main():
         for co in poss_cood:
             if co not in poss_co_clean:
                 poss_co_clean.append(co)
-        print elements
-        print poss_co_clean
+        print(elements)
+        print(poss_co_clean)
         if len(poss_co_clean) == 1:
             coordination.append(poss_co_clean[0])
         else: 
-            coordination.append(raw_input('Coordination state of ' + elements + ' '))
+            coordination.append(input('Coordination state of ' + elements + ' '))
 
-        print elements,oxidation[i],coordination[i]
+        print(elements,oxidation[i],coordination[i])
         i+=1
 
     ## B-types
@@ -305,17 +309,17 @@ def main():
     print (" \n ### B type lattices ###\n ")
 
     for lattice in b_lattices:
-        print (' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  ')
+        print((' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  '))
         shannon_radius = []
         for i, elements in enumerate(crystal_elements):
-            print elements,oxidation[i],coordination[i]
+            print(elements,oxidation[i],coordination[i])
             x = smact.Species(elements,oxidation[i],coordination[i])
             shannon_radius.append(float(x.shannon_radius))
         a,b,c,alpha,beta,gamma = lattice(shannon_radius)
         if lattice.__name__ == 'wurtzite':
             inner_space = a * (6**0.5) - (4*shannon_radius[0])
             print ("With a gap in the middle of " + "%.2f"%inner_space+" (diameter)")
-        print crystal_elements[0:2],"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma
+        print(crystal_elements[0:2],"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma)
 
 
 
@@ -332,14 +336,14 @@ def main():
     print (" \n ### E type lattices ###\n ")
 
     for lattice in e_lattices:
-        print (' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  ')
+        print((' \n===============\n ') + lattice.__name__.upper() + (' Lattice \n===============\n  '))
         shannon_radius = []
         for i, elements in enumerate(crystal_elements):
-            print elements,oxidation[i],coordination[i]
+            print(elements,oxidation[i],coordination[i])
             x = smact.Species(elements,oxidation[i],coordination[i])
             shannon_radius.append(float(x.shannon_radius))
         a,b,c,space,alpha,beta,gamma = lattice(shannon_radius)
-        print crystal_elements[0:],"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma
+        print(crystal_elements[0:],"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma)
         print ("With a gap in the middle of " + "%.2f"%space+" (diameter)")
 
 if __name__ == '__main__':

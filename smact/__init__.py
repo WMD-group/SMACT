@@ -19,11 +19,15 @@ A collection of fast screening tools from elemental data
 """
 
 # get correct path for datafiles when called from another directory
+from builtins import filter
+from builtins import map
+from builtins import range
+from builtins import object
 from os import path
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, 'data')
 import itertools
-from itertools import imap
+
 
 from fractions import gcd
 from operator import mul as multiply
@@ -298,7 +302,7 @@ def _isneutral(oxidations, stoichs):
         oxidations (tuple): Oxidation states of a set of oxidised elements
         stoichs (tuple): Stoichiometry values corresponding to `oxidations`
     """
-    return 0 == sum(imap(multiply, oxidations, stoichs))
+    return 0 == sum(map(multiply, oxidations, stoichs))
 
 def neutral_ratios_iter(oxidations, stoichs=False, threshold=5):
     """
@@ -318,12 +322,12 @@ def neutral_ratios_iter(oxidations, stoichs=False, threshold=5):
         tuple: ratio that gives neutrality
     """
     if not stoichs:
-        stoichs = [range(1,threshold+1)] * len(oxidations)
+        stoichs = [list(range(1,threshold+1))] * len(oxidations)
 
     # First filter: remove combinations which have a common denominator
     # greater than 1 (i.e. Use simplest form of each set of ratios)
     # Second filter: return only charge-neutral combinations
-    return itertools.ifilter(
+    return filter(
         lambda x: _isneutral(oxidations, x) and _gcd_recursive(*x) == 1,
         # Generator: enumerate all combinations of stoichiometry
         itertools.product(*stoichs)

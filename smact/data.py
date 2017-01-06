@@ -15,6 +15,8 @@
 #  this program.  If not, see <http://www.gnu.org/licenses/>.                  #
 ################################################################################
 
+from __future__ import division
+from past.utils import old_div
 import smact
 
 def get_mulliken(element):
@@ -32,7 +34,7 @@ def get_mulliken(element):
     elif type(element) != smact.Element:
         raise Exception("Unexpected type: {0}".format(type(element)))        
 
-    mulliken = (element.ionpot+element.e_affinity)/2.0
+    mulliken = old_div((element.ionpot+element.e_affinity),2.0)
 
     return mulliken
 

@@ -19,7 +19,7 @@
 #                                                                              #
 ################################################################################
 
-from ase.utils.geometry import cut
+from ase.build import cut
 
 def cut100(crystal,nlayers=6):
     """Cleave the 100 surface"""

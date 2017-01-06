@@ -38,7 +38,7 @@ except ImportError:
     except ImportError:
         raise Exception("Could not load spglib")
 
-from ase.lattice.spacegroup import Spacegroup
+from ase.spacegroup import Spacegroup
 
 
 def get_sg(lattice):

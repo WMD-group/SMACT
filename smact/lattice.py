@@ -15,6 +15,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.                   #
 ################################################################################
 
+from builtins import object
 import numpy as np
 import smact
 
@@ -110,9 +111,9 @@ def possible_compositions(crystal, elements):
     """
 
     for site in crystal.sites:
-	composition = []
-	for ox in site.oxidation_states:
-	    total_charge = total_charge + ox
+        composition = []
+        for ox in site.oxidation_states:
+            total_charge = total_charge + ox
 
 
 '''
@@ -180,10 +181,10 @@ def possible_elements(elements, oxidations):
     """
     atoms = []
     for element in elements:
-	elemental_oxidations = smact.Element(element).oxidation_states
+        elemental_oxidations = smact.Element(element).oxidation_states
         for ox_state_a in oxidations:
-	    for element_ox in elemental_oxidations:
-        	if int(element_ox) == int(ox_state_a):
-        	    atoms.append(element)
+            for element_ox in elemental_oxidations:
+                if int(element_ox) == int(ox_state_a):
+                    atoms.append(element)
     return atoms
 #------------------------------------------------------------------------------------

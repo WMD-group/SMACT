@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import division
 ###############################################################################
 # Copyright Daniel Davies, Adam J. Jackson, Keith T. Butler (2016)            #
 #                                                                             #
@@ -13,6 +15,10 @@
 #                                                                             #
 ###############################################################################
 
+from builtins import map
+from builtins import input
+from builtins import range
+from past.utils import old_div
 import smact
 from numpy import sqrt, product
 from smact.data import get_mulliken
@@ -54,13 +60,13 @@ def band_gap_Harrison(verbose=False, anion=None, cation=None,
     if cation:
         Cat = cation
     if not anion:
-        An = raw_input("Enter Anion Symbol:")
+        An = input("Enter Anion Symbol:")
     if not cation:
-        Cat = raw_input("Enter Cation Symbol:")
+        Cat = input("Enter Cation Symbol:")
     if distance:
         d = float(distance)
     if not distance:
-        d = float(raw_input("Enter internuclear separation (Angstroms): "))
+        d = float(input("Enter internuclear separation (Angstroms): "))
 
     # Get elemental data:
     if not elements_dict:
@@ -68,20 +74,20 @@ def band_gap_Harrison(verbose=False, anion=None, cation=None,
     An, Cat = elements_dict[An], elements_dict[Cat]
 
     # Calculate values of equation components
-    V1_Cat = (Cat.eig - Cat.eig_s)/4
-    V1_An = (An.eig - An.eig_s)/4
-    V1_bar = (V1_An + V1_Cat)/2
+    V1_Cat = old_div((Cat.eig - Cat.eig_s),4)
+    V1_An = old_div((An.eig - An.eig_s),4)
+    V1_bar = old_div((V1_An + V1_Cat),2)
     V2 = 2.16 * hbarsq_over_m / (d**2)
-    V3 = (Cat.eig - An.eig)/2
-    alpha_m = (1.11*V1_bar)/sqrt(V2**2 + V3**2)
+    V3 = old_div((Cat.eig - An.eig),2)
+    alpha_m = old_div((1.11*V1_bar),sqrt(V2**2 + V3**2))
 
     # Calculate Band gap [(3-43) Harrison 1980 ]
-    Band_gap = (3.60/3)*(sqrt(V2**2 + V3**2))*(1-alpha_m)
+    Band_gap = (old_div(3.60,3))*(sqrt(V2**2 + V3**2))*(1-alpha_m)
     if verbose:
-        print "V1_bar = ", V1_bar
-        print "V2 = ", V2
-        print "alpha_m = ", alpha_m
-        print "V3 = ", V3
+        print("V1_bar = ", V1_bar)
+        print("V2 = ", V2)
+        print("alpha_m = ", alpha_m)
+        print("V3 = ", V3)
 
     return Band_gap
 
@@ -131,17 +137,17 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
 
     # Get elements and stoichiometries if not provided as argument
     if not elements:
-        elementlist = list(raw_input(
+        elementlist = list(input(
             "Enter elements (space separated): ").split(" "))
     if not stoichs:
-        stoichslist = list(raw_input(
+        stoichslist = list(input(
             "Enter stoichiometries (space separated): ").split(" "))
 
     if not elements_dict:
         elements_dict = smact.element_dictionary(elements)
 
     # Convert stoichslist from string to float
-    stoichslist = map(float, stoichslist)
+    stoichslist = list(map(float, stoichslist))
 
     # Get electronegativity values for each element
     if source == 'Mulliken':
@@ -156,7 +162,7 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.
     if verbose:
-        print "Electronegativities of elements=", elementlist
+        print("Electronegativities of elements=", elementlist)
 
     # Raise each electronegativity to its appropriate power
     # to account for stoichiometry.
@@ -165,10 +171,10 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
 
     # Calculate geometric mean (n-th root of product)
     prod = product(elementlist)
-    compelectroneg = (prod)**(1.0/(sum(stoichslist)))
+    compelectroneg = (prod)**(old_div(1.0,(sum(stoichslist))))
 
     if verbose:
-        print "Geometric mean = Compound 'electronegativity'=", compelectroneg
+        print("Geometric mean = Compound 'electronegativity'=", compelectroneg)
 
     return compelectroneg
 

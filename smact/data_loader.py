@@ -23,7 +23,11 @@ naively constructing several of these objects.  It also implements a
 switchable system to print verbose warning messages about possible
 missing data (mainly for debugging purposes).
 """
+from __future__ import print_function
 
+from builtins import next
+from builtins import map
+from builtins import zip
 import csv
 import os
 
@@ -189,10 +193,10 @@ def lookup_element_data(symbol, copy=True):
             # First two columns are strings and should be left intact
             # Everything else is numerical and should be cast to a float
             # or, if not clearly a number, to None
-            clean_items = items[0:2] + map(float_or_None, items[2:])
+            clean_items = items[0:2] + list(map(float_or_None, items[2:]))
 
             _element_data.update({items[0]:
-                                  dict(zip(keys, clean_items))})
+                                  dict(list(zip(keys, clean_items)))})
 
     if symbol in _element_data:
         if copy:
@@ -209,7 +213,7 @@ def lookup_element_data(symbol, copy=True):
         if _print_warnings:
             print("WARNING: Elemental data for {0}"
                   " not found.".format(symbol))
-            print _element_data
+            print(_element_data)
         return None
 
 
