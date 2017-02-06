@@ -2,10 +2,10 @@
 
 __author__ = "Daniel W. Davies"
 __copyright__ = "Copyright Adam J. Jackson, Daniel W. Davies (2013)"
-__version__ = "1.1"
+__version__ = "1.2"
 __maintainer__ = "Daniel W. Davies"
 __email__ = "d.w.davies@bath.ac.uk"
-__date__ = "Jan 3 2017"
+__date__ = "Feb 6 2017"
 
 from setuptools import setup
 import os
@@ -15,7 +15,7 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 if __name__ == "__main__":
     setup(
         name='SMACT',
-        version='1.1.1',
+        version='1.2',
         description='Semiconducting Materials by Analogy and Chemical Theory',
         long_description=open(os.path.join(module_dir, 'README.md')).read(),
         url='https://github.com/WMD-group/SMACT',
@@ -26,7 +26,7 @@ if __name__ == "__main__":
         package_data={'smact': ['data/*.txt','data/*.csv']},
         zip_safe=False,
         install_requires=['scipy','numpy','spglib'],
-        classifiers=['Programming Language :: Python :: 2.7',
+        classifiers=['Programming Language :: Python',
                      'Development Status :: 5 - Production/Stable',
                      'Intended Audience :: Science/Research',
                      'Operating System :: OS Independent',
