@@ -1,6 +1,6 @@
 from builtins import zip
 from itertools import combinations
-
+from smact import Element
 
 def pauling_test(oxidation_states, electronegativities,
                  symbols=[], repeat_anions=True,
@@ -233,7 +233,7 @@ def eneg_states_test_alternate(ox_states, enegs):
             max_anion_eneg = max(eneg, max_anion_eneg)
     return min_cation_eneg > max_anion_eneg
 
-def ML_representation_generator(composition, stoichs=None):
+def ml_rep_generator(composition, stoichs=None):
     """Function to take a composition of Elements and returns a 
     list of values between 0 and 1 that describe the composition,
     useful for machine learning. 
@@ -262,3 +262,34 @@ def ML_representation_generator(composition, stoichs=None):
         ML_rep[int(element.number)-1] += stoich
     norm = [float(i)/sum(ML_rep) for i in ML_rep]
     return norm
+
+def ml_rep_generator_symbols(composition, stoichs=None):
+    """Function to take a composition of Element symbols and returns a
+    list of values between 0 and 1 that describe the composition,
+    useful for machine learning.
+
+    The list is of length 103 as there are 103 elements
+    considered in total in SMACT.
+
+    e.g. Li2O --> [0, 0, 2/3, 0, 0, 0, 0, 1/3, 0 ....]
+
+    Inspired by a method in Legrain et al.: https://arxiv.org/abs/1703.02309
+
+    Args:
+        composition (list): Element objects in composition
+        stoichs (list): Corresponding stoichiometries in the composition
+
+    Returns:
+        norm (list): List of floats representing the composition that sum
+            to one
+
+    """
+    if stoichs == None:
+        stoichs = [1 for i, el in enumerate(composition)]
+
+    ML_rep = [0 for i in range(1,103)]
+    for element, stoich in zip(composition, stoichs):
+        ML_rep[int(Element(element).number)-1] += stoich
+    norm = [float(i)/sum(ML_rep) for i in ML_rep]
+    return norm
+
