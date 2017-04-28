@@ -261,11 +261,9 @@ def ml_rep_generator(composition, stoichs=None):
     if type(composition[0]) == Element:
         for element, stoich in zip(composition, stoichs):
             ML_rep[int(element.number)-1] += stoich
-    elif type(composition[0]) == str:
+    else:
         for element, stoich in zip(composition, stoichs):
             ML_rep[int(Element(element).number)-1] += stoich
-    else:
-        raise ValueError('ml_rep_generator was expeting a list of SMACT Element objects or a list of symbols.')
 
     norm = [float(i)/sum(ML_rep) for i in ML_rep]
     return norm

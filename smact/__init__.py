@@ -133,6 +133,8 @@ class Element(object):
             ('number', dataset['Z']),
             ('oxidation_states',
              data_loader.lookup_element_oxidation_states(symbol)),
+            ('oxidation_states_icsd',
+             data_loader.lookup_element_oxidation_states_icsd(symbol)),
             ('pauling_eneg', dataset['el_neg']),
             ('SSE', sse),
             ('SSEPauling', sse_Pauling),
