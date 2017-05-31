@@ -41,6 +41,7 @@ but are expected to make it upstream fairly rapidly.
 
 Installation
 ------------
+	pip install smact
 
 On a unix-like system, simply add the directory containing this README file
 to your PYTHONPATH. e.g. in ~/.bashrc
@@ -52,7 +53,7 @@ Usage
 
 SMACT's features are
 accessed through Python scripts, importing classes and functions as needed.
-In addition to the `examples` folder, some practical applications using are also available from [https://github.com/WMD-group/SMACT_practical](https://github.com/WMD-group/SMACT_practical).
+In addition to the `examples` folder, some practical applications using are also available from [our examples page](https://github.com/WMD-group/SMACT/tree/master/examples).
 
 License and attribution
 -----------------------
