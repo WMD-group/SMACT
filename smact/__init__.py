@@ -377,3 +377,9 @@ metals = ['Li','Be','Na','Mg','Al','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','N
 'Cs','Ba','La','Ce', 'Pr', 'Nd','Sm','Gd','Dy','Ho','Er','Tm',
 'Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','Fr','Ra','Ac',
 'Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No']
+
+# List of elements that can be considered 'anions'.
+# Similar to the Pymatgen 'electronegative elements' but excluding H, B, C & Si.
+anions = ["N", "P", "As", "Sb",
+           "O", "S", "Se", "Te",
+           "F", "Cl", "Br", "I"]
