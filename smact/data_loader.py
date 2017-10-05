@@ -151,6 +151,37 @@ def lookup_element_oxidation_states_icsd(symbol, copy=True):
             _el_ox_states_icsd[items[0]] = [int(oxidationState)
                                        for oxidationState in items[1:]]
 
+def lookup_element_oxidation_states_sp(symbol, copy=True):
+    """
+    Retrieve a list of known oxidation states for an element.
+    The oxidation states list used contains only those that
+    are in the Pymatgen default lambda table for structure prediction.
+
+    Args:
+        symbol (str) : the atomic symbol of the element to look up.
+        copy (Optional(bool)): if True (default), return a copy of the
+            oxidation-state list, rather than a reference to the cached
+            data -- only use copy=False in performance-sensitive code
+            and where the list will not be modified!
+
+    Returns:
+        list: List of known oxidation states for the element.
+
+            Return None if oxidation states for the Element were not
+            found in the external data.
+    """
+
+    global _el_ox_states_icsd
+
+    if _el_ox_states_icsd is None:
+        _el_ox_states_icsd = {}
+
+        for items in _get_data_rows(os.path.join(data_directory,
+                                                 "oxidation_states_SP.txt")):
+            _el_ox_states_icsd[items[0]] = [int(oxidationState)
+                                       for oxidationState in items[1:]]
+
+
     if symbol in _el_ox_states_icsd:
         if copy:
             # _el_ox_states_icsd stores lists -> if copy is set, make an implicit

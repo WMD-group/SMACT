@@ -135,6 +135,8 @@ class Element(object):
              data_loader.lookup_element_oxidation_states(symbol)),
             ('oxidation_states_icsd',
              data_loader.lookup_element_oxidation_states_icsd(symbol)),
+            ('oxidation_states_sp',
+             data_loader.lookup_element_oxidation_states_sp(symbol)),
             ('pauling_eneg', dataset['el_neg']),
             ('SSE', sse),
             ('SSEPauling', sse_Pauling),
