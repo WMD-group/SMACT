@@ -117,7 +117,6 @@ def lookup_element_oxidation_states(symbol, copy=True):
                   "not found.".format(symbol))
         return None
 
-# Loader and cache for the element oxidation-state data.
 _el_ox_states_icsd = None
 
 
@@ -151,6 +150,8 @@ def lookup_element_oxidation_states_icsd(symbol, copy=True):
             _el_ox_states_icsd[items[0]] = [int(oxidationState)
                                        for oxidationState in items[1:]]
 
+_el_ox_states_sp = None
+
 def lookup_element_oxidation_states_sp(symbol, copy=True):
     """
     Retrieve a list of known oxidation states for an element.
@@ -171,26 +172,26 @@ def lookup_element_oxidation_states_sp(symbol, copy=True):
             found in the external data.
     """
 
-    global _el_ox_states_icsd
+    global _el_ox_states_sp
 
-    if _el_ox_states_icsd is None:
-        _el_ox_states_icsd = {}
+    if _el_ox_states_sp is None:
+        _el_ox_states_sp = {}
 
         for items in _get_data_rows(os.path.join(data_directory,
                                                  "oxidation_states_SP.txt")):
-            _el_ox_states_icsd[items[0]] = [int(oxidationState)
+            _el_ox_states_sp[items[0]] = [int(oxidationState)
                                        for oxidationState in items[1:]]
 
 
-    if symbol in _el_ox_states_icsd:
+    if symbol in _el_ox_states_sp:
         if copy:
-            # _el_ox_states_icsd stores lists -> if copy is set, make an implicit
+            # _el_ox_states_sp stores lists -> if copy is set, make an implicit
             # deep copy.  The elements of the lists are integers, which are
             # "value types" in Python.
 
-            return [oxidationState for oxidationState in _el_ox_states_icsd[symbol]]
+            return [oxidationState for oxidationState in _el_ox_states_sp[symbol]]
         else:
-            return _el_ox_states_icsd[symbol]
+            return _el_ox_states_sp[symbol]
     else:
         if _print_warnings:
             print("WARNING: Oxidation states for element {0} "
