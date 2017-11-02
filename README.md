@@ -53,7 +53,7 @@ Usage
 
 SMACT's features are
 accessed through Python scripts, importing classes and functions as needed.
-In addition to the `examples` folder, some practical applications using are also available from [our examples page](https://github.com/WMD-group/SMACT/tree/master/examples).
+Some practical applications using are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples).
 
 License and attribution
 -----------------------
@@ -92,9 +92,7 @@ is also helpful, including a good model for docstrings.
 Please use comments liberally when adding nontrivial features, and
 take the chance to clean up other people's code while looking at it.
  
-Although the project is based in Python 2.7.x, please use new-style classes and
-string formatting; as well as enjoying their elegance and power, this will make
-it much easier to port to Python 3 if this is ever desired.
+The project was started Python 2.7.x, but has now been ported to Python 3. Please use new-style classes and string formatting.
 
 Testing modules should be pass/fail and wrapped into **tests/test.py**.
 Tests need to be run from the main directory (i.e. with `python tests/test.py`).
