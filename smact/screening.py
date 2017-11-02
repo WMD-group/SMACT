@@ -235,7 +235,7 @@ def eneg_states_test_alternate(ox_states, enegs):
 
 def ml_rep_generator(composition, stoichs=None):
     """Function to take a composition of Elements and returns a
-    list of values between 0 and 1 that describe the composition,
+    list of values between 0 and 1 that describes the composition,
     useful for machine learning.
 
     The list is of length 103 as there are 103 elements
@@ -243,7 +243,7 @@ def ml_rep_generator(composition, stoichs=None):
 
     e.g. Li2O --> [0, 0, 2/3, 0, 0, 0, 0, 1/3, 0 ....]
 
-    Inspired by a method in Legrain et al.: https://arxiv.org/abs/1703.02309
+    Inspired by the representation used by Legrain et al. DOI: 10.1021/acs.chemmater.7b00789
 
     Args:
         composition (list): Element objects in composition OR symbols of elements in composition
