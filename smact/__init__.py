@@ -44,35 +44,43 @@ class Element(object):
     "Species" class.
 
     Attributes:
-        Element.symbol (string): Elemental symbol used to retrieve data
+        Element.symbol (string) : Elemental symbol used to retrieve data
 
-        Element.name (string): Full name of element
+        Element.name (string) : Full name of element
 
-        Element.number (int): Proton number of element
+        Element.number (int) : Proton number of element
 
-        Element.pauling_eneg (float): Pauling electronegativity (0.0 if unknown)
+        Element.pauling_eneg (float) : Pauling electronegativity (0.0 if unknown)
 
-        Element.ionpot (float): Ionisation potential in eV (0.0 if unknown)
+        Element.ionpot (float) : Ionisation potential in eV (0.0 if unknown)
 
-        Element.e_affinity (float): Electron affinity in eV (0.0 if unknown)
+        Element.e_affinity (float) : Electron affinity in eV (0.0 if unknown)
 
-        Element.eig (float): Electron eigenvalue (units unknown). N.B. For Cu, Au and Ag this defaults to d-orbital.
+        Element.eig (float) : Electron eigenvalue (units unknown) N.B. For Cu, Au and Ag this defaults to d-orbital
 
-        Element.eig_s (float): Eigenvalue of s-orbital
-
-        Element.crustal_abundance (float): crustal abundance in the earths crust mg/kg taken from CRC
-
-        Element.coord_envs (list): The allowed coordination enviroments for the ion.
-
-        Element.mass (float) : Molar mass of the element.
-
-        Element.HHI_p (float) : Herfindahl-Hirschman Index for elemental production
-
-        Element.HHI_R (float) : Hirfindahl-Hirschman Index for elemental reserves
+        Element.eig_s (float) : Eigenvalue of s-orbital
 
         Element.SSE (float) : Solid State Energy
 
         Element.SSEPauling (float) : SSE based on regression fit with Pauling electronegativity
+
+        Element.oxidation_states (list) : Default list of allowed oxidation states for use in SMACT
+
+        Element.oxidation_states_sp (list) : List of oxdation states recognised by the Pymatgen Structure Predictor
+
+        Element.oxidation_states_icsd (list) : List of oxidation states that appear in the ICSD
+
+        Element.coord_envs (list): The allowed coordination enviroments for the ion
+
+        Element.covalent_radius (float) : Covalent radius of the element
+
+        Element.mass (float) : Molar mass of the element
+
+        Element.crustal_abundance (float) : Crustal abundance in the earths crust mg/kg taken from CRC
+
+        Element.HHI_p (float) : Herfindahl-Hirschman Index for elemental production
+
+        Element.HHI_r (float) : Hirfindahl-Hirschman Index for elemental reserves
 
     Raises:
         NameError: Element not found in element.txt
@@ -126,7 +134,7 @@ class Element(object):
             ('eig', dataset['p_eig']),
             ('eig_s', dataset['s_eig']),
             ('HHI_p', HHI_scores[0]),
-            ('HHI_R', HHI_scores[1]),
+            ('HHI_r', HHI_scores[1]),
             ('ionpot', dataset['ion_pot']),
             ('mass', dataset['Mass']),
             ('name', dataset['Name']),
