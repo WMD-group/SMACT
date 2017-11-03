@@ -1,6 +1,6 @@
-#!/usr/bin/env python 
-# Using the ase spacegroup module this can build the structure, from 
-# the composition, as defined in the smact_lattice module. 
+#!/usr/bin/env python
+# Using the ase spacegroup module this can build the structure, from
+# the composition, as defined in the smact_lattice module.
 #TO DO:
 # Calculating the lattice parameters from the elemnts involved
 ################################################################################
@@ -25,203 +25,12 @@ from builtins import input
 from past.utils import old_div
 import smact
 import numpy as np
-
 import sys
-def query_yes_no(question, default="yes"):
-        valid = {"yes": True, "y": True, "yer":True, "sure":True, "i am":True, "ye": True, "nope":False, "no": False, "n": False}
-        if default is None:
-            prompt = " [y/n] "
-        elif default == "yes":
-            prompt = " [Y/n] "
-        elif default == "no":
-            prompt = " [y/N] "
-        else:
-            raise ValueError("invalid default answer: '%s'" % default)
-
-        while True:
-            sys.stdout.write(question + prompt)
-            choice = input().lower()
-            if default is not None and choice == '':
-                return valid[default]
-            elif choice in valid:
-                return valid[choice]
-            else:
-                sys.stdout.write("Please respond with 'yes' or 'no' "
-                                 "(or 'y' or 'n').\n")
-
-
-# A-type lattices
-#------------------------------------------------------------------------------------------
-
-#A1#
-def fcc(covalent_radius):
-    a = 2 * 2**0.5 * covalent_radius
-    b = 2 * 2**0.5 * covalent_radius
-    c = 2 * 2**0.5 * covalent_radius
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,alpha,beta,gamma
-
-#A2#
-def bcc(covalent_radius):
-    a = 4 * covalent_radius / np.sqrt(3)
-    b = a
-    c = a
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,alpha,beta,gamma
-
-#A3#
-def hcp(covalent_radius):
-    a = 2 * covalent_radius
-    b = a
-    c = (old_div(4.,3.)) * 6**0.5 * covalent_radius
-    alpha = 90
-    beta = 90
-    gamma = 120
-    return a,b,c,alpha,beta,gamma
-
-#A4#
-def diamond(covalent_radius):
-    a = 8 * covalent_radius / np.sqrt(3)
-    b = a
-    c = a
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,alpha,beta,gamma
-
-#A5#
-def bct(covalent_radius):
-    a = 3.86 * covalent_radius
-    b = a
-    c = 2 * covalent_radius
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,alpha,beta,gamma
-
-''''
-#A6#
-def beta_tin(covalent_radius):##### Really?
-    a = 2 * covalent_radius ##### Really ?
-    b = a
-    c = 2.9 * covalent_radius ##### Really? 
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,alpha,beta,gamma
-'''
-
-#A-type lattices#
-a_lattices = [fcc,bcc,hcp,diamond,bct]
-
-
-
-
-# B-type lattices
-#------------------------------------------------------------------------------------------
-
-#B1
-def rocksalt(shannon_radius):
-    print(shannon_radius)
-    limiting_factors=[2*2**0.2*shannon_radius[0],2*2**0.2*shannon_radius[1],2*shannon_radius[0]+2*shannon_radius[1]]
-    a = max(limiting_factors)
-    b = a
-    c = a
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,alpha,beta,gamma
-
-#B2    
-def b2(shannon_radius):
-    print(shannon_radius)
-    limiting_factors=[2*(shannon_radius[0]+shannon_radius[0])/np.sqrt(3),2*shannon_radius[1],2*shannon_radius[0]]
-    a = max(limiting_factors)
-    b = a
-    c = a
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,alpha,beta,gamma
-    
-#B3    
-def zincblende(shannon_radius):
-    print(shannon_radius)
-    limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(old_div(1.,3.))]
-    a = max(limiting_factors)
-    b = a
-    c = a
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,alpha,beta,gamma
-
-
-## Zn-S-Zn angle is ~109.5 degrees (from a tetrahedron). It is exactly 2*invCos(-1/3).
-## The distance of that Zn-Zn (diagonally to half the face) is (using the cosine rule) is
-# root[2(r1+r2)^2 - 2(r1+r2)^(2)cos(ZnSZn angle)].
-
-#B4    
-def wurtzite(shannon_radius):
-    print(shannon_radius)
-    ##limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(1./3.)]
-    a = 2*0.827*(shannon_radius[0]+shannon_radius[1])  # 0.817 is sin(109.6/2)
-    b = a
-    c = (shannon_radius[0]+shannon_radius[1])*(2+2*0.334)  # 0.334 is sin(109.5-90)
-    alpha = 90
-    beta = 90
-    gamma = 120
-    return a,b,c,alpha,beta,gamma
-
-#B10
-def b10(shannon_radius): #Litharge
-    print(shannon_radius)
-    limiting_factors=[4*(max(shannon_radius))/np.sqrt(2), sum(shannon_radius)*1.31]## Explained below.
-    a = max(limiting_factors)
-    b = a
-    c = a*1.26 #Value taken for PbO http://www.mindat.org/min-2466.html#
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,alpha,beta,gamma
-## Angle (w) between face-centered atom measured to be ~117.8 deg for   SnO and PbO, where atoms are not similar in size.
-b_lattices = [rocksalt,b2,zincblende,wurtzite,b10]
-
-# E-type lattices
-#------------------------------------------------------------------------------------------
-#E2_1
-
-def E2_1(shannon_radius): #Cubic Pervoskite
-    print(shannon_radius)
-    limiting_factors=[2*sum(shannon_radius[1:])]
-    a = max(limiting_factors)
-    b = a
-    c = a
-    space = a * np.sqrt(3) - 2 * shannon_radius[1]
-    alpha = 90
-    beta = 90
-    gamma = 90
-    return a,b,c,space,alpha,beta,gamma
-e_lattices = [E2_1]
-
-
-#------------------------------------------------------------------------------------------
+import csv
 
 def main():
-
     crystal_elements = input('Which elements? Separate chemical symbols with a space. ')
     crystal_elements = crystal_elements.split()
-
-    perov=False
-    if len(crystal_elements) == 3:
-        perov = query_yes_no("Are you looking for Perovskites?")
-    print(perov)
-
-
 
     # Processing Lattices
     #------------------------------------------------------------------------------------------
@@ -244,17 +53,8 @@ def main():
             print(elements,"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma)
     print(' \n Key :: Element a b c alpha beta gamma \n///////////////////////////////////////////////////////////////////////////////////////\n ')
 
-
-
-
-
-
-
-    import csv
     oxidation =[]
     coordination =[]
-
-    # Raw input processing
 
     i=0
     for elements in crystal_elements:
@@ -290,14 +90,14 @@ def main():
         print(poss_co_clean)
         if len(poss_co_clean) == 1:
             coordination.append(poss_co_clean[0])
-        else: 
+        else:
             coordination.append(input('Coordination state of ' + elements + ' '))
 
         print(elements,oxidation[i],coordination[i])
         i+=1
 
     ## B-types
-    #-------------------------------------------------------------------------------------#    
+    #-------------------------------------------------------------------------------------#
     print (" \n=========================================")
     print ("    BBBB     ####### ##   ## #####  #####")
     print ("   BB BB       ##     ## ## ##  ## ##")
@@ -320,8 +120,6 @@ def main():
             inner_space = a * (6**0.5) - (4*shannon_radius[0])
             print ("With a gap in the middle of " + "%.2f"%inner_space+" (diameter)")
         print(crystal_elements[0:2],"%.2f"%a,"%.2f"%b,"%.2f"%c,"%.1f"%alpha,"%.1f"%beta,"%.1f"%gamma)
-
-
 
     # E Types
     #-------------------------------------------------------------------------------------#

@@ -1,5 +1,5 @@
-#!/usr/bin/env python 
-# This script can calculate roughly the lattice parameters of a lattice type, based 
+#!/usr/bin/env python
+# This script can calculate roughly the lattice parameters of a lattice type, based
 # on the radii of the species on each site.
 ################################################################################
 # Copyright Tim Gauntlett, Keith Butler   (2014)                               #
@@ -55,7 +55,7 @@ def wurtzite(shannon_radius):
     alpha = 90
     beta = 90
     gamma = 120
-    # 
+    #
     # Scenario A: A atoms are touching
     #   i.e. height is that of two tetrahegons with side length a
     #    = 2 * sqrt(2/3) * a
@@ -174,7 +174,7 @@ def rocksalt(shannon_radius):
     gamma = 90
     return a,b,c,alpha,beta,gamma
 
-#B2    
+#B2
 def b2(shannon_radius):
     '''The lattice parameters of b2
     Args:
@@ -192,7 +192,7 @@ def b2(shannon_radius):
     gamma = 90
     return a,b,c,alpha,beta,gamma
 
-#B3    
+#B3
 def zincblende(shannon_radius):
     '''The lattice parameters of Zinc Blende
     Args:
