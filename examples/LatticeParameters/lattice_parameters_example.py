@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-# Using the ase spacegroup module this can build the structure, from
-# the composition, as defined in the smact_lattice module.
+# Example use of the lattice_parameters.py module.
 #TO DO:
 # Calculating the lattice parameters from the elemnts involved
 ################################################################################
@@ -24,6 +23,7 @@ from __future__ import division
 from builtins import input
 from past.utils import old_div
 import smact
+import smact.lattice_parameters as lp
 import numpy as np
 import sys
 import csv
@@ -31,6 +31,10 @@ import csv
 def main():
     crystal_elements = input('Which elements? Separate chemical symbols with a space. ')
     crystal_elements = crystal_elements.split()
+
+    a_lattices = [lp.fcc, lp.bcc, lp.hcp, lp.diamond, lp.bct]
+    b_lattices = [ lp.rocksalt, lp.b2, lp.zincblende, lp.wurtzite, lp.b10]
+    e_lattices = [lp.cubic_perovskite]
 
     # Processing Lattices
     #------------------------------------------------------------------------------------------

@@ -22,10 +22,9 @@ Contents
   * **lattice.py** Given the sites, multiplicities and possible oxidation states
 	at those sites, this reads from the database and generates all possible
 	stoichiometeries.
-  * **parameters.py**  
  * **builder.py** Builds some common lattice structures, given the chemical
 	composition.
-  * **lattice_parameters.py** 
+  * **lattice_parameters.py** Estimation of lattice parameters for various lattice types using covalent/ionic radii. 
   * **distorter.py** A collection of functions for enumerating and then
 	substituting on inequivalent sites of a sub-lattice.
   * **surface.py** 
