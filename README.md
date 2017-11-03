@@ -15,15 +15,20 @@ Contents
 --------
 
 * **smact** library containing:
-  * **core.py** 
-  * **data.py** A collection of functions providing elemental properties.
+  * **\_\_init\_\_.py** Contains the core `Element` and `Species` classes.
+  *  **data_loader.py** Handles the loading of external data used to initialise the core `smact.Element` and `smact.Species` classes. 
+  *  **screening.py** Used for generating and applying filters to compositional search spaces.
+  *  **properties.py** A collection of tools for estimating useful properties based on composition.
   * **lattice.py** Given the sites, multiplicities and possible oxidation states
 	at those sites, this reads from the database and generates all possible
 	stoichiometeries.
-  * **builder.py** Builds some common lattice structures, given the chemical
+  * **parameters.py**  
+ * **builder.py** Builds some common lattice structures, given the chemical
 	composition.
+  * **lattice_parameters.py** 
   * **distorter.py** A collection of functions for enumerating and then
 	substituting on inequivalent sites of a sub-lattice.
+  * **surface.py** 
 
 Requirements
 ------------

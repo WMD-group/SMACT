@@ -1,5 +1,3 @@
-from __future__ import print_function
-from __future__ import division
 ###############################################################################
 # Copyright Daniel Davies, Adam J. Jackson, Keith T. Butler (2016)            #
 #                                                                             #
@@ -15,14 +13,33 @@ from __future__ import division
 #                                                                             #
 ###############################################################################
 
+from __future__ import print_function
+from __future__ import division
 from builtins import map
 from builtins import input
 from builtins import range
 from past.utils import old_div
 import smact
 from numpy import sqrt, product
-from smact.data import get_mulliken
-from smact.data import get_pauling
+
+def eneg_mulliken(element):
+    """Get Mulliken electronegativity from the IE and EA
+
+    Arguments:
+        symbol (smact.Element or str): Element object or symbol
+
+    Returns:
+        mulliken (float): Mulliken electronegativity
+
+    """
+    if type(element) == str:
+        element = smact.Element(element)
+    elif type(element) != smact.Element:
+        raise Exception("Unexpected type: {0}".format(type(element)))
+
+    mulliken = old_div((element.ionpot+element.e_affinity),2.0)
+
+    return mulliken
 
 
 def band_gap_Harrison(anion, cation, verbose=False,
@@ -83,7 +100,7 @@ def band_gap_Harrison(anion, cation, verbose=False,
 
 
 def compound_electroneg(verbose=False, elements=None, stoichs=None,
-                        elements_dict=None, source='Mulliken'):
+                                                source='Mulliken'):
 
     """Estimate electronegativity of compound from elemental data.
 
@@ -99,11 +116,7 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
 
     Args:
     elements: A list of elements given as standard elemental symbols.
-    Optional: if not used, interactive input of space separated
-    elemental symbols will be offered.
     stoichs: A list of stoichiometries, given as integers or floats.
-    Optional: if not used, interactive input of space separated
-    integers  will be offered.
     verbose: An optional True/False flag. If True, additional information
     is printed to the standard output. [Default: False]
     elements_dict: Dictionary of smact.Element objects; can be provided to
@@ -119,36 +132,30 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
     Raises:
     (There are no special error messages for this function.)
     """
-
-    if elements:
+    if type(elements[0]) == str:
+        elementlist = [smact.Element(i) for i in elements]
+    elif type(elements[0]) == smact.Element:
         elementlist = elements
-    if stoichs:
-        stoichslist = stoichs
+    else:
+        raise Exception("Please supply a list of element symbols or SMACT Element objects")
 
-    # Get elements and stoichiometries if not provided as argument
-    if not elements:
-        elementlist = list(input(
-            "Enter elements (space separated): ").split(" "))
-    if not stoichs:
-        stoichslist = list(input(
-            "Enter stoichiometries (space separated): ").split(" "))
-
-    if not elements_dict:
-        elements_dict = smact.element_dictionary(elements)
-
+    stoichslist = stoichs
     # Convert stoichslist from string to float
     stoichslist = list(map(float, stoichslist))
 
     # Get electronegativity values for each element
+
     if source == 'Mulliken':
-        elementlist = [get_mulliken(elements_dict[el])
+        elementlist = [old_div((el.ionpot+el.e_affinity),2.0)
                        for el in elementlist]
+
     elif source == 'Pauling':
-        elementlist = [2.86 * get_pauling(elements_dict[el])
+        elementlist = [(2.86 * el.pauling_eneg)
                        for el in elementlist]
     else:
         raise Exception("Electronegativity type '{0}'".format(source),
                         "is not recognised")
+
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.
     if verbose:
