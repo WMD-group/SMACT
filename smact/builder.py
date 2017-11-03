@@ -51,14 +51,3 @@ def wurtzite(species, cell_par=[2,2,6,90,90,120],repetitions=[1,1,1]):
         sites_list.append(Site(site[0],site[1]))
     return Lattice(sites_list, oxidation_states), system
 
-#----- Old-style definitions  -------------------------------------------------------------------------
-
-# def spinel(species,cell_par=[8,8,8,90,90,90],repetitions=[1,1,1]):
-# 	 system = crystal((species),
-# 	 basis=[(0.0, 0.0, 0.0),(0.625, 0.625, 0.625),(0.3873, 0.3873, 0.3873)],
-# 	 spacegroup=227,size=repetitions,cellpar=cell_par)
-
-#          return system
-
-
-#          return system
