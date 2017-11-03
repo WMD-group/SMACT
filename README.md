@@ -27,12 +27,11 @@ Contents
   * **lattice_parameters.py** Estimation of lattice parameters for various lattice types using covalent/ionic radii. 
   * **distorter.py** A collection of functions for enumerating and then
 	substituting on inequivalent sites of a sub-lattice.
-  * **surface.py** 
 
 Requirements
 ------------
 
-The main language is Python 2.7 with Numpy, Scipy and Matplotlib.
+The main language is Python 3 with Numpy, Scipy and Matplotlib.
 The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) 
 (ASE) is required for some components, as is [spglib](http://atztogo.github.io/spglib).
 
@@ -45,7 +44,7 @@ but are expected to make it upstream fairly rapidly.
 
 Installation
 ------------
-	pip install smact
+	pip install git+git://github.com/WMD-group/SMACT.git
 
 On a unix-like system, simply add the directory containing this README file
 to your PYTHONPATH. e.g. in ~/.bashrc
