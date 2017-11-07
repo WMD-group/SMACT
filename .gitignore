@@ -42,3 +42,9 @@ nosetests.xml
 
 *.swp
 
+# Any ipynb checkpoint files
+.ipynb_checkpoints
+.DS_Store
+
+# Docs builds
+docs/_build/
