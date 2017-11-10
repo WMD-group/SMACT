@@ -15,7 +15,8 @@
 
 from builtins import zip
 from itertools import combinations
-from smact import Element
+from smact import Element, neutral_ratios
+import itertools
 
 def pauling_test(oxidation_states, electronegativities,
                  symbols=[], repeat_anions=True,
@@ -282,3 +283,40 @@ def ml_rep_generator(composition, stoichs=None):
 
     norm = [float(i)/sum(ML_rep) for i in ML_rep]
     return norm
+
+def smact_test(els, threshold=8, include=None):
+    """Function that applies the charge neutrality and electronegativity
+    tests in one go for simple application in external scripts that
+    wish to apply the general 'smact test'.
+
+    Args:
+        els (tuple): A list of Element objects or symbols.
+        threshold (int): Threshold for stoichiometry limit, default = 8.
+        include (list): (optional) List of Element objects that must be in every composition.
+    Returns:
+        allowed_comps (list): Allowed compositions for that chemical system
+        in the form [[elements], [ratios]]
+
+    Note: Info on oxidation states is not returned, only the list of elements and unique allowed ratios.
+    """
+    ratios = []
+    els = list(els)
+    els = els + include if include != None else els
+
+    # Get symbols and electronegativities
+    symbols = [e.symbol for e in els]
+    electronegs = [e.pauling_eneg for e in els]
+    ox_combos = [e.oxidation_states for e in els]
+
+    for ox_states in itertools.product(*ox_combos):
+        # Test for charge balance
+        cn_e, cn_r = neutral_ratios(ox_states, threshold=threshold)
+        # Electronegativity test
+        if cn_e:
+            electroneg_OK = pauling_test(ox_states, electronegs)
+            if electroneg_OK:
+                ratios.append(cn_r)
+    ratios = [item for sublist in ratios for item in sublist]
+    ratios = list(set(ratios))
+    compositions = [[symbols,x] for x in ratios]
+    return compositions
