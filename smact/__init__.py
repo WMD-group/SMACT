@@ -384,7 +384,7 @@ def neutral_ratios(oxidations, stoichs=False, threshold=5):
 # List of metals for which we have Pauling electronegativity values
 metals = ['Li','Be','Na','Mg','Al','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni',
 'Cu','Zn','Ga','Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn',
-'Cs','Ba','La','Ce', 'Pr', 'Nd','Sm','Gd','Dy','Ho','Er','Tm',
+'Cs','Ba','La','Ce', 'Pr','Nd','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb',
 'Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','Fr','Ra','Ac',
 'Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No']
 
