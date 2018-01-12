@@ -100,25 +100,36 @@ def sort_species(species_list, ordering):
     return species_list
 
 
-def species_totals(structures):
+def species_totals(structures, count_elements=False):
     """Given a set of pymatgen structures in the form of dictionaries where
     the Structure is keyed as 'structure', returns a dictionary of the number
     of compounds that features each Species.
     Args:
-        structures (list): Dictionaries containing pymatgen Structures
+        structures (list): dictionaries containing pymatgen Structures
+        count_elements (bool): switch to counting elements not species
     """
     totals = []
-    for i in structures:
-        comp = [j for j in i['structure'].composition]
-        totals.append(comp)
-    totals = [i for sublist in totals for i in sublist]
-    totals = dict(Counter(totals))
+
+    if count_elements:
+        for i in structures:
+            comp = [j.symbol for j in i['structure'].composition]
+            totals.append(comp)
+        totals = [i for sublist in totals for i in sublist]
+        totals = dict(Counter(totals))
+
+    else:
+        for i in structures:
+            comp = [j for j in i['structure'].composition]
+            totals.append(comp)
+        totals = [i for sublist in totals for i in sublist]
+        totals = dict(Counter(totals))
+
     return(totals)
 
 def find_instances(anion, structures):
     """Finds the number of instances of each species in a list of pymatgen
     Structure objects when a given anion is the most electronegative one
-    present.
+    present. Also adds most electronegative anion to the dictionary.
     Args:
         anion (Pymatgen Species): Anion of interest
         structures (list): Dictionaries containing pymatgen Structures
@@ -132,6 +143,7 @@ def find_instances(anion, structures):
             sp in i['structure'].composition]
             if all(eneg <= an_eneg for eneg in all_enegs):
                 comp = [j for j in i['structure'].composition]
+                i['most_eneg_anion'] = anion
                 an_containing.append(comp)
 
     an_containing = [i for sublist in an_containing for i in sublist]
@@ -139,7 +151,7 @@ def find_instances(anion, structures):
     an_containing.pop(anion)
     return(an_containing)
 
-def generate_scores(spec_list, anion_count_dict, spec_totals, scoring):
+def generate_scores(spec_list, anion_count_dict, spec_totals, scoring, el_totals=None):
     """Given a list of Species of interest in order and a dictionary of the
     occurrence of each species with each anion as the most electronegative one
     present, can return various 'scores' based on this info.
@@ -152,6 +164,9 @@ def generate_scores(spec_list, anion_count_dict, spec_totals, scoring):
             that species.
             an_norm  as in spec_frac but also divided by total compounds
             containing that anion
+            overall_score  as in an_norm but multiplied by
+            (compounds containing species / compounds containing element)
+        el_totals (dict): Total number of compounds containing each element
      """
 
     if scoring == 'spec_fraction':
@@ -171,8 +186,20 @@ def generate_scores(spec_list, anion_count_dict, spec_totals, scoring):
             an_vals = []
             for i in spec_list:
                 if i in anion_count_dict[an]:
-                    an_vals.append(anion_count_dict[an][i]/spec_totals[i]*\
-                    spec_totals[an])
+                    an_vals.append(anion_count_dict[an][i]/(spec_totals[i]*\
+                    spec_totals[an])*1000)
+                else:
+                    an_vals.append(0.)
+            list_vals[an] = an_vals
+
+    elif scoring == 'overall_score':
+        list_vals = {}
+        for an, subdict in anion_count_dict.items():
+            an_vals = []
+            for i in spec_list:
+                if i in anion_count_dict[an]:
+                    an_vals.append(anion_count_dict[an][i]/(el_totals[i.symbol]*\
+                    spec_totals[an])*2000)
                 else:
                     an_vals.append(0.)
             list_vals[an] = an_vals
@@ -299,3 +326,56 @@ def plot_metal(metal, list_scores, spec_list, show_legend = False):
     plt.tight_layout()
     plt.savefig('OxidationState_score_{0}'.format(metal, dpi=300))
     plt.show()
+
+def assign_prob(structures, list_scores, species_list, verbose=False):
+    """ Assigns probability values to structures based on the list of score values.
+
+    """
+    scores_dict = {}
+    for key in list_scores.keys():
+        an = {}
+        for spec, val in zip(species_list, list_scores[key]):
+            an[spec] = val
+        scores_dict[key] = an
+
+    probabilities_list = []
+    for struc in tqdm(structures):
+        scores = []
+        comp = list(struc['structure'].species)
+        try:
+            scores = [scores_dict[struc['most_eneg_anion']][sp] for sp in comp \
+            if sp in species_list]
+            overall_score = np.mean(scores)
+        except:
+            if verbose:
+                print('Could not get score for: {}'.format(comp))
+            overall_score = 0
+        struc['probability'] = overall_score
+        probabilities_list.append(overall_score)
+
+    return probabilities_list
+
+def assign_prob_new(compositions, list_scores, species_list, verbose=False):
+    """ Assign probabilities to novel compositions based on the list of score values. """
+    scores_dict = {}
+    for key in list_scores.keys():
+        an = {}
+        for spec, val in zip(species_list, list_scores[key]):
+            an[spec] = val
+        scores_dict[key] = an
+
+    probabilities_list = []
+    for comp in tqdm(compositions):
+        scores = []
+        # Assumes the last species is the most electronegative
+        most_eneg = comp[-1]
+        try:
+            scores = [scores_dict[most_eneg][sp] for sp in comp \
+            if sp in species_list]
+            overall_score = np.mean(scores)
+        except:
+            if verbose:
+                print('Could not get score for: {}'.format(comp))
+            overall_score = 0
+        probabilities_list.append(overall_score)
+    return probabilities_list
