@@ -29,10 +29,12 @@ from tqdm import tqdm
 from collections import Counter
 import os
 import numpy as np
+import itertools
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pymatgen import Structure, Specie, MPRester
-from smact import ordered_elements, Element
+from smact import ordered_elements, Element, neutral_ratios
+from smact.screening import pauling_test
 
 def get_struc_list(cifpath, json_name):
     """Import pymatgen Structure objects from a json.
@@ -50,17 +52,23 @@ def get_struc_list(cifpath, json_name):
     return(struc_list)
 
 
-def mp_filter(criteria):
+def mp_filter(criteria, return_elements=False):
     """Get a list of materials project mpids that match a set of given criteria.
     The criteria should be in the format used for a MP query.
     Args:
         criteria (dict): Criteria that can be used in an MPRester query
+        return_elements (bool): Also return the elements for that MP entry
     """
     m = MPRester(os.environ.get("MP_API_KEY"))
-    properties = ['task_id']
-    struc_filter = m.query(criteria,properties)
-    id_list = [i['task_id'] for i in struc_filter]
-    return id_list
+    if return_elements:
+        properties = ['task_id', 'elements']
+        struc_filter = m.query(criteria,properties)
+        return struc_filter
+    else:
+        properties = ['task_id']
+        struc_filter = m.query(criteria,properties)
+        id_list = [i['task_id'] for i in struc_filter]
+        return id_list
 
 
 def species_count(structures):
@@ -206,7 +214,7 @@ def generate_scores(spec_list, anion_count_dict, spec_totals, scoring, el_totals
     return(list_vals)
 
 
-def plot_all_scores(list_scores, spec_list, break_points, figure_filename):
+def plot_all_scores(list_scores, spec_list, break_points, figure_filename, raw_totals=None):
     """ Plots correlation plots for all the species considered.
     Args:
         list_scores (dict): Lists of scores for the species in spec_list
@@ -215,6 +223,8 @@ def plot_all_scores(list_scores, spec_list, break_points, figure_filename):
         scores in each list within the dict list_scores
         break_points (list): ints, positions in lists to start each new plot
         figure_filename (str): Name of .png file to save plot
+        raw_totals (list of dicts): First dict is element totals, second
+        dict is species totals. If included, will display these values on the plot.
          """
     arr = np.array([list_scores[key] for key in list_scores])
     arr = arr.transpose()
@@ -222,7 +232,12 @@ def plot_all_scores(list_scores, spec_list, break_points, figure_filename):
     # y-axis
     y_labels = []
     for i in spec_list:
-        y_lab = '{0}(+{1})'.format(i.symbol,i.oxi_state)
+        if raw_totals:
+            spec_tot = raw_totals[1][i]
+            el_tot = raw_totals[0][i.symbol]
+            y_lab = r"$_{{{0}/{1}}}$ {2}$^{{+{3}}}$".format(spec_tot,el_tot,i.symbol,int(i.oxi_state))
+        else:
+            y_lab = r"{0}$^{{+{1}}}$".format(i.symbol,int(i.oxi_state))
         y_labels.append(y_lab)
     # x-axis clean up
     x_labels = [key.symbol for key, val in list_scores.items()]
@@ -237,13 +252,24 @@ def plot_all_scores(list_scores, spec_list, break_points, figure_filename):
         spec_labels['{}'.format(i)] = label_chunk
 
     # Plotting
-    f, axarr = plt.subplots(5, 3)
+    #HACK f, axarr = plt.subplots(5, 3)
+    f, axarr = plt.subplots(7,2)
     plot = plt.setp(axarr, xticks=np.arange(0,8), xticklabels=x_labels)
-    axarrs = [axarr[0,0],axarr[0,1], axarr[0,2],
-          axarr[1,0], axarr[1,1],axarr[1,2],
-          axarr[2,0],axarr[2,1], axarr[2,2],
-          axarr[3,0],axarr[3,1], axarr[3,2],
-          axarr[4,0]   ]
+
+    #HACK axarrs = [axarr[0,0],axarr[0,1], axarr[0,2],
+    #HACK      axarr[1,0], axarr[1,1],axarr[1,2],
+    #HACK      axarr[2,0],axarr[2,1], axarr[2,2],
+    #HACK      axarr[3,0],axarr[3,1], axarr[3,2],
+    #HACK      axarr[4,0]   ]
+
+    axarrs = [ axarr[0,0], axarr[0,1],
+            axarr[1,0], axarr[1,1],
+            axarr[2,0], axarr[2,1],
+            axarr[3,0], axarr[3,1],
+            axarr[4,0], axarr[4,1],
+            axarr[5,0], axarr[5,1],
+            axarr[6,0]
+            ]
 
     for ax, i in zip(axarrs, list(chunks.keys())):
         ax1 =ax.imshow(chunks[i], interpolation='None',
@@ -254,7 +280,7 @@ def plot_all_scores(list_scores, spec_list, break_points, figure_filename):
     # Tidy up
     plt.tight_layout()
     f.subplots_adjust(right = 0.85)
-    cbar_ax = f.add_axes([0.9,0.05,0.05,0.7])
+    cbar_ax = f.add_axes([0.9,0.05,0.05,0.2])
     f.colorbar(ax1, cax=cbar_ax)
     plt.savefig(figure_filename, dpi = 300)
     plt.show()
@@ -327,8 +353,17 @@ def plot_metal(metal, list_scores, spec_list, show_legend = False):
     plt.savefig('OxidationState_score_{0}'.format(metal, dpi=300))
     plt.show()
 
-def assign_prob(structures, list_scores, species_list, verbose=False):
+def assign_prob(structures, list_scores, species_list, scoring = 'overall_score', verbose=False):
     """ Assigns probability values to structures based on the list of score values.
+    Args:
+        structures (list): Dictionaries containing pymatgen Structures
+        list_scores (dict): Lists of scores for the species in spec_list
+        spec_list (list): Pymatgen species in same order as corresponding
+        scoring (str): Can be either:
+                        overall_score: mean species-anion score for each species of interest
+                        in the composition
+                        limiting_score: as above but minimum species-anion score
+        verbose (bool): Explicitly print any compounds that were skipped over
 
     """
     scores_dict = {}
@@ -345,7 +380,10 @@ def assign_prob(structures, list_scores, species_list, verbose=False):
         try:
             scores = [scores_dict[struc['most_eneg_anion']][sp] for sp in comp \
             if sp in species_list]
-            overall_score = np.mean(scores)
+            if scoring == 'overall_score':
+                overall_score = np.mean(scores)
+            elif scoring == 'limiting_score':
+                overall_score = min(scores)
         except:
             if verbose:
                 print('Could not get score for: {}'.format(comp))
@@ -356,7 +394,13 @@ def assign_prob(structures, list_scores, species_list, verbose=False):
     return probabilities_list
 
 def assign_prob_new(compositions, list_scores, species_list, verbose=False):
-    """ Assign probabilities to novel compositions based on the list of score values. """
+    """ Assign probabilities to novel compositions based on the list of score values.
+    Args:
+        compositions (list): list of pymatgen species (possibly as generated by smact)
+        list_scores (dict): Lists of scores for the species in spec_list
+        spec_list (list): Pymatgen species in same order as corresponding
+        verbose (bool): Explicitly print any compounds that were skipped over
+        """
     scores_dict = {}
     for key in list_scores.keys():
         an = {}
@@ -379,3 +423,68 @@ def assign_prob_new(compositions, list_scores, species_list, verbose=False):
             overall_score = 0
         probabilities_list.append(overall_score)
     return probabilities_list
+
+def plot_scores_hist(scores, bins = 100, plot_title='plot', xlim = None):
+    """ Plot histogram of a list of scores.        """
+    print('Number of individual values: {}'.format(len(scores)))
+    print('Number of zero values: {}'.format(scores.count(0.0)))
+    print('Maximum score: {}'.format(max(scores)))
+
+    plt.hist(scores, bins, color='orange', alpha=0.5)
+    if xlim:
+        plt.xlim(xlim[0],xlim[1])
+    plt.title(plot_title)
+    plt.xlabel('Score')
+    plt.savefig('{}.png'.format(plot_title), dpi=300)
+    plt.show()
+
+def ternary_smact_combos(position1, position2, position3, threshold = 8):
+    """ Get Pymatgen species compositions using SMACT when up to three different
+        lists are needed to draw species from. E.g. Ternary metal halides...
+    Args:
+        positionn (list of species): Species to be considered iteratively for each
+                                     position.
+        """
+
+    print('Generating combinations...')
+    initial_comps_list = []
+    for sp1, sp2, an in tqdm(itertools.product(position1, position2, position3)):
+        m1, oxst1 = sp1.symbol, int(sp1.oxi_state)
+        eneg1 = Element(m1).pauling_eneg
+        m2, oxst2 = sp2.symbol, int(sp2.oxi_state)
+        eneg2 = Element(m2).pauling_eneg
+        hal, oxst3 = an.symbol, int(an.oxi_state)
+        eneg3 = Element(hal).pauling_eneg
+
+        symbols = [m1,m2,hal]
+        ox_states = [oxst1, oxst2, oxst3]
+        cn_e, cn_r = neutral_ratios(ox_states, threshold=threshold)
+
+        if cn_e:
+            enegs = [eneg1,eneg2,eneg3]
+            eneg_ok = pauling_test(ox_states, enegs, symbols=symbols, repeat_cations=False)
+            if eneg_ok:
+                for ratio in cn_r:
+                    comp = (symbols, ox_states, list(ratio))
+                    initial_comps_list.append(comp)
+    print('Number of compositions before reduction:  {}'.format(len(initial_comps_list)))
+
+    # Create a list of pymatgen species for each comp
+    print('Converting to Pymatgen Species...')
+    species_comps = []
+    for i in tqdm(initial_comps_list):
+        comp = {}
+        for sym,ox,ratio in zip(i[0],i[1],i[2]):
+            comp[Specie(sym,ox)] = ratio
+        comp_list = [[key]*val for key,val in comp.items()]
+        comp_list = [item for sublist in comp_list for item in sublist]
+        species_comps.append(comp_list)
+
+    # Sort and ditch duplicates
+    print('Ditching duplicates (sorry to have got your hopes up with the big numbers)...')
+    for i in species_comps:
+        i.sort()
+        i.sort(key=lambda x: x.oxi_state, reverse=True)
+    species_comps = list(set([tuple(i) for i in species_comps]))
+    print('Total number of new compounds unique compositions: {0}'.format(len(species_comps)))
+    return species_comps
