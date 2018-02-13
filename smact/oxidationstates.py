@@ -481,6 +481,7 @@ def plot_scores_hist(scores, bins = 100, plot_title='plot', xlim = None, ylim = 
     plt.xlabel('Score')
     if ylim:
         plt.ylim(ylim[0],ylim[1])
+    plt.tight_layout()
     plt.savefig('{}.png'.format(plot_title), dpi=300)
     plt.show()
 
