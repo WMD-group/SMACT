@@ -28,11 +28,15 @@ import json
 from tqdm import tqdm
 from collections import Counter
 import os
+import re
 import numpy as np
 import itertools
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 from pymatgen import Structure, Specie, MPRester
+from pymatgen.analysis.structure_prediction.substitutor import Substitutor
+from pymatgen.io.cif import CifWriter
 from smact import ordered_elements, Element, neutral_ratios
 from smact.screening import pauling_test
 
@@ -174,6 +178,8 @@ def generate_scores(spec_list, anion_count_dict, spec_totals, scoring, el_totals
             containing that anion
             overall_score  as in an_norm but multiplied by
             (compounds containing species / compounds containing element)
+            spec_prob  calculate the probability of the compound based on
+            available oxidation states
         el_totals (dict): Total number of compounds containing each element
      """
 
@@ -211,6 +217,21 @@ def generate_scores(spec_list, anion_count_dict, spec_totals, scoring, el_totals
                 else:
                     an_vals.append(0.)
             list_vals[an] = an_vals
+
+    elif scoring == 'spec_prob':
+        list_vals = {}
+        for an, subdict in anion_count_dict.items():
+            an_vals = []
+            for i in spec_list:
+                if i in anion_count_dict[an]:
+                    element_an_counts = [count for sp,count in subdict.items() if i.symbol==sp.symbol]
+                    element_an_tot = sum(element_an_counts)
+                    an_vals.append(anion_count_dict[an][i]/(element_an_tot))
+                else:
+                    an_vals.append(0.)
+            list_vals[an] = an_vals
+    return list_vals
+
     return(list_vals)
 
 
@@ -252,25 +273,25 @@ def plot_all_scores(list_scores, spec_list, break_points, figure_filename, raw_t
         spec_labels['{}'.format(i)] = label_chunk
 
     # Plotting
-    #HACK f, axarr = plt.subplots(5, 3)
-    f, axarr = plt.subplots(7,2)
+    f, axarr = plt.subplots(5, 3)
+    #HACK f, axarr = plt.subplots(7,2)
     plot = plt.setp(axarr, xticks=np.arange(0,8), xticklabels=x_labels)
 
-    #HACK axarrs = [axarr[0,0],axarr[0,1], axarr[0,2],
-    #HACK      axarr[1,0], axarr[1,1],axarr[1,2],
-    #HACK      axarr[2,0],axarr[2,1], axarr[2,2],
-    #HACK      axarr[3,0],axarr[3,1], axarr[3,2],
-    #HACK      axarr[4,0]   ]
+    axarrs = [axarr[0,0],axarr[0,1], axarr[0,2],
+          axarr[1,0], axarr[1,1],axarr[1,2],
+          axarr[2,0],axarr[2,1], axarr[2,2],
+          axarr[3,0],axarr[3,1], axarr[3,2],
+          axarr[4,0],axarr[4,1]   ]
 
-    axarrs = [ axarr[0,0], axarr[0,1],
+    '''axarrs = [ axarr[0,0], axarr[0,1],
             axarr[1,0], axarr[1,1],
             axarr[2,0], axarr[2,1],
             axarr[3,0], axarr[3,1],
             axarr[4,0], axarr[4,1],
             axarr[5,0], axarr[5,1],
-            axarr[6,0]
+            axarr[6,0], axarr[6,1]
             ]
-
+'''
     for ax, i in zip(axarrs, list(chunks.keys())):
         ax1 =ax.imshow(chunks[i], interpolation='None',
         cmap = mpl.cm.get_cmap('inferno_r'), vmin = 0, vmax =1)
@@ -280,7 +301,7 @@ def plot_all_scores(list_scores, spec_list, break_points, figure_filename, raw_t
     # Tidy up
     plt.tight_layout()
     f.subplots_adjust(right = 0.85)
-    cbar_ax = f.add_axes([0.9,0.05,0.05,0.2])
+    cbar_ax = f.add_axes([0.9,0.05,0.04,0.3])
     f.colorbar(ax1, cax=cbar_ax)
     plt.savefig(figure_filename, dpi = 300)
     plt.show()
@@ -335,20 +356,20 @@ def plot_metal(metal, list_scores, spec_list, show_legend = False):
         plt.bar(np.array(anion[0]) + pos, anion[1], width, label=labels[col], color = colours[col])
 
     if show_legend:
-        plt.legend(prop={'size':18})
+        plt.legend(prop={'size':24})
 
-    plt.xticks(np.arange(min_x, max_x+1)+0.5, np.arange(min_x,max_x+1))
+    plt.xticks(np.arange(min_x, max_x+1)+0.5, np.arange(min_x,max_x+1, dtype=np.int_))
     if min_x < 0:
         min_x = 0
     plt.xlim(min_x, max_x+1)
-    plt.ylim(0, max_y + 0.2)
+    plt.ylim(0, 1.19)
     plt.xlabel('Oxidation state')
-    plt.ylabel('Score')
+    plt.ylabel('Species fraction')
 
     at_no = int(Element(metal).number)
     mass = Element(metal).mass
-    plt.text(np.mean([max_x,min_x]) + 0.5, max_y, "$^{{{0}}}$\n  {1}\n$_{{{2:.2f}}}$".format(at_no,metal, mass),
-            bbox={'facecolor':'gray', 'alpha':0.3, 'pad':10}, size=18)
+    plt.text(np.mean([max_x,min_x]) + 0.5, 1.0, "$^{{{0}}}$\n  {1}\n$_{{{2:.2f}}}$".format(at_no,metal, mass),
+            bbox={'facecolor':'gray', 'alpha':0.3, 'pad':20}, size=28)
     plt.tight_layout()
     plt.savefig('OxidationState_score_{0}'.format(metal, dpi=300))
     plt.show()
@@ -363,6 +384,8 @@ def assign_prob(structures, list_scores, species_list, scoring = 'overall_score'
                         overall_score: mean species-anion score for each species of interest
                         in the composition
                         limiting_score: as above but minimum species-anion score
+                        probability: product of scores
+                        probability_simple: product of scores for different species only (set(comp))
         verbose (bool): Explicitly print any compounds that were skipped over
 
     """
@@ -384,6 +407,12 @@ def assign_prob(structures, list_scores, species_list, scoring = 'overall_score'
                 overall_score = np.mean(scores)
             elif scoring == 'limiting_score':
                 overall_score = min(scores)
+            elif scoring == 'probability':
+                overall_score = np.prod(scores)
+            elif scoring == 'probability_simple':
+                scores = [scores_dict[struc['most_eneg_anion']][sp] for sp in list(set(comp)) \
+                if sp in species_list]
+                overall_score = np.prod(scores)
         except:
             if verbose:
                 print('Could not get score for: {}'.format(comp))
@@ -393,13 +422,19 @@ def assign_prob(structures, list_scores, species_list, scoring = 'overall_score'
 
     return probabilities_list
 
-def assign_prob_new(compositions, list_scores, species_list, verbose=False):
+def assign_prob_new(compositions, list_scores, species_list, scoring, verbose=False):
     """ Assign probabilities to novel compositions based on the list of score values.
     Args:
         compositions (list): list of pymatgen species (possibly as generated by smact)
         list_scores (dict): Lists of scores for the species in spec_list
         spec_list (list): Pymatgen species in same order as corresponding
         verbose (bool): Explicitly print any compounds that were skipped over
+        scoring (str): Can be either:
+                        overall_score: mean species-anion score for each species of interest
+                        in the composition
+                        limiting_score: as above but minimum species-anion score
+                        probability: product of scores
+                        probability_simple: product of scores for different species only (set(comp))
         """
     scores_dict = {}
     for key in list_scores.keys():
@@ -416,7 +451,16 @@ def assign_prob_new(compositions, list_scores, species_list, verbose=False):
         try:
             scores = [scores_dict[most_eneg][sp] for sp in comp \
             if sp in species_list]
-            overall_score = np.mean(scores)
+            if scoring == 'overall_score':
+                overall_score = np.mean(scores)
+            elif scoring == 'limiting_score':
+                overall_score = min(scores)
+            elif scoring == 'probability':
+                overall_score = np.prod(scores)
+            elif scoring == 'probability_simple':
+                scores = [scores_dict[most_eneg][sp] for sp in list(set(comp)) \
+                if sp in species_list]
+                overall_score = np.prod(scores)
         except:
             if verbose:
                 print('Could not get score for: {}'.format(comp))
@@ -424,7 +468,7 @@ def assign_prob_new(compositions, list_scores, species_list, verbose=False):
         probabilities_list.append(overall_score)
     return probabilities_list
 
-def plot_scores_hist(scores, bins = 100, plot_title='plot', xlim = None):
+def plot_scores_hist(scores, bins = 100, plot_title='plot', xlim = None, ylim = None):
     """ Plot histogram of a list of scores.        """
     print('Number of individual values: {}'.format(len(scores)))
     print('Number of zero values: {}'.format(scores.count(0.0)))
@@ -435,6 +479,8 @@ def plot_scores_hist(scores, bins = 100, plot_title='plot', xlim = None):
         plt.xlim(xlim[0],xlim[1])
     plt.title(plot_title)
     plt.xlabel('Score')
+    if ylim:
+        plt.ylim(ylim[0],ylim[1])
     plt.savefig('{}.png'.format(plot_title), dpi=300)
     plt.show()
 
@@ -442,11 +488,11 @@ def ternary_smact_combos(position1, position2, position3, threshold = 8):
     """ Get Pymatgen species compositions using SMACT when up to three different
         lists are needed to draw species from. E.g. Ternary metal halides...
     Args:
-        positionn (list of species): Species to be considered iteratively for each
+        position(n) (list of species): Species to be considered iteratively for each
                                      position.
+        threshold (int): Max stoichiometry threshold
         """
 
-    print('Generating combinations...')
     initial_comps_list = []
     for sp1, sp2, an in tqdm(itertools.product(position1, position2, position3)):
         m1, oxst1 = sp1.symbol, int(sp1.oxi_state)
@@ -488,3 +534,56 @@ def ternary_smact_combos(position1, position2, position3, threshold = 8):
     species_comps = list(set([tuple(i) for i in species_comps]))
     print('Total number of new compounds unique compositions: {0}'.format(len(species_comps)))
     return species_comps
+
+def predict_structure(species, struc_list, check_dir=False):
+    """ Save cif files of predicted structures for set of pymatgen species.
+    Args:
+        species (list): pymatgen species to predict structures for
+        struc_list (list): pymatgen structures to substitute species into
+        check_dir (bool): check if directory already exists and only carry out
+        prediction if it doesn't.
+    """
+    sub = Substitutor(threshold = 0.00001)
+    print('{}  ........'.format(species))
+    dirname = ''.join([str(i) for i in species])
+    path_exists = True if os.path.exists('./SP_results/{0}'.format(dirname)) else False
+
+    if (check_dir and path_exists):
+        print('Already exists')
+    else:
+        print('{} not already there'.format(dirname))
+        suggested_strucs = sub.pred_from_structures(target_species=species, structures_list=struc_list,
+                                                 remove_existing = False, remove_duplicates = True)
+        suggested_strucs = sorted(suggested_strucs,
+        key=lambda k: k.other_parameters['proba'], reverse = True)
+
+        # Save the structures as cifs
+        if not path_exists:
+            os.makedirs('./SP_results/{0}'.format(dirname))
+
+        for i, d in enumerate(suggested_strucs):
+            cw = CifWriter(d.final_structure)
+            cw.write_file("SP_results/{0}/{1}_BasedOn_{2}.cif".format(dirname, i, d.history[0]['source']))
+
+        # Save the summary as a text file
+        with open ('SP_results/{0}/{0}_summary.txt'.format(dirname), 'w') as f:
+            f.write('Formula,  Probability,  Based on,  Substitutions \n')
+            for i, struc in enumerate(suggested_strucs):
+                f.write(' {0}, {1:12},   {2:.5f},         {3:9},    {4} \n'.format(i,struc.composition.reduced_formula,
+                                                                               struc.other_parameters['proba'],
+                                                        struc.history[0]['source'],
+                                                        re.sub('Specie', '', str(struc.history[1]['species_map']))))
+    print('Done.')
+
+def add_probabilities(strucs):
+    """ Add probabilities from summary text files for a list of dicts containing structures.
+        Dicts must contain Structure, based_on (str).
+    """
+    for i in tqdm(strucs):
+        ions = ''.join([str(j) for j in i['struc'].composition])
+        with open('SP_results/{}/{}_summary.txt'.format(ions, ions), 'r') as f:
+            for lines in f:
+                line = lines.split(',')
+                if line[3].strip() == i['based_on']:
+                    i['probability'] = float(line[2].strip())
+    return strucs
