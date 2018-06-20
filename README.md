@@ -73,7 +73,10 @@ References
 ----------
 
 [D. W. Davies et al, 
-"Computational Screening of All Stoichiometric Inorganic Materials" *Chem* **1**, 617 (2016)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
+"Computer-aided design of metal chalcohalide semiconductors: from chemical composition to crystal structure" *Chem. Sci.* **9**, 1022 (2018)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
+
+[D. W. Davies et al, 
+"Computational screening of all stoichiometric inorganic materials" *Chem* **1**, 617 (2016)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
 
 [K. T. Butler et al, 
 "Computational materials design of crystalline solids", *Chemical Society Reviews* (2016)](http://pubs.rsc.org/en/content/articlelanding/2016/cs/c5cs00841g)
