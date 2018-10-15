@@ -17,36 +17,41 @@
 # Collection of functions for the statistical analysis of oxidation states    #
 # tidied neatly into one module.                                              #
 # NB:                                                                         #
-# Currently this module is quite specific to a current piece of work and      #
-# some functions need to be made more general.                                #
-# This module also depends on Pymatgen, although this is not currently a      #
+# This module currently depends on Pymatgen, although this is not currently a #
 # dependency of SMACT. See http://pymatgen.org/.                              #
 ###############################################################################
 
 ###  Imports
-import json
+# General
+import os, re, json
 from tqdm import tqdm
 from collections import Counter
-import os
-import re
-import numpy as np
 import itertools
+
+# Maths and plotting
+import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
+
+# pymatgen
 from pymatgen import Structure, Specie, MPRester
 from pymatgen.analysis.structure_prediction.substitutor import Substitutor
 from pymatgen.io.cif import CifWriter
 from smact import ordered_elements, Element, neutral_ratios
 from smact.screening import pauling_test
 
-def get_struc_list(cifpath, json_name):
-    """Import pymatgen Structure objects from a json.
+### Functions
+def get_struc_list(json_name):
+    """Import pymatgen Structure objects from a json as a list.
+    TODO DWD: Move to more appropriate place. This is not oxidation state specific.
     Args:
-        cifpath (string): Filepath to json file
-        json_name (string): Name of json file
+        json_name (string): Path to json file containing a list of dicts in which one key is
+        'structure'. The value of this entry should be a Pymatgen Structure object as a dict.
+    Returns:
+        struc_list (list): list of dicts containing 'id' and 'structure'.
     """
-    with open('{0}{1}'.format(cifpath,json_name)) as f:
+    with open(json_name, 'r') as f:
         saved_strucs = json.load(f)
 
     struc_list = []
@@ -56,31 +61,32 @@ def get_struc_list(cifpath, json_name):
     return(struc_list)
 
 
-def mp_filter(criteria, return_elements=False):
-    """Get a list of materials project mpids that match a set of given criteria.
+def mp_filter(criteria, api_key=None):
+    """Get a list of Materials Project task ids that match a set of given criteria.
     The criteria should be in the format used for a MP query.
+    TODO DWD: Move to more appropriate place. This is not oxidation state specific.
     Args:
         criteria (dict): Criteria that can be used in an MPRester query
-        return_elements (bool): Also return the elements for that MP entry
+        api_key (str): Materials Project API key (from your MP dashboard)
     """
-    m = MPRester(os.environ.get("MP_API_KEY"))
-    if return_elements:
-        properties = ['task_id', 'elements']
-        struc_filter = m.query(criteria,properties)
-        return struc_filter
+    if not api_key:
+        print('You need to supply an api key.')
     else:
+        m = MPRester(os.environ.get("MP_API_KEY"))
         properties = ['task_id']
         struc_filter = m.query(criteria,properties)
         id_list = [i['task_id'] for i in struc_filter]
         return id_list
 
 
-def species_count(structures):
+def get_unique_species(structures):
     """Given a set of pymatgen structures, in the form of dictionaries where the
     Structure is keyed as 'structure', returns a list of all the different
     Species present in that set.
     Args:
         structures (list): Dictionaries containing pymatgen Structures
+    Returns:
+        species_list (list): Unique species that are exhibited in the structures.
     """
     species_list = []
     for i in structures:
@@ -90,18 +96,22 @@ def species_count(structures):
     return(species_list)
 
 
-def sort_species(species_list, ordering):
+def sort_species(species_list, ordering='ptable', reverse=False):
     """Given a list of pymatgen Species, will order them according to a given
     rule and return the ordered list.
-    ordering is a string that can take values: 'ptable': order by periodic table position.
     Args:
         species_list (list): Pymatgen species objects
+        ordering('string'): How to order the Species:
+            ptable: order by periodic table position
+        reverse (bool): Whether to reverse the ordering (descending order)
+    Returns:
+        species_list (list): ordered Pymatgen species objects
     """
     ordered_el = ordered_elements(1,103)
     # Turn into tuples for easy sorting
     species_list = [(i.symbol, i.oxi_state) for i in species_list]
     if ordering == 'ptable':
-        species_list.sort(key = lambda x: (ordered_el.index(x[0]),x[1]))
+        species_list.sort(key = lambda x: (ordered_el.index(x[0]),x[1]), reverse=reverse)
         print("Species ordered by periodic table position.")
     else:
         print('Did not reorder the list of species...')
@@ -114,11 +124,13 @@ def sort_species(species_list, ordering):
 
 def species_totals(structures, count_elements=False):
     """Given a set of pymatgen structures in the form of dictionaries where
-    the Structure is keyed as 'structure', returns a dictionary of the number
+    the Structure is keyed as 'structure', returns the number
     of compounds that features each Species.
     Args:
         structures (list): dictionaries containing pymatgen Structures
         count_elements (bool): switch to counting elements not species
+    Returns:
+        totals (dict): Totals of each species.
     """
     totals = []
 
@@ -138,25 +150,30 @@ def species_totals(structures, count_elements=False):
 
     return(totals)
 
-def find_instances(anion, structures):
+def species_totals_for_anion(anion, structures, edit_structure_dicts=True):
     """Finds the number of instances of each species in a list of pymatgen
     Structure objects when a given anion is the most electronegative one
     present. Also adds most electronegative anion to the dictionary.
     Args:
-        anion (Pymatgen Species): Anion of interest
+        anion (Pymatgen.Species): Anion of interest
         structures (list): Dictionaries containing pymatgen Structures
+        edit_structure_dicts (bool): Modify the dicts in the structures list
+        to include a 'most_eneg_anion' key.
+    Returns:
+        an_containing (dict): Totals of each species.
     """
     an_containing = []
     for i in structures:
         if anion in i['structure'].composition:
-            # Check whether anion most electronegative element
+            # Check whether anion is most electronegative element
             an_eneg = Element(anion.symbol).pauling_eneg
             all_enegs = [Element(sp.symbol).pauling_eneg for \
             sp in i['structure'].composition]
             if all(eneg <= an_eneg for eneg in all_enegs):
                 comp = [j for j in i['structure'].composition]
-                i['most_eneg_anion'] = anion
                 an_containing.append(comp)
+                if edit_structure_dicts:
+                    i['most_eneg_anion'] = anion
 
     an_containing = [i for sublist in an_containing for i in sublist]
     an_containing = dict(Counter(an_containing))
@@ -164,23 +181,31 @@ def find_instances(anion, structures):
     return(an_containing)
 
 def generate_scores(spec_list, anion_count_dict, spec_totals, scoring, el_totals=None):
-    """Given a list of Species of interest in order and a dictionary of the
+    """Given a list of Species of interest, and a dictionary of the
     occurrence of each species with each anion as the most electronegative one
     present, can return various 'scores' based on this info.
     Args:
-        spec_list (list): Pymatgen species we are interested in (in order)
-        anion_count_dict (dict): Totals as described above
-        spec_totals (dict): Total number of compounds containing each Species
+        spec_list (list): Pymatgen species we are interested in
+            e.g. [Specie Li+, Specie Na+, Specie Mg2+...].
+        anion_count_dict (dict): Occurrence of each species with each anion as the most
+        electronegiative element present (as generated by species_totals_for_anion)
+            e.g. {Specie:F-: {Specie Rb+: 164, Specie K+...}...}.
+        spec_totals (dict): Total number of compounds containing each Species (as
+        generated by species_totals)
+            e.g. {Specie Cs+: 1026, Specie Ag+: 521...}.
         scoring (str): Can take values:
-            spec_fraction  Totals in dictionary / total compounds containing
+            spec_fraction - Totals in dictionary / total compounds containing
             that species.
-            an_norm  as in spec_frac but also divided by total compounds
-            containing that anion
-            overall_score  as in an_norm but multiplied by
+            an_norm - As in spec_frac but also divided by total compounds
+            containing that anion.
+            overall_score - As in an_norm but multiplied by
             (compounds containing species / compounds containing element)
-            spec_prob  calculate the probability of the compound based on
-            available oxidation states
-        el_totals (dict): Total number of compounds containing each element
+            spec_prob - Calculate the probability of the compound based on
+            available oxidation states.
+        el_totals (dict): Total number of compounds containing each element.
+    Returns:
+        list_vals (dict) of list: Scores for each species, dict is keyed by anion.
+        WARNING: lists of scores are in the same order as the supplied spec_list.
      """
 
     if scoring == 'spec_fraction':
@@ -239,13 +264,16 @@ def plot_all_scores(list_scores, spec_list, break_points, figure_filename, raw_t
     """ Plots correlation plots for all the species considered.
     Args:
         list_scores (dict): Lists of scores for the species in spec_list
-        keyed by anion.
+        keyed by anion (as generated by generate_scores).
         spec_list (list): Pymatgen species in same order as corresponding
-        scores in each list within the dict list_scores
-        break_points (list): ints, positions in lists to start each new plot
-        figure_filename (str): Name of .png file to save plot
-        raw_totals (list of dicts): First dict is element totals, second
-        dict is species totals. If included, will display these values on the plot.
+        scores in each list within the dict list_scores (as used by generate_scores).
+        break_points (list): ints, positions in lists to start each new plot.
+        figure_filename (str): Name of .png file to save plot.
+        raw_totals (list) of dicts: Two dicts: First dict is element totals, second
+        dict is species totals. If included, will display these values on the plot.i
+    Returns:
+        Saves and shows plots. Data should be chunked into 14 subplots (3 x 4 + 2) and this
+        is not currently flexible.
          """
     arr = np.array([list_scores[key] for key in list_scores])
     arr = arr.transpose()
@@ -274,7 +302,6 @@ def plot_all_scores(list_scores, spec_list, break_points, figure_filename, raw_t
 
     # Plotting
     f, axarr = plt.subplots(5, 3)
-    #HACK f, axarr = plt.subplots(7,2)
     plot = plt.setp(axarr, xticks=np.arange(0,8), xticklabels=x_labels)
 
     axarrs = [axarr[0,0],axarr[0,1], axarr[0,2],
@@ -310,12 +337,14 @@ def plot_all_scores(list_scores, spec_list, break_points, figure_filename, raw_t
 def plot_metal(metal, list_scores, spec_list, show_legend = False):
     """ Plot distribution of species for individual metals.
     Args:
-        metal (str): metal element of interest to plot
+        metal (str): metal element of interest to plot.
         list_scores (dict): Lists of scores for the species in spec_list
-        keyed by anion.
+        keyed by anion (as generated by genrate_scores).
         spec_list (list): Pymatgen species in same order as corresponding
-        scores in each list within the dict list_scores
-        show_legend (bool): display legend on plot
+        scores in each list within the dict list_scores.
+        show_legend (bool): display legend on plot.
+    Returns:
+        Shows and saves plot.
      """
     # Set initial very daft x and y range values to be adjusted below
     min_x, max_x = 20, -20
@@ -374,20 +403,25 @@ def plot_metal(metal, list_scores, spec_list, show_legend = False):
     plt.savefig('OxidationState_score_{0}'.format(metal, dpi=300))
     plt.show()
 
-def assign_prob(structures, list_scores, species_list, scoring = 'overall_score', verbose=False):
+def assign_prob(structures, list_scores, species_list, scoring = 'overall_score', verbose=False,
+        edit_struc_dict = True):
     """ Assigns probability values to structures based on the list of score values.
     Args:
-        structures (list): Dictionaries containing pymatgen Structures
-        list_scores (dict): Lists of scores for the species in spec_list
-        spec_list (list): Pymatgen species in same order as corresponding
+        structures (list): Dictionaries containing pymatgen Structures, keyed under 'structure'.
+        list_scores (dict): Lists of scores for the species in spec_list keyed by anion
+        (as produced by generate_scores).
+        species_list (list): Pymatgen species in same order as corresponding lists in list_scores.
         scoring (str): Can be either:
-                        overall_score: mean species-anion score for each species of interest
-                        in the composition
-                        limiting_score: as above but minimum species-anion score
-                        probability: product of scores
-                        probability_simple: product of scores for different species only (set(comp))
-        verbose (bool): Explicitly print any compounds that were skipped over
-
+                        overall_score - Mean species-anion score for each species of interest
+                        in the composition.
+                        limiting_score - As above but minimum species-anion score.
+                        probability - Product of scores.
+                        probability_simple - Product of scores for different species only (set(comp))
+        verbose (bool): Explicitly print any compounds that were skipped over due to the elements
+        they contain.
+        edit_struc_dict (bool): Add the probability to the dicts in the structures list.
+    Returns:
+        probabilities_list (list): Score for each structure in structures.
     """
     scores_dict = {}
     for key in list_scores.keys():
@@ -417,7 +451,8 @@ def assign_prob(structures, list_scores, species_list, scoring = 'overall_score'
             if verbose:
                 print('Could not get score for: {}'.format(comp))
             overall_score = 0
-        struc['probability'] = overall_score
+        if edit_struc_dict = True:
+            struc['probability'] = overall_score
         probabilities_list.append(overall_score)
 
     return probabilities_list
