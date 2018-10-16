@@ -14,8 +14,12 @@
 ###############################################################################
 
 ###############################################################################
-# Collection of functions for the statistical analysis of oxidation states    #
-# tidied neatly into one module.                                              #
+# Collection of functions for the statistical analysis of oxidation states.   #
+# It is possible to use the values obtained in the publication "Materials     #
+# Discovery by Chemical Analogy: Role of Oxidation States in Structure        #
+# Prediction" - DOI: 10.1039/C8FD00032H                                       #
+# or to create a new probabilistic model using your own database of materials #
+# and the functions in this module.                                           #
 # NB:                                                                         #
 # This module currently depends on Pymatgen, although this is not currently a #
 # dependency of SMACT. See http://pymatgen.org/.                              #
@@ -23,163 +27,18 @@
 
 ###  Imports
 # General
-import os, re, json
 from tqdm import tqdm
-from collections import Counter
-import itertools
+import os
+import csv
 
 # Maths and plotting
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FormatStrFormatter
 
 # pymatgen
-from pymatgen import Structure, Specie, MPRester
-from pymatgen.analysis.structure_prediction.substitutor import Substitutor
-from pymatgen.io.cif import CifWriter
-from smact import ordered_elements, Element, neutral_ratios
-from smact.screening import pauling_test
-
-### Functions
-def get_struc_list(json_name):
-    """Import pymatgen Structure objects from a json as a list.
-    TODO DWD: Move to more appropriate place. This is not oxidation state specific.
-    Args:
-        json_name (string): Path to json file containing a list of dicts in which one key is
-        'structure'. The value of this entry should be a Pymatgen Structure object as a dict.
-    Returns:
-        struc_list (list): list of dicts containing 'id' and 'structure'.
-    """
-    with open(json_name, 'r') as f:
-        saved_strucs = json.load(f)
-
-    struc_list = []
-    for i, entry in enumerate(tqdm(saved_strucs)):
-        struc_list.append({'structure': Structure.from_dict(entry['structure']),
-        'id': entry['id'] })
-    return(struc_list)
-
-
-def mp_filter(criteria, api_key=None):
-    """Get a list of Materials Project task ids that match a set of given criteria.
-    The criteria should be in the format used for a MP query.
-    TODO DWD: Move to more appropriate place. This is not oxidation state specific.
-    Args:
-        criteria (dict): Criteria that can be used in an MPRester query
-        api_key (str): Materials Project API key (from your MP dashboard)
-    """
-    if not api_key:
-        print('You need to supply an api key.')
-    else:
-        m = MPRester(os.environ.get("MP_API_KEY"))
-        properties = ['task_id']
-        struc_filter = m.query(criteria,properties)
-        id_list = [i['task_id'] for i in struc_filter]
-        return id_list
-
-
-def get_unique_species(structures):
-    """Given a set of pymatgen structures, in the form of dictionaries where the
-    Structure is keyed as 'structure', returns a list of all the different
-    Species present in that set.
-    Args:
-        structures (list): Dictionaries containing pymatgen Structures
-    Returns:
-        species_list (list): Unique species that are exhibited in the structures.
-    """
-    species_list = []
-    for i in structures:
-        for sp in i['structure'].composition:
-            species_list.append((sp))
-    species_list = list(set(species_list))
-    return(species_list)
-
-
-def sort_species(species_list, ordering='ptable', reverse=False):
-    """Given a list of pymatgen Species, will order them according to a given
-    rule and return the ordered list.
-    Args:
-        species_list (list): Pymatgen species objects
-        ordering('string'): How to order the Species:
-            ptable: order by periodic table position
-        reverse (bool): Whether to reverse the ordering (descending order)
-    Returns:
-        species_list (list): ordered Pymatgen species objects
-    """
-    ordered_el = ordered_elements(1,103)
-    # Turn into tuples for easy sorting
-    species_list = [(i.symbol, i.oxi_state) for i in species_list]
-    if ordering == 'ptable':
-        species_list.sort(key = lambda x: (ordered_el.index(x[0]),x[1]), reverse=reverse)
-        print("Species ordered by periodic table position.")
-    else:
-        print('Did not reorder the list of species...')
-
-    # Turn back into Species objects
-    species_list = [Specie(i[0], i[1]) for i in species_list]
-    print("First species: {0}  last species: {1}".format(species_list[0], species_list[-1]))
-    return species_list
-
-
-def species_totals(structures, count_elements=False):
-    """Given a set of pymatgen structures in the form of dictionaries where
-    the Structure is keyed as 'structure', returns the number
-    of compounds that features each Species.
-    Args:
-        structures (list): dictionaries containing pymatgen Structures
-        count_elements (bool): switch to counting elements not species
-    Returns:
-        totals (dict): Totals of each species.
-    """
-    totals = []
-
-    if count_elements:
-        for i in structures:
-            comp = [j.symbol for j in i['structure'].composition]
-            totals.append(comp)
-        totals = [i for sublist in totals for i in sublist]
-        totals = dict(Counter(totals))
-
-    else:
-        for i in structures:
-            comp = [j for j in i['structure'].composition]
-            totals.append(comp)
-        totals = [i for sublist in totals for i in sublist]
-        totals = dict(Counter(totals))
-
-    return(totals)
-
-def species_totals_for_anion(anion, structures, edit_structure_dicts=True):
-    """Finds the number of instances of each species in a list of pymatgen
-    Structure objects when a given anion is the most electronegative one
-    present. Also adds most electronegative anion to the dictionary.
-    Args:
-        anion (Pymatgen.Species): Anion of interest
-        structures (list): Dictionaries containing pymatgen Structures
-        edit_structure_dicts (bool): Modify the dicts in the structures list
-        to include a 'most_eneg_anion' key.
-    Returns:
-        an_containing (dict): Totals of each species.
-    """
-    an_containing = []
-    for i in structures:
-        if anion in i['structure'].composition:
-            # Check whether anion is most electronegative element
-            an_eneg = Element(anion.symbol).pauling_eneg
-            all_enegs = [Element(sp.symbol).pauling_eneg for \
-            sp in i['structure'].composition]
-            if all(eneg <= an_eneg for eneg in all_enegs):
-                comp = [j for j in i['structure'].composition]
-                an_containing.append(comp)
-                if edit_structure_dicts:
-                    i['most_eneg_anion'] = anion
-
-    an_containing = [i for sublist in an_containing for i in sublist]
-    an_containing = dict(Counter(an_containing))
-    an_containing.pop(anion)
-    return(an_containing)
-
+from pymatgen import Structure, Specie
+from smact import Element, data_directory
 def generate_scores(spec_list, anion_count_dict, spec_totals, scoring, el_totals=None):
     """Given a list of Species of interest, and a dictionary of the
     occurrence of each species with each anion as the most electronegative one
@@ -403,14 +262,16 @@ def plot_metal(metal, list_scores, spec_list, show_legend = False):
     plt.savefig('OxidationState_score_{0}'.format(metal, dpi=300))
     plt.show()
 
-def assign_prob(structures, list_scores, species_list, scoring = 'overall_score', verbose=False,
-        edit_struc_dict = True):
+def assign_prob(structures, scoring = 'overall_score', verbose=False,
+        edit_struc_dict = True, list_scores=None, species_list=None):
     """ Assigns probability values to structures based on the list of score values.
     Args:
-        structures (list): Dictionaries containing pymatgen Structures, keyed under 'structure'.
+        structures (list): Pymatgen Structures, keyed under 'structure'.
         list_scores (dict): Lists of scores for the species in spec_list keyed by anion
-        (as produced by generate_scores).
+        (as produced by generate_scores). Default values used from Faraday Discussions paper
+        (DOI: 10.1039/C8FD00032H) if none supplied.
         species_list (list): Pymatgen species in same order as corresponding lists in list_scores.
+        Default values used from Faraday Discussions paper (DOI: 10.1039/C8FD00032H) if none supplied.
         scoring (str): Can be either:
                         overall_score - Mean species-anion score for each species of interest
                         in the composition.
@@ -423,6 +284,19 @@ def assign_prob(structures, list_scores, species_list, scoring = 'overall_score'
     Returns:
         probabilities_list (list): Score for each structure in structures.
     """
+    if not list_scores:
+        # Import default list_scores from data directory
+        with open(os.path.join(data_directory,
+            'oxidation_states/oxidationstates_prob_table.csv'), 'r') as f:
+            reader = csv.reader(f)
+            list_scores = {eval(rows[0]): eval(rows[1]) for rows in reader}
+            print('Using default list_scores..')
+
+    if not species_list:
+        # Import species_list from data directory
+        with open(os.path.join(data_directory,'oxidation_states/species_list.txt'), 'r') as f:
+            species_list = eval(f.readline())
+            print('Using default species_list')
     scores_dict = {}
     for key in list_scores.keys():
         an = {}
@@ -431,12 +305,27 @@ def assign_prob(structures, list_scores, species_list, scoring = 'overall_score'
         scores_dict[key] = an
 
     probabilities_list = []
-    for struc in tqdm(structures):
+    for struc in structures:
         scores = []
-        comp = list(struc['structure'].species)
+        comp = set(list(struc['structure'].species))
+        comp = [(sp.symbol, sp.oxi_state) for sp in comp]
+
+        an_symbols = [an[0] for an in list_scores.keys()]
+        if 'most_eneg_anion' not in struc.keys():
+            # Get most eneg element in struc
+            els = [Element(e[0]) for e in comp]
+            els.sort(key=lambda x: x.pauling_eneg, reverse=True)
+            most_eneg = els[0].symbol
+            if most_eneg in an_symbols:
+                for poss in list_scores.keys():
+                    if poss[0] == most_eneg:
+                        struc['most_eneg_anion'] = poss
+            else:
+                print('No data available for most electronegative anion in structure.')
         try:
             scores = [scores_dict[struc['most_eneg_anion']][sp] for sp in comp \
             if sp in species_list]
+            print(scores)
             if scoring == 'overall_score':
                 overall_score = np.mean(scores)
             elif scoring == 'limiting_score':
@@ -462,7 +351,7 @@ def assign_prob_new(compositions, list_scores, species_list, scoring, verbose=Fa
     Note: This works very similarly to the assign_prob function and the two should be combined
     in the future.
     Args:
-        compositions (list) of lists: list of lists of pymatgen species (e.g. as generated by smact).
+        compositions (list): list of lists of Pymatgen Species (e.g. as generated by smact).
         These can be one item in the list for each species in the structure.
         The last species in the list should be the anion of interest.
         list_scores (dict): Lists of scores for the species in spec_list.
@@ -534,125 +423,6 @@ def plot_hist(values, bins = 100, plot_title='plot', xlim = None, ylim = None):
     plt.tight_layout()
     plt.savefig('{}.png'.format(plot_title), dpi=300)
     plt.show()
-
-def ternary_smact_combos(position1, position2, position3, threshold = 8):
-    """ Combinatorially generate Pymatgen Species compositions using SMACT when up to three different
-        lists are needed to draw species from (e.g. Ternary metal halides.)
-    Args:
-        position(n) (list of species): Species to be considered iteratively for each
-                                     position.
-        threshold (int): Max stoichiometry threshold.
-    Returns:
-        species_comps (list): Compositions as tuples of Pymatgen Species objects.
-        """
-
-    initial_comps_list = []
-    for sp1, sp2, an in tqdm(itertools.product(position1, position2, position3)):
-        e1, oxst1 = sp1.symbol, int(sp1.oxi_state)
-        eneg1 = Element(e1).pauling_eneg
-        e2, oxst2 = sp2.symbol, int(sp2.oxi_state)
-        eneg2 = Element(e2).pauling_eneg
-        e3, oxst3 = an.symbol, int(an.oxi_state)
-        eneg3 = Element(e3).pauling_eneg
-
-        symbols = [e1,e2,e3]
-        ox_states = [oxst1, oxst2, oxst3]
-        cn_e, cn_r = neutral_ratios(ox_states, threshold=threshold)
-
-        if cn_e:
-            enegs = [eneg1,eneg2,eneg3]
-            eneg_ok = pauling_test(ox_states, enegs, symbols=symbols, repeat_cations=False)
-            if eneg_ok:
-                for ratio in cn_r:
-                    comp = (symbols, ox_states, list(ratio))
-                    initial_comps_list.append(comp)
-    print('Number of compositions before reduction:  {}'.format(len(initial_comps_list)))
-
-    # Create a list of pymatgen species for each comp
-    print('Converting to Pymatgen Species...')
-    species_comps = []
-    for i in tqdm(initial_comps_list):
-        comp = {}
-        for sym,ox,ratio in zip(i[0],i[1],i[2]):
-            comp[Specie(sym,ox)] = ratio
-        comp_list = [[key]*val for key,val in comp.items()]
-        comp_list = [item for sublist in comp_list for item in sublist]
-        species_comps.append(comp_list)
-
-    # Sort and ditch duplicates
-    print('Ditching duplicates (sorry to have got your hopes up with the big numbers)...')
-    for i in species_comps:
-        i.sort()
-        i.sort(key=lambda x: x.oxi_state, reverse=True)
-    species_comps = list(set([tuple(i) for i in species_comps]))
-    print('Total number of new compounds unique compositions: {0}'.format(len(species_comps)))
-    return species_comps
-
-def predict_structure(species, struc_list, check_dir=Falsem threshold = 0.00001):
-    """ Predicted structures for set of pymatgen species using the Pymatgen structure predictor
-    and save as cif file.
-    TODO: This will be superceded by our own implementation of the structure prediction algorithm
-    in future versions of SMACT.
-    Args:
-        species (list): Pymatgen Species for which structure should be predicted.
-        struc_list (list): Pymatgen Structure objects to consider as parent structures in the
-        substitution algorithm.
-        check_dir (bool): check if directory already exists and only carry out
-        prediction and write new files if it doesn't.
-        threshold (float): Log-probability threshold for the Pymatgen structure predictor.
-    Returns:
-        Saves cif files of possible structures in new directory along with a summary .txt file
-        containing info including probabilities.
-    """
-    sub = Substitutor(threshold = 0.00001)
-    print('{}  ........'.format(species))
-    dirname = ''.join([str(i) for i in species])
-    path_exists = True if os.path.exists('./SP_results/{0}'.format(dirname)) else False
-
-    if (check_dir and path_exists):
-        print('Already exists')
-    else:
-        print('{} not already there'.format(dirname))
-        suggested_strucs = sub.pred_from_structures(target_species=species, structures_list=struc_list,
-                                                 remove_existing = False, remove_duplicates = True)
-        suggested_strucs = sorted(suggested_strucs,
-        key=lambda k: k.other_parameters['proba'], reverse = True)
-
-        # Save the structures as cifs
-        if not path_exists:
-            os.makedirs('./SP_results/{0}'.format(dirname))
-
-        for i, d in enumerate(suggested_strucs):
-            cw = CifWriter(d.final_structure)
-            cw.write_file("SP_results/{0}/{1}_BasedOn_{2}.cif".format(dirname, i, d.history[0]['source']))
-
-        # Save the summary as a text file
-        with open ('SP_results/{0}/{0}_summary.txt'.format(dirname), 'w') as f:
-            f.write('Formula,  Probability,  Based on,  Substitutions \n')
-            for i, struc in enumerate(suggested_strucs):
-                f.write(' {0}, {1:12},   {2:.5f},         {3:9},    {4} \n'.format(i,struc.composition.reduced_formula,
-                                                                               struc.other_parameters['proba'],
-                                                        struc.history[0]['source'],
-                                                        re.sub('Specie', '', str(struc.history[1]['species_map']))))
-    print('Done.')
-
-def add_probabilities(strucs):
-    """ Add probabilities from summary text files for a list of dicts containing structures.
-        Dicts must contain Structure, based_on (str).
-        Args:
-            strucs (list): Dicts containing Pymatgen Structures (keyed by 'struc')
-            and a string of the parent structure formula (keyed by 'based_on').
-        Returns:
-            strucs (list): As supplied to function but with the additional probability info.
-    """
-    for i in tqdm(strucs):
-        ions = ''.join([str(j) for j in i['struc'].composition])
-        with open('SP_results/{}/{}_summary.txt'.format(ions, ions), 'r') as f:
-            for lines in f:
-                line = lines.split(',')
-                if line[3].strip() == i['based_on']:
-                    i['probability'] = float(line[2].strip())
-    return strucs
 
 
 oxistate_prob_table = {('F', -1): [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0392156862745098, 0.35294117647058826, 0.6078431372549019, 0.21739130434782608, 0.45652173913043476, 0.17391304347826086, 0.15217391304347827, 0.13157894736842105, 0.5789473684210527, 0.19736842105263158, 0.09210526315789473, 0.0, 0.0, 0.47959183673469385, 0.41836734693877553, 0.10204081632653061, 0.0, 0.0, 0.0, 0.0, 0.23333333333333334, 0.7666666666666667, 0.0, 0.0, 0.6428571428571429, 0.30952380952380953, 0.047619047619047616, 0.0, 0.7288135593220338, 0.13559322033898305, 0.13559322033898305, 0.08080808080808081, 0.8686868686868687, 0.050505050505050504, 1.0, 0.0, 0.0, 1.0, 0.043478260869565216, 0.0, 0.9565217391304348, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.08333333333333333, 0.19444444444444445, 0.7222222222222222, 0.0, 0.2972972972972973, 0.08108108108108109, 0.02702702702702703, 0.5945945945945946, 0.13333333333333333, 0.13333333333333333, 0.13333333333333333, 0.4666666666666667, 0.13333333333333333, 0.05, 0.4, 0.55, 0.7142857142857143, 0.047619047619047616, 0.23809523809523808, 0.4, 0.4666666666666667, 0.13333333333333333, 1.0, 0.045454545454545456, 0.0, 0.9545454545454546, 0.4430379746835443, 0.02531645569620253, 0.5316455696202531, 0.35036496350364965, 0.021897810218978103, 0.6131386861313869, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.9375, 0.0625, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.47368421052631576, 0.5263157894736842, 0.0, 1.0, 0.0, 0.0, 0.3684210526315789, 0.631578947368421, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.26666666666666666, 0.7333333333333333, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.125, 0.0, 0.0, 0.875, 0.0, 0.0, 0.08333333333333333, 0.041666666666666664, 0.25, 0.625, 0.2, 0.5, 0.1, 0.2, 0.25, 0.75, 0.8444444444444444, 0.15555555555555556, 0.8888888888888888, 0.1111111111111111, 0.0, 0.0, 0.7142857142857143, 0.2857142857142857, 0.0, 1.0, 0.0, 0.034482758620689655, 0.41379310344827586, 0.1724137931034483, 0.3793103448275862], ('O', -2): [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.014814814814814815, 0.9851851851851852, 0.0025188916876574307, 0.0982367758186398, 0.8992443324937027, 0.008368200836820083, 0.1297071129707113, 0.26778242677824265, 0.5941422594142259, 0.0960960960960961, 0.40540540540540543, 0.04804804804804805, 0.10510510510510511, 0.34534534534534533, 0.0, 0.5506216696269982, 0.22380106571936056, 0.19005328596802842, 0.019538188277087035, 0.007104795737122558, 0.008880994671403197, 0.0019193857965451055, 0.2399232245681382, 0.7428023032629558, 0.015355086372360844, 0.0117096018735363, 0.7634660421545667, 0.16627634660421545, 0.0585480093676815, 0.0033003300330033004, 0.8679867986798679, 0.10231023102310231, 0.026402640264026403, 0.145748987854251, 0.8205128205128205, 0.033738191632928474, 1.0, 0.004464285714285714, 0.0, 0.9955357142857143, 0.005763688760806916, 0.002881844380403458, 0.9769452449567724, 1.0, 1.0, 0.0, 0.004149377593360996, 0.995850622406639, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0029154518950437317, 0.043731778425655975, 0.061224489795918366, 0.892128279883382, 0.0, 0.02872531418312388, 0.059245960502693, 0.10771992818671454, 0.8043087971274686, 0.029940119760479042, 0.0718562874251497, 0.3413173652694611, 0.49700598802395207, 0.059880239520958084, 0.0, 0.6949152542372882, 0.3050847457627119, 0.881578947368421, 0.07894736842105263, 0.039473684210526314, 0.9866666666666667, 0.0044444444444444444, 0.008888888888888889, 1.0, 0.0, 0.017857142857142856, 0.9821428571428571, 0.2875, 0.00625, 0.70625, 0.321285140562249, 0.0, 0.5863453815261044, 1.0, 1.0, 0.002680965147453083, 0.02680965147453083, 0.9705093833780161, 0.00819672131147541, 0.7049180327868853, 0.28688524590163933, 0.028409090909090908, 0.9715909090909091, 0.02158273381294964, 0.9784172661870504, 0.011560693641618497, 0.9884393063583815, 0.25, 0.75, 0.006329113924050633, 0.9936708860759493, 0.0, 0.0, 0.8709677419354839, 0.12903225806451613, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0136986301369863, 0.9863013698630136, 0.08333333333333333, 0.9166666666666666, 1.0, 0.0, 1.0, 0.0, 0.0, 0.01282051282051282, 0.02564102564102564, 0.9615384615384616, 0.0, 0.0, 0.00980392156862745, 0.029411764705882353, 0.9607843137254902, 0.0, 0.0, 0.05357142857142857, 0.26785714285714285, 0.19047619047619047, 0.4880952380952381, 0.046511627906976744, 0.4883720930232558, 0.3953488372093023, 0.06976744186046512, 0.23417721518987342, 0.7658227848101266, 0.7772020725388601, 0.22279792746113988, 0.8956043956043956, 0.1043956043956044, 0.002702702702702703, 0.0, 0.9297297297297298, 0.05945945945945946, 0.025, 0.975, 0.0, 0.010344827586206896, 0.07586206896551724, 0.07241379310344828, 0.8413793103448276], ('Cl', -1): [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.045454545454545456, 0.3181818181818182, 0.6363636363636364, 0.2727272727272727, 0.45454545454545453, 0.2727272727272727, 0.5, 0.2857142857142857, 0.14285714285714285, 0.07142857142857142, 0.5909090909090909, 0.4090909090909091, 0.0, 0.0, 0.0, 0.0, 0.9285714285714286, 0.0, 0.07142857142857142, 0.0, 0.0, 0.0, 0.0, 0.4375, 0.5625, 0.0, 0.0, 0.8148148148148148, 0.18518518518518517, 0.0, 0.0, 1.0, 0.0, 0.0, 0.4418604651162791, 0.5116279069767442, 0.046511627906976744, 1.0, 0.043478260869565216, 0.08695652173913043, 0.8695652173913043, 0.3333333333333333, 0.0, 0.5, 1.0, 1.0, 0.1111111111111111, 0.0, 0.8888888888888888, 0.03333333333333333, 0.23333333333333334, 0.3, 0.43333333333333335, 0.0, 0.0, 0.3333333333333333, 0.16666666666666666, 0.5, 0.21621621621621623, 0.1891891891891892, 0.21621621621621623, 0.2702702702702703, 0.10810810810810811, 0.1, 0.6, 0.3, 0.0, 0.0, 0.0, 0.75, 0.25, 0.8387096774193549, 0.0, 0.16129032258064516, 0.9473684210526315, 0.05263157894736842, 0.0, 1.0, 0.4166666666666667, 0.08333333333333333, 0.5, 0.4166666666666667, 0.0, 0.5833333333333334, 0.3181818181818182, 0.0, 0.5681818181818182, 1.0, 1.0, 0.0, 0.05, 0.95, 0.0, 0.875, 0.125, 0.0, 1.0, 0.0, 1.0, 0.3333333333333333, 0.6666666666666666, 0.4444444444444444, 0.5555555555555556, 0.16666666666666666, 0.8333333333333334, 0.2, 0.0, 0.8, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.5, 0.5, 1.0, 0.2857142857142857, 0.7142857142857143, 0.0, 0.0, 0.08695652173913043, 0.2608695652173913, 0.6521739130434783, 0.1111111111111111, 0.2222222222222222, 0.2777777777777778, 0.16666666666666666, 0.2222222222222222, 0.03225806451612903, 0.3225806451612903, 0.3225806451612903, 0.22580645161290322, 0.03225806451612903, 0.06451612903225806, 0.6666666666666666, 0.16666666666666666, 0.16666666666666666, 0.0, 0.020833333333333332, 0.9791666666666666, 0.875, 0.125, 0.8125, 0.1875, 0.0, 0.04, 0.96, 0.0, 0.0, 1.0, 0.0, 0.26666666666666666, 0.4, 0.26666666666666666, 0.06666666666666667], ('Br', -1): [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.5, 0.5, 0.5, 0.3333333333333333, 0.16666666666666666, 0.8333333333333334, 0.16666666666666666, 0.0, 0.0, 0.42857142857142855, 0.5714285714285714, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4444444444444444, 0.5555555555555556, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.7391304347826086, 0.17391304347826086, 0.08695652173913043, 1.0, 0.0, 0.1, 0.9, 0.5555555555555556, 0.0, 0.3333333333333333, 1.0, 1.0, 0.0, 0.0, 1.0, 0.1111111111111111, 0.2222222222222222, 0.3333333333333333, 0.3333333333333333, 0.0, 0.058823529411764705, 0.35294117647058826, 0.11764705882352941, 0.47058823529411764, 0.5, 0.4166666666666667, 0.08333333333333333, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.5384615384615384, 0.15384615384615385, 0.3076923076923077, 1.0, 0.0, 0.0, 1.0, 0.43478260869565216, 0.2608695652173913, 0.30434782608695654, 0.625, 0.0, 0.375, 0.7777777777777778, 0.0, 0.0, 1.0, 1.0, 0.05, 0.2, 0.75, 0.0, 1.0, 0.0, 0.125, 0.875, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.2, 0.8, 0.14285714285714285, 0.14285714285714285, 0.7142857142857143, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.8, 0.2, 1.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.2, 0.6, 0.4166666666666667, 0.08333333333333333, 0.16666666666666666, 0.16666666666666666, 0.16666666666666666, 0.0, 0.5454545454545454, 0.09090909090909091, 0.18181818181818182, 0.09090909090909091, 0.09090909090909091, 1.0, 0.0, 0.0, 0.0, 0.023809523809523808, 0.9761904761904762, 0.9047619047619048, 0.09523809523809523, 1.0, 0.0, 0.1, 0.1, 0.75, 0.0, 0.14285714285714285, 0.8571428571428571, 0.0, 0.25, 0.625, 0.125, 0.0], ('I', -1): [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.5, 0.5, 0.5, 0.3333333333333333, 0.16666666666666666, 1.0, 0.0, 0.0, 0.0, 0.7777777777777778, 0.2222222222222222, 0.0, 0.0, 0.0, 0.14285714285714285, 0.8571428571428571, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8, 0.2, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.9473684210526315, 0.0, 0.05263157894736842, 1.0, 0.0, 0.2, 0.8, 0.5, 0.0, 0.16666666666666666, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.3076923076923077, 0.5384615384615384, 0.15384615384615385, 0.0, 0.1111111111111111, 0.2777777777777778, 0.1111111111111111, 0.5, 0.5, 0.25, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3333333333333333, 0.2222222222222222, 0.4444444444444444, 1.0, 0.0, 0.0, 1.0, 0.5, 0.05555555555555555, 0.4444444444444444, 0.8, 0.0, 0.2, 0.7647058823529411, 0.0, 0.0, 1.0, 1.0, 0.043478260869565216, 0.34782608695652173, 0.6086956521739131, 0.5, 0.5, 0.0, 0.16666666666666666, 0.8333333333333334, 0.6666666666666666, 0.3333333333333333, 0.3333333333333333, 0.6666666666666666, 1.0, 0.0, 0.5, 0.5, 0.0, 0.0, 1.0, 0.0, 0.3333333333333333, 0.6666666666666666, 0.0, 1.0, 1.0, 0.6666666666666666, 0.3333333333333333, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.2222222222222222, 0.1111111111111111, 0.6666666666666666, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.02857142857142857, 0.9714285714285714, 0.9642857142857143, 0.03571428571428571, 1.0, 0.0, 0.125, 0.0625, 0.8125, 0.0, 0.0, 1.0, 0.0, 0.2857142857142857, 0.7142857142857143, 0.0, 0.0], ('S', -2): [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.05263157894736842, 0.9473684210526315, 0.03125, 0.28125, 0.6875, 0.10204081632653061, 0.32653061224489793, 0.3673469387755102, 0.20408163265306123, 0.15789473684210525, 0.8070175438596491, 0.03508771929824561, 0.0, 0.0, 0.0, 0.9423076923076923, 0.038461538461538464, 0.019230769230769232, 0.0, 0.0, 0.0, 0.0, 0.47058823529411764, 0.5098039215686274, 0.0196078431372549, 0.0, 0.6333333333333333, 0.26666666666666666, 0.1, 0.0, 0.7407407407407407, 0.25925925925925924, 0.0, 0.8060344827586207, 0.1939655172413793, 0.0, 1.0, 0.0, 0.05555555555555555, 0.9444444444444444, 0.030927835051546393, 0.041237113402061855, 0.9175257731958762, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.125, 0.041666666666666664, 0.8333333333333334, 0.0, 0.10638297872340426, 0.1702127659574468, 0.3829787234042553, 0.3404255319148936, 0.10526315789473684, 0.42105263157894735, 0.3157894736842105, 0.0, 0.15789473684210525, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.8, 0.2, 1.0, 0.0, 0.0, 0.9919354838709677, 0.008064516129032258, 0.0, 1.0, 0.02666666666666667, 0.04, 0.9333333333333333, 0.3229166666666667, 0.041666666666666664, 0.6354166666666666, 0.8271604938271605, 0.0, 0.12345679012345678, 1.0, 1.0, 0.0, 0.04081632653061224, 0.9591836734693877, 0.023809523809523808, 0.9285714285714286, 0.047619047619047616, 0.041666666666666664, 0.9583333333333334, 0.058823529411764705, 0.9411764705882353, 0.029411764705882353, 0.9705882352941176, 0.9166666666666666, 0.08333333333333333, 0.05, 0.95, 0.0, 0.05555555555555555, 0.9444444444444444, 0.0, 0.045454545454545456, 0.9545454545454546, 0.05263157894736842, 0.9473684210526315, 1.0, 0.05555555555555555, 0.9444444444444444, 0.3333333333333333, 0.6666666666666666, 1.0, 0.07692307692307693, 0.9230769230769231, 0.022222222222222223, 0.08888888888888889, 0.022222222222222223, 0.3333333333333333, 0.5333333333333333, 0.0, 0.0, 0.2857142857142857, 0.0, 0.7142857142857143, 0.0, 0.6, 0.4, 0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 1.0, 0.9887640449438202, 0.011235955056179775, 1.0, 0.0, 0.0, 0.04918032786885246, 0.9508196721311475, 0.0, 0.08333333333333333, 0.9166666666666666, 0.027777777777777776, 0.1388888888888889, 0.7777777777777778, 0.027777777777777776, 0.027777777777777776], ('Se', -2): [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.14285714285714285, 0.8571428571428571, 0.13333333333333333, 0.4, 0.4666666666666667, 0.1111111111111111, 0.5, 0.2222222222222222, 0.16666666666666666, 0.07692307692307693, 0.9230769230769231, 0.0, 0.0, 0.0, 0.0, 0.9285714285714286, 0.07142857142857142, 0.0, 0.0, 0.0, 0.0, 0.0, 0.47058823529411764, 0.5294117647058824, 0.0, 0.0, 0.631578947368421, 0.2631578947368421, 0.10526315789473684, 0.05263157894736842, 0.7894736842105263, 0.15789473684210525, 0.0, 0.8391608391608392, 0.16083916083916083, 0.0, 1.0, 0.0, 0.1111111111111111, 0.8888888888888888, 0.07017543859649122, 0.08771929824561403, 0.8421052631578947, 1.0, 1.0, 0.0, 0.0, 1.0, 0.08333333333333333, 0.0, 0.0, 0.9166666666666666, 0.034482758620689655, 0.0, 0.20689655172413793, 0.3103448275862069, 0.4482758620689655, 0.3, 0.2, 0.4, 0.0, 0.1, 0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 0.6666666666666666, 0.3333333333333333, 1.0, 0.0, 0.0, 0.9850746268656716, 0.014925373134328358, 0.0, 1.0, 0.022727272727272728, 0.06818181818181818, 0.9090909090909091, 0.25862068965517243, 0.017241379310344827, 0.7241379310344828, 0.7586206896551724, 0.0, 0.13793103448275862, 1.0, 1.0, 0.0, 0.05555555555555555, 0.9444444444444444, 0.043478260869565216, 0.9130434782608695, 0.043478260869565216, 0.06666666666666667, 0.9333333333333333, 0.06666666666666667, 0.9333333333333333, 0.05, 0.95, 1.0, 0.0, 0.08333333333333333, 0.9166666666666666, 0.0, 0.058823529411764705, 0.9411764705882353, 0.0, 0.06666666666666667, 0.9333333333333333, 0.07692307692307693, 0.9230769230769231, 1.0, 0.1111111111111111, 0.8888888888888888, 0.3333333333333333, 0.6666666666666666, 1.0, 0.0, 1.0, 0.058823529411764705, 0.14705882352941177, 0.029411764705882353, 0.38235294117647056, 0.38235294117647056, 0.0, 0.0, 0.5, 0.0, 0.5, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.9787234042553191, 0.02127659574468085, 1.0, 0.0, 0.0, 0.0967741935483871, 0.9032258064516129, 0.0, 0.0, 1.0, 0.05555555555555555, 0.05555555555555555, 0.8888888888888888, 0.0, 0.0], ('Te', -2): [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.125, 0.125, 0.75, 0.25, 0.5, 0.25, 0.5, 0.25, 0.25, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.8823529411764706, 0.11764705882352941, 0.0, 0.0, 0.0, 0.0, 0.0, 0.75, 0.25, 0.0, 0.0, 0.8333333333333334, 0.0, 0.16666666666666666, 0.0, 0.8571428571428571, 0.14285714285714285, 0.0, 0.6764705882352942, 0.3235294117647059, 0.0, 1.0, 0.0, 0.1111111111111111, 0.8888888888888888, 0.7333333333333333, 0.06666666666666667, 0.2, 1.0, 1.0, 0.0, 0.0, 1.0, 0.09090909090909091, 0.36363636363636365, 0.09090909090909091, 0.45454545454545453, 0.0, 0.25, 0.3333333333333333, 0.25, 0.16666666666666666, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.045454545454545456, 0.09090909090909091, 0.8636363636363636, 0.36363636363636365, 0.0, 0.6363636363636364, 0.5263157894736842, 0.0, 0.0, 1.0, 1.0, 0.0, 0.16666666666666666, 0.8333333333333334, 0.2, 0.8, 0.0, 0.2857142857142857, 0.7142857142857143, 0.14285714285714285, 0.8571428571428571, 0.16666666666666666, 0.8333333333333334, 1.0, 0.0, 0.5, 0.5, 0.0, 0.2, 0.8, 0.0, 0.16666666666666666, 0.8333333333333334, 0.16666666666666666, 0.8333333333333334, 1.0, 0.3333333333333333, 0.6666666666666666, 1.0, 0.0, 1.0, 0.0, 1.0, 0.11764705882352941, 0.29411764705882354, 0.17647058823529413, 0.11764705882352941, 0.29411764705882354, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.08333333333333333, 0.9166666666666666, 0.0, 0.0, 1.0, 0.1111111111111111, 0.1111111111111111, 0.7777777777777778, 0.0, 0.0]}
