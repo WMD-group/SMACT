@@ -290,13 +290,13 @@ def assign_prob(structures, scoring = 'overall_score', verbose=False,
             'oxidation_states/oxidationstates_prob_table.csv'), 'r') as f:
             reader = csv.reader(f)
             list_scores = {eval(rows[0]): eval(rows[1]) for rows in reader}
-            print('Using default list_scores..')
+            print('INFO: Using default list_scores.')
 
     if not species_list:
         # Import species_list from data directory
         with open(os.path.join(data_directory,'oxidation_states/species_list.txt'), 'r') as f:
             species_list = eval(f.readline())
-            print('Using default species_list')
+            print('INFO: Using default species_list.')
     scores_dict = {}
     for key in list_scores.keys():
         an = {}
@@ -325,7 +325,6 @@ def assign_prob(structures, scoring = 'overall_score', verbose=False,
         try:
             scores = [scores_dict[struc['most_eneg_anion']][sp] for sp in comp \
             if sp in species_list]
-            print(scores)
             if scoring == 'overall_score':
                 overall_score = np.mean(scores)
             elif scoring == 'limiting_score':
