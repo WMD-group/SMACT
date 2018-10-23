@@ -155,7 +155,7 @@ def species_totals(structures, count_elements=False, anions=[],
                 totals.append(comp)
             totals = [i for sublist in totals for i in sublist]
             totals = dict(Counter(totals))
-
+    # Method used if collecting count per anion 
     else:
         totals = {}
         for anion in tqdm(anions):
