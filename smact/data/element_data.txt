@@ -51,6 +51,10 @@
 #         Ref: NIST Atomic Spectra Database, http://physics.nist.gov/asd      #
 #         [Accessed April 2016]                                               #
 #                                                                             #
+#   dipol: Static dipole polarizability in 1.6488e-41 C m^2 / V               #
+#          Ref: http://ctcp.massey.ac.nz/index.php?menu=dipole&page=dipole    #
+#          Calculated values using the best available data for each element.  #
+#                                                                             #
 ###############################################################################
 #
 #Symbol  Name         Z     Mass          r_cov  e_affinity   p_eig     s_eig  Abundance el_neg  ion_pot         dipol
@@ -156,4 +160,4 @@ Es       Einsteinium  99   252.0829800000 None   None          None      None   
 Fm       Fermium      100  257.0951061000 None   None          None      None      None  1.3     6.50             113.40
 Md       Mendelevium  101  259.1010400000 None   None          None      None      None  1.3     6.58             109.40
 No       Nobelium     102  259.1010300000 None   None          None      None      None  1.3     6.65             105.40
-Lr       Lawrencium   103  262.1096100000 None   None          None      None      None  None    4.96
+Lr       Lawrencium   103  262.1096100000 None   None          None      None      None  None    4.96             None
