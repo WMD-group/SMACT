@@ -1,15 +1,16 @@
+[![DOI](https://zenodo.org/badge/14117740.svg)](https://zenodo.org/badge/latestdoi/14117740) 
+[![Documentation Status](https://readthedocs.org/projects/smact/badge/?version=latest)](http://smact.readthedocs.org/en/latest/?badge=latest)
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+
 SMACT
 =====
 
-**Semiconducting Materials from Analogy and Chemical Theory** (SMACT) is a collection of fast screening tools from elemental data.
+**Semiconducting Materials from Analogy and Chemical Theory** (SMACT) is a collection of rapid screening tools from elemental data.
 
 ![](SMACT.png)
 
 *If you torture the data enough, nature will always confess* - Roland Coase (from 'How should economists choose?')
-
-[![Documentation Status](https://readthedocs.org/projects/smact/badge/?version=latest)](http://smact.readthedocs.org/en/latest/?badge=latest)
-
-[![DOI](https://zenodo.org/badge/14117740.svg)](https://zenodo.org/badge/latestdoi/14117740)
 
 Contents
 --------
@@ -61,8 +62,7 @@ Some practical applications using are available in [our examples folder](https:/
 License and attribution
 -----------------------
 
-SMACT is produced by the Walsh Materials Design group. Python code
-and original data tables are licensed under the GNU General Public
+Python code and original data tables are licensed under the GNU General Public
 License (GPL) v3.
 
 The following files have their own licenses: **data/elements.txt** is
@@ -85,8 +85,6 @@ References
 compounds by structural analogy", *J. Phys. Chem. Solids*
 **25**, 675 (1964)](http://www.sciencedirect.com/science/article/pii/0022369764901763)
 
-[Mendeley "Materials Design" Reading List](https://www.mendeley.com/groups/8113991/materials-design/overview/)
-
 Development notes
 -----------------
 
@@ -98,7 +96,7 @@ is also helpful, including a good model for docstrings.
 Please use comments liberally when adding nontrivial features, and
 take the chance to clean up other people's code while looking at it.
  
-The project was started Python 2.7.x, but has now been ported to Python 3. Please use new-style classes and string formatting.
+The project was started Python 2.7.x, but has been ported to Python 3. Please use new-style classes and string formatting.
 
 Testing modules should be pass/fail and wrapped into **tests/test.py**.
 Tests need to be run from the main directory (i.e. with `python tests/test.py`).
