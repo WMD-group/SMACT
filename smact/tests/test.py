@@ -20,6 +20,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(Pt.name, 'Platinum')
         self.assertEqual(Pt.ionpot, 8.95883)
         self.assertEqual(Pt.number, 78)
+        self.assertEqual(Pt.dipol, 44.00)
 
     def test_ordered_elements(self):
         self.assertEqual(
