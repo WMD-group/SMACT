@@ -269,7 +269,8 @@ def lookup_element_data(symbol, copy=True):
     if _element_data is None:
         _element_data = {}
         keys = ('Symbol', 'Name', 'Z', 'Mass', 'r_cov', 'e_affinity',
-                'p_eig', 's_eig', 'Abundance', 'el_neg', 'ion_pot')
+                'p_eig', 's_eig', 'Abundance', 'el_neg', 'ion_pot',
+                'dipol')
         for items in _get_data_rows(os.path.join(data_directory,
                                                  "element_data.txt")):
             # First two columns are strings and should be left intact

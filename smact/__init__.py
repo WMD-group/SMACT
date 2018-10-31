@@ -56,6 +56,8 @@ class Element(object):
 
         Element.e_affinity (float) : Electron affinity in eV (0.0 if unknown)
 
+        Element.dipol (float) : Static dipole polarizability in 1.6488e-41 C m^2 / V  (0.0 if unknown)
+
         Element.eig (float) : Electron eigenvalue (units unknown) N.B. For Cu, Au and Ag this defaults to d-orbital
 
         Element.eig_s (float) : Eigenvalue of s-orbital
@@ -145,6 +147,7 @@ class Element(object):
              data_loader.lookup_element_oxidation_states_icsd(symbol)),
             ('oxidation_states_sp',
              data_loader.lookup_element_oxidation_states_sp(symbol)),
+            ('dipol', dataset['dipol']),
             ('pauling_eneg', dataset['el_neg']),
             ('SSE', sse),
             ('SSEPauling', sse_Pauling),
