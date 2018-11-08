@@ -12,6 +12,11 @@ SMACT
 
 *If you torture the data enough, nature will always confess* - Roland Coase (from 'How should economists choose?')
 
+Statement of need
+--------
+The purpose of SMACT is to facilitate the high-throughput screening and design of functional materials. 
+It follows a top-down approach where a set of element combinations is generated and then screened using rapid chemical filters. It can be used as part of a multi-technique workflow or to feed machine learning models for materials.
+
 Contents
 --------
 
@@ -69,22 +74,6 @@ The following files have their own licenses: **data/elements.txt** is
 from the [OpenBabel](http://openbabel.sourceforge.net) project and licensed under the GPL v2, which is
 included in the parent folder.
 
-References
-----------
-
-[D. W. Davies et al, 
-"Computer-aided design of metal chalcohalide semiconductors: from chemical composition to crystal structure" *Chem. Sci.* **9**, 1022 (2018)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
-
-[D. W. Davies et al, 
-"Computational screening of all stoichiometric inorganic materials" *Chem* **1**, 617 (2016)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
-
-[K. T. Butler et al, 
-"Computational materials design of crystalline solids", *Chemical Society Reviews* (2016)](http://pubs.rsc.org/en/content/articlelanding/2016/cs/c5cs00841g)
-
-[B. R. Pamplin, "A systematic method of deriving new semiconducting
-compounds by structural analogy", *J. Phys. Chem. Solids*
-**25**, 675 (1964)](http://www.sciencedirect.com/science/article/pii/0022369764901763)
-
 Development notes
 -----------------
 
@@ -100,3 +89,19 @@ The project was started Python 2.7.x, but has been ported to Python 3. Please us
 
 Testing modules should be pass/fail and wrapped into **tests/test.py**.
 Tests need to be run from the main directory (i.e. with `python tests/test.py`).
+
+References
+----------
+
+[D. W. Davies et al, 
+"Materials discovery by chemical analogy: role of oxidation states in structure prediction" *Faraday Discuss.* **211**, 553 (2018)](https://pubs.rsc.org/en/Content/ArticleLanding/2018/FD/C8FD00032H)
+
+[D. W. Davies et al, 
+"Computer-aided design of metal chalcohalide semiconductors: from chemical composition to crystal structure" *Chem. Sci.* **9**, 1022 (2018)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
+
+[D. W. Davies et al, 
+"Computational screening of all stoichiometric inorganic materials" *Chem* **1**, 617 (2016)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
+
+[B. R. Pamplin, "A systematic method of deriving new semiconducting
+compounds by structural analogy", *J. Phys. Chem. Solids*
+**25**, 675 (1964)](http://www.sciencedirect.com/science/article/pii/0022369764901763)
