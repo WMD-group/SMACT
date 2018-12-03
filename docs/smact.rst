@@ -1,3 +1,5 @@
+.. smact_module:
+
 smact Python package
 ====================
 

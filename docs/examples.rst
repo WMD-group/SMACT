@@ -2,7 +2,7 @@
 Examples
 ========
 
-Here we will give a demonstration of how to use some of SMACT's features. For a full set of 
+Here we will give a demonstration of how to use some of :mod:`smact`'s features. For a full set of 
 work-through tutorials in Jupyter notebook form check out `the tutorials section of our GitHub
 repo <https://github.com/WMD-group/SMACT/tree/master/examples>`_
 
@@ -10,7 +10,7 @@ repo <https://github.com/WMD-group/SMACT/tree/master/examples>`_
 Element and species classes
 ===========================
 
-The element and species classes are at the heart of SMACT's functionality. Elements are the
+The element and species classes are at the heart of :mod:`smact`'s functionality. Elements are the
 elements of the periodic table. Species are elements, with some additional information; the
 oxidation state and the coordination environment (if known). So for example the element iron
 can have many oxidation states and those oxidation states can have many coordination 
@@ -24,17 +24,26 @@ environments.
     print("The element %s has %i oxidation states. They are %s." % 
     (iron.symbol, len(iron.oxidation_states), iron.oxidation_states))
 
+    The element Fe has 8 oxidation states. They are [-2, -1, 1, 2, 3, 4, 5, 6].
+
 When an element has an oxidation state and coordination environment then it has additional
 features. For example the Shannon radius [1]_ of the element, this is often useful for calculating
 radius ratio rules [2]_, or for training neural networks [3]_ .
+
+.. code:: python
+
+    iron_square_planar = smact.Species('Fe', 2, '4_n')
+    print('Square planar iron has a Shannon radius of %s Angstrom' % iron_square_planar.shannon_radius)
+
+    Square planar iron has a Shannon radius of 0.77 Angstrom
 
 =============
 List building
 =============
 
-Often when using SMACT the aim will to be to search over combinations of a set of elements. This
+Often when using :mod:`smact` the aim will to be to search over combinations of a set of elements. This
 is most efficiently achieved by setting up a dictionary of the elements that you want to search
-over. The easiest way to achive this in SMACT is to first create a list of the symbols of the elements
+over. The easiest way to achieve this in :mod:`smact` is to first create a list of the symbols of the elements
 that you want to include, then to build a dictionary of the corresponding element objects.
 
 The list can be built by hand, or if you want to cover a given range there is a helper function.
@@ -80,10 +89,13 @@ Neutral combinations
 One of the most basic tests for establishing sensible combinations of elements is that they should form charge neutral
 combinations. This is a straightforward combinatorial problem of comparing oxidation states and allowed stoichiometries.
 
-.. math:: \Sum_i Q_in_i = 0
+:math:`\Sigma_i Q_in_i = 0`
 
 where :math:`i` are the elements in the compound and :math:`Q` are the charges. We have a special function, ``smact_test``,
-which does this checking for a list of elements. As input ``smact_test`` takes:
+which does this checking for a list of elements. The ``smact_test`` also ensures that all elements specified to be anions
+have electronegitivities greater than all elements specified to be cations.
+
+As input ``smact_test`` takes:
 
 * ``els`` : a tuple of the elements to search over (required)
 * ``threshold``: the upper limit of the stoichiometric ratios (default = 8)
@@ -97,11 +109,97 @@ We can look for neutral combos.
 
     elements = ['Ti', 'Al', 'O']
     space = smact.element_dictionary(elements)
-    # We just want the element items from the dictornary
+    # We just want the element items from the dictionary
     eles = [e[1] for e in space.items()]
-    # With an 
-    
+    # We set a threshold for the stoichiometry of 4
+    allowed_combinations = smact.screening.smact_test(eles, threshold=4)
+    print(allowed_combinations)
 
+    [[['Ti', 'Al', 'O'], (1, 3, 2)],
+    [['Ti', 'Al', 'O'], (1, 4, 4)],
+    [['Ti', 'Al', 'O'], (1, 4, 3)],
+    [['Ti', 'Al', 'O'], (2, 4, 3)],
+    [['Ti', 'Al', 'O'], (3, 1, 4)],
+    [['Ti', 'Al', 'O'], (3, 1, 3)],
+    [['Ti', 'Al', 'O'], (3, 1, 2)],
+    [['Ti', 'Al', 'O'], (2, 1, 4)],
+    [['Ti', 'Al', 'O'], (1, 2, 2)],
+    [['Ti', 'Al', 'O'], (1, 2, 3)],
+    [['Ti', 'Al', 'O'], (2, 1, 2)],
+    [['Ti', 'Al', 'O'], (1, 2, 4)],
+    [['Ti', 'Al', 'O'], (2, 2, 3)],
+    [['Ti', 'Al', 'O'], (1, 1, 1)],
+    [['Ti', 'Al', 'O'], (3, 2, 4)],
+    [['Ti', 'Al', 'O'], (2, 1, 3)],
+    [['Ti', 'Al', 'O'], (4, 1, 3)],
+    [['Ti', 'Al', 'O'], (1, 1, 3)],
+    [['Ti', 'Al', 'O'], (1, 1, 2)],
+    [['Ti', 'Al', 'O'], (1, 3, 4)],
+    [['Ti', 'Al', 'O'], (2, 3, 4)],
+    [['Ti', 'Al', 'O'], (4, 2, 3)],
+    [['Ti', 'Al', 'O'], (1, 1, 4)],
+    [['Ti', 'Al', 'O'], (1, 3, 3)]]
+    
+==========================
+Compound electronegativity
+==========================
+
+One property that is often used in high-throughput screening where band alignment is important is the
+compound electronegativity. Ginley and Butler showed how the simple geometric mean of the 
+electronegitivities of a compound could be used to predict flat band potentials [4]_. :mod:`smact` has a built
+in function to calculate this property for a given composition.
+
+.. code:: python
+
+    import smact.properties
+
+    compound_electronegs = [smact.properties.compound_electroneg(elements = a[0], stoichs = a[1]) for \\
+    a in allowed_combinations]
+
+    print(compound_electronegs)
+
+    [4.319343517137848,
+     4.729831837874991,
+     4.462035251666306,
+     4.337155845378665,
+     5.0575817742802025,
+     4.777171739263751,
+     4.427325394494835,
+     5.34030430325585,
+     4.583732423414276,
+     4.980129115226567,
+     4.652147502981397,
+     5.284089129411956,
+     4.726884428924315,
+     4.373001170931816,
+     4.808336266651247,
+     5.041995471272069,
+     4.587722671269271,
+     5.437592861777965,
+     5.010966817423813,
+     4.964781503487637,
+     4.768922515748819,
+     4.409142747625072,
+     5.74200359520417,
+     4.677126472294396]
+
+===============================
+Interfacing to machine learning
+===============================
+
+When preparing to do machine learning, we have to convert the convert the compositions that we have into 
+something that can be fed into an algorithm. Many of the properties provided in :mod:`smact` are suitable for this,
+one can take properties like electronegativity, mass, electron affinity etc etc (for the full list see 
+:ref:`smact_module`_).
+
+One useful representation that is often used in machine learning is the one-hot-vector formulation. A similar
+construction to this can be used to encode a chemical formula. A vector of length of the periodic table is 
+set up and each element set to be a number corresponding to the stoichiometric ratio of that element in the compound.
+For example we could convert :math:`Ba(OH)_2`
+
+.. code:: python
+
+   ml_vector = smact.screening.ml_rep_generator(['Ba', 'H', 'O'], stoichs=[1, 2, 2]) 
 
 .. [1]  "Revised effective ionic radii and systematic studies of interatomic distances in halides and chalcogenides". 
          Acta Crystallogr A. 32: 751–767, 1976
@@ -109,4 +207,8 @@ We can look for neutral combos.
 .. [2]  "Crystal Structure and Chemical Constitution" Trans. Faraday Soc. 25, 253-283, 1929.
 
 .. [3] "Deep neural networks for accurate predictions of crystal stability" Nat. Comms. 9, 3800, 2018.
+
+.. [4] "Prediction of Flatband Potentials at Semiconductor‐Electrolyte Interfaces from Atomic Electronegativities" 
+       J. Electrochem. Soc. 125, 228-32, 1975.
+
 
