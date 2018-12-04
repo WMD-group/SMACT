@@ -12,6 +12,8 @@ Contents:
    :maxdepth: 4
 
    introduction
+   getting_started
+   examples
    smact
 
 
