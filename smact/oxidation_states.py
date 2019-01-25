@@ -14,14 +14,12 @@
 ###############################################################################
 
 ###############################################################################
-# Collection of functions for the statistical analysis of oxidation states.   #
+# Collection of tools for the statistical analysis of oxidation states.       #
 # It is possible to use the values obtained in the publication "Materials     #
 # Discovery by Chemical Analogy: Role of Oxidation States in Structure        #
 # Prediction" - DOI: 10.1039/C8FD00032H                                       #
 # In future it will be possible to create a new probabilistic model using     #
-# own database of materials.                                                  #
-# and the functions in this module.                                           #
-###############################################################################
+# your own dataset of materials.                                              # ###############################################################################
 
 from os import path
 import json
@@ -99,7 +97,7 @@ class Oxidation_state_probability_finder:
             species1 (smact.Species): Cation or anion species
             species2 (smact.Species): Cation or anion species
         Returns:
-            prob (float): Species-anion probability.
+            prob (float): Species-anion probability
         '''
         # Generate lookup table key and use it to look up probability
         probability_table_key = self._generate_lookup_key(species1,species2)
@@ -157,22 +155,3 @@ class Oxidation_state_probability_finder:
         pair_probs = [self.pair_probability(pair[0],pair[1]) for pair in species_pairs]
         compound_prob = mean(pair_probs)
         return compound_prob
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
