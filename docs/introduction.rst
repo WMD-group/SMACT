@@ -18,7 +18,7 @@ water splitting and thermoelectrics. Read more about :mod:`smact` in our publica
 This approach is heavily inspired by the work of Harrison [1]_ and
 Pamplin [2]_. The work is an active project in the `Walsh Materials Design Group <http://wmd-group.github.io>`_.
 
-SMACT is now available *via* :code:`pip install smact`. 
+SMACT is now available *via* :code:`pip install smact`.
 
 We are also developing a set of Jupyter notebook examples `here <https://github.com/WMD-group/SMACT/tree/master/examples>`_.
 

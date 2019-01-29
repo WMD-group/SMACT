@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# This script can calculate roughly the lattice parameters of a lattice type, based
-# on the radii of the species on each site.
 ################################################################################
 # Copyright Tim Gauntlett, Keith Butler   (2014)                               #
 #                                                                              #
@@ -16,18 +14,21 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.                   #
 #                                                                              #
 ################################################################################
-
+"""
+This module can be used to calculate roughly the lattice parameters of a lattice type, based
+on the radii of the species on each site.
+"""
 from __future__ import division
 from past.utils import old_div
 import numpy as np
 
 def cubic_perovskite(shannon_radius): #Cubic Pervoskite
-    '''The lattice parameters of the cubic perovskite structure
+    '''The lattice parameters of the cubic perovskite structure.
     Args:
-	shannon_radius : a list containing the radii of the a,b,c ions
+	shannon_radius (list) : The radii of the a,b,c ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
 
     limiting_factors=[2*sum(shannon_radius[1:])]
@@ -41,12 +42,12 @@ def cubic_perovskite(shannon_radius): #Cubic Pervoskite
     return a,b,c,alpha,beta,gamma
 
 def wurtzite(shannon_radius):
-    '''The lattice parameters of the wurtzite structure
+    '''The lattice parameters of the wurtzite structure.
     Args:
-	shannon_radius : a list containing the radii of the a,b ions
+	shannon_radius (list) : The radii of the a,b ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     shannon_radius.sort(reverse=True) # Geometry assumes atom A is larger
     # "Ideal" wurtzite structure
@@ -73,12 +74,12 @@ def wurtzite(shannon_radius):
 
 #A1#
 def fcc(covalent_radius):
-    '''The lattice parameters of the A1
-    Args:
-	covalent_radius : a list containing the radii of the a ions
+    '''The lattice parameters of the A1.
+	Args:
+	shannon_radius (list) : The radii of the a ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     a = 2 * 2**0.5 * covalent_radius
     b = 2 * 2**0.5 * covalent_radius
@@ -90,12 +91,12 @@ def fcc(covalent_radius):
 
 #A2#
 def bcc(covalent_radius):
-    '''The lattice parameters of the A2
+    '''The lattice parameters of the A2.
     Args:
-	covalent_radius : a list containing the radii of the a ions
+	shannon_radius (list) : The radii of the a ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     a = 4 * covalent_radius / np.sqrt(3)
     b = a
@@ -107,12 +108,12 @@ def bcc(covalent_radius):
 
 #A3#
 def hcp(covalent_radius):
-    '''The lattice parameters of the hcp
+    '''The lattice parameters of the hcp.
     Args:
-	covalent_radius : a list containing the radii of the a ions
+	shannon_radius (list) : The radii of the a ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     a = 2 * covalent_radius
     b = a
@@ -124,12 +125,12 @@ def hcp(covalent_radius):
 
 #A4#
 def diamond(covalent_radius):
-    '''The lattice parameters of the diamond
+    '''The lattice parameters of the diamond.
     Args:
-	covalent_radius : a list containing the radii of the a ions
+	shannon_radius (list) : The radii of the a ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     a = 8 * covalent_radius / np.sqrt(3)
     b = a
@@ -141,12 +142,12 @@ def diamond(covalent_radius):
 
 #A5#
 def bct(covalent_radius):
-    '''The lattice parameters of the bct
+    '''The lattice parameters of the bct.
     Args:
-	covalent_radius : a list containing the radii of the a ions
+	shannon_radius (list) : The radii of the a ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     a = 3.86 * covalent_radius
     b = a
@@ -158,12 +159,12 @@ def bct(covalent_radius):
 
 #B1
 def rocksalt(shannon_radius):
-    '''The lattice parameters of rocksalt
+    '''The lattice parameters of rocksalt.
     Args:
-	shannon_radius : a list containing the radii of the a,b ions
+	shannon_radius (list) : The radii of the a,b ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     limiting_factors=[2*2**0.2*shannon_radius[0],2*2**0.2*shannon_radius[1],2*shannon_radius[0]+2*shannon_radius[1]]
     a = max(limiting_factors)
@@ -176,12 +177,12 @@ def rocksalt(shannon_radius):
 
 #B2
 def b2(shannon_radius):
-    '''The lattice parameters of b2
+    '''The lattice parameters of b2.
     Args:
-	shannon_radius : a list containing the radii of the a,b ions
+	shannon_radius (list) : The radii of the a,b ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     limiting_factors=[2*(shannon_radius[0]+shannon_radius[0])/np.sqrt(3),2*shannon_radius[1],2*shannon_radius[0]]
     a = max(limiting_factors)
@@ -194,12 +195,13 @@ def b2(shannon_radius):
 
 #B3
 def zincblende(shannon_radius):
-    '''The lattice parameters of Zinc Blende
+    '''The lattice parameters of Zinc Blende.
     Args:
-	shannon_radius : a list containing the radii of the a,b ions
+	Args:
+	shannon_radius (list) : The radii of the a,b ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(old_div(1.,3.))]
     a = max(limiting_factors)
@@ -219,10 +221,10 @@ def zincblende(shannon_radius):
 def b10(shannon_radius): #Litharge
     '''The lattice parameters of Litharge
     Args:
-	shannon_radius : a list containing the radii of the a,b ions
+	shannon_radius (list) : The radii of the a,b ions
     Returns:
-	a,b,c : real number values of the lattice constants
-	alpha,beta,gamma : real number values of the lattice angles
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     limiting_factors=[4*(max(shannon_radius))/np.sqrt(2), sum(shannon_radius)*1.31]## Explained below.
     a = max(limiting_factors)
@@ -234,7 +236,12 @@ def b10(shannon_radius): #Litharge
     return a,b,c,alpha,beta,gamma
 
 def stuffed_wurtzite(shannon_radii):
-    ''' The stuffed wortzite structure (e.g. LiGaGe) space group P63/mc
+    ''' The stuffed wurtzite structure (e.g. LiGaGe) space group P63/mc.
+    Args:
+	shannon_radius (list) : The radii of the a,b,c ions
+    Returns:
+	   (float) : real number values of the lattice constants
+	   (float) : real number values of the lattice angles
     '''
     rac = shannon_radii[2]+ shannon_radii[1]
     x = rac*np.sin(np.radians(19.5))

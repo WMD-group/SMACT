@@ -22,18 +22,18 @@ def pauling_test(oxidation_states, electronegativities,
                  symbols=[], repeat_anions=True,
                  repeat_cations=True, threshold=0.):
     """ Check if a combination of ions makes chemical sense,
-        (i.e. positive ions should be of lower electronegativity)
+        (i.e. positive ions should be of lower electronegativity).
 
     Args:
-        ox (list):  oxidation states of the compound
+        ox (list):  oxidation states of elements in the compound
         paul (list): the corresponding  Pauling electronegativities
             of the elements in the compound
-        symbols (list) :  chemical symbols of each site.
+        symbols (list) :  chemical symbols of each site
         threshold (float): a tolerance for the allowed deviation from
             the Pauling criterion
         repeat_anions : boolean, allow an anion to repeat in different
-            oxidation states in the same compound.
-        repeat_cations : as above, but for cations.
+            oxidation states in the same compound
+        repeat_cations : as above, but for cations
 
     Returns:
         bool:
@@ -101,10 +101,11 @@ def _no_repeats(oxidation_states, symbols,
 
 
 def pauling_test_old(ox, paul, symbols, repeat_anions=True,
-                     repeat_cations=True, threshold=0.5):
+                     repeat_cations=True, threshold=0.):
     """ Check if a combination of ions makes chemical sense,
-        (i.e. positive ions should be of lower Pauling electronegativity)
-
+        (i.e. positive ions should be of lower Pauling electronegativity).
+        This function should give the same results as pauling_test but is
+        not optimised for speed.
     Args:
         ox (list):  oxidation states of the compound
         paul (list): the corresponding  Pauling electronegativities
@@ -117,7 +118,7 @@ def pauling_test_old(ox, paul, symbols, repeat_anions=True,
         repeat_cations : as above, but for cations.
 
     Returns:
-        makes_sense (bool):
+        (bool):
             True if positive ions have lower
             electronegativity than negative ions
 
@@ -250,7 +251,7 @@ def eneg_states_test_alternate(ox_states, enegs):
     return min_cation_eneg > max_anion_eneg
 
 def ml_rep_generator(composition, stoichs=None):
-    """Function to take a composition of Elements and returns a
+    """Function to take a composition of Elements and return a
     list of values between 0 and 1 that describes the composition,
     useful for machine learning.
 
@@ -290,16 +291,15 @@ def smact_test(els, threshold=8, include=None):
     wish to apply the general 'smact test'.
 
     Args:
-        els (tuple): A list of Element objects or symbols.
-        threshold (int): Threshold for stoichiometry limit, default = 8.
+        els (tuple/list): A list of smact.Element objects
+        threshold (int): Threshold for stoichiometry limit, default = 8
         include (list): (optional) List of Element objects that must be in every composition.
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
-        in the form [[elements], [ratios]]
-
-    Note: Info on oxidation states is not returned, only the list of elements and unique allowed ratios.
+        in the form [[elements], [oxidation states], [ratios]]
     """
     ratios = []
+    oxidation_states = []
     els = list(els)
     els = els + include if include != None else els
 
@@ -316,7 +316,8 @@ def smact_test(els, threshold=8, include=None):
             electroneg_OK = pauling_test(ox_states, electronegs)
             if electroneg_OK:
                 ratios.append(cn_r)
+                oxidation_states.append(ox_states)
     ratios = [item for sublist in ratios for item in sublist]
     ratios = list(set(ratios))
-    compositions = [[symbols,x] for x in ratios]
+    compositions = [[symbols, ox, ratio] for ox, ratio in zip(oxidation_states,ratios)]
     return compositions

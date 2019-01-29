@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 ################################################################################
 #  Copyright Keith T. Butler, Adam J. Jackson (2013)                           #
@@ -20,7 +20,7 @@ import numpy as np
 import smact
 
 class Lattice(object):
-      """A unique set of Sites
+      """A unique set of Sites.
 
       Lattice objects define a general crystal structure, with a space group and
       a collection of Site objects. These Site objects have their own fractional
@@ -30,12 +30,12 @@ class Lattice(object):
       "materials" and use the Atoms class from the Atomic Simulation
       Environment.
 
-      Attributes: 
+      Attributes:
           basis_sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
           comprising the basis sites in Cartesian coordinates
 
           space_group: Integer space group number according to the
-          International Tables for Crystallography.  
+          International Tables for Crystallography.
 
           structurbericht:
           Structurbericht identity, if applicable (e.g. 'B1')
@@ -52,16 +52,16 @@ class Lattice(object):
 
 class Site(object):
       """
-      A single lattice site with a list of possible oxidation states
+      A single lattice site with a list of possible oxidation states.
 
       The Site object is primarily used within Lattice objects.
 
       Attributes:
           position: A list of fractional coordinates [x,y,z]
           oxidation_states: A list of possible oxidation states e.g. [-1,0,1]
-      
-      """ 
-      
+
+      """
+
       def __init__(self, position, oxidation_states=[0]):
             self.position = position
             self.oxidation_states = oxidation_states
@@ -74,14 +74,14 @@ def check_lattice_charges(charges, site_elements, sites):
       """
       This function checks the sum of the charges on the lattice sites in the crystal.
       The formal oxidation states of each species are assumed.
-      
-      'This does not signify that the chemical bonds in the crystal 
+
+      'This does not signify that the chemical bonds in the crystal
       are necessarily ionic in the sense of the quantum mechanics'
       Linus Pauling (1929)
 
       Args:
           charges: array of the charge contributions of each lattice site
-          site_elements: All possible elements which satisfy charge neutrality 
+          site_elements: All possible elements which satisfy charge neutrality
           sites: list, the current set of elements under inspection
 
       Returns:
@@ -91,14 +91,15 @@ def check_lattice_charges(charges, site_elements, sites):
 # Check if all sub-lattice charges sum to zero, append to list if true
       if np.sum(charges) == 0:
           site_elements.append(sites)
-# Need to use two lists, new contains the present composition; site_elements is the 
+# Need to use two lists, new contains the present composition; site_elements is the
 # list of all news found.
 
       return site_elements
 #------------------------------------------------------------------------------------
+"""
 def possible_compositions(crystal, elements):
-    """
-    Search for the elements which satisfy the possible oxidation states and 
+    ##### DOCSTRING
+    Search for the elements which satisfy the possible oxidation states and
     provide charge neutrality.
 
     Args:
@@ -108,7 +109,7 @@ def possible_compositions(crystal, elements):
     Returns:
         list/array/dict of int/float/string of something useful (???)
 
-    """
+    #####
 
     for site in crystal.sites:
         composition = []
@@ -116,7 +117,7 @@ def possible_compositions(crystal, elements):
             total_charge = total_charge + ox
 
 
-'''
+
 # Initialise the array atom, containing possible elements for each sub lattice
     atom = []
 # Initialise the array, site_elements, containing compositions found
@@ -129,7 +130,7 @@ def possible_compositions(crystal, elements):
 for site in crystal
 # I could not think of an elegant way to generalise this. For now it loops through the possible
 # lattices until it reaches the number, then it goes no further. Therefore, many of the loops
-# here are redundant. 
+# here are redundant.
 # site_n refers to the possible element @ site n
 # we multiply these by oxidation number to get sub-lattice charge
     i = 0
@@ -138,7 +139,7 @@ for site in crystal
 # Look up the charge of 'site_1' multiply by the multiplicity of that site to get charge
         charges[0] = int(elements[site_1]) * crystal.site_ratios[0]
 	if len(atom) == 1: #Are ther more sites to check?
-	    sites = [site_1] 
+	    sites = [site_1]
 	    site_elements = check_lattice_charges(charges, site_elements, sites)
 	if 2 <= len(atom):       #Are ther more sites to check?
       	    for site_2 in atom[1]:
@@ -155,12 +156,12 @@ for site in crystal
 		        if 4 <= len(atom): #Are ther more sites to check?
                             for site_4 in atom[3]:
                                 charges[3] = int(elements[site_4]) * crystal.site_ratios[3]
-	                        if len(atom) == 4: 
+	                        if len(atom) == 4:
 	                            sites = [site_1, site_2, site_3, site_4]
 		                    site_elements = check_lattice_charges(charges, site_elements, sites)
 			    if 5 <= len(atom):
 			    	for site_5 in atom[4]:
-				    charges[4] = int(elements[site_5]) * crystal.site_ratios[4] 
+				    charges[4] = int(elements[site_5]) * crystal.site_ratios[4]
 	                            if len(atom) == 5:
 	                                sites = [site_1, site_2, site_3, site_4]
 		                        site_elements = check_lattice_charges(charges, site_elements, sites)
@@ -169,13 +170,13 @@ for site in crystal
 '''
 #------------------------------------------------------------------------------------
 def possible_elements(elements, oxidations):
-    """Identify possible atoms to occupy a site
-    
-    Args:
-        elements:
-        oxidations: 
+    """Identify possible atoms to occupy a site.
 
-    Returns: 
+    Args:
+        elements (list) : element symbols
+        oxidations (list) : allowed oxidation states
+
+    Returns:
         Array of atoms
 
     """

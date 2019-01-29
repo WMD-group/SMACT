@@ -21,11 +21,8 @@ As input it takes the ASE crystal object (as built by smact.builder)
 and the sub-lattice on which substitutions are to be made.
 There is an example of how to use the code in Example_distort.py
 
-
 TODO: Add a functionality to check two Atoms objects against one another
 for equivalence.
-
-
 """
 
 import copy
@@ -44,13 +41,12 @@ from ase.spacegroup import Spacegroup
 def get_sg(lattice):
 
     """
-    Get the space-group of the system
+    Get the space-group of the system.
 
     Args:
         lattice: the ASE crystal class
     Returns:
         sg (int): integer number of the spacegroup
-
     """
     spacegroup = spglib.get_spacegroup(lattice, symprec=1e-5)
     space_split=spacegroup.split()
@@ -59,7 +55,7 @@ def get_sg(lattice):
     return sg
 
 def get_inequivalent_sites(sub_lattice, lattice):
-    """Given a sub lattice, returns symmetry unique sites for substitutions
+    """Given a sub lattice, returns symmetry unique sites for substitutions.
 
     Args:
         sub_lattice (list of lists): array containing Cartesian coordinates
@@ -69,7 +65,6 @@ def get_inequivalent_sites(sub_lattice, lattice):
 
     Returns:
         List of sites
-
     """
     sg = get_sg(lattice)
     inequivalent_sites = []
@@ -93,7 +88,7 @@ def get_inequivalent_sites(sub_lattice, lattice):
 
 
 def make_substitution(lattice,site,new_species):
-    """Change atomic species on lattice site to new_species
+    """Change atomic species on lattice site to new_species.
 
     Args:
         lattice (ASE crystal): Input lattice
@@ -102,7 +97,6 @@ def make_substitution(lattice,site,new_species):
 
     Returns:
         lattice
-
      """
     i = 0
     # NBNBNBNB  It is necessary to use deepcopy for objects, otherwise changes applied to a clone
@@ -117,7 +111,7 @@ def make_substitution(lattice,site,new_species):
 
 
 def build_sub_lattice(lattice, symbol):
-    """Generate a sub-lattice of the lattice based on equivalent atomic species
+    """Generate a sub-lattice of the lattice based on equivalent atomic species.
 
     Args:
         lattice (ASE crystal class): Input lattice
@@ -126,7 +120,6 @@ def build_sub_lattice(lattice, symbol):
     Returns:
         list of lists:
             sub_lattice: Cartesian coordinates of the sub-lattice of symbol
-
     """
 
     sub_lattice = []

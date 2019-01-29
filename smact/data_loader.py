@@ -14,14 +14,15 @@
 ###############################################################################
 
 """
-Provide data from text files while transparently caching for efficiency
+Provide data from text files while transparently caching for efficiency.
 
 This module handles the loading of external data used to initialise the
 core smact.Element and smact.Species classes.  It implements a
 transparent data-caching system to avoid a large amount of I/O when
 naively constructing several of these objects.  It also implements a
 switchable system to print verbose warning messages about possible
-missing data (mainly for debugging purposes).
+missing data (mainly for debugging purposes). In general these fuctions
+are used in the background and it is not necessary to use them directly.
 """
 from __future__ import print_function
 
@@ -62,7 +63,7 @@ def _get_data_rows(filename):
                 yield line.split()
 
 def float_or_None(x):
-    """Cast a string to a float or to a None"""
+    """Cast a string to a float or to a None."""
     try:
         return float(x)
     except ValueError:
@@ -88,7 +89,7 @@ def lookup_element_oxidation_states(symbol, copy=True):
     Returns:
         list: List of known oxidation states for the element.
 
-            Return None if oxidation states for the Element were not
+            Returns None if oxidation states for the Element were not
             found in the external data.
     """
 
@@ -211,8 +212,10 @@ def lookup_element_hhis(symbol):
         symbol : the atomic symbol of the element to look up.
 
     Returns:
-        A (HHI_p, HHI_R) tuple, or None if values for the elements were
-        not found in the external data.
+        tuple : (HHI_p, HHI_R)
+
+            Return None if values for the elements were
+            not found in the external data.
     """
 
     global _element_hhis
@@ -262,8 +265,8 @@ def lookup_element_data(symbol, copy=True):
             and where you are certain the dictionary will not be
             modified!
 
-    Returns (dict): Dictionary of data for given element, keyed by
-        column headings from data/element_data.txt
+    Returns (dict) : Dictionary of data for given element, keyed by
+        column headings from data/element_data.txt.
     """
     global _element_data
     if _element_data is None:
@@ -408,8 +411,23 @@ def lookup_element_sse_data(symbol):
         symbol : the atomic symbol of the element to look up.
 
     Returns:
-        A dictionary containing the SSE dataset for the element, or None
-        if the element was not found among the external data.
+        list : SSE datasets for the element, or None
+            if the element was not found among the external data.
+
+        SSE datasets are dictionaries with the keys:
+
+        AtomicNumber
+            *int*
+        SolidStateEnergy
+            *float* SSE
+        IonisationPotential
+            *float*
+        ElectronAffinity
+            *float*
+        MullikenElectronegativity
+            *str*
+        SolidStateRenormalisationEnergy
+            *float*
     """
 
     global _element_ssedata
@@ -454,7 +472,7 @@ def lookup_element_sse2015_data(symbol, copy=True):
 
     Retrieve the solid-state energy (SSE2015) data for an element in an
     oxidation state.  Taken from J. Solid State Chem., 2015, 231,
-    pp138-144, DOI: 10.1016/j.jssc.2015.07.037
+    pp138-144, DOI: 10.1016/j.jssc.2015.07.037.
 
     Args:
         symbol : the atomic symbol of the element to look up.
@@ -464,8 +482,15 @@ def lookup_element_sse2015_data(symbol, copy=True):
         certain the dictionary will not be modified!
 
     Returns:
-        A list of SSE datasets for the element, or None if the element was
-        not found among the external data.
+        list : SSE datasets for the element, or None
+            if the element was not found among the external data.
+
+        SSE datasets are dictionaries with the keys:
+
+        OxidationState
+            *int*
+        SolidStateEnergy2015
+            *float* SSE2015
     """
 
     global _element_sse2015_data

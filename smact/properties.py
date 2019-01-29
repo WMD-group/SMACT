@@ -23,7 +23,7 @@ import smact
 from numpy import sqrt, product
 
 def eneg_mulliken(element):
-    """Get Mulliken electronegativity from the IE and EA
+    """Get Mulliken electronegativity from the IE and EA.
 
     Arguments:
         symbol (smact.Element or str): Element object or symbol
@@ -43,7 +43,7 @@ def eneg_mulliken(element):
 
 
 def band_gap_Harrison(anion, cation, verbose=False,
-                      distance=None, elements_dict=None):
+                      distance=None):
 
     """
     Estimates the band gap from elemental data.
@@ -53,18 +53,16 @@ def band_gap_Harrison(anion, cation, verbose=False,
     Solids: The Physics of the Chemical Bond".
 
     Args:
-        Anion (str): Element symbol of the dominant anion in the system.
+        Anion (str): Element symbol of the dominant anion in the system
 
-        Cation (str): Element symbol of the the dominant cation in the system.
+        Cation (str): Element symbol of the the dominant cation in the system
         Distance (float or str): Nuclear separation between anion and cation
-                i.e. sum of ionic radii.
-        verbose: An optional True/False flag. If True, additional information
-                is printed to the standard output. [Defult: False]
-        elements_dict (dict): Element symbol keys with smact.Element
-                objects values. This may be provided to prevent
-                excessive reading of data files.
+                i.e. sum of ionic radii
+        verbose (bool) : An optional True/False flag. If True, additional
+        information is printed to the standard output. [Defult: False]
 
-    Returns (float): Band gap in eV.
+    Returns :
+        Band_gap (float): Band gap in eV
 
     """
 
@@ -115,22 +113,17 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
     X_Cu2S = (X_Cu * X_Cu * C_S)^(1/3)
 
     Args:
-    elements: A list of elements given as standard elemental symbols.
-    stoichs: A list of stoichiometries, given as integers or floats.
-    verbose: An optional True/False flag. If True, additional information
-    is printed to the standard output. [Default: False]
-    elements_dict: Dictionary of smact.Element objects; can be provided to
-    prevent multiple reads of data files
-    source: String 'Mulliken' or 'Pauling'; type of Electronegativity to
-    use. Note that in SMACT, Pauling electronegativities are
-    rescaled to a Mulliken-like scale.
+        elements (list) : Elements given as standard elemental symbols.
+        stoichs (list) : Stoichiometries, given as integers or floats.
+        verbose (bool) : An optional True/False flag. If True, additional information
+            is printed to the standard output. [Default: False]
+        source: String 'Mulliken' or 'Pauling'; type of Electronegativity to
+            use. Note that in SMACT, Pauling electronegativities are
+            rescaled to a Mulliken-like scale.
 
     Returns:
-    Electronegativity: Estimated electronegativity as a float.
-    Electronegativity is a dimensionless property.
+        Electronegativity (float) : Estimated electronegativity (no units).
 
-    Raises:
-    (There are no special error messages for this function.)
     """
     if type(elements[0]) == str:
         elementlist = [smact.Element(i) for i in elements]

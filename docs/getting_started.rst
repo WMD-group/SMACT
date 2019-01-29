@@ -18,14 +18,13 @@ Installation
 For the latest stable release simply use
 
 .. code::
-  
+
     pip install smact
 
-For the latest master branch from the Git repo
+Or for the latest master branch from the Git repo
 
 .. code::
 
     pip install git+git://github.com/WMD-group/SMACT.git
 
-Then ensure that the location of Smact is on your PYTHONPATH.
-
+Then ensure that the location of :mod:`smact` is on your PYTHONPATH.

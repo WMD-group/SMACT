@@ -5,7 +5,7 @@ smact Python package
 
 The core module of :mod:`smact` contains classes which are used as
 fundamental data types within the smact package, as well as several
-utility functions.  
+utility functions.
 Particular attention is drawn to :func:`smact.element_dictionary`,
 which returns a dictionary of :class:`smact.Element` objects indexed
 by their chemical symbols.
@@ -24,13 +24,9 @@ Submodules
 .. toctree::
 
    smact.builder
-   smact.data
    smact.data_loader
    smact.distorter
    smact.lattice
    smact.lattice_parameters
-   smact.parameters
    smact.properties
    smact.screening
-   smact.surface
-
