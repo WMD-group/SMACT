@@ -96,9 +96,9 @@ def check_lattice_charges(charges, site_elements, sites):
 
       return site_elements
 #------------------------------------------------------------------------------------
-"""
+
 def possible_compositions(crystal, elements):
-    ##### DOCSTRING
+    '''
     Search for the elements which satisfy the possible oxidation states and
     provide charge neutrality.
 
@@ -109,7 +109,7 @@ def possible_compositions(crystal, elements):
     Returns:
         list/array/dict of int/float/string of something useful (???)
 
-    #####
+    '''
 
     for site in crystal.sites:
         composition = []
@@ -117,7 +117,7 @@ def possible_compositions(crystal, elements):
             total_charge = total_charge + ox
 
 
-
+'''
 # Initialise the array atom, containing possible elements for each sub lattice
     atom = []
 # Initialise the array, site_elements, containing compositions found
