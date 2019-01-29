@@ -2,7 +2,7 @@
 Examples
 ========
 
-Here we will give a demonstration of how to use some of :mod:`smact`'s features. For a full set of 
+Here we will give a demonstration of how to use some of :mod:`smact`'s features. For a full set of
 work-through tutorials in Jupyter notebook form check out `the tutorials section of our GitHub
 repo <https://github.com/WMD-group/SMACT/tree/master/examples>`_
 
@@ -13,7 +13,7 @@ Element and species classes
 The element and species classes are at the heart of :mod:`smact`'s functionality. Elements are the
 elements of the periodic table. Species are elements, with some additional information; the
 oxidation state and the coordination environment (if known). So for example the element iron
-can have many oxidation states and those oxidation states can have many coordination 
+can have many oxidation states and those oxidation states can have many coordination
 environments.
 
 .. code:: python
@@ -21,7 +21,7 @@ environments.
     import smact
 
     iron = smact.Element('Fe')
-    print("The element %s has %i oxidation states. They are %s." % 
+    print("The element %s has %i oxidation states. They are %s." %
     (iron.symbol, len(iron.oxidation_states), iron.oxidation_states))
 
     The element Fe has 8 oxidation states. They are [-2, -1, 1, 2, 3, 4, 5, 6].
@@ -57,7 +57,7 @@ The list can be built by hand, or if you want to cover a given range there is a 
 
     ['Al','Si','P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co']
 
-For doing searches across combinations of elements it is then quickest to load the element objects into 
+For doing searches across combinations of elements it is then quickest to load the element objects into
 a dictionary and search by key. This avoids having to repopulate the element class at each iteration of
 the search.
 
@@ -139,13 +139,13 @@ We can look for neutral combos.
     [['Ti', 'Al', 'O'], (4, 2, 3)],
     [['Ti', 'Al', 'O'], (1, 1, 4)],
     [['Ti', 'Al', 'O'], (1, 3, 3)]]
-    
+
 ==========================
 Compound electronegativity
 ==========================
 
 One property that is often used in high-throughput screening where band alignment is important is the
-compound electronegativity. Ginley and Butler showed how the simple geometric mean of the 
+compound electronegativity. Ginley and Butler showed how the simple geometric mean of the
 electronegitivities of a compound could be used to predict flat band potentials [4]_. :mod:`smact` has a built
 in function to calculate this property for a given composition.
 
@@ -187,28 +187,26 @@ in function to calculate this property for a given composition.
 Interfacing to machine learning
 ===============================
 
-When preparing to do machine learning, we have to convert the convert the compositions that we have into 
+When preparing to do machine learning, we have to convert the convert the compositions that we have into
 something that can be fed into an algorithm. Many of the properties provided in :mod:`smact` are suitable for this,
-one can take properties like electronegativity, mass, electron affinity etc etc (for the full list see 
-:ref:`smact_module`_).
+one can take properties like electronegativity, mass, electron affinity etc etc (for the full list see
+:ref:`smact_module`).
 
 One useful representation that is often used in machine learning is the one-hot-vector formulation. A similar
-construction to this can be used to encode a chemical formula. A vector of length of the periodic table is 
+construction to this can be used to encode a chemical formula. A vector of length of the periodic table is
 set up and each element set to be a number corresponding to the stoichiometric ratio of that element in the compound.
 For example we could convert :math:`Ba(OH)_2`
 
 .. code:: python
 
-   ml_vector = smact.screening.ml_rep_generator(['Ba', 'H', 'O'], stoichs=[1, 2, 2]) 
+   ml_vector = smact.screening.ml_rep_generator(['Ba', 'H', 'O'], stoichs=[1, 2, 2])
 
-.. [1]  "Revised effective ionic radii and systematic studies of interatomic distances in halides and chalcogenides". 
+.. [1]  "Revised effective ionic radii and systematic studies of interatomic distances in halides and chalcogenides".
          Acta Crystallogr A. 32: 751–767, 1976
 
 .. [2]  "Crystal Structure and Chemical Constitution" Trans. Faraday Soc. 25, 253-283, 1929.
 
 .. [3] "Deep neural networks for accurate predictions of crystal stability" Nat. Comms. 9, 3800, 2018.
 
-.. [4] "Prediction of Flatband Potentials at Semiconductor‐Electrolyte Interfaces from Atomic Electronegativities" 
+.. [4] "Prediction of Flatband Potentials at Semiconductor‐Electrolyte Interfaces from Atomic Electronegativities"
        J. Electrochem. Soc. 125, 228-32, 1975.
-
-
