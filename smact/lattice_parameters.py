@@ -76,10 +76,11 @@ def wurtzite(shannon_radius):
 def fcc(covalent_radius):
     '''The lattice parameters of the A1.
 	Args:
-	shannon_radius (list) : The radii of the a ions
+    	shannon_radius (list) : The radii of the a ions
+
     Returns:
-	   (float) : real number values of the lattice constants
-	   (float) : real number values of the lattice angles
+       (float) : real number values of the lattice constants
+       (float) : real number values of the lattice angles
     '''
     a = 2 * 2**0.5 * covalent_radius
     b = 2 * 2**0.5 * covalent_radius

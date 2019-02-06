@@ -103,9 +103,10 @@ def _no_repeats(oxidation_states, symbols,
 def pauling_test_old(ox, paul, symbols, repeat_anions=True,
                      repeat_cations=True, threshold=0.):
     """ Check if a combination of ions makes chemical sense,
-        (i.e. positive ions should be of lower Pauling electronegativity).
-        This function should give the same results as pauling_test but is
-        not optimised for speed.
+    (i.e. positive ions should be of lower Pauling electronegativity).
+    This function should give the same results as pauling_test but is
+    not optimised for speed.
+
     Args:
         ox (list):  oxidation states of the compound
         paul (list): the corresponding  Pauling electronegativities
