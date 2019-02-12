@@ -369,6 +369,6 @@ class Mock(MagicMock):
             return Mock()
 
 MOCK_MODULES = ['spglib', 'pyspglib', 'ase', 'numpy', 
-                    'ase.lattice', 'ase.lattice.spacegroup',
+                    'ase.lattice', 'ase.spacegroup',
                     'ase.utils', 'ase.utils.geometry']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
