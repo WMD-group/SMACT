@@ -63,7 +63,8 @@ Usage
 
 SMACT's features are
 accessed through Python scripts, importing classes and functions as needed.
-Some practical applications using are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples).
+Some applications are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples),
+as well as in the [SMACT workflow respository](https://github.com/WMD-group/SMACT_workflows).
 
 License and attribution
 -----------------------
