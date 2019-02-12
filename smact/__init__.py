@@ -210,11 +210,12 @@ class Species(Element):
         self.SSE_2015 = None
 
         sse_2015_data = data_loader.lookup_element_sse2015_data(symbol);
-
-        for dataset in sse_2015_data:
-            if dataset['OxidationState'] == oxidation:
-                self.SSE_2015 = dataset['SolidStateEnergy2015']
-
+        if sse_2015_data:
+            for dataset in sse_2015_data:
+                if dataset['OxidationState'] == oxidation:
+                    self.SSE_2015 = dataset['SolidStateEnergy2015']
+        else:
+            self.SSE_2015 = None
 
 def ordered_elements(x,y):
     """
@@ -397,7 +398,7 @@ anions = ["N", "P", "As", "Sb",
            "O", "S", "Se", "Te",
            "F", "Cl", "Br", "I"]
 
-# List of d-block metals 
+# List of d-block metals
 d_block = ['Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn',
            'Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
            'La','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg']
