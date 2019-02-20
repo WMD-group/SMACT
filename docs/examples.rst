@@ -99,7 +99,8 @@ As input ``smact_test`` takes:
 
 * ``els`` : a tuple of the elements to search over (required)
 * ``threshold``: the upper limit of the stoichiometric ratios (default = 8)
-* ``include``: a list of elements that **must** be in every compound (optional)
+* ``species_unique``: whether or not we want to consider elements in different oxidation states as unique in our results
+(default is False).
 
 We can look for neutral combos.
 
@@ -115,30 +116,30 @@ We can look for neutral combos.
     allowed_combinations = smact.screening.smact_test(eles, threshold=4)
     print(allowed_combinations)
 
-    [[['Ti', 'Al', 'O'], (1, 3, 2)],
-    [['Ti', 'Al', 'O'], (1, 4, 4)],
-    [['Ti', 'Al', 'O'], (1, 4, 3)],
-    [['Ti', 'Al', 'O'], (2, 4, 3)],
-    [['Ti', 'Al', 'O'], (3, 1, 4)],
-    [['Ti', 'Al', 'O'], (3, 1, 3)],
-    [['Ti', 'Al', 'O'], (3, 1, 2)],
-    [['Ti', 'Al', 'O'], (2, 1, 4)],
-    [['Ti', 'Al', 'O'], (1, 2, 2)],
-    [['Ti', 'Al', 'O'], (1, 2, 3)],
-    [['Ti', 'Al', 'O'], (2, 1, 2)],
-    [['Ti', 'Al', 'O'], (1, 2, 4)],
-    [['Ti', 'Al', 'O'], (2, 2, 3)],
-    [['Ti', 'Al', 'O'], (1, 1, 1)],
-    [['Ti', 'Al', 'O'], (3, 2, 4)],
-    [['Ti', 'Al', 'O'], (2, 1, 3)],
-    [['Ti', 'Al', 'O'], (4, 1, 3)],
-    [['Ti', 'Al', 'O'], (1, 1, 3)],
-    [['Ti', 'Al', 'O'], (1, 1, 2)],
-    [['Ti', 'Al', 'O'], (1, 3, 4)],
-    [['Ti', 'Al', 'O'], (2, 3, 4)],
-    [['Ti', 'Al', 'O'], (4, 2, 3)],
-    [['Ti', 'Al', 'O'], (1, 1, 4)],
-    [['Ti', 'Al', 'O'], (1, 3, 3)]]
+    [(('Ti', 'Al', 'O'), (1, 3, 3)),
+     (('Ti', 'Al', 'O'), (2, 3, 4)),
+     (('Ti', 'Al', 'O'), (3, 1, 4)),
+     (('Ti', 'Al', 'O'), (1, 4, 4)),
+     (('Ti', 'Al', 'O'), (3, 1, 2)),
+     (('Ti', 'Al', 'O'), (3, 2, 4)),
+     (('Ti', 'Al', 'O'), (1, 2, 3)),
+     (('Ti', 'Al', 'O'), (1, 3, 4)),
+     (('Ti', 'Al', 'O'), (2, 4, 3)),
+     (('Ti', 'Al', 'O'), (2, 1, 3)),
+     (('Ti', 'Al', 'O'), (4, 2, 3)),
+     (('Ti', 'Al', 'O'), (1, 3, 2)),
+     (('Ti', 'Al', 'O'), (1, 2, 4)),
+     (('Ti', 'Al', 'O'), (1, 1, 2)),
+     (('Ti', 'Al', 'O'), (1, 2, 2)),
+     (('Ti', 'Al', 'O'), (1, 1, 4)),
+     (('Ti', 'Al', 'O'), (3, 1, 3)),
+     (('Ti', 'Al', 'O'), (2, 1, 4)),
+     (('Ti', 'Al', 'O'), (1, 1, 1)),
+     (('Ti', 'Al', 'O'), (2, 2, 3)),
+     (('Ti', 'Al', 'O'), (4, 1, 3)),
+     (('Ti', 'Al', 'O'), (1, 1, 3)),
+     (('Ti', 'Al', 'O'), (1, 4, 3)),
+     (('Ti', 'Al', 'O'), (2, 1, 2))]
 
 ==========================
 Compound electronegativity

@@ -286,7 +286,7 @@ def ml_rep_generator(composition, stoichs=None):
     norm = [float(i)/sum(ML_rep) for i in ML_rep]
     return norm
 
-def smact_test(els, threshold=8, include=None):
+def smact_test_test(els, threshold=8, species_unique=True):
     """Function that applies the charge neutrality and electronegativity
     tests in one go for simple application in external scripts that
     wish to apply the general 'smact test'.
@@ -294,21 +294,19 @@ def smact_test(els, threshold=8, include=None):
     Args:
         els (tuple/list): A list of smact.Element objects
         threshold (int): Threshold for stoichiometry limit, default = 8
-        include (list): (optional) List of Element objects that must be in every composition.
+        species_unique (bool): Whether or not to consider elements in different
+        oxidation states as unique in the results.
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
-        in the form [[elements], [oxidation states], [ratios]]
+        in the form [(elements), (oxidation states), (ratios)] if species_unique=True
+        or in the form [(elements), (ratios)] if species_unique=False.
     """
-    ratios = []
-    oxidation_states = []
-    els = list(els)
-    els = els + include if include != None else els
+    compositions = []
 
     # Get symbols and electronegativities
-    symbols = [e.symbol for e in els]
+    symbols = tuple(e.symbol for e in els)
     electronegs = [e.pauling_eneg for e in els]
     ox_combos = [e.oxidation_states for e in els]
-
     for ox_states in itertools.product(*ox_combos):
         # Test for charge balance
         cn_e, cn_r = neutral_ratios(ox_states, threshold=threshold)
@@ -316,9 +314,14 @@ def smact_test(els, threshold=8, include=None):
         if cn_e:
             electroneg_OK = pauling_test(ox_states, electronegs)
             if electroneg_OK:
-                ratios.append(cn_r)
-                oxidation_states.append(ox_states)
-    ratios = [item for sublist in ratios for item in sublist]
-    ratios = list(set(ratios))
-    compositions = [[symbols, ox, ratio] for ox, ratio in zip(oxidation_states,ratios)]
-    return compositions
+                for ratio in cn_r:
+                    compositions.append(tuple([symbols,ox_states,ratio]))
+
+    # Return list depending on whether we are interested in unique species combinations
+    # or just unique element combinations.
+    if species_unique:
+        return(compositions)
+    else:
+        compositions = [(i[0], i[2]) for i in compositions]
+        compositions = list(set(compositions))
+        return compositions
