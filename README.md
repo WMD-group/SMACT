@@ -26,13 +26,13 @@ Contents
   *  **screening.py** Used for generating and applying filters to compositional search spaces.
   *  **properties.py** A collection of tools for estimating useful properties based on composition.
   * **lattice.py** Given the sites, multiplicities and possible oxidation states
-	at those sites, this reads from the database and generates all possible
-	stoichiometeries.
+    at those sites, this reads from the database and generates all possible
+    stoichiometeries.
   * **builder.py** Builds some common lattice structures, given the chemical
-	composition.
+    composition.
   * **lattice_parameters.py** Estimation of lattice parameters for various lattice types using covalent/ionic radii.
   * **distorter.py** A collection of functions for enumerating and then
-	substituting on inequivalent sites of a sub-lattice.
+    substituting on inequivalent sites of a sub-lattice.
 
 Requirements
 ------------
@@ -50,7 +50,7 @@ but are expected to make it upstream fairly rapidly.
 
 Installation
 ------------
-	pip install git+git://github.com/WMD-group/SMACT.git
+    pip install git+git://github.com/WMD-group/SMACT.git
 
 On a unix-like system, simply add the directory containing this README file
 to your PYTHONPATH. e.g. in ~/.bashrc
@@ -83,12 +83,15 @@ Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to rep
 
 ### Code contributions
 
-We are always looking for ways to make SMACT better and more useful to the wider community; contributions are very welcome. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following: 
+We are always looking for ways to make SMACT better and more useful to the wider community; contributions are very welcome. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following:
 
 - Code style should comply with [PEP8](http://www.python.org/dev/peps/pep-0008) where possible. [Google's house style](http://google-styleguide.googlecode.com/svn/trunk/pyguide.html)
 is also helpful, including a good model for docstrings.
 - Please use comments liberally when adding nontrivial features, and take the chance to clean up other people's code while looking at it.
-- Add tests wherever possible. Testing modules should be pass/fail and wrapped into **tests/test.py**. Tests need to be run from the main directory (i.e. with `python tests/test.py`).
+- Add tests wherever possible, and use the test suite to check if you broke anything.
+  Testing modules should be pass/fail and wrapped into **tests/test.py**.
+  Run the tests using `python -m smact.tests.test -v`.
+  (The final `-v` is optional and adds more detail to the output.)
 
 References
 ----------
@@ -105,4 +108,3 @@ References
 [B. R. Pamplin, "A systematic method of deriving new semiconducting
 compounds by structural analogy", *J. Phys. Chem. Solids*
 **25**, 675 (1964)](http://www.sciencedirect.com/science/article/pii/0022369764901763)
-
