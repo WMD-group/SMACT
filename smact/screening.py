@@ -286,7 +286,7 @@ def ml_rep_generator(composition, stoichs=None):
     norm = [float(i)/sum(ML_rep) for i in ML_rep]
     return norm
 
-def smact_test_test(els, threshold=8, species_unique=True):
+def smact_test(els, threshold=8, species_unique=True):
     """Function that applies the charge neutrality and electronegativity
     tests in one go for simple application in external scripts that
     wish to apply the general 'smact test'.
