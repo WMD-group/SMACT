@@ -17,6 +17,8 @@ Statement of need
 --------
 The purpose of SMACT is to facilitate the high-throughput screening and design of functional materials. It follows a top-down approach where a set of element combinations is generated and then screened using rapid chemical filters. It can be used as part of a multi-technique workflow or to feed machine learning models for materials.
 
+![](smact_simple.gif)
+
 Contents
 --------
 
