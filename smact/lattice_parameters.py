@@ -18,8 +18,6 @@
 This module can be used to calculate roughly the lattice parameters of a
 lattice type, based on the radii of the species on each site.
 """
-from __future__ import division
-from past.utils import old_div
 import numpy as np
 
 def cubic_perovskite(shannon_radius): #Cubic Pervoskite
@@ -69,7 +67,7 @@ def wurtzite(shannon_radius):
     if shannon_radius[0] > 0.817*(shannon_radius[0]+shannon_radius[1]):
         a = 2 * shannon_radius[0]
         b = a
-        c = 2 * np.sqrt(old_div(2.,3.)) * a
+        c = 2 * np.sqrt(2./3.) * a
     else:
         # Scenario B: regular wurtzite, similar sizes
         a = 2*0.817*(shannon_radius[0]+shannon_radius[1])  # 0.817 is sin(109.6/2)
@@ -132,7 +130,7 @@ def hcp(covalent_radius):
     '''
     a = 2 * covalent_radius
     b = a
-    c = (old_div(4.,3.)) * 6**0.5 * covalent_radius
+    c = (4./3.) * 6**0.5 * covalent_radius
     alpha = 90
     beta = 90
     gamma = 120
@@ -231,7 +229,7 @@ def zincblende(shannon_radius):
            float values of lattics constants and
            angles (a, b, c, alpha, beta, gamma)
     '''
-    limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(old_div(1.,3.))]
+    limiting_factors=[2*(max(shannon_radius)*np.sqrt(2)), 4*(shannon_radius[0] + shannon_radius[1])**(1./3.)]
     a = max(limiting_factors)
     b = a
     c = a

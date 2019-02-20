@@ -24,7 +24,6 @@ switchable system to print verbose warning messages about possible
 missing data (mainly for debugging purposes). In general these fuctions
 are used in the background and it is not necessary to use them directly.
 """
-from __future__ import print_function
 
 from builtins import next
 from builtins import map

@@ -23,7 +23,6 @@
 
 # First example: using ase
 
-from __future__ import absolute_import
 from ase.spacegroup import crystal
 from smact.lattice import Lattice, Site
 

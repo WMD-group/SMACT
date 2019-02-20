@@ -13,12 +13,9 @@
 #                                                                             #
 ###############################################################################
 
-from __future__ import print_function
-from __future__ import division
 from builtins import map
 from builtins import input
 from builtins import range
-from past.utils import old_div
 import smact
 from numpy import sqrt, product
 
@@ -37,7 +34,7 @@ def eneg_mulliken(element):
     elif type(element) != smact.Element:
         raise Exception("Unexpected type: {0}".format(type(element)))
 
-    mulliken = old_div((element.ionpot+element.e_affinity),2.0)
+    mulliken = (element.ionpot+element.e_affinity)/2.0
 
     return mulliken
 
@@ -79,15 +76,15 @@ def band_gap_Harrison(anion, cation, verbose=False,
     An, Cat = elements_dict[An], elements_dict[Cat]
 
     # Calculate values of equation components
-    V1_Cat = old_div((Cat.eig - Cat.eig_s),4)
-    V1_An = old_div((An.eig - An.eig_s),4)
-    V1_bar = old_div((V1_An + V1_Cat),2)
+    V1_Cat = (Cat.eig - Cat.eig_s)/4
+    V1_An = (An.eig - An.eig_s)/4
+    V1_bar = (V1_An + V1_Cat)/2
     V2 = 2.16 * hbarsq_over_m / (d**2)
-    V3 = old_div((Cat.eig - An.eig),2)
-    alpha_m = old_div((1.11*V1_bar),sqrt(V2**2 + V3**2))
+    V3 = (Cat.eig - An.eig)/2
+    alpha_m = (1.11*V1_bar)/sqrt(V2**2 + V3**2)
 
     # Calculate Band gap [(3-43) Harrison 1980 ]
-    Band_gap = (old_div(3.60,3))*(sqrt(V2**2 + V3**2))*(1-alpha_m)
+    Band_gap = (3.60/3.)*(sqrt(V2**2 + V3**2))*(1-alpha_m)
     if verbose:
         print("V1_bar = ", V1_bar)
         print("V2 = ", V2)
@@ -139,7 +136,7 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
     # Get electronegativity values for each element
 
     if source == 'Mulliken':
-        elementlist = [old_div((el.ionpot+el.e_affinity),2.0)
+        elementlist = [(el.ionpot+el.e_affinity)/2.0
                        for el in elementlist]
 
     elif source == 'Pauling':
@@ -161,7 +158,7 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
 
     # Calculate geometric mean (n-th root of product)
     prod = product(elementlist)
-    compelectroneg = (prod)**(old_div(1.0,(sum(stoichslist))))
+    compelectroneg = (prod)**(1.0/(sum(stoichslist)))
 
     if verbose:
         print("Geometric mean = Compound 'electronegativity'=", compelectroneg)
