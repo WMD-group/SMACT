@@ -9,6 +9,7 @@ __date__ = "Feb 6 2017"
 
 from setuptools import setup
 import os
+import unittest
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -25,6 +26,7 @@ if __name__ == "__main__":
         packages=['smact','smact.tests'],
         package_data={'smact': ['data/*.txt','data/*.csv']},
         zip_safe=False,
+        test_suite='smact.tests.test',
         install_requires=['scipy','numpy','spglib'],
         classifiers=['Programming Language :: Python',
                      'Development Status :: 5 - Production/Stable',
