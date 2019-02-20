@@ -2,9 +2,11 @@
 Examples
 ========
 
-Here we will give a demonstration of how to use some of :mod:`smact`'s features. For a full set of
-work-through tutorials in Jupyter notebook form check out `the tutorials section of our GitHub
-repo <https://github.com/WMD-group/SMACT/tree/master/examples>`_
+Here we will give a demonstration of how to use some of `smact`'s features. For a full set of
+work-through examples in Jupyter notebook form check out `the examples section of our GitHub
+repo <https://github.com/WMD-group/SMACT/tree/master/examples>`.
+For workflows that have been used in real examples and in published work, visit our
+`separate repository <https://github.com/WMD-group/smact_workflows>`.
 
 ===========================
 Element and species classes
@@ -140,6 +142,9 @@ We can look for neutral combos.
      (('Ti', 'Al', 'O'), (1, 1, 3)),
      (('Ti', 'Al', 'O'), (1, 4, 3)),
      (('Ti', 'Al', 'O'), (2, 1, 2))]
+
+There is `an example <https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb>` of how this function can be combined with multiprocessing
+to rapidly explore large subsets of chemical space.
 
 ==========================
 Compound electronegativity
