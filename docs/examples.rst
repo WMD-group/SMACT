@@ -3,10 +3,10 @@ Examples
 ========
 
 Here we will give a demonstration of how to use some of `smact`'s features. For a full set of
-work-through examples in Jupyter notebook form check out `the examples section of our GitHub
-repo <https://github.com/WMD-group/SMACT/tree/master/examples>`.
+work-through examples in Jupyter notebook form check out
+`the examples section of our GitHub repo <https://github.com/WMD-group/SMACT/tree/master/examples>`_.
 For workflows that have been used in real examples and in published work, visit our
-`separate repository <https://github.com/WMD-group/smact_workflows>`.
+`separate repository <https://github.com/WMD-group/smact_workflows>`_.
 
 ===========================
 Element and species classes
@@ -101,8 +101,7 @@ As input ``smact_test`` takes:
 
 * ``els`` : a tuple of the elements to search over (required)
 * ``threshold``: the upper limit of the stoichiometric ratios (default = 8)
-* ``species_unique``: whether or not we want to consider elements in different oxidation states as unique in our results
-(default is False).
+* ``species_unique``: whether or not we want to consider elements in different oxidation states as unique in our results (default is False).
 
 We can look for neutral combos.
 
@@ -143,8 +142,8 @@ We can look for neutral combos.
      (('Ti', 'Al', 'O'), (1, 4, 3)),
      (('Ti', 'Al', 'O'), (2, 1, 2))]
 
-There is `an example <https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb>` of how this function can be combined with multiprocessing
-to rapidly explore large subsets of chemical space.
+There is `an example <https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb>`_
+of how this function can be combined with multiprocessing to rapidly explore large subsets of chemical space.
 
 ==========================
 Compound electronegativity

@@ -39,16 +39,8 @@ Contents
 Requirements
 ------------
 
-The main language is Python 3 with Numpy, Scipy and Matplotlib.
-The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase)
-(ASE) is required for some components, as is [spglib](http://atztogo.github.io/spglib).
-
-The [chemlab](http://chemlab.github.com/chemlab) project is not
-currently used, but is considered "friendly"; we will try to avoid
-namespace clashes and it may be used for some features in the future.
-Needed modifications will be made in [ajjackson's
-fork](https://github.com/ajjackson/chemlab),
-but are expected to make it upstream fairly rapidly.
+The main language is Python 3 and basic requirements are Numpy and Scipy.
+The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](www.pymatgen.org) are also required for many components. 
 
 Installation
 ------------
@@ -62,20 +54,15 @@ to your PYTHONPATH. e.g. in ~/.bashrc
 Usage
 -----
 
-SMACT's features are
-accessed through Python scripts, importing classes and functions as needed.
-Some applications are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples),
-as well as in the [SMACT workflow respository](https://github.com/WMD-group/SMACT_workflows).
+SMACT's features are accessed through Python scripts, importing classes and functions as needed.
+Some applications are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples), as well as in the [SMACT workflow respository](https://github.com/WMD-group/SMACT_workflows).
 
 License and attribution
 -----------------------
 
-Python code and original data tables are licensed under the GNU General Public
-License (GPL) v3.
+Python code and original data tables are licensed under the GNU General Public License (GPL) v3.
 
-The following files have their own licenses: **data/elements.txt** is
-from the [OpenBabel](http://openbabel.sourceforge.net) project and licensed under the GPL v2, which is
-included in the parent folder.
+The following files have their own licenses: **data/elements.txt** is from the [OpenBabel](http://openbabel.sourceforge.net) project and licensed under the GPL v2, which is included in the parent folder.
 
 Development notes
 -----------------
