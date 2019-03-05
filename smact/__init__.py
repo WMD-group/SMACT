@@ -29,7 +29,7 @@ data_directory = path.join(module_directory, 'data')
 import itertools
 
 
-from fractions import gcd
+from math import gcd
 from operator import mul as multiply
 
 from smact import data_loader

@@ -349,7 +349,7 @@ def lookup_element_shannon_radius_data(symbol, copy=True):
         _element_shannon_radii_data = {}
 
         with open(os.path.join(data_directory, "shannon_radii.csv"),
-                  'rU') as file:
+                  'r') as file:
             reader = csv.reader(file)
 
             # Skip the first row (headers).
@@ -435,7 +435,7 @@ def lookup_element_sse_data(symbol):
         _element_ssedata = {}
 
         with open(os.path.join(data_directory,
-                               "SSE.csv"), 'rU') as file:
+                               "SSE.csv"), 'r') as file:
             reader = csv.reader(file)
 
             for row in reader:
@@ -498,7 +498,7 @@ def lookup_element_sse2015_data(symbol, copy=True):
         _element_sse2015_data = {}
 
         with open(os.path.join(data_directory, "SSE_2015.csv"),
-                  'rU') as file:
+                  'r') as file:
             reader = csv.reader(file)
 
             for row in reader:
@@ -557,7 +557,7 @@ def lookup_element_sse_pauling_data(symbol):
         _element_ssepauling_data = {}
 
         with open(os.path.join(data_directory, "SSE_Pauling.csv"),
-                  'rU') as file:
+                  'r') as file:
             reader = csv.reader(file)
 
             for row in reader:
