@@ -192,7 +192,7 @@ in function to calculate this property for a given composition.
 Interfacing to machine learning
 ===============================
 
-When preparing to do machine learning, we have to convert the convert the compositions that we have into
+When preparing to do machine learning, we have to convert the compositions that we have into
 something that can be fed into an algorithm. Many of the properties provided in :mod:`smact` are suitable for this,
 one can take properties like electronegativity, mass, electron affinity etc etc (for the full list see
 :ref:`smact_module`).
@@ -205,6 +205,10 @@ For example we could convert :math:`Ba(OH)_2`
 .. code:: python
 
    ml_vector = smact.screening.ml_rep_generator(['Ba', 'H', 'O'], stoichs=[1, 2, 2])
+
+There is also `an example <https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb>`_
+demonstrating the conversion of charge neutral compositions produced by SMACT to a list of formulas using Pymatgen,
+or to a Pandas dataframe, both of which could then be used as input for a machine learning algorithm. 
 
 .. [1]  "Revised effective ionic radii and systematic studies of interatomic distances in halides and chalcogenides".
          Acta Crystallogr A. 32: 751–767, 1976
