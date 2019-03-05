@@ -32,5 +32,5 @@ if __name__ == "__main__":
                         help="More Verbose output.")
     args = parser.parse_args()
 
-    print band_gap_Harrison(verbose=args.verbose, anion=args.anion,
-                            cation=args.cation, distance=args.distance)
+    print( band_gap_Harrison(verbose=args.verbose, anion=args.anion,
+                            cation=args.cation, distance=args.distance))
