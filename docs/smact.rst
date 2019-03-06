@@ -23,10 +23,11 @@ Submodules
 
 .. toctree::
 
-   smact.builder
-   smact.data_loader
-   smact.distorter
-   smact.lattice
-   smact.lattice_parameters
-   smact.properties
-   smact.screening
+  smact.properties
+  smact.screening
+  smact.oxidation_states
+  smact.builder
+  smact.distorter
+  smact.lattice
+  smact.lattice_parameters
+  smact.data_loader
