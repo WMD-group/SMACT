@@ -2,7 +2,7 @@
 
 import unittest
 import smact
-from smact.properties import compound_electroneg
+from smact.properties import compound_electroneg, band_gap_Harrison
 from smact.builder import wurtzite
 import smact.screening
 import smact.lattice
@@ -68,6 +68,28 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(len(neutral_combos), 9)
         self.assertTrue((3, 2, 1) in neutral_combos)
 
+    # ---------------- Properties ----------------
+
+    def test_compound_eneg_brass(self):
+        self.assertAlmostEqual(compound_electroneg(
+            elements=["Cu", "Zn"], stoichs=[0.5, 0.5],
+            source='Pauling'),
+            5.0638963259)
+
+    def test_harrison_gap_MgCl(self):
+        self.assertAlmostEqual(band_gap_Harrison(
+            'Mg','Cl',verbose=False,distance=2.67),
+            3.545075110572662)
+
+    # ---------------- BUILDER ----------------
+
+    def test_builder_ZnS(self):
+        ZnS, sys_ZnS = wurtzite(['Zn', 'S'])
+        self.assertEqual((ZnS.sites[0].position[2]), 0)
+        self.assertEqual((ZnS.sites[0].position[0]), 2./3.)
+
+    # ---------------- SCREENING ----------------
+
     def test_pauling_test(self):
         Sn, S = (smact.Element(label) for label in ('Sn', 'S'))
         self.assertTrue(smact.screening.pauling_test(
@@ -93,21 +115,8 @@ class TestSequenceFunctions(unittest.TestCase):
             symbols=('S', 'Sn', 'Sn'), repeat_anions=False
             ))
 
-    # ---------------- Properties ----------------
-
-    def test_compound_eneg_brass(self):
-        self.assertAlmostEqual(compound_electroneg(
-            elements=["Cu", "Zn"], stoichs=[0.5, 0.5],
-            source='Pauling'),
-            5.0638963259)
-
-    # ---------------- BUILDER ----------------
-
-    def test_builder_ZnS(self):
-        ZnS, sys_ZnS = wurtzite(['Zn', 'S'])
-        self.assertEqual((ZnS.sites[0].position[2]), 0)
-        self.assertEqual((ZnS.sites[0].position[0]), 2./3.)
-
+    def test_eneg_states_test(self):
+        
 
 if __name__ == '__main__':
     unittest.main()
