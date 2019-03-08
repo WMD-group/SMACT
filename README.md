@@ -40,7 +40,7 @@ Requirements
 ------------
 
 The main language is Python 3 and basic requirements are Numpy and Scipy.
-The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](www.pymatgen.org) are also required for many components. 
+The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](www.pymatgen.org) are also required for many components. 
 
 Installation
 ------------
