@@ -13,13 +13,13 @@
 #                                                                             #
 ###############################################################################
 
- """
- smact.oxidation_states: Module for predicting the likelihood of species
- coexisting in a compound based on statistical analysis of oxidation states.
- It is possible to use the values obtained in the publication "Materials
- Discovery by Chemical Analogy: Role of Oxidation States in Structure
- Prediction" - DOI: 10.1039/C8FD00032H.
- """
+"""
+smact.oxidation_states: Module for predicting the likelihood of species
+coexisting in a compound based on statistical analysis of oxidation states.
+It is possible to use the values obtained in the publication Materials
+Discovery by Chemical Analogy: Role of Oxidation States in Structure
+Prediction - DOI: 10.1039/C8FD00032H.
+"""
 
 from os import path
 import json
