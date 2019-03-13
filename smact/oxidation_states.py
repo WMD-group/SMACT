@@ -19,7 +19,8 @@
 # Discovery by Chemical Analogy: Role of Oxidation States in Structure        #
 # Prediction" - DOI: 10.1039/C8FD00032H                                       #
 # In future it will be possible to create a new probabilistic model using     #
-# your own dataset of materials.                                              # ###############################################################################
+# your own dataset of materials.                                              #
+###############################################################################
 
 from os import path
 import json
