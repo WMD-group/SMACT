@@ -60,7 +60,7 @@ To clone the project from Github and make a local installation:
 
     git clone https://github.com/wmd-group/smact.git
     cd smact
-    pip3 install --user -e .
+    pip install --user -e .
 
 With -e pip will create links to the source folder so that that changes
 to the code will be immediately reflected on the PATH.
