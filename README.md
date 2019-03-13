@@ -40,16 +40,29 @@ Requirements
 ------------
 
 The main language is Python 3 and basic requirements are Numpy and Scipy.
-The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](www.pymatgen.org) are also required for many components. 
+The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](www.pymatgen.org) are also required for many components.
 
 Installation
 ------------
+The latest stable release of SMACT can be installed via pip which will automatically setup other Python packages as required:
+
+    pip install smact  
+
+Alternatively, the very latest version can be installed using:
+
     pip install git+git://github.com/WMD-group/SMACT.git
 
-On a unix-like system, simply add the directory containing this README file
-to your PYTHONPATH. e.g. in ~/.bashrc
+For developer installation SMACT can be installed from a copy of the source
+repository (https://github.com/wmd-group/smact); this will be preferred if using experimental code branches.
 
-    export PYTHONPATH="/home/username/src/smact:$PYTHONPATH"
+To clone the project from Github and make a local installation:
+
+    git clone https://github.com/wmd-group/smact.git
+    cd smact
+    pip3 install --user -e .
+
+With -e pip will create links to the source folder so that that changes
+to the code will be immediately reflected on the PATH.
 
 Usage
 -----
