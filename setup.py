@@ -2,7 +2,7 @@
 
 __author__ = "Daniel W. Davies"
 __copyright__ = "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
-__version__ = "2.0"
+__version__ = "2.0.1"
 __maintainer__ = "Daniel W. Davies"
 __email__ = "d.davies16@imperial.ac.uk"
 __date__ = "Mar 13 2019"
@@ -16,7 +16,7 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 if __name__ == "__main__":
     setup(
         name='SMACT',
-        version='2.0',
+        version='2.0.1',
         description='Semiconducting Materials by Analogy and Chemical Theory',
         long_description=open(os.path.join(module_dir, 'README.md')).read(),
         url='https://github.com/WMD-group/SMACT',
