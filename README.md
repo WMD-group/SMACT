@@ -4,6 +4,7 @@
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 [![Build Status](https://travis-ci.org/WMD-group/SMACT.svg?branch=master)](https://travis-ci.org/WMD-group/SMACT)
 [![HitCount](http://hits.dwyl.io/wmd-group/smact.svg)](http://hits.dwyl.io/wmd-group/smact)
+[![BADGINATOR](https://badginator.herokuapp.com/wmd-group/smact.svg)](https://github.com/defunctzombie/badginator)
 
 SMACT
 =====
