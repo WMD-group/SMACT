@@ -8,6 +8,9 @@ import smact.screening
 import smact.lattice
 import smact.lattice_parameters
 import smact.distorter
+import smact.oxidation_states
+from pymatgen import Specie
+from smact import Species
 
 class TestSequenceFunctions(unittest.TestCase):
 
@@ -217,6 +220,18 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertAlmostEqual(perovskite[3], 90)
         self.assertAlmostEqual(wurtz[0], 5.13076)
         self.assertAlmostEqual(wurtz[2], 8.3838)
+
+    # ---------- Lattice parameters -----------
+    def test_oxidation_states(self):
+        ox  = smact.oxidation_states.Oxidation_state_probability_finder()
+        self.assertAlmostEqual(ox.compound_probability(
+        [Specie('Fe',+3), Specie('O',-2)]),
+        0.74280230326)
+        self.assertAlmostEqual(ox.pair_probability(
+        Species('Fe',+3), Species('O',-2)),
+        0.74280230326)
+        self.assertEqual(len(ox.get_included_species()), 173)
+
 
 
 if __name__ == '__main__':
