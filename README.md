@@ -90,7 +90,7 @@ Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to rep
 
 We are always looking for ways to make SMACT better and more useful to the wider community; contributions are very welcome. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following:
 
-- Code style should comply with [PEP8](http://www.python.org/dev/peps/pep-0008) where possible. [Google's house style](http://google-styleguide.googlecode.com/svn/trunk/pyguide.html)
+- Code style should comply with [PEP8](http://www.python.org/dev/peps/pep-0008) where possible. [Google's house style](https://google.github.io/styleguide/pyguide.html)
 is also helpful, including a good model for docstrings.
 - Please use comments liberally when adding nontrivial features, and take the chance to clean up other people's code while looking at it.
 - Add tests wherever possible, and use the test suite to check if you broke anything.
