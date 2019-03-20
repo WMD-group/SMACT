@@ -82,8 +82,8 @@ class Oxidation_state_probability_finder:
             raise ValueError("One cation and one anion required.")
 
         # Generate keys for lookup table
-        cat_key = ''.join([cation.symbol,  str(cation.oxidation)])
-        an_key = ''.join([anion.symbol, str(anion.oxidation)])
+        cat_key = ''.join([cation.symbol,  str(int(cation.oxidation))])
+        an_key = ''.join([anion.symbol, str(int(anion.oxidation))])
 
         # Check that both the species are included in the probability table
         if not all(elem in self._included_species for elem in [an_key, cat_key]):
