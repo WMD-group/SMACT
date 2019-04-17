@@ -19,6 +19,7 @@ if __name__ == "__main__":
         version='2.0.2',
         description='Semiconducting Materials by Analogy and Chemical Theory',
         long_description=open(os.path.join(module_dir, 'README.md')).read(),
+        long_description_content_type='text/markdown'
         url='https://github.com/WMD-group/SMACT',
         author='Daniel W. Davies',
         author_email='d.davies16@imperial.ac.uk',

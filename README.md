@@ -3,8 +3,6 @@
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 [![Build Status](https://travis-ci.org/WMD-group/SMACT.svg?branch=master)](https://travis-ci.org/WMD-group/SMACT)
-[![HitCount](http://hits.dwyl.io/wmd-group/smact.svg)](http://hits.dwyl.io/wmd-group/smact)
-[![BADGINATOR](https://badginator.herokuapp.com/wmd-group/smact.svg)](https://github.com/defunctzombie/badginator)
 
 SMACT
 =====
@@ -84,19 +82,19 @@ Development notes
 -----------------
 
 ### Bugs, features and questions
-Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs!
-
+Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact Dan Davies by e-mail: D.Davies16@imperial.ac.uk. 
 ### Code contributions
-
 We are always looking for ways to make SMACT better and more useful to the wider community; contributions are very welcome. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following:
 
 - Code style should comply with [PEP8](http://www.python.org/dev/peps/pep-0008) where possible. [Google's house style](https://google.github.io/styleguide/pyguide.html)
 is also helpful, including a good model for docstrings.
 - Please use comments liberally when adding nontrivial features, and take the chance to clean up other people's code while looking at it.
 - Add tests wherever possible, and use the test suite to check if you broke anything.
-  Testing modules should be pass/fail and wrapped into **tests/test.py**.
-  Run the tests using `python -m smact.tests.test -v`.
-  (The final `-v` is optional and adds more detail to the output.)
+
+### Tests
+Testing modules should be pass/fail and wrapped into **tests/test.py**.
+Run the tests using `python -m smact.tests.test -v`.
+(The final `-v` is optional and adds more detail to the output.)
 
 References
 ----------
