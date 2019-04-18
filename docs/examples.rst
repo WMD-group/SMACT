@@ -207,8 +207,10 @@ For example we could convert :math:`Ba(OH)_2`
    ml_vector = smact.screening.ml_rep_generator(['Ba', 'H', 'O'], stoichs=[1, 2, 2])
 
 There is also `an example <https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb>`_
-demonstrating the conversion of charge neutral compositions produced by SMACT to a list of formulas using Pymatgen,
-or to a Pandas dataframe, both of which could then be used as input for a machine learning algorithm. 
+demonstrating the conversion of charge neutral compositions produced by `smact` to a list of formulas using Pymatgen,
+or to a Pandas dataframe, both of which could then be used as input for a machine learning algorithm.
+For a full machine learning example that uses `smact`, there is a repository `here <https://github.com/WMD-group/Solar_oxides_data>`_ 
+which demonstrates a search for solar energy materials from the four-component (quaternary) oxide materials space.
 
 .. [1]  "Revised effective ionic radii and systematic studies of interatomic distances in halides and chalcogenides".
          Acta Crystallogr A. 32: 751–767, 1976
