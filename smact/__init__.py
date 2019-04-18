@@ -201,9 +201,10 @@ class Species(Element):
 
         shannon_data = data_loader.lookup_element_shannon_radius_data(symbol);
 
-        for dataset in shannon_data:
-            if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
-                self.shannon_radius = dataset['crystal_radius'];
+        if shannon_data:
+            for dataset in shannon_data:
+                if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
+                    self.shannon_radius = dataset['crystal_radius'];
 
         # Get SSE_2015 (revised) for the oxidation state.
 
