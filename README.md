@@ -97,6 +97,8 @@ Testing modules should be pass/fail and wrapped into **tests/test.py**.
 Run the tests using `python -m smact.tests.test -v`.
 (The final `-v` is optional and adds more detail to the output.)
 
+We also use integrated testing on Github via [travis](https://travis-ci.org).
+
 References
 ----------
 
