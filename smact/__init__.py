@@ -183,6 +183,10 @@ class Species(Element):
         Species.eig: Electron eigenvalue (units unknown)
             N.B. For Cu, Au and Ag this defaults to d-orbital.
 
+        Species.shannon_radius: Shannon radius of Species.
+
+        Species.ionic_radius: Ionic radius of Species.
+
     Raises:
         NameError: Element not found in element.txt
         Warning: Element not found in Eigenvalues.csv
@@ -205,6 +209,14 @@ class Species(Element):
             for dataset in shannon_data:
                 if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
                     self.shannon_radius = dataset['crystal_radius'];
+
+        # Get ionic radius
+        self.ionic_radius = None;
+
+        if shannon_data:
+            for dataset in shannon_data:
+                if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
+                    self.ionic_radius = dataset['ionic_radius'];
 
         # Get SSE_2015 (revised) for the oxidation state.
 
