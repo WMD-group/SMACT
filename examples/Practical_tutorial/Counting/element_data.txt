@@ -1,0 +1,159 @@
+###############################################################################
+#                                                                             #
+#           element_data.txt -- This data file is part of SMACT               #
+#                                                                             #
+###############################################################################
+#                                                                             #
+# This table provides elemental properties which are accessed by the Element  #
+# class. For efficiency the contents are cached in memory the first time they #
+# are accessed by smact.data_loader.                                          #
+#                                                                             #
+# Symbol: Standard chemical symbol used as index throughout SMACT             #
+#                                                                             #
+# Name:   Standard chemical name of element                                   #
+#                                                                             #
+# Z:      Proton number                                                       #
+#                                                                             #
+# Mass:   Relative atomic mass in atomic mass units (i.e. 1/12 * mass of C-12)#
+#         Values obtained from NIST Standard Reference Database 144           #
+#         (J. S. Coursey, D. J. Schwab, J. J. Tsai, NIST Physical Measurement #
+#         Laboratory) in 2016. Where the relative abundance of isotopes is    #
+#         unknown or a range of values is provided, a simple mean was taken.  #
+#                                                                             #
+# r_cov:  Covalent radius in Angstroms                                        #
+#         Ref: Cordero et al. (2008) DOI:10.1039/B801115J                     #
+#                                                                             #
+# e_affinity: Electron affinity in eV. NIST-recommended values.               #
+#         Note that unspecified negative values (originally reported as '<0') #
+#         are listed as 'None' in this table. Electron affinities of elements #
+#         Fr (Z=87) and above are unknown, and also listed as 'None'.         #
+#         Ref: Andersen et al. (1999) DOI: 10.1063/1.556047                   #
+#                                                                             #
+# p_eig:  Highest occupied p-state eigenvalue in eV. Based on approximate     #
+#         Hartree-Fock calculations published by Herman & Skillman (1963);    #
+#         the relevant values were tabulated and converted to eV by Harrison  #
+#         (1980). Harrison's values are used here.                            #
+#                                                                             #
+# s_eig:  Highest occupied s-state eigenvalue in eV. The source is the same   #
+#         as for p_states.                                                    #
+#                                                                             #
+# Abundance: Crustal abundance in mg/kg.                                      #
+#         Ref: CRC Handbook of Chemistry and Physics, 92nd Ed. (2011)         #
+#                                                                             #
+# el_neg: Pauling electronegativity                                           #
+#         Ref: CRC Handbook of Chemistry and Physics, 92nd Ed. (2011)         #
+#         Elements 95 (Am) and above are assigned the value 1.3 as            #
+#         recommended by Pauling (The Nature of the Chemical Bond, 1939)      #
+#         The value of 3.0 for Krypton was computed by Allen and Huheey (1980)#
+#         from the bond energy of KrF2. DOI: 10.1016/0022-1902(80)80132-1     #
+#                                                                             #
+# ion_pot: Ionisation potential in eV.                                        #
+#         Ref: NIST Atomic Spectra Database, http://physics.nist.gov/asd      #
+#         [Accessed April 2016]                                               #
+#                                                                             #
+###############################################################################
+#
+#Symbol  Name         Z     Mass          r_cov  e_affinity   p_eig     s_eig  Abundance el_neg  ion_pot
+H        Hydrogen     1      1.0078250322 0.31   0.75420375    None      None  1.40e+03  2.20    13.598434005136
+He       Helium       2      4.0026020000 0.28   None          None    -23.40  8.00e-03  None    24.587387936
+Li       Lithium      3      6.9675000000 1.28   0.618049      None     -5.48  2.00e+01  0.98    5.391714761
+Be       Beryllium    4      9.0121831000 0.96   None         -4.14     -8.17  2.80e+00  1.57    9.322699
+B        Boron        5     10.8135000000 0.84   0.279723     -6.64    -12.54  1.00e+01  2.04    8.2980190
+C        Carbon       6     12.0106000000 0.76   1.262118     -8.97    -17.52  2.00e+02  2.55    11.260300
+N        Nitrogen     7     14.0068550000 0.71   -0.07       -11.47    -23.04  1.90e+01  3.04    14.53413
+O        Oxygen       8     15.9994000000 0.66   1.461112    -14.13    -29.14  4.61e+05  3.44    13.618054
+F        Fluorine     9     18.9984031630 0.57   3.4011887   -16.99    -35.80  5.85e+02  3.98    17.42282
+Ne       Neon         10    20.1797000000 0.58   None        -20.00    -43.20  5.00e-03  None    21.564540
+Na       Sodium       11    22.9897692800 1.66   0.547926      None     -5.13  2.36e+04  0.93    5.1390767
+Mg       Magnesium    12    24.3055000000 1.41   None         -2.99     -6.86  2.33e+04  1.31    7.646235
+Al       Aluminium    13    26.9815385000 1.21   0.43283      -4.86    -10.11  8.23e+04  1.61    5.985768
+Si       Silicon      14    28.0850000000 1.11   1.389521     -6.52    -13.55  2.82e+05  1.90    8.151683
+P        Phosphorus   15    30.9737619980 1.07   0.7465       -8.33    -17.10  1.05e+03  2.19    10.486686
+S        Sulfur       16    32.0675000000 1.05   2.0771029   -10.27    -20.80  3.50e+00  2.58    10.36001
+Cl       Chlorine     17    35.4515000000 1.02   3.612724    -12.31    -24.63  1.45e+02  3.16    12.96763
+Ar       Argon        18    39.9480000000 1.06   None        -14.50    -28.70  3.50e+00  None    15.7596112
+K        Potassium    19    39.0983000000 2.03   0.501459      None     -4.19  2.09e+04  0.82    4.34066354
+Ca       Calcium      20    40.0780000000 1.76   0.02455       None     -5.41  4.15e+04  1.00    6.11315520
+Sc       Scandium     21    44.9559080000 1.70   0.188         None     -5.85  2.20e+01  1.36    6.56149
+Ti       Titanium     22    47.8670000000 1.60   0.084         None      None  5.65e+03  1.54    6.82812
+V        Vanadium     23    50.9415000000 1.53   0.525         None      None  1.20e+02  1.63    6.746187
+Cr       Chromium     24    51.9961000000 1.39   0.67584       None      None  1.02e+02  1.66    6.76651
+Mn       Manganese    25    54.9380440000 1.39   None          None      None  9.50e+02  1.55    7.434038
+Fe       Iron         26    55.8450000000 1.32   0.151         None      None  5.63e+04  1.83    7.9024678
+Co       Cobalt       27    58.9331940000 1.26   0.6633        None      None  2.50e+01  1.88    7.88101
+Ni       Nickel       28    58.6934000000 1.24   1.15716       None      None  8.40e+01  1.91    7.639877
+Cu       Copper       29    63.5460000000 1.32   1.23578      -6.92     -6.92  6.00e+01  1.90    7.726380
+Zn       Zinc         30    65.3800000000 1.22   None         -3.38     -8.40  7.00e+01  1.65    9.3941968
+Ga       Gallium      31    69.7230000000 1.22   0.41         -4.90    -11.37  1.90e+01  1.81    5.9993018
+Ge       Germanium    32    72.6300000000 1.20   1.232712     -6.63    -14.38  1.50e+00  2.01    7.899435
+As       Arsenic      33    74.9215950000 1.19   0.814        -7.91    -17.33  1.80e+00  2.18    9.7886
+Se       Selenium     34    78.9710000000 1.20   2.02067      -9.53    -20.32  5.00e-02  2.55    9.752392
+Br       Bromine      35    79.9040000000 1.20   3.3635880   -11.20    -23.35  2.40e+00  2.96    11.81381
+Kr       Krypton      36    83.7980000000 1.16   None        -13.00    -26.50  1.00e-04  3.0     13.9996049
+Rb       Rubidium     37    85.4678000000 2.20   0.485916      None     -3.94  9.00e+01  0.82    4.177128
+Sr       Strontium    38    87.6200000000 1.95   0.05206       None     -5.00  3.70e+02  0.95    5.69486720
+Y        Yttrium      39    88.9058400000 1.90   0.307         None     -5.53  3.30e+01  1.22    6.21726
+Zr       Zirconium    40    91.2240000000 1.75   0.426         None      None  1.65e+02  0.33    6.63390
+Nb       Niobium      41    92.9063700000 1.64   0.893         None      None  2.20e+02  1.6     6.75885
+Mo       Molybdenum   42    95.9500000000 1.54   0.7472        None      None  1.20e+00  2.16    7.09243
+Tc       Technetium   43    98.0000000000 1.47   0.55          None      None      None  2.10    7.11938
+Ru       Ruthenium    44   101.0700000000 1.46   1.04638       None      None      None  2.2     7.36050
+Rh       Rhodium      45   102.9055000000 1.42   1.14289       None      None  1.00e-03  2.28    7.45890
+Pd       Palladium    46   106.4200000000 1.39   0.56214       None      None  1.50e-02  2.20    8.33686
+Ag       Silver       47   107.8682000000 1.45   1.30447      -2.05     -6.41  7.50e-02  1.93    7.576234
+Cd       Cadmium      48   112.4140000000 1.44   None         -3.38     -7.70  1.50e-01  1.69    8.993820
+In       Indium       49   114.8180000000 1.42   0.404        -4.69    -10.12  2.50e-01  1.78    5.7863554
+Sn       Tin          50   118.7100000000 1.39   1.112066     -5.94    -12.50  2.30e+00  1.96    7.343917
+Sb       Antimony     51   121.7600000000 1.39   1.047401     -7.24    -14.80  2.00e-01  2.05    8.608389
+Te       Tellurium    52   127.6000000000 1.38   1.970875     -8.59    -17.11  1.00e-03  2.1     9.00966
+I        Iodine       53   126.9044700000 1.39   3.059038     -9.97    -19.42  4.50e-01  2.66    10.45126
+Xe       Xenon        54   131.2930000000 1.40   None        -11.40    -21.80  3.00e-05  2.60    12.1298431
+Cs       Caesium      55   132.9054519600 2.44   0.471626      None     -3.56  3.00e+00  0.79    3.893905548
+Ba       Barium       56   137.3270000000 2.15   0.14462       None     -4.45  4.25e+02  0.89    5.211664
+La       Lanthanum    57   138.9054700000 2.07   0.47          None     -4.86  3.90e+01  1.10    5.5769
+Ce       Cerium       58   140.1160000000 2.04   0.5           None      None  6.65e+01  1.12    5.5386
+Pr       Praseodymium 59   140.9076600000 2.03   0.5           None      None  9.20e+00  1.13    5.473
+Nd       Neodymium    60   144.2420000000 2.01   0.5           None      None  4.15e+01  1.14    5.5250
+Pm       Promethium   61   145.0000000000 1.99   0.5           None      None      None  None    5.582
+Sm       Samarium     62   150.3600000000 1.98   0.5           None      None  7.05e+00  1.17    5.64371
+Eu       Europium     63   151.9640000000 1.98   0.5           None      None  2.00e+00  None    5.67040385
+Gd       Gadolinium   64   157.2500000000 1.96   0.5           None      None  6.20e+00  1.20    6.14980
+Tb       Terbium      65   158.9253500000 1.94   0.5           None      None  1.20e+00  None    5.8638
+Dy       Dysprosium   66   162.5000000000 1.92   0.5           None      None  5.20e+00  1.22    5.938905
+Ho       Holmium      67   164.9303300000 1.92   0.5           None      None  1.30e+00  1.23    6.0215
+Er       Erbium       68   167.2590000000 1.89   0.5           None      None  3.50e+00  1.24    6.1077
+Tm       Thulium      69   168.9342200000 1.90   0.5           None      None  5.20e-01  1.25    6.18431
+Yb       Ytterbium    70   173.0540000000 1.87   0.5           None      None  3.20e+00  None    6.254159
+Lu       Lutetium     71   174.9668000000 1.87   0.5           None      None  8.00e+01  1.0     5.425871
+Hf       Hafnium      72   178.4900000000 1.75   0             None      None  3.00e+00  1.3     6.825069
+Ta       Tantalum     73   180.9478800000 1.70   0.322         None      None  2.00e+00  1.5     7.549571
+W        Tungsten     74   183.8400000000 1.62   0.815         None      None  1.25e+00  1.7     7.86403
+Re       Rhenium      75   186.2070000000 1.51   0.15          None      None  7.00e-04  1.9     7.83352
+Os       Osmium       76   190.2300000000 1.44   1.0778        None      None  1.50e-03  2.2     8.43823
+Ir       Iridium      77   192.2170000000 1.41   1.56436       None      None  1.00e-03  2.2     8.96702
+Pt       Platinum     78   195.0840000000 1.36   2.1251        None      None  5.00e-03  2.2     8.95883
+Au       Gold         79   196.9665690000 1.36   2.30861      -2.38     -6.48  4.00e-03  2.4     9.225553
+Hg       Mercury      80   200.5920000000 1.32   None         -3.48     -7.68  8.50e-02  1.9     10.437504
+Tl       Thallium     81   204.3835000000 1.45   0.377        -4.61     -9.92  8.50e-01  1.8     6.1082871
+Pb       Lead         82   207.2000000000 1.46   0.364        -5.77    -12.07  1.40e+01  1.8     7.416796
+Bi       Bismuth      83   208.9804000000 1.48   0.942363     -6.97    -14.15  8.50e-03  1.9     7.285516
+Po       Polonium     84   209.0000000000 1.40   1.9          -8.19    -16.21  2.00e-10  2.0     8.414
+At       Astatine     85   210.0000000000 1.50   2.8          -9.44    -18.24      None  2.2     9.31751
+Rn       Radon        86   222.0000000000 1.50   None          None    -20.31      None  None    10.74850
+Fr       Francium     87   223.0000000000 2.60   None          None     -3.40      None  0.7     4.0727409
+Ra       Radium       88   226.0000000000 2.21   None          None     -4.24  9.00e-07  0.9     5.278424
+Ac       Actinium     89   227.0000000000 2.15   None          None     -4.63  5.50e-10  1.1     5.380226
+Th       Thorium      90   232.0377000000 2.06   None        -10.71      None  9.60e+00  1.3     6.3067
+Pa       Protactinium 91   231.0358800000 2.00   None          None      None  1.40e-06  1.5     5.89
+U        Uranium      92   238.0289100000 1.96   None          None      None  2.70e+00  1.7     6.19405
+Np       Neptunium    93   237.0000000000 1.90   None          None      None      None  1.3     6.2655
+Pu       Plutonium    94   244.0000000000 1.87   None          None      None      None  1.3     6.0258
+Am       Americium    95   242.0591053000 1.80   None          None      None      None  1.3     5.9738
+Cm       Curium       96   245.0654423000 1.69   None          None      None      None  1.3     5.9914
+Bk       Berkelium    97   248.0726475000 None   None          None      None      None  1.3     6.1978
+Cf       Californium  98   250.5781189750 None   None          None      None      None  1.3     6.2817
+Es       Einsteinium  99   252.0829800000 None   None          None      None      None  1.3     6.3676
+Fm       Fermium      100  257.0951061000 None   None          None      None      None  1.3     6.50
+Md       Mendelevium  101  259.1010400000 None   None          None      None      None  1.3     6.58
+No       Nobelium     102  259.1010300000 None   None          None      None      None  1.3     6.65
+Lr       Lawrencium   103  262.1096100000 None   None          None      None      None  None    4.96

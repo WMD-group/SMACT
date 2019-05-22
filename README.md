@@ -12,7 +12,6 @@ SMACT
 
 - **Documentation:** https://smact.readthedocs.io/en/latest/
 - **Examples folder:** https://github.com/WMD-group/SMACT/tree/master/examples
-- **Full screening workflows examples:** https://github.com/WMD-group/SMACT_workflows
 
 ![](SMACT.png)
 
@@ -20,7 +19,9 @@ SMACT
 
 Statement of need
 --------
-The purpose of SMACT is to facilitate the high-throughput screening and design of functional materials. It follows a top-down approach where a set of element combinations is generated and then screened using rapid chemical filters. It can be used as part of a multi-technique workflow or to feed machine learning models for materials.
+There is a strong demand for functional materials across a wide range of technologies. The motivation can include cost reduction, performance enhancement, or to enable a new application. Data collections such as the [Materials Project](https://www.materialsproject.org), [NREL Materials Database](http://materials.nrel.gov) and the [Open Quantum Materials Database](http://oqmd.org) are valuable resources, but they largely cover the properties of *known* compounds as calculated using high-level quantum mechanical theories.
+
+We have developed low-cost procedures for screening hypothetical materials in SMACT. This framework can be used for simple calculations on your own computer. SMACT follows a top-down approach where a set of element combinations is generated and then screened using rapid chemical filters. It can be used as part of a multi-technique workflow or to feed machine learning models for materials.
 
 
 ![](smact_simple.gif)
@@ -31,8 +32,7 @@ Getting started
 
 SMACT's features are accessed through Python scripts, importing classes and functions as needed.
 The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be used.
-Extended examples are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples) and the [SMACT workflow respository](https://github.com/WMD-group/SMACT_workflows) contains scripts that have been used in published work. 
-
+Extended examples are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples).
 Code features
 --------
 - At the core of SMACT are [Element](https://smact.readthedocs.io/en/latest/smact.html#smact.Element) and [Species](https://smact.readthedocs.io/en/latest/smact.html#smact.Species) (element in a given oxidation state) classes that have various properties associated with them. 
