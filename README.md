@@ -33,6 +33,7 @@ Getting started
 SMACT's features are accessed through Python scripts, importing classes and functions as needed.
 The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be used.
 Extended examples are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples).
+
 Code features
 --------
 - At the core of SMACT are [Element](https://smact.readthedocs.io/en/latest/smact.html#smact.Element) and [Species](https://smact.readthedocs.io/en/latest/smact.html#smact.Species) (element in a given oxidation state) classes that have various properties associated with them. 
