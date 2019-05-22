@@ -10,7 +10,7 @@ SMACT
 
 **Semiconducting Materials from Analogy and Chemical Theory** (SMACT) is a collection of rapid screening tools that uses data about chemical elements.
 
-- **Documentation:** https://readthedocs.org/projects/smact/
+- **Documentation:** https://smact.readthedocs.io/en/latest/
 - **Examples folder:** https://github.com/WMD-group/SMACT/tree/master/examples
 - **Full screening workflows examples:** https://github.com/WMD-group/SMACT_workflows
 
@@ -25,17 +25,34 @@ The purpose of SMACT is to facilitate the high-throughput screening and design o
 
 ![](smact_simple.gif)
 
+
+Getting started
+-----
+
+SMACT's features are accessed through Python scripts, importing classes and functions as needed.
+The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be used.
+Extended examples are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples) and the [SMACT workflow respository](https://github.com/WMD-group/SMACT_workflows) contains scripts that have been used in published work. 
+
 Code features
 --------
-- At the core of SMACT is it's ability to generate element compositions and screen through them based on heuristic filters. This is mainly handled using the [screening module]() and [this publication]() describes the underlying theory. An example procedure is [outlined in the docs]() and further examples can be found in the [counting examples subfolder]().
+- At the core of SMACT are [Element](https://smact.readthedocs.io/en/latest/smact.html#smact.Element) and [Species](https://smact.readthedocs.io/en/latest/smact.html#smact.Species) (element in a given oxidation state) classes that have various properties associated with them. 
 
-- More specific filters can be applied to generated lists of compositions in order to screen for particular properties. These properties are calculated using the [properties module](). An example use case is shown in [this publication](), in which 160,000 chemical compositions are screened based on optical band gap calculated using the [solid-state energy scale]().
+- The various oxidation states that are accessible to each element are included in their properties.
 
-- Other properties that can be filtered on include sustainability via crustal abundance or the [HHI]()...
+- Element compositions can be screened through based on the heuristic filters of charge neutrality and electronegativity order. This is handled using the [screening module](https://smact.readthedocs.io/en/latest/smact.screening.html) and [this publication](https://www.cell.com/chem/fulltext/S2451-9294(16)30155-3) describes the underlying theory. An example procedure is [outlined in the docs](https://smact.readthedocs.io/en/latest/examples.html#neutral-combinations) and further examples can be found in the [counting examples subfolder](https://github.com/WMD-group/SMACT/tree/master/examples/Counting).
 
-- Compositions can easily be converted for use in Pymatgen ([example]()) or for representation to machine learning algorithms ([example]()). 
+- Further filters can be applied to generated lists of compositions in order to screen for particular properties. These properties are either intrinsic properties of elements or are calculated for compositions using the [properties module](https://smact.readthedocs.io/en/latest/smact.properties.html). For example: 
+  - A use case is shown in [this publication](https://pubs.rsc.org/en/content/articlehtml/2018/sc/c7sc03961a), in which 160,000 chemical compositions are screened based on optical band gap calculated using the [solid-state energy scale](https://www.sciencedirect.com/science/article/pii/S0022459615300888).
+  - The [oxidation_states module](https://smact.readthedocs.io/en/latest/smact.oxidation_states.html) can be used to filter out compositions containing metals in unlikely oxidation states according to [a data-driven model](https://pubs.rsc.org/en/content/articlelanding/2018/fd/c8fd00032h#!divAbstract).
 
-- The code also has some tools for manipulating common crystal lattice types...
+- Compositions can also be filtered based on sustainability via crustal abundance or the [HHI scale](https://pubs.acs.org/doi/10.1021/cm400893e). 
+
+- Compositions can easily be converted for use in Pymatgen or for representation to machine learning algorithms ([see "next steps" in this example](https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb)).
+
+- The code also has some tools for manipulating common crystal lattice types: 
+ - Common crystal structure types can be built using the [builder module](https://smact.readthedocs.io/en/latest/smact.builder.html)
+ - Lattice parameters can be quickly estimated using ionic radii of the elements for various common crystal structure types using the [lattice_parameters module](https://smact.readthedocs.io/en/latest/smact.lattice_parameters.html).
+ - The [lattice module](https://smact.readthedocs.io/en/latest/smact.lattice.html) and [distorter module](https://smact.readthedocs.io/en/latest/smact.distorter.html) rely on the [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase/) and can be used to generate unique atomic substitutions on a given crystal structure.  
 
 List of modules
 -------
@@ -83,12 +100,6 @@ To clone the project from Github and make a local installation:
 With -e pip will create links to the source folder so that that changes
 to the code will be immediately reflected on the PATH.
 
-Usage
------
-
-SMACT's features are accessed through Python scripts, importing classes and functions as needed.
-The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be used.
-Extended examples are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples) and the [SMACT workflow respository](https://github.com/WMD-group/SMACT_workflows) contains scripts that have been used in published work. 
 
 License and attribution
 -----------------------
