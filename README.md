@@ -10,6 +10,10 @@ SMACT
 
 **Semiconducting Materials from Analogy and Chemical Theory** (SMACT) is a collection of rapid screening tools that uses data about chemical elements.
 
+- **Documentation:** https://readthedocs.org/projects/smact/
+- **Examples screening workflows:** https://github.com/WMD-group/SMACT_workflows
+
+
 ![](SMACT.png)
 
 *If you torture the data enough, nature will always confess* - Roland Coase (from 'How should economists choose?')
@@ -17,6 +21,8 @@ SMACT
 Statement of need
 --------
 The purpose of SMACT is to facilitate the high-throughput screening and design of functional materials. It follows a top-down approach where a set of element combinations is generated and then screened using rapid chemical filters. It can be used as part of a multi-technique workflow or to feed machine learning models for materials.
+
+
 
 ![](smact_simple.gif)
 
@@ -70,7 +76,8 @@ Usage
 -----
 
 SMACT's features are accessed through Python scripts, importing classes and functions as needed.
-Some applications are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples), as well as in the [SMACT workflow respository](https://github.com/WMD-group/SMACT_workflows).
+The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be used.
+Extended examples are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples) and the [SMACT workflow respository](https://github.com/WMD-group/SMACT_workflows) contains scripts that have been used in published work. 
 
 License and attribution
 -----------------------
