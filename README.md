@@ -11,8 +11,8 @@ SMACT
 **Semiconducting Materials from Analogy and Chemical Theory** (SMACT) is a collection of rapid screening tools that uses data about chemical elements.
 
 - **Documentation:** https://readthedocs.org/projects/smact/
-- **Examples screening workflows:** https://github.com/WMD-group/SMACT_workflows
-
+- **Examples folder:** https://github.com/WMD-group/SMACT/tree/master/examples
+- **Full screening workflows examples:** https://github.com/WMD-group/SMACT_workflows
 
 ![](SMACT.png)
 
@@ -23,11 +23,22 @@ Statement of need
 The purpose of SMACT is to facilitate the high-throughput screening and design of functional materials. It follows a top-down approach where a set of element combinations is generated and then screened using rapid chemical filters. It can be used as part of a multi-technique workflow or to feed machine learning models for materials.
 
 
-
 ![](smact_simple.gif)
 
-Contents
+Code features
 --------
+- At the core of SMACT is it's ability to generate element compositions and screen through them based on heuristic filters. This is mainly handled using the [screening module]() and [this publication]() describes the underlying theory. An example procedure is [outlined in the docs]() and further examples can be found in the [counting examples subfolder]().
+
+- More specific filters can be applied to generated lists of compositions in order to screen for particular properties. These properties are calculated using the [properties module](). An example use case is shown in [this publication](), in which 160,000 chemical compositions are screened based on optical band gap calculated using the [solid-state energy scale]().
+
+- Other properties that can be filtered on include sustainability via crustal abundance or the [HHI]()...
+
+- Compositions can easily be converted for use in Pymatgen ([example]()) or for representation to machine learning algorithms ([example]()). 
+
+- The code also has some tools for manipulating common crystal lattice types...
+
+List of modules
+-------
 
 * **smact** library containing:
   * **\_\_init\_\_.py** Contains the core `Element` and `Species` classes.
