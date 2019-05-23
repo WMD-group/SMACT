@@ -189,14 +189,14 @@ class TestSequenceFunctions(unittest.TestCase):
             [Pb, O], [1, 2]), PbO2_ml
             )
 
-    def test_smact_test(self):
+    def test_smact_filter(self):
         Na, Fe, Cl = (smact.Element(label) for label in ('Na', 'Fe', 'Cl'))
-        self.assertEqual(smact.screening.smact_test(
+        self.assertEqual(smact.screening.smact_filter(
             [Na, Fe, Cl], threshold=2),
             [(('Na', 'Fe', 'Cl'), (1, -1, -1), (2, 1, 1)),
             (('Na', 'Fe', 'Cl'), (1, 1, -1), (1, 1, 2))]
             )
-        self.assertEqual(len(smact.screening.smact_test(
+        self.assertEqual(len(smact.screening.smact_filter(
             [Na, Fe, Cl], threshold=8)), 77
             )
 

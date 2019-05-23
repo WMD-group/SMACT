@@ -22,7 +22,7 @@ These examples also explore the generation of compositional spaces:
 
 - **Generate\_compositions\_lists.ipynb:** A walkthrough of how to use SMACT to generate a list
 of allowed compositions from a chosen search-space of elements. It shows how to choose the elements 
-you are interested in, and how to apply the standard smact_test with a certain stoichiometry threshold (see [docs here](https://smact.readthedocs.io/en/latest/examples.html#neutral-combinations) for more info).
+you are interested in, and how to apply the standard smact_filter with a certain stoichiometry threshold (see [docs here](https://smact.readthedocs.io/en/latest/examples.html#neutral-combinations) for more info).
 It also shows you how to interface the output to [Pymatgen](http://pymatgen.org/) or [Pandas](https://pandas.pydata.org/). 
 
 - **Raw_combinations.ipynb:** Does not use SMACT, but uses itertools to calculate the raw number of possible 
@@ -53,7 +53,7 @@ These rules allow us to estimate whether or not a perovskite structure is likely
 We also apply the standard charge neutrality and electronegativity tests as described [in the docs](https://smact.readthedocs.io/en/latest/examples.html#neutral-combinations).
 
 ### Solar oxides
-Generates a set of quaternary oxide compositions using a modified `smact_test` function and then turns the results into a dataframe with features that can be read by a machine learning algorithm. 
+Generates a set of quaternary oxide compositions using a modified `smact_filter` function and then turns the results into a dataframe with features that can be read by a machine learning algorithm. 
 
 ### Simple wrappers
 

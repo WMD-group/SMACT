@@ -93,11 +93,11 @@ combinations. This is a straightforward combinatorial problem of comparing oxida
 
 :math:`\Sigma_i Q_in_i = 0`
 
-where :math:`i` are the elements in the compound and :math:`Q` are the charges. We have a special function, ``smact_test``,
-which does this checking for a list of elements. The ``smact_test`` also ensures that all elements specified to be anions
+where :math:`i` are the elements in the compound and :math:`Q` are the charges. We have a special function, ``smact_filter``,
+which does this checking for a list of elements. The ``smact_filter`` also ensures that all elements specified to be anions
 have electronegitivities greater than all elements specified to be cations.
 
-As input ``smact_test`` takes:
+As input ``smact_filter`` takes:
 
 * ``els`` : a tuple of the elements to search over (required)
 * ``threshold``: the upper limit of the stoichiometric ratios (default = 8)
@@ -114,7 +114,7 @@ We can look for neutral combos.
     # We just want the element items from the dictionary
     eles = [e[1] for e in space.items()]
     # We set a threshold for the stoichiometry of 4
-    allowed_combinations = smact.screening.smact_test(eles, threshold=4)
+    allowed_combinations = smact.screening.smact_filter(eles, threshold=4)
     print(allowed_combinations)
 
     [(('Ti', 'Al', 'O'), (1, 3, 3)),
