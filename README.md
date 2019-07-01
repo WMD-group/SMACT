@@ -47,7 +47,7 @@ Code features
   - A use case is shown in [this publication](https://pubs.rsc.org/en/content/articlehtml/2018/sc/c7sc03961a), in which 160,000 chemical compositions are screened based on optical band gap calculated using the [solid-state energy scale](https://www.sciencedirect.com/science/article/pii/S0022459615300888).
   - The [oxidation_states module](https://smact.readthedocs.io/en/latest/smact.oxidation_states.html) can be used to filter out compositions containing metals in unlikely oxidation states according to [a data-driven model](https://pubs.rsc.org/en/content/articlelanding/2018/fd/c8fd00032h#!divAbstract).
 
-- Compositions can also be filtered based on sustainability via crustal abundance or the [HHI scale](https://pubs.acs.org/doi/10.1021/cm400893e). 
+- Compositions can also be filtered based on sustainability via crystal abundance or the [HHI scale](https://pubs.acs.org/doi/10.1021/cm400893e). 
 
 - Compositions can easily be converted for use in Pymatgen or for representation to machine learning algorithms ([see "next steps" in this example](https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb)).
 
