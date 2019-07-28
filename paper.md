@@ -1,0 +1,66 @@
+---
+title: 'SMACT: Semiconducting Materials by Analogy and Chemical Theory'
+tags:
+  - Python
+  - materials design
+  - chemical heuristics
+  - high-throughput screening
+authors:
+  - name: Daniel W. Davies
+    orcid: 0000-0003-4094-5992
+    affiliation: 1
+  - name: Keith T. Butler
+    orcid: 0000-0001-5432-5597
+    affiliation: 2
+  - name: Adam J. Jackson
+    orcid: 0000-0001-5272-6530
+    affiliation: 3
+  - name: Jonathan M. Skelton
+    orcid: 0000-0002-0395-1202
+    affiliation: 4
+  - name: Kazuki Morita
+    orcid: 0000-0002-2558-6963
+    affiliation: "1"
+  - name: Aron Walsh
+    orcid: 0000-0001-5460-7033
+    affiliation: "1, 5"
+affiliations:
+  - name: Department of Materials, Imperial College London, London, UK
+    index: 1
+  - name: SciML, STFC Scientific Computing Division, Rutherford Appleton Laboratories, UK
+    index: 2
+  - name: Department of Chemistry, University College London, London, UK
+    index: 3
+  - name: School of Chemistry, University of Manchester, Manchester, UK
+    index: 4
+  - name: Department of Materials Science and Engineering, Yonsei University, Seoul, Korea
+    index: 5
+date: 01 March 2019
+bibliography: paper.bib
+---
+
+The paradigm of data-driven science is revolutionising the materials discovery process. There are now many databases containing experimental and calculated materials properties and extensive codes available for applying data mining, machine learning, and other statistical approaches (a well-maintained list is available on [github.com/tilde-lab/awesome-materials-informatics](https://github.com/tilde-lab/awesome-materials-informatics)). While we use these tools to push forward in the quest to learn as much as we can from existing materials, it is becoming clear that the search space for new materials remains relatively uncharted.
+
+The discovery of new chemical compounds (combinations of elements arranged in a particular way in space) underpins materials discovery. The `smact` Python library is designed to facilitate a top-down approach where sets of element combinations are generated then screened using chemical filters. It is possible to screen for candidates that make "chemical sense" according to the well-established principles of electron valence and charge neutrality. The methodology is inspired by the seminal work of Goodman and Pamplin who carried out similar procedures by hand, predicting the existence of new semiconductors by analogy with existing compounds [@pamplin1964; @goodman1958].
+
+Once a set of compositions is generated, further functions built into `smact` can be used to filter for candidates with target properties using data-driven models. These functions can predict key electronic structure properties such as the optical band gap using the solid-state energy scale [@pelatt2011], evaluate sustainability metrics using the Herfidahl-Hirschman Index of resource availability [@gaultois2013], and predict stability using a statistical oxidation states model [@davies2018].
+
+**Core components:** The element and species classes are at the heart of `smact`. Elements are elements of the periodic table. Species are elements in a particular oxidation state and (optionally) coordination environment. These classes provide access to tabulated data and the properties of these objects are leveraged by the screening functions. For example, atomic radii can be used in the application of radius-ratio rules [@goldschmidt1929] and electronegativities can be used to estimate electronic properties [@nethercot1974]. In a typical workflow, screening functions are applied to lists of elements or species sets. While other chemistry toolkits such as `OpenBabel` [@oboyle2011], the Atomic Simulation Environment (`ASE`) [@ase-paper] and `Pymatgen` [@ong2013] can also be used to access tabulated element data, `smact` is distinctive in that it primarily deals with chemical composition and associated properties, as opposed to molecular or crystal structure.
+
+**High-throughput workflows:** The number of possible element combinations is enormous, exceeding $4\times10^{12}$ for four-component compounds [@davies_computational_2016]. For this reason, functions from `smact` can be applied at low computational cost to facilitate the screening of vast areas of chemical space rapidly on a desktop computer.  This is made possible by (i) a `data_loader` module which implements a data-caching system to avoid a large amount of I/O and (ii) using Python's built-in `multiprocessing` library, as shown in the [example workflows](https://github.com/WMD-group/SMACT/tree/master/examples).
+
+**Interfacing to machine learning:** Materials design is begining to benefit from the development of powerful machine learning techniques, with many supervised learning models being built to predict important properties [@butler2018]. The `smact` library can provide a large, unseen chemical space to which trained models can be applied. The compositions generated by `smact` can be featurised using the `matminer` Python library [@ward2018] or converted to objects used in `Pymatgen`.
+
+# Author contributions
+
+[DWD](https://github.com/dandavies99), [AJJ](https://github.com/ajjackson) and [KTB](https://github.com/keeeto) contributed equally to the primary code base of the `smact` package and, along with [AW](https://wmd-group.github.io/), made the majority of decisions about which features should be available and how they should be implemented. [JMS](https://github.com/jmskelton) improved the code performance by implementing the `data_loader` module. [KM](https://github.com/KazMorita) implemented atomic polarizability and associated tests. The first draft of this manuscript was written by DWD with input from all co-authours.
+
+# Acknowledgements
+
+The development of this code has benefited through discussions with and contributions from many members of the Walsh research group including
+Andrew Morris,
+Timothy Gaunlett,
+Jarvist M. Frost,
+Suzanne K. Wallace.
+
+# References

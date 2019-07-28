@@ -1,23 +1,39 @@
+###############################################################################
+# Copyright Daniel Davies, Adam J. Jackson, Keith T. Butler (2016)            #
+#                                                                             #
+# This file is part of SMACT: properties.py is free software: you can         #
+# redistribute it and/or modify it under the terms of the GNU General Public  #
+# License as published by the Free Software Foundation, either version 3 of   #
+# the License, or (at your option) any later version.  This program is        #
+# distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;   #
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A       #
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.   #
+# You should have received a copy of the GNU General Public License along     #
+# with this program.  If not, see <http://www.gnu.org/licenses/>.             #
+#                                                                             #
+###############################################################################
+
 from builtins import zip
 from itertools import combinations
-from smact import Element
+from smact import Element, neutral_ratios
+import itertools
 
 def pauling_test(oxidation_states, electronegativities,
                  symbols=[], repeat_anions=True,
                  repeat_cations=True, threshold=0.):
     """ Check if a combination of ions makes chemical sense,
-        (i.e. positive ions should be of lower electronegativity)
+        (i.e. positive ions should be of lower electronegativity).
 
     Args:
-        ox (list):  oxidation states of the compound
+        ox (list):  oxidation states of elements in the compound
         paul (list): the corresponding  Pauling electronegativities
             of the elements in the compound
-        symbols (list) :  chemical symbols of each site.
+        symbols (list) :  chemical symbols of each site
         threshold (float): a tolerance for the allowed deviation from
             the Pauling criterion
         repeat_anions : boolean, allow an anion to repeat in different
-            oxidation states in the same compound.
-        repeat_cations : as above, but for cations.
+            oxidation states in the same compound
+        repeat_cations : as above, but for cations
 
     Returns:
         bool:
@@ -85,9 +101,11 @@ def _no_repeats(oxidation_states, symbols,
 
 
 def pauling_test_old(ox, paul, symbols, repeat_anions=True,
-                     repeat_cations=True, threshold=0.5):
+                     repeat_cations=True, threshold=0.):
     """ Check if a combination of ions makes chemical sense,
-        (i.e. positive ions should be of lower Pauling electronegativity)
+    (i.e. positive ions should be of lower Pauling electronegativity).
+    This function should give the same results as pauling_test but is
+    not optimised for speed.
 
     Args:
         ox (list):  oxidation states of the compound
@@ -101,7 +119,7 @@ def pauling_test_old(ox, paul, symbols, repeat_anions=True,
         repeat_cations : as above, but for cations.
 
     Returns:
-        makes_sense (bool):
+        (bool):
             True if positive ions have lower
             electronegativity than negative ions
 
@@ -234,38 +252,8 @@ def eneg_states_test_alternate(ox_states, enegs):
     return min_cation_eneg > max_anion_eneg
 
 def ml_rep_generator(composition, stoichs=None):
-    """Function to take a composition of Elements and returns a 
-    list of values between 0 and 1 that describe the composition,
-    useful for machine learning. 
-    
-    The list is of length 103 as there are 103 elements
-    considered in total in SMACT.
-
-    e.g. Li2O --> [0, 0, 2/3, 0, 0, 0, 0, 1/3, 0 ....]
-
-    Inspired by a method in Legrain et al.: https://arxiv.org/abs/1703.02309 
-    
-    Args:
-        composition (list): Element objects in composition
-        stoichs (list): Corresponding stoichiometries in the composition
-
-    Returns:
-        norm (list): List of floats representing the composition that sum
-            to one
-        
-    """
-    if stoichs == None:
-        stoichs = [1 for i, el in enumerate(composition)]
-    
-    ML_rep = [0 for i in range(1,103)]
-    for element, stoich in zip(composition, stoichs):
-        ML_rep[int(element.number)-1] += stoich
-    norm = [float(i)/sum(ML_rep) for i in ML_rep]
-    return norm
-
-def ml_rep_generator_symbols(composition, stoichs=None):
-    """Function to take a composition of Element symbols and returns a
-    list of values between 0 and 1 that describe the composition,
+    """Function to take a composition of Elements and return a
+    list of values between 0 and 1 that describes the composition,
     useful for machine learning.
 
     The list is of length 103 as there are 103 elements
@@ -273,10 +261,10 @@ def ml_rep_generator_symbols(composition, stoichs=None):
 
     e.g. Li2O --> [0, 0, 2/3, 0, 0, 0, 0, 1/3, 0 ....]
 
-    Inspired by a method in Legrain et al.: https://arxiv.org/abs/1703.02309
+    Inspired by the representation used by Legrain et al. DOI: 10.1021/acs.chemmater.7b00789
 
     Args:
-        composition (list): Element objects in composition
+        composition (list): Element objects in composition OR symbols of elements in composition
         stoichs (list): Corresponding stoichiometries in the composition
 
     Returns:
@@ -288,8 +276,52 @@ def ml_rep_generator_symbols(composition, stoichs=None):
         stoichs = [1 for i, el in enumerate(composition)]
 
     ML_rep = [0 for i in range(1,103)]
-    for element, stoich in zip(composition, stoichs):
-        ML_rep[int(Element(element).number)-1] += stoich
+    if type(composition[0]) == Element:
+        for element, stoich in zip(composition, stoichs):
+            ML_rep[int(element.number)-1] += stoich
+    else:
+        for element, stoich in zip(composition, stoichs):
+            ML_rep[int(Element(element).number)-1] += stoich
+
     norm = [float(i)/sum(ML_rep) for i in ML_rep]
     return norm
 
+def smact_filter(els, threshold=8, species_unique=True):
+    """Function that applies the charge neutrality and electronegativity
+    tests in one go for simple application in external scripts that
+    wish to apply the general 'smact test'.
+
+    Args:
+        els (tuple/list): A list of smact.Element objects
+        threshold (int): Threshold for stoichiometry limit, default = 8
+        species_unique (bool): Whether or not to consider elements in different
+        oxidation states as unique in the results.
+    Returns:
+        allowed_comps (list): Allowed compositions for that chemical system
+        in the form [(elements), (oxidation states), (ratios)] if species_unique=True
+        or in the form [(elements), (ratios)] if species_unique=False.
+    """
+    compositions = []
+
+    # Get symbols and electronegativities
+    symbols = tuple(e.symbol for e in els)
+    electronegs = [e.pauling_eneg for e in els]
+    ox_combos = [e.oxidation_states for e in els]
+    for ox_states in itertools.product(*ox_combos):
+        # Test for charge balance
+        cn_e, cn_r = neutral_ratios(ox_states, threshold=threshold)
+        # Electronegativity test
+        if cn_e:
+            electroneg_OK = pauling_test(ox_states, electronegs)
+            if electroneg_OK:
+                for ratio in cn_r:
+                    compositions.append(tuple([symbols,ox_states,ratio]))
+
+    # Return list depending on whether we are interested in unique species combinations
+    # or just unique element combinations.
+    if species_unique:
+        return(compositions)
+    else:
+        compositions = [(i[0], i[2]) for i in compositions]
+        compositions = list(set(compositions))
+        return compositions

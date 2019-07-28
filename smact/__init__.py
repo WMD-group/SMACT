@@ -29,7 +29,7 @@ data_directory = path.join(module_directory, 'data')
 import itertools
 
 
-from fractions import gcd
+from math import gcd
 from operator import mul as multiply
 
 from smact import data_loader
@@ -44,35 +44,45 @@ class Element(object):
     "Species" class.
 
     Attributes:
-        Element.symbol (string): Elemental symbol used to retrieve data
+        Element.symbol (string) : Elemental symbol used to retrieve data
 
-        Element.name (string): Full name of element
+        Element.name (string) : Full name of element
 
-        Element.number (int): Proton number of element
+        Element.number (int) : Proton number of element
 
-        Element.pauling_eneg (float): Pauling electronegativity (0.0 if unknown)
+        Element.pauling_eneg (float) : Pauling electronegativity (0.0 if unknown)
 
-        Element.ionpot (float): Ionisation potential in eV (0.0 if unknown)
+        Element.ionpot (float) : Ionisation potential in eV (0.0 if unknown)
 
-        Element.e_affinity (float): Electron affinity in eV (0.0 if unknown)
+        Element.e_affinity (float) : Electron affinity in eV (0.0 if unknown)
 
-        Element.eig (float): Electron eigenvalue (units unknown). N.B. For Cu, Au and Ag this defaults to d-orbital.
+        Element.dipol (float) : Static dipole polarizability in 1.6488e-41 C m^2 / V  (0.0 if unknown)
 
-        Element.eig_s (float): Eigenvalue of s-orbital
+        Element.eig (float) : Electron eigenvalue (units unknown) N.B. For Cu, Au and Ag this defaults to d-orbital
 
-        Element.crustal_abundance (float): crustal abundance in the earths crust mg/kg taken from CRC
-
-        Element.coord_envs (list): The allowed coordination enviroments for the ion.
-
-        Element.mass (float) : Molar mass of the element.
-
-        Element.HHI_p (float) : Herfindahl-Hirschman Index for elemental production
-
-        Element.HHI_R (float) : Hirfindahl-Hirschman Index for elemental reserves
+        Element.eig_s (float) : Eigenvalue of s-orbital
 
         Element.SSE (float) : Solid State Energy
 
         Element.SSEPauling (float) : SSE based on regression fit with Pauling electronegativity
+
+        Element.oxidation_states (list) : Default list of allowed oxidation states for use in SMACT
+
+        Element.oxidation_states_sp (list) : List of oxdation states recognised by the Pymatgen Structure Predictor
+
+        Element.oxidation_states_icsd (list) : List of oxidation states that appear in the ICSD
+
+        Element.coord_envs (list): The allowed coordination enviroments for the ion
+
+        Element.covalent_radius (float) : Covalent radius of the element
+
+        Element.mass (float) : Molar mass of the element
+
+        Element.crustal_abundance (float) : Crustal abundance in the earths crust mg/kg taken from CRC
+
+        Element.HHI_p (float) : Herfindahl-Hirschman Index for elemental production
+
+        Element.HHI_r (float) : Hirfindahl-Hirschman Index for elemental reserves
 
     Raises:
         NameError: Element not found in element.txt
@@ -126,13 +136,18 @@ class Element(object):
             ('eig', dataset['p_eig']),
             ('eig_s', dataset['s_eig']),
             ('HHI_p', HHI_scores[0]),
-            ('HHI_R', HHI_scores[1]),
+            ('HHI_r', HHI_scores[1]),
             ('ionpot', dataset['ion_pot']),
             ('mass', dataset['Mass']),
             ('name', dataset['Name']),
             ('number', dataset['Z']),
             ('oxidation_states',
              data_loader.lookup_element_oxidation_states(symbol)),
+            ('oxidation_states_icsd',
+             data_loader.lookup_element_oxidation_states_icsd(symbol)),
+            ('oxidation_states_sp',
+             data_loader.lookup_element_oxidation_states_sp(symbol)),
+            ('dipol', dataset['dipol']),
             ('pauling_eneg', dataset['el_neg']),
             ('SSE', sse),
             ('SSEPauling', sse_Pauling),
@@ -168,13 +183,17 @@ class Species(Element):
         Species.eig: Electron eigenvalue (units unknown)
             N.B. For Cu, Au and Ag this defaults to d-orbital.
 
+        Species.shannon_radius: Shannon radius of Species.
+
+        Species.ionic_radius: Ionic radius of Species.
+
     Raises:
         NameError: Element not found in element.txt
         Warning: Element not found in Eigenvalues.csv
 
     """
 
-    def __init__(self,symbol,oxidation,coordination):
+    def __init__(self,symbol,oxidation,coordination=4):
         Element.__init__(self,symbol)
 
         self.oxidation = oxidation
@@ -186,20 +205,30 @@ class Species(Element):
 
         shannon_data = data_loader.lookup_element_shannon_radius_data(symbol);
 
-        for dataset in shannon_data:
-            if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
-                self.shannon_radius = dataset['crystal_radius'];
+        if shannon_data:
+            for dataset in shannon_data:
+                if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
+                    self.shannon_radius = dataset['crystal_radius'];
+
+        # Get ionic radius
+        self.ionic_radius = None;
+
+        if shannon_data:
+            for dataset in shannon_data:
+                if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
+                    self.ionic_radius = dataset['ionic_radius'];
 
         # Get SSE_2015 (revised) for the oxidation state.
 
         self.SSE_2015 = None
 
         sse_2015_data = data_loader.lookup_element_sse2015_data(symbol);
-
-        for dataset in sse_2015_data:
-            if dataset['OxidationState'] == oxidation:
-                self.SSE_2015 = dataset['SolidStateEnergy2015']
-
+        if sse_2015_data:
+            for dataset in sse_2015_data:
+                if dataset['OxidationState'] == oxidation:
+                    self.SSE_2015 = dataset['SolidStateEnergy2015']
+        else:
+            self.SSE_2015 = None
 
 def ordered_elements(x,y):
     """
@@ -369,8 +398,20 @@ def neutral_ratios(oxidations, stoichs=False, threshold=5):
                                                         threshold=threshold)]
     return (len(allowed_ratios) > 0, allowed_ratios)
 
+# List of metals
 metals = ['Li','Be','Na','Mg','Al','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni',
-'Cu','Zn','Ga','Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn',
-'Cs','Ba','La','Ce','Nd','Sm','Gd','Dy','Ho','Er','Tm',
+'Cu','Zn','Ga','Ge','Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn','Sb',
+'Cs','Ba','La','Ce', 'Pr','Nd','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb',
 'Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','Fr','Ra','Ac',
 'Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No']
+
+# List of elements that can be considered 'anions'.
+# Similar to the Pymatgen 'electronegative elements' but excluding H, B, C & Si.
+anions = ["N", "P", "As", "Sb",
+           "O", "S", "Se", "Te",
+           "F", "Cl", "Br", "I"]
+
+# List of d-block metals
+d_block = ['Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn',
+           'Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
+           'La','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg']

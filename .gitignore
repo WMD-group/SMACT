@@ -40,14 +40,11 @@ nosetests.xml
 */*.cif
 */*/*.cif
 
-# The LEGO development directory
-surface/*
-
 *.swp
 
+# Any ipynb checkpoint files
+.ipynb_checkpoints
+.DS_Store
 
-# Output file from compound library example
-examples/output.txt
-
-# Some of the examples are in development
-../examples/StuffedWurtzite/
+# Docs builds
+docs/_build/

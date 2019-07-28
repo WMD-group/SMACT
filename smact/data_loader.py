@@ -14,16 +14,16 @@
 ###############################################################################
 
 """
-Provide data from text files while transparently caching for efficiency
+Provide data from text files while transparently caching for efficiency.
 
 This module handles the loading of external data used to initialise the
 core smact.Element and smact.Species classes.  It implements a
 transparent data-caching system to avoid a large amount of I/O when
 naively constructing several of these objects.  It also implements a
 switchable system to print verbose warning messages about possible
-missing data (mainly for debugging purposes).
+missing data (mainly for debugging purposes). In general these fuctions
+are used in the background and it is not necessary to use them directly.
 """
-from __future__ import print_function
 
 from builtins import next
 from builtins import map
@@ -62,7 +62,7 @@ def _get_data_rows(filename):
                 yield line.split()
 
 def float_or_None(x):
-    """Cast a string to a float or to a None"""
+    """Cast a string to a float or to a None."""
     try:
         return float(x)
     except ValueError:
@@ -75,6 +75,8 @@ _el_ox_states = None
 def lookup_element_oxidation_states(symbol, copy=True):
     """
     Retrieve a list of known oxidation states for an element.
+    The oxidation states list used is the SMACT default and
+    most exhaustive list.
 
     Args:
         symbol (str) : the atomic symbol of the element to look up.
@@ -86,7 +88,7 @@ def lookup_element_oxidation_states(symbol, copy=True):
     Returns:
         list: List of known oxidation states for the element.
 
-            Return None if oxidation states for the Element were not
+            Returns None if oxidation states for the Element were not
             found in the external data.
     """
 
@@ -115,6 +117,86 @@ def lookup_element_oxidation_states(symbol, copy=True):
                   "not found.".format(symbol))
         return None
 
+_el_ox_states_icsd = None
+
+
+def lookup_element_oxidation_states_icsd(symbol, copy=True):
+    """
+    Retrieve a list of known oxidation states for an element.
+    The oxidation states list used contains only those found
+    in the ICSD (and judged to be non-spurious).
+
+    Args:
+        symbol (str) : the atomic symbol of the element to look up.
+        copy (Optional(bool)): if True (default), return a copy of the
+            oxidation-state list, rather than a reference to the cached
+            data -- only use copy=False in performance-sensitive code
+            and where the list will not be modified!
+
+    Returns:
+        list: List of known oxidation states for the element.
+
+            Return None if oxidation states for the Element were not
+            found in the external data.
+    """
+
+    global _el_ox_states_icsd
+
+    if _el_ox_states_icsd is None:
+        _el_ox_states_icsd = {}
+
+        for items in _get_data_rows(os.path.join(data_directory,
+                                                 "oxidation_states_icsd.txt")):
+            _el_ox_states_icsd[items[0]] = [int(oxidationState)
+                                       for oxidationState in items[1:]]
+
+_el_ox_states_sp = None
+
+def lookup_element_oxidation_states_sp(symbol, copy=True):
+    """
+    Retrieve a list of known oxidation states for an element.
+    The oxidation states list used contains only those that
+    are in the Pymatgen default lambda table for structure prediction.
+
+    Args:
+        symbol (str) : the atomic symbol of the element to look up.
+        copy (Optional(bool)): if True (default), return a copy of the
+            oxidation-state list, rather than a reference to the cached
+            data -- only use copy=False in performance-sensitive code
+            and where the list will not be modified!
+
+    Returns:
+        list: List of known oxidation states for the element.
+
+            Return None if oxidation states for the Element were not
+            found in the external data.
+    """
+
+    global _el_ox_states_sp
+
+    if _el_ox_states_sp is None:
+        _el_ox_states_sp = {}
+
+        for items in _get_data_rows(os.path.join(data_directory,
+                                                 "oxidation_states_SP.txt")):
+            _el_ox_states_sp[items[0]] = [int(oxidationState)
+                                       for oxidationState in items[1:]]
+
+
+    if symbol in _el_ox_states_sp:
+        if copy:
+            # _el_ox_states_sp stores lists -> if copy is set, make an implicit
+            # deep copy.  The elements of the lists are integers, which are
+            # "value types" in Python.
+
+            return [oxidationState for oxidationState in _el_ox_states_sp[symbol]]
+        else:
+            return _el_ox_states_sp[symbol]
+    else:
+        if _print_warnings:
+            print("WARNING: Oxidation states for element {0} "
+                  "not found.".format(symbol))
+        return None
 
 # Loader and cache for the element HHI scores.
 
@@ -129,8 +211,10 @@ def lookup_element_hhis(symbol):
         symbol : the atomic symbol of the element to look up.
 
     Returns:
-        A (HHI_p, HHI_R) tuple, or None if values for the elements were
-        not found in the external data.
+        tuple : (HHI_p, HHI_R)
+
+            Return None if values for the elements were
+            not found in the external data.
     """
 
     global _element_hhis
@@ -180,14 +264,15 @@ def lookup_element_data(symbol, copy=True):
             and where you are certain the dictionary will not be
             modified!
 
-    Returns (dict): Dictionary of data for given element, keyed by
-        column headings from data/element_data.txt
+    Returns (dict) : Dictionary of data for given element, keyed by
+        column headings from data/element_data.txt.
     """
     global _element_data
     if _element_data is None:
         _element_data = {}
         keys = ('Symbol', 'Name', 'Z', 'Mass', 'r_cov', 'e_affinity',
-                'p_eig', 's_eig', 'Abundance', 'el_neg', 'ion_pot')
+                'p_eig', 's_eig', 'Abundance', 'el_neg', 'ion_pot',
+                'dipol')
         for items in _get_data_rows(os.path.join(data_directory,
                                                  "element_data.txt")):
             # First two columns are strings and should be left intact
@@ -264,7 +349,7 @@ def lookup_element_shannon_radius_data(symbol, copy=True):
         _element_shannon_radii_data = {}
 
         with open(os.path.join(data_directory, "shannon_radii.csv"),
-                  'rU') as file:
+                  'r') as file:
             reader = csv.reader(file)
 
             # Skip the first row (headers).
@@ -325,8 +410,23 @@ def lookup_element_sse_data(symbol):
         symbol : the atomic symbol of the element to look up.
 
     Returns:
-        A dictionary containing the SSE dataset for the element, or None
-        if the element was not found among the external data.
+        list : SSE datasets for the element, or None
+            if the element was not found among the external data.
+
+        SSE datasets are dictionaries with the keys:
+
+        AtomicNumber
+            *int*
+        SolidStateEnergy
+            *float* SSE
+        IonisationPotential
+            *float*
+        ElectronAffinity
+            *float*
+        MullikenElectronegativity
+            *str*
+        SolidStateRenormalisationEnergy
+            *float*
     """
 
     global _element_ssedata
@@ -335,7 +435,7 @@ def lookup_element_sse_data(symbol):
         _element_ssedata = {}
 
         with open(os.path.join(data_directory,
-                               "SSE.csv"), 'rU') as file:
+                               "SSE.csv"), 'r') as file:
             reader = csv.reader(file)
 
             for row in reader:
@@ -371,7 +471,7 @@ def lookup_element_sse2015_data(symbol, copy=True):
 
     Retrieve the solid-state energy (SSE2015) data for an element in an
     oxidation state.  Taken from J. Solid State Chem., 2015, 231,
-    pp138-144, DOI: 10.1016/j.jssc.2015.07.037
+    pp138-144, DOI: 10.1016/j.jssc.2015.07.037.
 
     Args:
         symbol : the atomic symbol of the element to look up.
@@ -381,8 +481,15 @@ def lookup_element_sse2015_data(symbol, copy=True):
         certain the dictionary will not be modified!
 
     Returns:
-        A list of SSE datasets for the element, or None if the element was
-        not found among the external data.
+        list : SSE datasets for the element, or None
+            if the element was not found among the external data.
+
+        SSE datasets are dictionaries with the keys:
+
+        OxidationState
+            *int*
+        SolidStateEnergy2015
+            *float* SSE2015
     """
 
     global _element_sse2015_data
@@ -391,7 +498,7 @@ def lookup_element_sse2015_data(symbol, copy=True):
         _element_sse2015_data = {}
 
         with open(os.path.join(data_directory, "SSE_2015.csv"),
-                  'rU') as file:
+                  'r') as file:
             reader = csv.reader(file)
 
             for row in reader:
@@ -450,7 +557,7 @@ def lookup_element_sse_pauling_data(symbol):
         _element_ssepauling_data = {}
 
         with open(os.path.join(data_directory, "SSE_Pauling.csv"),
-                  'rU') as file:
+                  'r') as file:
             reader = csv.reader(file)
 
             for row in reader:
