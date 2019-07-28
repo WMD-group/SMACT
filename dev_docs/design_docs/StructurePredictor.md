@@ -31,7 +31,7 @@ The `PYMATGEN` structure predictor is a very useful tool for going from composit
 
 ## Proposed Workflow
 
-![workflow](IMAG0237.jpg)
+![workflow](../images/sp_workflow.jpg)
 
 * Generate a list of target compositions eg for Ba$_2$OF$_2$ `[Ba2+, O2-, F1-, (2, 1, 2)]`
 * Make all possible substitutions in the $\lambda-$table (no need to worry about stoichiometry)
@@ -72,13 +72,17 @@ These are some more fleshed out prototypes of objects/methods that are described
 	.
 	END
 	
-* **NB** need some rules about how this is ordered - Adam how does ASE order POSCARs?
+* Ordering consistent with Database key (see below)
 
-#### Database schema
+#### Database
+
+![workflow](../images/database_design.jpg)
+
+* Entries to be created by a valence bond analysis of structures
 
 * Simple two field database
 	* Field 1: database key
-	* Field 2: location of structure object file
+	* Field 2: location of zipped structure object file
 
 #### Database Key
 
