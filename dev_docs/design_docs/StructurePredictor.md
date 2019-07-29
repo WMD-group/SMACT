@@ -2,7 +2,8 @@
 ---
 
 ## Motivation
-The `PYMATGEN` structure predictor is a very useful tool for going from composition to a reasonable structure, based on a similarity index of ions. This tool works particularly well with the `SMACT` methods for generating reasonable compositions. However, there are two major reasons for building our own structure predictor: (i) We feel that relying on `PYMATGEN` as a dependancy is less than ideal; (ii) The `PYMATGEN` method is not as fast as it could be, in terms of interfacing with `SMACT`. Therefore we propose implement a similar method in `SMACT`.
+The `PYMATGEN` structure predictor [based on [this paper](https://pubs.acs.org/doi/10.1021/ic102031h)] is a useful tool for going from chemical composition to a reasonable crystal structure, based on a similarity index of ions. 
+This tool works particularly well with the `SMACT` methods for generating reasonable compositions. However, there are two major reasons for building our own structure predictor: (i) relying on `PYMATGEN` as a dependancy is less than ideal; (ii) the `PYMATGEN` method is not as fast as it could be, in terms of interfacing with `SMACT`. Therefore we propose implement a similar method in `SMACT`.
 
 ## Required features
 
