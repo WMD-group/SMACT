@@ -134,6 +134,9 @@ References
 ----------
 
 [D. W. Davies et al,
+"SMACT: Semiconducting Materials by Analogy and Chemical Theory" *JOSS* **4**, 1361 (2019)](https://joss.theoj.org/papers/7efd2f2ad60d25bdccee3fbd3fc11448)
+
+[D. W. Davies et al,
 "Materials discovery by chemical analogy: role of oxidation states in structure prediction" *Faraday Discuss.* **211**, 553 (2018)](https://pubs.rsc.org/en/Content/ArticleLanding/2018/FD/C8FD00032H)
 
 [D. W. Davies et al,
