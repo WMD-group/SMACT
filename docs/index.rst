@@ -6,6 +6,8 @@
 Semiconducting Materials from Analogy and Chemical Theory
 =========================================================
 
+View the code on Github `here <http://github.com/wmd-group/smact>`_.
+
 Contents:
 
 .. toctree::
