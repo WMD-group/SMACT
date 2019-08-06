@@ -88,12 +88,12 @@ These are some more fleshed out prototypes of objects/methods that are described
 #### Database Key
 
 * Information about element, charge and stoichiometry.
-* The elements must be ordered by atomic number.
+* The elements must be ordered by alphabet.
 * The species ordered by charge highest to lowest.
 
 E.g. 
-* Ba$_2$OF$_2$ -> `O_1_2-F_2_1-Ba_2_2+`
-* Be$_2$OF$_2$ -> `Be_2_2+O_1_2-F_2_1-`
+* Ba$_2$OF$_2$ -> `Ba_2_2+F_2_1-O_1_2-`
+* Fe$_3$O$_4$ -> `Fe_1_2+Fe_2_3+O_3_2-`
 
 #### Substitution list
 
