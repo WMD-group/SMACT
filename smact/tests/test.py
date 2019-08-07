@@ -94,6 +94,7 @@ class TestSequenceFunctions(unittest.TestCase):
     
     # ------------- SmactStructure --------------
 
+    @unittest.skip("Need to implement SmactStructure instantiation tests.")
     def test_smactStruc_init(self):
         pass
 
