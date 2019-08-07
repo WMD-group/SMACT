@@ -23,7 +23,7 @@
 
 import typing
 from typing import List, Tuple, Union
-
+from operator import itemgetter
 # First example: using ase
 
 from ase.spacegroup import crystal
@@ -52,13 +52,26 @@ class SmactStructure:
             raise ValueError(species_error)
 
         if isinstance(species[0][0], str):  # String variation of instantiation
-            self.species = sorted(species, key=lambda x: x[0])
+            species.sort(key=itemgetter(1), reverse=True)
+            species.sort(key=itemgetter(0))
+            self.species = [(x[0], x[2], x[1]) for x in species]  # Rearrange
 
         elif isinstance(species[0][0], Species):  # Species class variation of instantiation
-            self.species = sorted(species, key=lambda x: x.symbol)
+            species.sort(key=lambda x: (x[0].symbol, -x[0].oxidation))
+            self.species = [(x[0].symbol, x[1], x[0].oxidation) for x in species]
 
         else:
             raise TypeError(species_error)
+
+    def composition(self):
+        comp_style = "{ele}_{stoic}_{charge}{sign}"
+        return "".join(
+            comp_style.format(
+                ele=specie[0],
+                stoic=specie[1],
+                charge=abs(specie[2]),
+                sign='+' if specie[2] >= 0 else '-',) for specie in self.species
+        )
 
 
 def cubic_perovskite(species, cell_par=[6, 6, 6, 90, 90, 90], repetitions=[1, 1, 1]):

@@ -3,7 +3,7 @@
 import unittest
 import smact
 from smact.properties import compound_electroneg, band_gap_Harrison
-from smact.builder import wurtzite
+from smact.builder import wurtzite, SmactStructure
 import smact.screening
 import smact.lattice
 import smact.lattice_parameters
@@ -91,6 +91,32 @@ class TestSequenceFunctions(unittest.TestCase):
         ZnS, sys_ZnS = wurtzite(['Zn', 'S'])
         self.assertEqual((ZnS.sites[0].position[2]), 0)
         self.assertEqual((ZnS.sites[0].position[0]), 2./3.)
+    
+    # ------------- SmactStructure --------------
+
+    def test_smactStruc_init(self):
+        pass
+
+    def test_smactStruc_comp_key(self):
+        s1 = SmactStructure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)])
+        s2 = SmactStructure([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)])
+
+        Ba = Species('Ba', 2)
+        O = Species('O', -2)
+        F = Species('F', -1)
+        Fe2 = Species('Fe', 2)
+        Fe3 = Species('Fe', 3)
+
+        s3 = SmactStructure([(Ba, 2), (O, 1), (F, 2)])
+        s4 = SmactStructure([(Fe2, 1), (Fe3, 2), (O, 4)])
+
+        Ba_2OF_2 = "Ba_2_2+F_2_1-O_1_2-"
+        Fe_3O_4 = "Fe_2_3+Fe_1_2+O_4_2-"
+        self.assertEqual(s1.composition(), Ba_2OF_2)
+        self.assertEqual(s2.composition(), Fe_3O_4)
+        self.assertEqual(s3.composition(), Ba_2OF_2)
+        self.assertEqual(s4.composition(), Fe_3O_4)
+
 
     # ---------------- SCREENING ----------------
 
