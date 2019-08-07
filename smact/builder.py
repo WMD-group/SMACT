@@ -4,6 +4,7 @@
 #TODO:
 # Estimate the cell parameters based on radii from tables.
 # Add further types, Spinnel, Flourite, Delafossite ....
+# Implement Structure class, c.f. dev_docs.
 ################################################################################
 # Copyright Keith T Butler, Adam J Jackson    (2013)                           #
 #                                                                              #
@@ -27,8 +28,9 @@ from ase.spacegroup import crystal
 from smact.lattice import Lattice, Site
 
 def cubic_perovskite(species,cell_par=[6,6,6,90,90,90],repetitions=[1,1,1]):
-    '''
-    Function to build a perovskite cell using the crystal function is ASE.
+    """
+    Build a perovskite cell using the crystal function in ASE.
+
     Args:
         species (str): Element symbols
         cell_par (list): Six floats/ints specifying 3 unit cell lengths and 3 unit cell angles.
@@ -36,7 +38,8 @@ def cubic_perovskite(species,cell_par=[6,6,6,90,90,90],repetitions=[1,1,1]):
     Returns:
         SMACT Lattice object of the unit cell,
         ASE crystal system of the unit cell.
-    '''
+        
+    """
     system = crystal((species),
     basis=[(0,0,0), (0.5, 0.5, 0.5), (0.5, 0.5, 0)],
     spacegroup=221, size = repetitions, cellpar=cell_par)
@@ -49,8 +52,9 @@ def cubic_perovskite(species,cell_par=[6,6,6,90,90,90],repetitions=[1,1,1]):
     return Lattice(sites_list, oxidation_states), system
 
 def wurtzite(species, cell_par=[2,2,6,90,90,120],repetitions=[1,1,1]):
-    '''
-    Function to build a wurzite cell using the crystal function is ASE.
+    """
+    Build a wurzite cell using the crystal function in ASE.
+
     Args:
         species (str): Element symbols
         cell_par (list): Six floats/ints specifying 3 unit cell lengths and 3 unit cell angles.
@@ -58,7 +62,8 @@ def wurtzite(species, cell_par=[2,2,6,90,90,120],repetitions=[1,1,1]):
     Returns:
         SMACT Lattice object of the unit cell,
         ASE crystal system of the unit cell.
-    '''
+
+    """
     system = crystal((species),
     basis=[(2./3.,1./3.,0),(2./3.,1./3.,5./8.)],
     spacegroup=186, size = repetitions, cellpar=[3, 3, 6, 90,90,120])
