@@ -21,20 +21,28 @@
 #                                                                              #
 ################################################################################
 
+import os
+import json
 import typing
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 from operator import itemgetter
 # First example: using ase
 
 from ase.spacegroup import crystal
 from smact.lattice import Lattice, Site
 from smact import Species
+from pymatgen.ext.matproj import MPRester
+
+MPI_KEY = os.environ.get("MPI_KEY")
 
 
 class SmactStructure:
     """SMACT implementation inspired by pymatgen Structure class."""
 
-    def __init__(self, species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
+    def __init__(
+        self,
+        species: List[Union[Tuple[str, int, int], Tuple[Species, int]]],
+        structure: Optional[str] = None,):
         """Initialize class with constituent species."""
         if not isinstance(species, list):
             raise TypeError(f"`species` must be a list, got {type(species)}.")
@@ -63,15 +71,56 @@ class SmactStructure:
         else:
             raise TypeError(species_error)
 
-    def composition(self):
-        comp_style = "{ele}_{stoic}_{charge}{sign}"
-        return "".join(
-            comp_style.format(
+        if structure is None:
+            with MPRester(MPI_KEY) as m:
+                eles = {}
+                for specie in self.species:
+                    if specie[0] in eles:
+                        eles[specie[0]] += specie[1]
+                    else:
+                        eles[specie[0]] = specie[1]
+
+                formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
+                structs = m.query(
+                    criteria={"reduced_cell_formula": formula},
+                    properties=["structure"],)
+
+                if len(structs) == 0:
+                    raise ValueError(
+                        "Could not find composition in Materials Project Database, "
+                        "please supply a structure."
+                    )
+
+                self.struct = structs[0]  # Default to first found structure
+
+        else:
+            # TODO Validate input structure
+            self.struct = structure
+
+    def _format_style(self, template: str, delim: Optional[str] = " "):
+        """Format a given template string with the composition."""
+        return delim.join(
+            template.format(
                 ele=specie[0],
                 stoic=specie[1],
                 charge=abs(specie[2]),
                 sign='+' if specie[2] >= 0 else '-',) for specie in self.species
         )
+
+    def composition(self):
+        """Generate a key that describes the composition."""
+        comp_style = "{ele}_{stoic}_{charge}{sign}"
+        return self._format_style(comp_style, delim="")
+
+    def as_poscar(self):
+        """Represent the structure as a POSCAR file compatible with VASP5."""
+        poscar = self._format_style("{ele}{charge}{sign}") + "\n"
+        poscar += "1.0\n"  # TODO Use actual lattice parameter
+        poscar += "\n".join(" ".join(vec) for vec in self.struct.lattice) + "\n"
+        poscar += self._format_style("{stoic}") + "\n"
+        poscar += "Coordinates\n"
+        # TODO Figure out how to distinguish oxidation states
+        return poscar
 
 
 def cubic_perovskite(species, cell_par=[6, 6, 6, 90, 90, 90], repetitions=[1, 1, 1]):
