@@ -99,8 +99,8 @@ class TestSequenceFunctions(unittest.TestCase):
         pass
 
     def test_smactStruc_comp_key(self):
-        s1 = SmactStructure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)])
-        s2 = SmactStructure([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)])
+        s1 = SmactStructure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)], "")
+        s2 = SmactStructure([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)], "")
 
         Ba = Species('Ba', 2)
         O = Species('O', -2)
@@ -108,8 +108,8 @@ class TestSequenceFunctions(unittest.TestCase):
         Fe2 = Species('Fe', 2)
         Fe3 = Species('Fe', 3)
 
-        s3 = SmactStructure([(Ba, 2), (O, 1), (F, 2)])
-        s4 = SmactStructure([(Fe2, 1), (Fe3, 2), (O, 4)])
+        s3 = SmactStructure([(Ba, 2), (O, 1), (F, 2)], "")
+        s4 = SmactStructure([(Fe2, 1), (Fe3, 2), (O, 4)], "")
 
         Ba_2OF_2 = "Ba_2_2+F_2_1-O_1_2-"
         Fe_3O_4 = "Fe_2_3+Fe_1_2+O_4_2-"
