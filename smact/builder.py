@@ -24,7 +24,7 @@
 import os
 import json
 import typing
-from typing import List, Tuple, Union, Optional
+from typing import List, Tuple, Union, Optional, Dict
 from operator import itemgetter
 # First example: using ase
 
@@ -33,6 +33,7 @@ from smact.lattice import Lattice, Site
 from smact import Species
 from pymatgen.ext.matproj import MPRester
 from pymatgen.analysis.bond_valence import BVAnalyzer
+import numpy as np
 
 MPI_KEY = os.environ.get("MPI_KEY")
 
@@ -43,32 +44,16 @@ class SmactStructure:
     def __init__(
         self,
         species: List[Union[Tuple[str, int, int], Tuple[Species, int]]],
-        structure: Optional[str] = None,):
+        lattice_mat: np.ndarray,
+        sites: Dict[str, List[List[float]]],
+        lattice_param: Optional[float] = 1.0,
+    ):
         """Initialize class with constituent species."""
         self.species = self._sanitise_species(species)
-
-        if structure is None:
-            with MPRester(MPI_KEY) as m:
-                eles = self._get_ele_stoics()
-
-                formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
-                structs = m.query(
-                    criteria={"reduced_cell_formula": formula},
-                    properties=["structure"],)
-
-                if len(structs) == 0:
-                    raise ValueError(
-                        "Could not find composition in Materials Project Database, "
-                        "please supply a structure."
-                    )
-
-                self.struct = structs[0]['structure']  # Default to first found structure
-                bva = BVAnalyzer()
-                self.struct = bva.get_oxi_state_decorated_structure(self.struct)
-
-        else:
-            # TODO Validate input structure
-            self.struct = structure
+        self.lattice_mat = lattice_mat
+        species_strs = self._format_style("{ele}{charge}{sign}")
+        self.sites = {spec: sites[spec] for spec in species_strs.split(" ")}  # Sort sites
+        self.lattice_param = lattice_param
 
     @staticmethod
     def _sanitise_species(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
@@ -104,15 +89,13 @@ class SmactStructure:
 
     @staticmethod
     def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
-        specs = SmactStructure._sanitise_species(species)
-
         with MPRester(MPI_KEY) as m:
             eles = {}
-            for spec in specs:
+            for spec in species:
                 if spec[0] in eles:
-                    eles[spec[0]] += spec[1]
+                    eles[spec[0]] += spec[2]
                 else:
-                    eles[spec[0]] = spec[1]
+                    eles[spec[0]] = spec[2]
 
             formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
             structs = m.query(
@@ -128,6 +111,18 @@ class SmactStructure:
             struct = structs[0]['structure']  # Default to first found structure
             bva = BVAnalyzer()
             struct = bva.get_oxi_state_decorated_structure(struct)
+
+        lattice_mat = struct.lattice.matrix
+        lattice_param = 1.0  # TODO Use actual lattice parameter
+        sites = {}
+        for site in struct.sites:
+            site_type = site.species_string
+            if site_type in sites:
+                sites[site_type].append(site.coords.tolist())
+            else:
+                sites[site_type] = [site.coords.tolist()]
+
+        return SmactStructure(species, lattice_mat, sites, lattice_param)
 
     def _format_style(self, template: str, delim: Optional[str] = " "):
         """Format a given template string with the composition."""
@@ -158,29 +153,22 @@ class SmactStructure:
         """Represent the structure as a POSCAR file compatible with VASP5."""
         poscar = self._format_style("{ele}{charge}{sign}") + "\n"
 
-        poscar += "1.0\n"  # TODO Use actual lattice parameter
+        poscar += f"{self.lattice_param}\n"
 
-        poscar += "\n".join(" ".join(map(str, vec)) for vec in self.struct.lattice.matrix.tolist()) + "\n"
+        poscar += "\n".join(" ".join(map(str, vec)) for vec in self.lattice_mat.tolist()) + "\n"
 
-        poscar_specs = {}
-        for spec in self.struct.species:
-            spec_str = str(spec)
-            if spec_str in poscar_specs:
-                poscar_specs[spec_str] += 1
-            else:
-                poscar_specs[spec_str] = 1
+        spec_count = {spec: len(coords) for spec, coords in self.sites.items()}
 
         poscar += self._format_style("{ele}") + "\n"
 
         species_strs = self._format_style("{ele}{charge}{sign}")
-        poscar += " ".join(str(poscar_specs[spec]) for spec in species_strs.split(" ")) + "\n"
+        poscar += " ".join(str(spec_count[spec]) for spec in species_strs.split(" ")) + "\n"
 
-        poscar += "Coordinates\n"
-        for spec in species_strs.split(" "):
-            for site in self.struct.sites:
-                if site.species_string == spec:
-                    poscar += " ".join(map(str, site.coords.tolist()))
-                    poscar += f" {spec}\n"
+        poscar += "Direct\n"
+        for spec, coords in self.sites.items():
+            for coord in coords:
+                poscar += " ".join(map(str, coord))
+                poscar += f" {spec}\n"
 
         return poscar
 
