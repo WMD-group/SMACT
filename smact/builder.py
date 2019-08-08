@@ -32,6 +32,7 @@ from ase.spacegroup import crystal
 from smact.lattice import Lattice, Site
 from smact import Species
 from pymatgen.ext.matproj import MPRester
+from pymatgen.analysis.bond_valence import BVAnalyzer
 
 MPI_KEY = os.environ.get("MPI_KEY")
 
@@ -87,6 +88,8 @@ class SmactStructure:
                     )
 
                 self.struct = structs[0]['structure']  # Default to first found structure
+                bva = BVAnalyzer()
+                self.struct = bva.get_oxi_state_decorated_structure(self.struct)
 
         else:
             # TODO Validate input structure
@@ -125,22 +128,25 @@ class SmactStructure:
 
         poscar += "\n".join(" ".join(map(str, vec)) for vec in self.struct.lattice.matrix.tolist()) + "\n"
 
-        poscar_eles = {}
-        for ele in self.struct.species:
-            ele_str = str(ele)
-            if ele_str in poscar_eles:
-                poscar_eles[ele_str] += 1
+        poscar_specs = {}
+        for spec in self.struct.species:
+            spec_str = str(spec)
+            if spec_str in poscar_specs:
+                poscar_specs[spec_str] += 1
             else:
-                poscar_eles[ele_str] = 1
+                poscar_specs[spec_str] = 1
 
-        poscar += " ".join(str(poscar_eles[ele]) for ele in self._get_ele_stoics().keys()) + "\n"
+        poscar += self._format_style("{ele}") + "\n"
+
+        species_strs = self._format_style("{ele}{charge}{sign}")
+        poscar += " ".join(str(poscar_specs[spec]) for spec in species_strs.split(" ")) + "\n"
 
         poscar += "Coordinates\n"
-        for ele in self._get_ele_stoics().keys():
+        for spec in species_strs.split(" "):
             for site in self.struct.sites:
-                if site.species_string == ele:
+                if site.species_string == spec:
                     poscar += " ".join(map(str, site.coords.tolist()))
-                    poscar += f" {ele}\n"
+                    poscar += f" {spec}\n"
 
         return poscar
 
