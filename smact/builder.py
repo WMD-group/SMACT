@@ -45,32 +45,7 @@ class SmactStructure:
         species: List[Union[Tuple[str, int, int], Tuple[Species, int]]],
         structure: Optional[str] = None,):
         """Initialize class with constituent species."""
-        if not isinstance(species, list):
-            raise TypeError(f"`species` must be a list, got {type(species)}.")
-        if len(species) == 0:
-            raise ValueError("`species` cannot be empty.")
-        if not isinstance(species[0], tuple):
-            raise TypeError(f"`species` must be a list of tuples, got list of {type(species[0])}.")
-
-        species_error = (
-            "`species` list of tuples must contain either "
-            "2-tuples of Species objects and stoichiometries, "
-            "or 3-tuples of elements, oxidations and stoichiometries."
-        )
-        if len(species[0]) not in {2, 3}:
-            raise ValueError(species_error)
-
-        if isinstance(species[0][0], str):  # String variation of instantiation
-            species.sort(key=itemgetter(1), reverse=True)
-            species.sort(key=itemgetter(0))
-            self.species = [(x[0], x[2], x[1]) for x in species]  # Rearrange
-
-        elif isinstance(species[0][0], Species):  # Species class variation of instantiation
-            species.sort(key=lambda x: (x[0].symbol, -x[0].oxidation))
-            self.species = [(x[0].symbol, x[1], x[0].oxidation) for x in species]
-
-        else:
-            raise TypeError(species_error)
+        self.species = self._sanitise_species(species)
 
         if structure is None:
             with MPRester(MPI_KEY) as m:
@@ -94,6 +69,65 @@ class SmactStructure:
         else:
             # TODO Validate input structure
             self.struct = structure
+
+    @staticmethod
+    def _sanitise_species(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
+        """Sanitise and format a list of species."""
+        if not isinstance(species, list):
+            raise TypeError(f"`species` must be a list, got {type(species)}.")
+        if len(species) == 0:
+            raise ValueError("`species` cannot be empty.")
+        if not isinstance(species[0], tuple):
+            raise TypeError(f"`species` must be a list of tuples, got list of {type(species[0])}.")
+
+        species_error = (
+            "`species` list of tuples must contain either "
+            "2-tuples of Species objects and stoichiometries, "
+            "or 3-tuples of elements, oxidations and stoichiometries."
+        )
+        if len(species[0]) not in {2, 3}:
+            raise ValueError(species_error)
+
+        if isinstance(species[0][0], str):  # String variation of instantiation
+            species.sort(key=itemgetter(1), reverse=True)
+            species.sort(key=itemgetter(0))
+            sanit_species = [(x[0], x[2], x[1]) for x in species]  # Rearrange
+
+        elif isinstance(species[0][0], Species):  # Species class variation of instantiation
+            species.sort(key=lambda x: (x[0].symbol, -x[0].oxidation))
+            sanit_species = [(x[0].symbol, x[1], x[0].oxidation) for x in species]
+
+        else:
+            raise TypeError(species_error)
+
+        return sanit_species
+
+    @staticmethod
+    def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
+        specs = SmactStructure._sanitise_species(species)
+
+        with MPRester(MPI_KEY) as m:
+            eles = {}
+            for spec in specs:
+                if spec[0] in eles:
+                    eles[spec[0]] += spec[1]
+                else:
+                    eles[spec[0]] = spec[1]
+
+            formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
+            structs = m.query(
+                criteria={"reduced_cell_formula": formula},
+                properties=["structure"],)
+
+            if len(structs) == 0:
+                raise ValueError(
+                    "Could not find composition in Materials Project Database, "
+                    "please supply a structure."
+                )
+
+            struct = structs[0]['structure']  # Default to first found structure
+            bva = BVAnalyzer()
+            struct = bva.get_oxi_state_decorated_structure(struct)
 
     def _format_style(self, template: str, delim: Optional[str] = " "):
         """Format a given template string with the composition."""
