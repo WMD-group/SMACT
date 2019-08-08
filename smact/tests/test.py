@@ -101,7 +101,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     @staticmethod
     def gen_empty_struct(species):
-        """Generate an empty set of arguments for SmactStructure testing."""
+        """Generate an empty set of arguments for `SmactStructure` testing."""
         lattice_mat = np.array([[0] * 3] * 3)
 
         if isinstance(species[0][0], str):
@@ -119,6 +119,7 @@ class TestSequenceFunctions(unittest.TestCase):
         return species, lattice_mat, sites
 
     def test_smactStruc_comp_key(self):
+        """Test generation of a composition key for `SmactStructure`s."""
         s1 = SmactStructure(*self.gen_empty_struct([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
         s2 = SmactStructure(*self.gen_empty_struct([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
 
@@ -137,7 +138,20 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(s2.composition(), Fe_3O_4)
         self.assertEqual(s3.composition(), Ba_2OF_2)
         self.assertEqual(s4.composition(), Fe_3O_4)
+    
+    def test_smactStruc_from_poscar(self):
+        """Test the `from_poscar` method of `SmactStructure`."""
+        s1 = SmactStructure.from_mp([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)])
 
+        test_file = 'test_poscar.test'
+        with open(test_file, 'w') as f:
+            f.write(s1.as_poscar())
+        
+        s2 = SmactStructure.from_poscar(test_file)
+        self.assertEqual(s1.species, s2.species)
+        self.assertEqual(s1.lattice_mat.tolist(), s2.lattice_mat.tolist())
+        self.assertEqual(s1.lattice_param, s2.lattice_param)
+        self.assertDictEqual(s1.sites, s2.sites)
 
     # ---------------- SCREENING ----------------
 

@@ -36,8 +36,6 @@ from pymatgen.ext.matproj import MPRester
 from pymatgen.analysis.bond_valence import BVAnalyzer
 import numpy as np
 
-MPI_KEY = os.environ.get("MPI_KEY")
-
 
 class SmactStructure:
     """SMACT implementation inspired by pymatgen Structure class."""
@@ -50,15 +48,20 @@ class SmactStructure:
         lattice_param: Optional[float] = 1.0,
     ):
         """Initialize class with constituent species."""
+
         self.species = self._sanitise_species(species)
         self.lattice_mat = lattice_mat
         species_strs = self._format_style("{ele}{charge}{sign}")
         self.sites = {spec: sites[spec] for spec in species_strs.split(" ")}  # Sort sites
         self.lattice_param = lattice_param
 
+    def __repr__(self):
+        return self.as_poscar()
+
     @staticmethod
     def _sanitise_species(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
         """Sanitise and format a list of species."""
+
         if not isinstance(species, list):
             raise TypeError(f"`species` must be a list, got {type(species)}.")
         if len(species) == 0:
@@ -90,6 +93,10 @@ class SmactStructure:
 
     @staticmethod
     def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
+        """Create a SmactStructure using the first Materials Project entry for a composition."""
+
+        MPI_KEY = os.environ.get("MPI_KEY")
+
         with MPRester(MPI_KEY) as m:
             eles = {}
             for spec in species:
@@ -114,7 +121,9 @@ class SmactStructure:
             struct = bva.get_oxi_state_decorated_structure(struct)
 
         lattice_mat = struct.lattice.matrix
+
         lattice_param = 1.0  # TODO Use actual lattice parameter
+
         sites = {}
         for site in struct.sites:
             site_type = site.species_string
@@ -128,6 +137,7 @@ class SmactStructure:
     @staticmethod
     def from_poscar(poscar_file: str):
         """Create SmactStructure from a POSCAR file."""
+
         with open(poscar_file, 'r') as f:
             lines = f.read().split("\n")
 
