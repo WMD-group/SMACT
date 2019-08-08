@@ -11,6 +11,7 @@ import smact.distorter
 import smact.oxidation_states
 from pymatgen import Specie
 from smact import Species
+import numpy as np
 
 class TestSequenceFunctions(unittest.TestCase):
 
@@ -98,9 +99,28 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_smactStruc_init(self):
         pass
 
+    @staticmethod
+    def gen_empty_struct(species):
+        """Generate an empty set of arguments for SmactStructure testing."""
+        lattice_mat = np.array([[0] * 3] * 3)
+
+        if isinstance(species[0][0], str):
+            species_strs = ["{ele}{charge}{sign}".format(
+                ele=spec[0], 
+                charge=abs(spec[1]), 
+                sign='+' if spec[1] >= 0 else '-') for spec in species]
+        else:
+            species_strs = ["{ele}{charge}{sign}".format(
+                ele=spec[0].symbol, 
+                charge=abs(spec[0].oxidation), 
+                sign='+' if spec[0].oxidation >= 0 else '-') for spec in species]
+
+        sites = {spec: [[]] for spec in species_strs}
+        return species, lattice_mat, sites
+
     def test_smactStruc_comp_key(self):
-        s1 = SmactStructure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)], "")
-        s2 = SmactStructure([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)], "")
+        s1 = SmactStructure(*self.gen_empty_struct([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
+        s2 = SmactStructure(*self.gen_empty_struct([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
 
         Ba = Species('Ba', 2)
         O = Species('O', -2)
@@ -108,8 +128,8 @@ class TestSequenceFunctions(unittest.TestCase):
         Fe2 = Species('Fe', 2)
         Fe3 = Species('Fe', 3)
 
-        s3 = SmactStructure([(Ba, 2), (O, 1), (F, 2)], "")
-        s4 = SmactStructure([(Fe2, 1), (Fe3, 2), (O, 4)], "")
+        s3 = SmactStructure(*self.gen_empty_struct([(Ba, 2), (O, 1), (F, 2)]))
+        s4 = SmactStructure(*self.gen_empty_struct([(Fe2, 1), (Fe3, 2), (O, 4)]))
 
         Ba_2OF_2 = "Ba_2_2+F_2_1-O_1_2-"
         Fe_3O_4 = "Fe_2_3+Fe_1_2+O_4_2-"
