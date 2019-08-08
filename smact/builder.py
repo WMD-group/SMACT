@@ -73,12 +73,7 @@ class SmactStructure:
 
         if structure is None:
             with MPRester(MPI_KEY) as m:
-                eles = {}
-                for specie in self.species:
-                    if specie[0] in eles:
-                        eles[specie[0]] += specie[1]
-                    else:
-                        eles[specie[0]] = specie[1]
+                eles = self._get_ele_stoics()
 
                 formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
                 structs = m.query(
@@ -91,7 +86,7 @@ class SmactStructure:
                         "please supply a structure."
                     )
 
-                self.struct = structs[0]  # Default to first found structure
+                self.struct = structs[0]['structure']  # Default to first found structure
 
         else:
             # TODO Validate input structure
@@ -107,6 +102,16 @@ class SmactStructure:
                 sign='+' if specie[2] >= 0 else '-',) for specie in self.species
         )
 
+    def _get_ele_stoics(self):
+        """Get the number of each element type in the compound, irrespective of oxidation state."""
+        eles = {}
+        for specie in self.species:
+            if specie[0] in eles:
+                eles[specie[0]] += specie[1]
+            else:
+                eles[specie[0]] = specie[1]
+        return eles
+
     def composition(self):
         """Generate a key that describes the composition."""
         comp_style = "{ele}_{stoic}_{charge}{sign}"
@@ -115,11 +120,28 @@ class SmactStructure:
     def as_poscar(self):
         """Represent the structure as a POSCAR file compatible with VASP5."""
         poscar = self._format_style("{ele}{charge}{sign}") + "\n"
+
         poscar += "1.0\n"  # TODO Use actual lattice parameter
-        poscar += "\n".join(" ".join(vec) for vec in self.struct.lattice) + "\n"
-        poscar += self._format_style("{stoic}") + "\n"
+
+        poscar += "\n".join(" ".join(map(str, vec)) for vec in self.struct.lattice.matrix.tolist()) + "\n"
+
+        poscar_eles = {}
+        for ele in self.struct.species:
+            ele_str = str(ele)
+            if ele_str in poscar_eles:
+                poscar_eles[ele_str] += 1
+            else:
+                poscar_eles[ele_str] = 1
+
+        poscar += " ".join(str(poscar_eles[ele]) for ele in self._get_ele_stoics().keys()) + "\n"
+
         poscar += "Coordinates\n"
-        # TODO Figure out how to distinguish oxidation states
+        for ele in self._get_ele_stoics().keys():
+            for site in self.struct.sites:
+                if site.species_string == ele:
+                    poscar += " ".join(map(str, site.coords.tolist()))
+                    poscar += f" {ele}\n"
+
         return poscar
 
 
