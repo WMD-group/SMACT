@@ -215,7 +215,7 @@ class SmactStructure:
         species_strs = self._format_style("{ele}{charge}{sign}")
         poscar += " ".join(str(spec_count[spec]) for spec in species_strs.split(" ")) + "\n"
 
-        poscar += "Direct\n"
+        poscar += "Cartesian\n"
         for spec, coords in self.sites.items():
             for coord in coords:
                 poscar += " ".join(map(str, coord))
