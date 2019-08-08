@@ -23,6 +23,7 @@
 
 import os
 import json
+import re
 import typing
 from typing import List, Tuple, Union, Optional, Dict
 from operator import itemgetter
@@ -123,6 +124,46 @@ class SmactStructure:
                 sites[site_type] = [site.coords.tolist()]
 
         return SmactStructure(species, lattice_mat, sites, lattice_param)
+
+    @staticmethod
+    def from_poscar(poscar_file: str):
+        """Create SmactStructure from a POSCAR file."""
+        with open(poscar_file, 'r') as f:
+            lines = f.read().split("\n")
+
+        # Find stoichiometry
+        total_specs = [int(x) for x in lines[6].split(" ")]
+        total_spec_sum = sum(total_specs)
+        total_specs = [x / total_spec_sum for x in total_specs]
+        total_spec_min = min(total_specs)
+        total_specs = [round(x / total_spec_min) for x in total_specs]
+
+        species = []
+        for spec_str, stoic in zip(lines[0].split(" "), total_specs):
+            charge_loc = re.search(r"\d", spec_str).start()
+            symb = spec_str[:charge_loc]
+            charge = int(spec_str[-1] + spec_str[charge_loc:-1])
+            species.append((symb, charge, stoic))
+
+        lattice_param = float(lines[1])
+
+        lattice = np.array([[float(point) for point in line.split(" ")] for line in lines[2:5]])
+
+        sites = {}
+        for line in lines[8:]:
+            if not line:  # EOF
+                break
+
+            split_line = line.split(" ")
+            coords = [float(x) for x in split_line[:3]]
+            spec = split_line[-1]
+
+            if spec in sites:
+                sites[spec].append(coords)
+            else:
+                sites[spec] = [coords]
+
+        return SmactStructure(species, lattice, sites, lattice_param)
 
     def _format_style(self, template: str, delim: Optional[str] = " "):
         """Format a given template string with the composition."""
