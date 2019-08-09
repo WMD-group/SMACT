@@ -132,7 +132,7 @@ class SmactStructure:
             site_type = site.species_string
             # Add charge magnitude, for cases of unit charge
             if all([
-                site_type[-2] not in range(10),
+                site_type[-2] not in map(str, range(10)),
                 site_type[-1] in ("+", "-"),]):
                 site_type = site_type[:-1] + '1' + site_type[-1]
 

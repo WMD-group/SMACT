@@ -10,3 +10,4 @@ install:
 
 script: 
   - python3 -m smact.tests.test -v
+  - python3 -m smact.tests.test_structure -v

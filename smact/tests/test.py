@@ -4,7 +4,7 @@ import unittest
 import os
 import smact
 from smact.properties import compound_electroneg, band_gap_Harrison
-from smact.builder import wurtzite, SmactStructure, StructureDB
+from smact.builder import wurtzite
 import smact.screening
 import smact.lattice
 import smact.lattice_parameters
@@ -12,23 +12,8 @@ import smact.distorter
 import smact.oxidation_states
 from pymatgen import Specie
 from smact import Species
-import numpy as np
-
-TEST_DB = "test.db"
-TEST_TABLE = "Structures"
-TEST_POSCAR = "test_poscar.test"
 
 class TestSequenceFunctions(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    @classmethod
-    def tearDownClass(cls):
-        """Remove temporary test files."""
-        for fname in [TEST_DB, TEST_POSCAR]:
-            if os.path.exists(fname):
-                os.remove(fname)
 
     # ---------------- TOP-LEVEL ----------------
 
@@ -104,77 +89,6 @@ class TestSequenceFunctions(unittest.TestCase):
         ZnS, sys_ZnS = wurtzite(['Zn', 'S'])
         self.assertEqual((ZnS.sites[0].position[2]), 0)
         self.assertEqual((ZnS.sites[0].position[0]), 2./3.)
-    
-    # ------------- SmactStructure --------------
-
-    @unittest.skip("Need to implement SmactStructure instantiation tests.")
-    def test_smactStruc_init(self):
-        pass
-
-    @staticmethod
-    def gen_empty_struct(species):
-        """Generate an empty set of arguments for `SmactStructure` testing."""
-        lattice_mat = np.array([[0] * 3] * 3)
-
-        if isinstance(species[0][0], str):
-            species_strs = ["{ele}{charge}{sign}".format(
-                ele=spec[0], 
-                charge=abs(spec[1]), 
-                sign='+' if spec[1] >= 0 else '-') for spec in species]
-        else:
-            species_strs = ["{ele}{charge}{sign}".format(
-                ele=spec[0].symbol, 
-                charge=abs(spec[0].oxidation), 
-                sign='+' if spec[0].oxidation >= 0 else '-') for spec in species]
-
-        sites = {spec: [[]] for spec in species_strs}
-        return species, lattice_mat, sites
-
-    def test_smactStruc_comp_key(self):
-        """Test generation of a composition key for `SmactStructure`s."""
-        s1 = SmactStructure(*self.gen_empty_struct([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
-        s2 = SmactStructure(*self.gen_empty_struct([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
-
-        Ba = Species('Ba', 2)
-        O = Species('O', -2)
-        F = Species('F', -1)
-        Fe2 = Species('Fe', 2)
-        Fe3 = Species('Fe', 3)
-
-        s3 = SmactStructure(*self.gen_empty_struct([(Ba, 2), (O, 1), (F, 2)]))
-        s4 = SmactStructure(*self.gen_empty_struct([(Fe2, 1), (Fe3, 2), (O, 4)]))
-
-        Ba_2OF_2 = "Ba_2_2+F_2_1-O_1_2-"
-        Fe_3O_4 = "Fe_2_3+Fe_1_2+O_4_2-"
-        self.assertEqual(s1.composition(), Ba_2OF_2)
-        self.assertEqual(s2.composition(), Fe_3O_4)
-        self.assertEqual(s3.composition(), Ba_2OF_2)
-        self.assertEqual(s4.composition(), Fe_3O_4)
-    
-    def test_smactStruc_from_file(self):
-        """Test the `from_file` method of `SmactStructure`."""
-        s1 = SmactStructure.from_mp([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)])
-
-        with open(TEST_POSCAR, 'w') as f:
-            f.write(s1.as_poscar())
-        
-        s2 = SmactStructure.from_file(TEST_POSCAR)
-        self.assertEqual(s1.species, s2.species)
-        self.assertEqual(s1.lattice_mat.tolist(), s2.lattice_mat.tolist())
-        self.assertEqual(s1.lattice_param, s2.lattice_param)
-        self.assertDictEqual(s1.sites, s2.sites)
-    
-    # --------------- StructureDB ---------------
-
-    def test_db_creation(self):
-        self.assertTrue(StructureDB(TEST_DB))
-
-    def test_struct_addition(self):
-        Db = StructureDB(TEST_DB)
-        self.assertTrue(Db.add_table(TEST_TABLE))
-
-        struct = SmactStructure(*self.gen_empty_struct([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
-        self.assertTrue(Db.add_struct(struct, TEST_TABLE))
 
     # ---------------- SCREENING ----------------
 
