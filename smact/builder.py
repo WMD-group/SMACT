@@ -119,8 +119,9 @@ class SmactStructure:
                 )
 
             struct = structs[0]['structure']  # Default to first found structure
-            bva = BVAnalyzer()
-            struct = bva.get_oxi_state_decorated_structure(struct)
+            if not 0 in (spec[1] for spec in species):  # If everything's charged
+                bva = BVAnalyzer()
+                struct = bva.get_oxi_state_decorated_structure(struct)
 
         lattice_mat = struct.lattice.matrix
 
@@ -129,6 +130,12 @@ class SmactStructure:
         sites = {}
         for site in struct.sites:
             site_type = site.species_string
+            # Add charge magnitude, for cases of unit charge
+            if all([
+                site_type[-2] not in range(10),
+                site_type[-1] in ("+", "-"),]):
+                site_type = site_type[:-1] + '1' + site_type[-1]
+
             if site_type in sites:
                 sites[site_type].append(site.coords.tolist())
             else:
@@ -157,9 +164,16 @@ class SmactStructure:
 
         species = []
         for spec_str, stoic in zip(lines[0].split(" "), total_specs):
-            charge_loc = re.search(r"\d", spec_str).start()
-            symb = spec_str[:charge_loc]
-            charge = int(spec_str[-1] + spec_str[charge_loc:-1])
+            charge_match = re.search(r"\d", spec_str)
+
+            if charge_match:
+                charge_loc = charge_match.start()
+                symb = spec_str[:charge_loc]
+                charge = int(spec_str[-1] + spec_str[charge_loc:-1])
+            else:
+                symb = spec_str
+                charge = 0
+
             species.append((symb, charge, stoic))
 
         lattice_param = float(lines[1])
@@ -182,14 +196,38 @@ class SmactStructure:
 
         return SmactStructure(species, lattice, sites, lattice_param)
 
-    def _format_style(self, template: str, delim: Optional[str] = " "):
+    @staticmethod
+    def __get_sign(charge):
+        if charge > 0:
+            return '+'
+        elif charge < 0:
+            return '-'
+        else:
+            return ''
+
+    def _format_style(
+        self,
+        template: str,
+        delim: Optional[str] = " ",
+        include_ground: Optional[bool] = False,):
         """Format a given template string with the composition."""
+
+        if include_ground:
+            return delim.join(
+                template.format(
+                    ele=specie[0],
+                    stoic=specie[1],
+                    charge=abs(specie[2]),
+                    sign="+" if specie[2] >= 0 else "-",) for specie in self.species
+            )
+
         return delim.join(
             template.format(
                 ele=specie[0],
                 stoic=specie[1],
-                charge=abs(specie[2]),
-                sign='+' if specie[2] >= 0 else '-',) for specie in self.species
+                charge=abs(specie[2]) if specie[2] != 0 else "",
+                sign=self.__get_sign(specie[2]),
+            ) for specie in self.species
         )
 
     def _get_ele_stoics(self):
@@ -205,7 +243,7 @@ class SmactStructure:
     def composition(self):
         """Generate a key that describes the composition."""
         comp_style = "{ele}_{stoic}_{charge}{sign}"
-        return self._format_style(comp_style, delim="")
+        return self._format_style(comp_style, delim="", include_ground=True)
 
     def as_poscar(self):
         """Represent the structure as a POSCAR file compatible with VASP5."""
