@@ -139,15 +139,15 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(s3.composition(), Ba_2OF_2)
         self.assertEqual(s4.composition(), Fe_3O_4)
     
-    def test_smactStruc_from_poscar(self):
-        """Test the `from_poscar` method of `SmactStructure`."""
+    def test_smactStruc_from_file(self):
+        """Test the `from_file` method of `SmactStructure`."""
         s1 = SmactStructure.from_mp([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)])
 
         test_file = 'test_poscar.test'
         with open(test_file, 'w') as f:
             f.write(s1.as_poscar())
         
-        s2 = SmactStructure.from_poscar(test_file)
+        s2 = SmactStructure.from_file(test_file)
         self.assertEqual(s1.species, s2.species)
         self.assertEqual(s1.lattice_mat.tolist(), s2.lattice_mat.tolist())
         self.assertEqual(s1.lattice_param, s2.lattice_param)

@@ -24,8 +24,10 @@
 import os
 import json
 import re
+import sqlite3
+from contextlib import ContextDecorator
 import typing
-from typing import List, Tuple, Union, Optional, Dict
+from typing import List, Tuple, Union, Optional, Dict, Sequence
 from operator import itemgetter
 # First example: using ase
 
@@ -135,11 +137,16 @@ class SmactStructure:
         return SmactStructure(species, lattice_mat, sites, lattice_param)
 
     @staticmethod
-    def from_poscar(poscar_file: str):
-        """Create SmactStructure from a POSCAR file."""
+    def from_file(fname: str):
+        """Create `SmactStructure` from a POSCAR file."""
+        with open(fname, 'r') as f:
+            return SmactStructure.from_poscar(f.read())
 
-        with open(poscar_file, 'r') as f:
-            lines = f.read().split("\n")
+    @staticmethod
+    def from_poscar(poscar: str):
+        """Create `SmactStructure` from a POSCAR string."""
+
+        lines = poscar.split("\n")
 
         # Find stoichiometry
         total_specs = [int(x) for x in lines[6].split(" ")]
@@ -222,6 +229,62 @@ class SmactStructure:
                 poscar += f" {spec}\n"
 
         return poscar
+
+
+class StructureDB:
+    """SQL Structure Database interface."""
+
+    def __init__(self, db: str):
+        """Set database name."""
+        self.db = db
+
+    def __enter__(self):
+        """Initialize database connection."""
+        self.conn = sqlite3.connect(self.db)
+        self.cur = self.conn.cursor()
+
+        return self.cur
+
+    def __exit__(self, *args):
+        """Close database connection."""
+        self.conn.commit()
+        self.conn.close()
+
+    def add_table(self, table: str):
+        """Add a table to the database."""
+        with self as c:
+            c.execute(f"""CREATE TABLE {table}
+                (composition TEXT NOT NULL, structure TEXT NOT NULL)""",)
+        return True
+
+    def add_struct(self, struct: SmactStructure, table: str):
+        """Add a `SmactStructure` to a table."""
+        entry = (struct.composition(), struct.as_poscar())
+
+        with self as c:
+            c.execute(f"INSERT into {table} VALUES (?, ?)", entry)
+
+        return True
+
+    def add_structs(self, structs: Sequence[SmactStructure], table: str):
+        """Add several `SmactStructure`s to a table."""
+        with self as c:
+            entries = [(
+                struct.composition(),
+                struct.as_poscar(),) for struct in structs]
+
+            c.executemany(f"INSERT into {table} VALUES (?, ?)", entries)
+
+        return True
+
+    def get_structs(self, composition: str, table: str):
+        """Get `SmactStructures` for a given composition."""
+        with self as c:
+            c.execute(
+                f"SELECT structure FROM {table} WHERE composition = ?",
+                (composition,),)
+            structs = c.fetchall()
+        return [SmactStructure.from_poscar(pos[0]) for pos in structs]
 
 
 def cubic_perovskite(species, cell_par=[6, 6, 6, 90, 90, 90], repetitions=[1, 1, 1]):
