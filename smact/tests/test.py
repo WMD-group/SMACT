@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import unittest
+import os
 import smact
 from smact.properties import compound_electroneg, band_gap_Harrison
-from smact.builder import wurtzite, SmactStructure
+from smact.builder import wurtzite, SmactStructure, StructureDB
 import smact.screening
 import smact.lattice
 import smact.lattice_parameters
@@ -13,10 +14,21 @@ from pymatgen import Specie
 from smact import Species
 import numpy as np
 
+TEST_DB = "test.db"
+TEST_TABLE = "Structures"
+TEST_POSCAR = "test_poscar.test"
+
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
         pass
+
+    @classmethod
+    def tearDownClass(cls):
+        """Remove temporary test files."""
+        for fname in [TEST_DB, TEST_POSCAR]:
+            if os.path.exists(fname):
+                os.remove(fname)
 
     # ---------------- TOP-LEVEL ----------------
 
@@ -143,15 +155,26 @@ class TestSequenceFunctions(unittest.TestCase):
         """Test the `from_file` method of `SmactStructure`."""
         s1 = SmactStructure.from_mp([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)])
 
-        test_file = 'test_poscar.test'
-        with open(test_file, 'w') as f:
+        with open(TEST_POSCAR, 'w') as f:
             f.write(s1.as_poscar())
         
-        s2 = SmactStructure.from_file(test_file)
+        s2 = SmactStructure.from_file(TEST_POSCAR)
         self.assertEqual(s1.species, s2.species)
         self.assertEqual(s1.lattice_mat.tolist(), s2.lattice_mat.tolist())
         self.assertEqual(s1.lattice_param, s2.lattice_param)
         self.assertDictEqual(s1.sites, s2.sites)
+    
+    # --------------- StructureDB ---------------
+
+    def test_db_creation(self):
+        self.assertTrue(StructureDB(TEST_DB))
+
+    def test_struct_addition(self):
+        Db = StructureDB(TEST_DB)
+        self.assertTrue(Db.add_table(TEST_TABLE))
+
+        struct = SmactStructure(*self.gen_empty_struct([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
+        self.assertTrue(Db.add_struct(struct, TEST_TABLE))
 
     # ---------------- SCREENING ----------------
 
