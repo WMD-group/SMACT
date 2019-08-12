@@ -17,14 +17,15 @@ class StructureTest(unittest.TestCase):
     TEST_STRUCT = os.path.join(files_dir, "test_struct")
     TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
 
+    TEST_SPECIES = {
+        "CaTiO3": [('Ca', 2, 1), ('Ti', 4, 1), ('O', -2, 3)],
+        "NaCl": [('Na', 1, 1), ('Cl', -1, 1)],
+        "Fe": [('Fe', 0, 1)],
+    }
+
     def test_as_poscar(self):
         """Test POSCAR generation."""
-        test_cases = {
-            "CaTiO3": [('Ca', 2, 1), ('Ti', 4, 1), ('O', -2, 3)],
-            "NaCl": [('Na', 1, 1), ('Cl', -1, 1)],
-            "Fe": [('Fe', 0, 1)],
-        }
-        for comp in test_cases.keys():
+        for comp in self.TEST_SPECIES.keys():
             with self.subTest(comp=comp):
                 comp_file = os.path.join(files_dir, f"{comp}.txt")
                 with open(comp_file, "r") as f:
@@ -84,17 +85,38 @@ class StructureTest(unittest.TestCase):
 
         self.assertEqual(s1, s2)
 
+    def test_equality(self):
+        """Test equality determination of `SmactStructure`."""
+        struct_files = [os.path.join(files_dir, f"{x}.txt") for x in ["CaTiO3", "NaCl"]]
+        CaTiO3 = SmactStructure.from_file(struct_files[0])
+        NaCl = SmactStructure.from_file(struct_files[1])
+
+        with self.subTest(msg="Testing equality of same object."):
+            self.assertEqual(CaTiO3, CaTiO3)
+
+        with self.subTest(msg="Testing inequality of different types."):
+            self.assertNotEqual(CaTiO3, "CaTiO3")
+
+        with self.subTest(msg="Testing inequality of different objects."):
+            self.assertNotEqual(CaTiO3, NaCl)
+
+    def test_ele_stoics(self):
+        """Test acquiring element stoichiometries."""
+        s1 = SmactStructure(*self.gen_empty_struct([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
+        s1_stoics = {'Fe': 3, 'O': 4}
+        s2 = SmactStructure(*self.gen_empty_struct([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
+        s2_stoics = {'Ba': 2, 'O': 1, 'F': 2}
+
+        for test, expected in [(s1, s1_stoics), (s2, s2_stoics)]:
+            with self.subTest(species=test.species):
+                self.assertEqual(test._get_ele_stoics(), expected)
+
     @unittest.skipUnless(os.environ.get("MPI_KEY"), "requires MPI key to be set.")
     def test_from_mp(self):
         """Test downloading structures from materialsproject.org."""
         # TODO Needs ensuring that the structure query gets the same
         # structure as we have downloaded.
-        test_cases = {
-            "CaTiO3": [('Ca', 2, 1), ('Ti', 4, 1), ('O', -2, 3)],
-            "NaCl": [('Na', 1, 1), ('Cl', -1, 1)],
-            "Fe": [('Fe', 0, 1)],
-        }
-        for comp, species in test_cases.items():
+        for comp, species in self.TEST_SPECIES.items():
             with self.subTest(comp=comp):
                 comp_file = os.path.join(files_dir, f"{comp}.txt")
                 with open(comp_file, "r") as f:
