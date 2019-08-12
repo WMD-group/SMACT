@@ -60,6 +60,16 @@ class SmactStructure:
     def __repr__(self):
         return self.as_poscar()
 
+    def __eq__(self, other):
+        if not isinstance(other, SmactStructure):
+            return False
+        return all([
+            self.species == other.species,
+            self.lattice_mat.tolist() == other.lattice_mat.tolist(),
+            self.lattice_param == other.lattice_param,
+            self.sites == other.sites
+        ])
+
     @staticmethod
     def _sanitise_species(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
         """Sanitise and format a list of species."""
