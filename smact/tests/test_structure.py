@@ -2,27 +2,20 @@
 
 import unittest
 import os
+import pickle
 import numpy as np
 
 from smact import Species
 from smact.builder import SmactStructure, StructureDB
 
+files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
+
 
 class StructureTest(unittest.TestCase):
-    """Testing for the Structure predictor pipeline."""
+    """`SmactStructure` testing."""
 
-    TEST_DB = "test.db"
-    TEST_TABLE = "Structures"
-    TEST_POSCAR = "test_poscar.test"
-
-    @classmethod
-    def tearDownClass(cls):
-        """Remove temporary test files."""
-        for fname in [cls.TEST_DB, cls.TEST_POSCAR]:
-            if os.path.exists(fname):
-                os.remove(fname)
-
-    # ------------- SmactStructure --------------
+    TEST_STRUCT = os.path.join(files_dir, "test_struct")
+    TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
 
     def test_as_poscar(self):
         """Test POSCAR generation."""
@@ -31,10 +24,11 @@ class StructureTest(unittest.TestCase):
             "NaCl": [('Na', 1, 1), ('Cl', -1, 1)],
             "Fe": [('Fe', 0, 1)],
         }
-        for comp, species in test_cases.items():
+        for comp in test_cases.keys():
             with self.subTest(comp=comp):
-                with open(f"files/{comp}.txt", "r") as f:
-                    struct = SmactStructure.from_mp(species)
+                comp_file = os.path.join(files_dir, f"{comp}.txt")
+                with open(comp_file, "r") as f:
+                    struct = SmactStructure.from_file(comp_file)
                     self.assertEqual(struct.as_poscar(), f.read())
 
     @staticmethod
@@ -83,27 +77,74 @@ class StructureTest(unittest.TestCase):
 
     def test_smactStruc_from_file(self):
         """Test the `from_file` method of `SmactStructure`."""
-        s1 = SmactStructure.from_mp([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)])
-
-        with open(self.TEST_POSCAR, 'w') as f:
-            f.write(s1.as_poscar())
+        with open(self.TEST_STRUCT, 'rb') as f:
+            s1 = pickle.load(f)
 
         s2 = SmactStructure.from_file(self.TEST_POSCAR)
-        self.assertEqual(s1.species, s2.species)
-        self.assertEqual(s1.lattice_mat.tolist(), s2.lattice_mat.tolist())
-        self.assertEqual(s1.lattice_param, s2.lattice_param)
-        self.assertDictEqual(s1.sites, s2.sites)
 
-    # --------------- StructureDB ---------------
+        self.assertEqual(s1, s2)
 
-    def test_struct_addition(self):
-        """Test adding to a database."""
-        Db = StructureDB(self.TEST_DB)
-        self.assertTrue(Db.add_table(self.TEST_TABLE))
+    @unittest.skipUnless(os.environ.get("MPI_KEY"), "requires MPI key to be set.")
+    def test_from_mp(self):
+        """Test downloading structures from materialsproject.org."""
+        # TODO Needs ensuring that the structure query gets the same
+        # structure as we have downloaded.
+        test_cases = {
+            "CaTiO3": [('Ca', 2, 1), ('Ti', 4, 1), ('O', -2, 3)],
+            "NaCl": [('Na', 1, 1), ('Cl', -1, 1)],
+            "Fe": [('Fe', 0, 1)],
+        }
+        for comp, species in test_cases.items():
+            with self.subTest(comp=comp):
+                comp_file = os.path.join(files_dir, f"{comp}.txt")
+                with open(comp_file, "r") as f:
+                    local_struct = SmactStructure.from_file(comp_file)
+                    mp_struct = SmactStructure.from_mp(species)
+                    self.assertEqual(local_struct, mp_struct)
 
-        struct = SmactStructure.from_file("files/CaTiO3.txt")
-        self.assertTrue(Db.add_struct(struct, self.TEST_TABLE))
+
+class StructureDBTest(unittest.TestCase):
+    """Test StructureDB interface."""
+
+    TEST_DB = os.path.join(files_dir, "test_db.tmp")
+    TEST_TABLE = "Structures"
+
+    @classmethod
+    def tearDownClass(cls):
+        """Remove database files."""
+        if os.path.exists(cls.TEST_DB):
+            os.remove(cls.TEST_DB)
+
+    def test_db_interface(self):
+        """Test interfacing with database."""
+        with self.subTest(msg="Instantiating database."):
+            self.db = StructureDB(self.TEST_DB)
+
+        with self.subTest(msg="Adding table."):
+            self.assertTrue(self.db.add_table(self.TEST_TABLE))
+
+        struct_file = os.path.join(files_dir, "CaTiO3.txt")
+        struct = SmactStructure.from_file(struct_file)
+
+        with self.subTest(msg="Adding structure to table."):
+            self.assertTrue(self.db.add_struct(struct, self.TEST_TABLE))
+
+        with self.subTest(msg="Getting structure from table."):
+            struct_list = self.db.get_structs(struct.composition(), self.TEST_TABLE)
+            self.assertEqual(len(struct_list), 1)
+            self.assertEqual(struct_list[0], struct)
+
+        struct_files = [os.path.join(files_dir, f"{x}.txt") for x in ["NaCl", "Fe"]]
+        structs = [SmactStructure.from_file(fname) for fname in struct_files]
+
+        with self.subTest(msg="Adding multiple structures to table."):
+            self.assertTrue(self.db.add_structs(structs, self.TEST_TABLE))
 
 
 if __name__ == "__main__":
-    unittest.main()
+    TestLoader = unittest.TestLoader()
+    StructureTests = unittest.TestSuite()
+    StructureTests.addTests(TestLoader.loadTestsFromTestCase(StructureTest))
+    StructureTests.addTests(TestLoader.loadTestsFromTestCase(StructureDBTest))
+    runner = unittest.TextTestRunner()
+    result = runner.run(StructureTests)
