@@ -18,9 +18,9 @@ class StructureTest(unittest.TestCase):
     TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
 
     TEST_SPECIES = {
-        "CaTiO3": [('Ca', 2, 1), ('Ti', 4, 1), ('O', -2, 3)],
-        "NaCl": [('Na', 1, 1), ('Cl', -1, 1)],
-        "Fe": [('Fe', 0, 1)],
+      "CaTiO3": [('Ca', 2, 1), ('Ti', 4, 1), ('O', -2, 3)],
+      "NaCl": [('Na', 1, 1), ('Cl', -1, 1)],
+      "Fe": [('Fe', 0, 1)],
     }
 
     def test_as_poscar(self):
@@ -33,23 +33,24 @@ class StructureTest(unittest.TestCase):
                     self.assertEqual(struct.as_poscar(), f.read())
 
     @staticmethod
-    def gen_empty_struct(species):
+    def _gen_empty_structure(species):
         """Generate an empty set of arguments for `SmactStructure` testing."""
         lattice_mat = np.array([[0] * 3] * 3)
 
         if isinstance(species[0][0], str):
             species_strs = [
-                "{ele}{charge}{sign}".format(
-                    ele=spec[0],
-                    charge=abs(spec[1]),
-                    sign='+' if spec[1] >= 0 else '-',) for spec in species
+              "{ele}{charge}{sign}".format(
+                ele=spec[0],
+                charge=abs(spec[1]),
+                sign='+' if spec[1] >= 0 else '-', ) for spec in species
             ]
         else:
             species_strs = [
-                "{ele}{charge}{sign}".format(
-                    ele=spec[0].symbol,
-                    charge=abs(spec[0].oxidation),
-                    sign='+' if spec[0].oxidation >= 0 else '-',) for spec in species
+              "{ele}{charge}{sign}".format(
+                ele=spec[0].symbol,
+                charge=abs(spec[0].oxidation),
+                sign='+' if spec[0].oxidation >= 0 else '-',
+              ) for spec in species
             ]
 
         sites = {spec: [[]] for spec in species_strs}
@@ -57,8 +58,8 @@ class StructureTest(unittest.TestCase):
 
     def test_smactStruc_comp_key(self):
         """Test generation of a composition key for `SmactStructure`s."""
-        s1 = SmactStructure(*self.gen_empty_struct([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
-        s2 = SmactStructure(*self.gen_empty_struct([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
+        s1 = SmactStructure(*self._gen_empty_structure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
+        s2 = SmactStructure(*self._gen_empty_structure([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
 
         Ba = Species('Ba', 2)
         O = Species('O', -2)
@@ -66,8 +67,8 @@ class StructureTest(unittest.TestCase):
         Fe2 = Species('Fe', 2)
         Fe3 = Species('Fe', 3)
 
-        s3 = SmactStructure(*self.gen_empty_struct([(Ba, 2), (O, 1), (F, 2)]))
-        s4 = SmactStructure(*self.gen_empty_struct([(Fe2, 1), (Fe3, 2), (O, 4)]))
+        s3 = SmactStructure(*self._gen_empty_structure([(Ba, 2), (O, 1), (F, 2)]))
+        s4 = SmactStructure(*self._gen_empty_structure([(Fe2, 1), (Fe3, 2), (O, 4)]))
 
         Ba_2OF_2 = "Ba_2_2+F_2_1-O_1_2-"
         Fe_3O_4 = "Fe_2_3+Fe_1_2+O_4_2-"
@@ -102,9 +103,9 @@ class StructureTest(unittest.TestCase):
 
     def test_ele_stoics(self):
         """Test acquiring element stoichiometries."""
-        s1 = SmactStructure(*self.gen_empty_struct([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
+        s1 = SmactStructure(*self._gen_empty_structure([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
         s1_stoics = {'Fe': 3, 'O': 4}
-        s2 = SmactStructure(*self.gen_empty_struct([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
+        s2 = SmactStructure(*self._gen_empty_structure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
         s2_stoics = {'Ba': 2, 'O': 1, 'F': 2}
 
         for test, expected in [(s1, s1_stoics), (s2, s2_stoics)]:
@@ -119,10 +120,9 @@ class StructureTest(unittest.TestCase):
         for comp, species in self.TEST_SPECIES.items():
             with self.subTest(comp=comp):
                 comp_file = os.path.join(files_dir, f"{comp}.txt")
-                with open(comp_file, "r") as f:
-                    local_struct = SmactStructure.from_file(comp_file)
-                    mp_struct = SmactStructure.from_mp(species)
-                    self.assertEqual(local_struct, mp_struct)
+                local_struct = SmactStructure.from_file(comp_file)
+                mp_struct = SmactStructure.from_mp(species)
+                self.assertEqual(local_struct, mp_struct)
 
 
 class StructureDBTest(unittest.TestCase):
