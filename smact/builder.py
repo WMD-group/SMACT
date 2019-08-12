@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Using the ase spacegroup module this can build the structure, from
 # the composition, as defined in the smact_lattice module.
-#TODO:
+# TODO:
 # Estimate the cell parameters based on radii from tables.
 # Add further types, Spinnel, Flourite, Delafossite ....
 # Implement Structure class, c.f. dev_docs.
@@ -22,11 +22,8 @@
 ################################################################################
 
 import os
-import json
 import re
 import sqlite3
-from contextlib import ContextDecorator
-import typing
 from typing import List, Tuple, Union, Optional, Dict, Sequence
 from operator import itemgetter
 # First example: using ase
@@ -43,14 +40,13 @@ class SmactStructure:
     """SMACT implementation inspired by pymatgen Structure class."""
 
     def __init__(
-        self,
-        species: List[Union[Tuple[str, int, int], Tuple[Species, int]]],
-        lattice_mat: np.ndarray,
-        sites: Dict[str, List[List[float]]],
-        lattice_param: Optional[float] = 1.0,
+      self,
+      species: List[Union[Tuple[str, int, int], Tuple[Species, int]]],
+      lattice_mat: np.ndarray,
+      sites: Dict[str, List[List[float]]],
+      lattice_param: Optional[float] = 1.0,
     ):
         """Initialize class with constituent species."""
-
         self.species = self._sanitise_species(species)
         self.lattice_mat = lattice_mat
         species_strs = self._format_style("{ele}{charge}{sign}")
@@ -58,22 +54,26 @@ class SmactStructure:
         self.lattice_param = lattice_param
 
     def __repr__(self):
+        """Represent the structure as a POSCAR.
+
+        Alias for `as_poscar`.
+        """
         return self.as_poscar()
 
     def __eq__(self, other):
+        """Determine equality of structures based on their attributes."""
         if not isinstance(other, SmactStructure):
             return False
         return all([
-            self.species == other.species,
-            self.lattice_mat.tolist() == other.lattice_mat.tolist(),
-            self.lattice_param == other.lattice_param,
-            self.sites == other.sites
+          self.species == other.species,
+          self.lattice_mat.tolist() == other.lattice_mat.tolist(),
+          self.lattice_param == other.lattice_param,
+          self.sites == other.sites
         ])
 
     @staticmethod
     def _sanitise_species(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
         """Sanitise and format a list of species."""
-
         if not isinstance(species, list):
             raise TypeError(f"`species` must be a list, got {type(species)}.")
         if len(species) == 0:
@@ -82,9 +82,9 @@ class SmactStructure:
             raise TypeError(f"`species` must be a list of tuples, got list of {type(species[0])}.")
 
         species_error = (
-            "`species` list of tuples must contain either "
-            "2-tuples of Species objects and stoichiometries, "
-            "or 3-tuples of elements, oxidations and stoichiometries."
+          "`species` list of tuples must contain either "
+          "2-tuples of Species objects and stoichiometries, "
+          "or 3-tuples of elements, oxidations and stoichiometries."
         )
         if len(species[0]) not in {2, 3}:
             raise ValueError(species_error)
@@ -104,9 +104,8 @@ class SmactStructure:
         return sanit_species
 
     @staticmethod
-    def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
+    def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]) -> SmactStructure:
         """Create a SmactStructure using the first Materials Project entry for a composition."""
-
         MPI_KEY = os.environ.get("MPI_KEY")
 
         with MPRester(MPI_KEY) as m:
@@ -119,17 +118,17 @@ class SmactStructure:
 
             formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
             structs = m.query(
-                criteria={"reduced_cell_formula": formula},
-                properties=["structure"],)
+              criteria={"reduced_cell_formula": formula},
+              properties=["structure"], )
 
             if len(structs) == 0:
                 raise ValueError(
-                    "Could not find composition in Materials Project Database, "
-                    "please supply a structure."
+                  "Could not find composition in Materials Project Database, "
+                  "please supply a structure."
                 )
 
             struct = structs[0]['structure']  # Default to first found structure
-            if not 0 in (spec[1] for spec in species):  # If everything's charged
+            if 0 not in (spec[1] for spec in species):  # If everything's charged
                 bva = BVAnalyzer()
                 struct = bva.get_oxi_state_decorated_structure(struct)
 
@@ -142,8 +141,8 @@ class SmactStructure:
             site_type = site.species_string
             # Add charge magnitude, for cases of unit charge
             if all([
-                site_type[-2] not in map(str, range(10)),
-                site_type[-1] in ("+", "-"),]):
+              site_type[-2] not in map(str, range(10)),
+              site_type[-1] in ("+", "-"), ]):
                 site_type = site_type[:-1] + '1' + site_type[-1]
 
             if site_type in sites:
@@ -154,15 +153,14 @@ class SmactStructure:
         return SmactStructure(species, lattice_mat, sites, lattice_param)
 
     @staticmethod
-    def from_file(fname: str):
+    def from_file(fname: str) -> SmactStructure:
         """Create `SmactStructure` from a POSCAR file."""
         with open(fname, 'r') as f:
             return SmactStructure.from_poscar(f.read())
 
     @staticmethod
-    def from_poscar(poscar: str):
+    def from_poscar(poscar: str) -> SmactStructure:
         """Create `SmactStructure` from a POSCAR string."""
-
         lines = poscar.split("\n")
 
         # Find stoichiometry
@@ -207,7 +205,7 @@ class SmactStructure:
         return SmactStructure(species, lattice, sites, lattice_param)
 
     @staticmethod
-    def __get_sign(charge):
+    def __get_sign(charge: int) -> str:
         if charge > 0:
             return '+'
         elif charge < 0:
@@ -216,31 +214,31 @@ class SmactStructure:
             return ''
 
     def _format_style(
-        self,
-        template: str,
-        delim: Optional[str] = " ",
-        include_ground: Optional[bool] = False,):
+      self,
+      template: str,
+      delim: Optional[str] = " ",
+      include_ground: Optional[bool] = False, ) -> str:
         """Format a given template string with the composition."""
-
         if include_ground:
             return delim.join(
-                template.format(
-                    ele=specie[0],
-                    stoic=specie[1],
-                    charge=abs(specie[2]),
-                    sign="+" if specie[2] >= 0 else "-",) for specie in self.species
+              template.format(
+                ele=specie[0],
+                stoic=specie[1],
+                charge=abs(specie[2]),
+                sign="+" if specie[2] >= 0 else "-",
+              ) for specie in self.species
             )
 
         return delim.join(
-            template.format(
-                ele=specie[0],
-                stoic=specie[1],
-                charge=abs(specie[2]) if specie[2] != 0 else "",
-                sign=self.__get_sign(specie[2]),
-            ) for specie in self.species
+          template.format(
+            ele=specie[0],
+            stoic=specie[1],
+            charge=abs(specie[2]) if specie[2] != 0 else "",
+            sign=self.__get_sign(specie[2]),
+          ) for specie in self.species
         )
 
-    def _get_ele_stoics(self):
+    def _get_ele_stoics(self) -> Dict[str, int]:
         """Get the number of each element type in the compound, irrespective of oxidation state."""
         eles = {}
         for specie in self.species:
@@ -250,13 +248,18 @@ class SmactStructure:
                 eles[specie[0]] = specie[1]
         return eles
 
-    def composition(self):
+    def composition(self) -> str:
         """Generate a key that describes the composition."""
         comp_style = "{ele}_{stoic}_{charge}{sign}"
         return self._format_style(comp_style, delim="", include_ground=True)
 
-    def as_poscar(self):
-        """Represent the structure as a POSCAR file compatible with VASP5."""
+    def as_poscar(self) -> str:
+        """Represent the structure as a POSCAR file compatible with VASP5.
+
+        Returns:
+            poscar (str) : POSCAR-style representation of the structure.
+
+        """
         poscar = self._format_style("{ele}{charge}{sign}") + "\n"
 
         poscar += f"{self.lattice_param}\n"
@@ -286,7 +289,7 @@ class StructureDB:
         """Set database name."""
         self.db = db
 
-    def __enter__(self):
+    def __enter__(self) -> sqlite3.Cursor:
         """Initialize database connection."""
         self.conn = sqlite3.connect(self.db)
         self.cur = self.conn.cursor()
@@ -298,14 +301,16 @@ class StructureDB:
         self.conn.commit()
         self.conn.close()
 
-    def add_table(self, table: str):
+    def add_table(self, table: str) -> bool:
         """Add a table to the database."""
         with self as c:
-            c.execute(f"""CREATE TABLE {table}
-                (composition TEXT NOT NULL, structure TEXT NOT NULL)""",)
+            c.execute(
+              f"""CREATE TABLE {table}
+                (composition TEXT NOT NULL, structure TEXT NOT NULL)""",
+            )
         return True
 
-    def add_struct(self, struct: SmactStructure, table: str):
+    def add_struct(self, struct: SmactStructure, table: str) -> bool:
         """Add a `SmactStructure` to a table."""
         entry = (struct.composition(), struct.as_poscar())
 
@@ -314,23 +319,23 @@ class StructureDB:
 
         return True
 
-    def add_structs(self, structs: Sequence[SmactStructure], table: str):
+    def add_structs(self, structs: Sequence[SmactStructure], table: str) -> bool:
         """Add several `SmactStructure`s to a table."""
         with self as c:
             entries = [(
-                struct.composition(),
-                struct.as_poscar(),) for struct in structs]
+              struct.composition(),
+              struct.as_poscar(), ) for struct in structs]
 
             c.executemany(f"INSERT into {table} VALUES (?, ?)", entries)
 
         return True
 
-    def get_structs(self, composition: str, table: str):
+    def get_structs(self, composition: str, table: str) -> List[SmactStructure]:
         """Get `SmactStructures` for a given composition."""
         with self as c:
             c.execute(
-                f"SELECT structure FROM {table} WHERE composition = ?",
-                (composition,),)
+              f"SELECT structure FROM {table} WHERE composition = ?",
+              (composition, ), )
             structs = c.fetchall()
         return [SmactStructure.from_poscar(pos[0]) for pos in structs]
 
