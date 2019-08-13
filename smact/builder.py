@@ -42,7 +42,7 @@ class SmactStructure:
     Handles basic structural and compositional information for a compound.
     Includes a lossless POSCAR-style specification for storing structures,
     allowing structures to be stored in files or databases, or to be pulled
-    from materialsproject.org.
+    from the `Materials Project <https://www.materialsproject.org>`_.
 
     Attributes:
         species: A list of tuples describing the composition of the structure,
@@ -54,8 +54,9 @@ class SmactStructure:
             representation of the species and coords is a list of position
             vectors, given as lists of length 3. For example:
 
-            {'Cl1-': [[2.323624165, 1.643050405, 4.02463512]],
-            'Na1+': [[0.0, 0.0, 0.0]]}
+            >>> s = SmactStructure.from_file('tests/files/NaCl.txt')
+            >>> s.sites
+            {'Cl1-': [[2.323624165, 1.643050405, 4.02463512]], 'Na1+': [[0.0, 0.0, 0.0]]}
 
         lattice_param: The lattice parameter.
 
@@ -79,7 +80,7 @@ class SmactStructure:
             lattice_param: See :class:`~.SmactStructure`.
             sanitise_species: Whether to sanitise check species. Should be `True` unless
                 species have already been sanitised by a different constructor like
-                `from_mp`.
+                :meth:`~.from_mp`.
 
         """
         self.species = self._sanitise_species(species) if sanitise_species else species
@@ -100,7 +101,12 @@ class SmactStructure:
         return self.as_poscar()
 
     def __eq__(self, other):
-        """Determine equality of structures based on their attributes."""
+        """Determine equality of structures based on their attributes.
+
+        :attr:`~.species`, :attr:`~.lattice_mat`, :attr:`~.lattice_param` and
+        :attr:`~.sites` must all be equal for the comparison to be True.
+
+        """
         if not isinstance(other, SmactStructure):
             return False
         return all([
@@ -165,6 +171,9 @@ class SmactStructure:
         Args:
             species: See :meth:`~.__init__`.
 
+        Returns:
+            :class:`~.SmactStructure`
+
         """
         MPI_KEY = os.environ.get("MPI_KEY")
 
@@ -215,14 +224,14 @@ class SmactStructure:
 
     @staticmethod
     def from_file(fname: str):
-        """Create `SmactStructure` from a POSCAR file.
+        """Create SmactStructure from a POSCAR file.
 
         Args:
             fname: The name of the POSCAR file.
                 See :meth:`~.as_poscar` for format specification.
 
         Returns:
-            SmactStructure
+            :class:`~.SmactStructure`
 
         """
         with open(fname, 'r') as f:
@@ -230,14 +239,14 @@ class SmactStructure:
 
     @staticmethod
     def from_poscar(poscar: str):
-        """Create `SmactStructure` from a POSCAR string.
+        """Create SmactStructure from a POSCAR string.
 
         Args:
             poscar: A SMACT-formatted POSCAR string.
                 See :meth:`~.as_poscar` for format specification.
 
         Returns:
-            SmactStructure
+            :class:`~.SmactStructure`
 
         """
         lines = poscar.split("\n")
@@ -291,7 +300,7 @@ class SmactStructure:
             charge: The number whose sign to derive.
 
         Returns:
-            Sign, either '+', '-' or '' for neutral.
+            Sign; either '+', '-' or '' for neutral.
 
         """
         if charge > 0:
@@ -380,7 +389,7 @@ class SmactStructure:
         """Generate a key that describes the composition.
 
         Key format is '{element}_{stoichiometry}_{charge}{sign}'
-        with no delimiter. Species are ordered as stored within
+        with no delimiter, *sans brackets*. Species are ordered as stored within
         the structure, see :class:`~.SmactStructure`.
 
         Returns:
@@ -398,8 +407,24 @@ class SmactStructure:
     def as_poscar(self) -> str:
         """Represent the structure as a POSCAR file compatible with VASP5.
 
+        The POSCAR format adopted is as follows:
+
+        The first line contains the species' names separated by a whitespace.
+        The second through fourth line, inclusive, contain the lattice
+        matrix: each line contains a lattice vector, with elements
+        separated by a whitespace.
+        The fifth line contains the elements' names separated by a whitespace.
+        If more than one oxidation state exists for an element, the element
+        appears multiple times; once for each oxidation state.
+        The sixth line is the string 'Cartesian'.
+        The seventh line onwards are the Cartesian coordinates of each site,
+        separated by a whitespace. In addition, at the end of each line is the
+        species' name, separated by a whitespace.
+
+        For examples of this format, see the text files under tests/files.
+
         Returns:
-            poscar (str) : POSCAR-style representation of the structure.
+            str: POSCAR-style representation of the structure.
 
         """
         poscar = self._format_style("{ele}{charge}{sign}") + "\n"
@@ -425,7 +450,32 @@ class SmactStructure:
 
 
 class StructureDB:
-    """SQL Structure Database interface."""
+    """SQLite Structure Database interface.
+
+    Acts as a context manager for database interfacing
+    and wraps several useful SQLite commands within
+    methods.
+
+    Attributes:
+        db: The database name.
+        conn: The database connection. Only open when
+            used as a context manager.
+        cur: The database connection cursor. Only usable
+            when class implemented as context manager.
+
+    Examples:
+        Connecting to a database in memory:
+        >>> DB = StructureDB(':memory:')
+        >>> with DB as c:
+        ...     _ = c.execute("CREATE TABLE test (id, val)")
+        ...     c.execute("SELECT * FROM test").fetchall()
+        []
+        >>> DB.cur.execute("SELECT * FROM test").fetchall()
+        Traceback (most recent call last):
+            ...
+        sqlite3.ProgrammingError: Cannot operate on a closed database.
+
+    """
 
     def __init__(self, db: str):
         """Set database name."""
@@ -444,7 +494,15 @@ class StructureDB:
         self.conn.close()
 
     def add_table(self, table: str) -> bool:
-        """Add a table to the database."""
+        """Add a table to the database.
+
+        Args:
+            table: The name of the table to add
+
+        Returns:
+            bool: Whether the operation was successful.
+
+        """
         with self as c:
             c.execute(
               f"""CREATE TABLE {table}
@@ -453,7 +511,16 @@ class StructureDB:
         return True
 
     def add_struct(self, struct: SmactStructure, table: str) -> bool:
-        """Add a `SmactStructure` to a table."""
+        """Add a SmactStructure to a table.
+
+        Args:
+            struct: The :class:`~.SmactStructure` to add.
+            table: The name of the table to add the structure to.
+
+        Returns:
+            bool: Whether the operation was successful.
+
+        """
         entry = (struct.composition(), struct.as_poscar())
 
         with self as c:
@@ -462,7 +529,16 @@ class StructureDB:
         return True
 
     def add_structs(self, structs: Sequence[SmactStructure], table: str) -> bool:
-        """Add several `SmactStructure`s to a table."""
+        """Add several SmactStructures to a table.
+
+        Args:
+            structs: Iterable of :class:`~.SmactStructure`s to add to table.
+            table: The name of the table to add the structs to.
+
+        Returns:
+            bool: Whether the operation was successful.
+
+        """
         with self as c:
             entries = [(
               struct.composition(),
@@ -473,7 +549,17 @@ class StructureDB:
         return True
 
     def get_structs(self, composition: str, table: str) -> List[SmactStructure]:
-        """Get `SmactStructures` for a given composition."""
+        """Get SmactStructures for a given composition.
+
+        Args:
+            composition: The composition to search for.
+                See :meth:`SmactStructure.composition`.
+            table: The name of the table in which to search.
+
+        Returns:
+            A list of :class:`~.SmactStructure` s.
+
+        """
         with self as c:
             c.execute(
               f"SELECT structure FROM {table} WHERE composition = ?",
