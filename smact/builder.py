@@ -37,7 +37,29 @@ from smact.lattice import Lattice, Site
 
 
 class SmactStructure:
-    """SMACT implementation inspired by pymatgen Structure class."""
+    """SMACT implementation inspired by pymatgen Structure class.
+
+    Handles basic structural and compositional information for a compound.
+    Includes a lossless POSCAR-style specification for storing structures,
+    allowing structures to be stored in files or databases, or to be pulled
+    from materialsproject.org.
+
+    Attributes:
+        species: A list of tuples describing the composition of the structure,
+            stored as (element, oxidation, stoichiometry). The list is sorted
+            alphabetically based on element symbol, and identical elements
+            are sorted with highest charge first.
+        lattice_mat: A numpy 3x3 array containing the lattice vectors.
+        sites: A dictionary of {species: coords}, where species is a string
+            representation of the species and coords is a list of position
+            vectors, given as lists of length 3. For example:
+
+            {'Cl1-': [[2.323624165, 1.643050405, 4.02463512]],
+            'Na1+': [[0.0, 0.0, 0.0]]}
+
+        lattice_param: The lattice parameter.
+
+    """
 
     def __init__(
       self,
@@ -47,7 +69,19 @@ class SmactStructure:
       lattice_param: Optional[float] = 1.0,
       sanitise_species: Optional[bool] = True,
     ):
-        """Initialize class with constituent species."""
+        """Initialize structure with constituent species.
+
+        Args:
+            species: See :class:`~.SmactStructure`. May be supplied as either a list of
+                (element, oxidation, stoichiometry) or (smact.Species, stoichiometry).
+            lattice_mat: See :class:`~.SmactStructure`.
+            sites: See :class:`~.SmactStructure`.
+            lattice_param: See :class:`~.SmactStructure`.
+            sanitise_species: Whether to sanitise check species. Should be `True` unless
+                species have already been sanitised by a different constructor like
+                `from_mp`.
+
+        """
         self.species = self._sanitise_species(species) if sanitise_species else species
 
         self.lattice_mat = lattice_mat
@@ -61,7 +95,7 @@ class SmactStructure:
     def __repr__(self):
         """Represent the structure as a POSCAR.
 
-        Alias for `as_poscar`.
+        Alias for :meth:`~.as_poscar`.
         """
         return self.as_poscar()
 
@@ -80,7 +114,21 @@ class SmactStructure:
     def _sanitise_species(
       species: List[Union[Tuple[str, int, int], Tuple[Species, int]]],
     ) -> List[Tuple[str, int, int]]:
-        """Sanitise and format a list of species."""
+        """Sanitise and format a list of species.
+
+        Args:
+            species: See :meth:`~.__init__`.
+
+        Returns:
+            sanit_species: Sanity-checked species in the format of
+            a list of (element, oxidation, stoichiometry).
+
+        Raises:
+            TypeError: species contains the wrong types.
+            ValueError: species is either empty or contains tuples of
+                incorrect length.
+
+        """
         if not isinstance(species, list):
             raise TypeError(f"`species` must be a list, got {type(species)}.")
         if len(species) == 0:
@@ -99,11 +147,11 @@ class SmactStructure:
         if isinstance(species[0][0], str):  # String variation of instantiation
             species.sort(key=itemgetter(1), reverse=True)
             species.sort(key=itemgetter(0))
-            sanit_species = [(x[0], x[2], x[1]) for x in species]  # Rearrange
+            sanit_species = species
 
         elif isinstance(species[0][0], Species):  # Species class variation of instantiation
             species.sort(key=lambda x: (x[0].symbol, -x[0].oxidation))
-            sanit_species = [(x[0].symbol, x[1], x[0].oxidation) for x in species]
+            sanit_species = [(x[0].symbol, x[0].oxidation, x[1]) for x in species]
 
         else:
             raise TypeError(species_error)
@@ -112,7 +160,12 @@ class SmactStructure:
 
     @staticmethod
     def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
-        """Create a SmactStructure using the first Materials Project entry for a composition."""
+        """Create a SmactStructure using the first Materials Project entry for a composition.
+
+        Args:
+            species: See :meth:`~.__init__`.
+
+        """
         MPI_KEY = os.environ.get("MPI_KEY")
 
         sanit_species = SmactStructure._sanitise_species(species)
@@ -131,7 +184,7 @@ class SmactStructure:
                 )
 
             struct = structs[0]['structure']  # Default to first found structure
-            if 0 not in (spec[1] for spec in species):  # If everything's charged
+            if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
                 bva = BVAnalyzer()
                 struct = bva.get_oxi_state_decorated_structure(struct)
 
@@ -162,13 +215,31 @@ class SmactStructure:
 
     @staticmethod
     def from_file(fname: str):
-        """Create `SmactStructure` from a POSCAR file."""
+        """Create `SmactStructure` from a POSCAR file.
+
+        Args:
+            fname: The name of the POSCAR file.
+                See :meth:`~.as_poscar` for format specification.
+
+        Returns:
+            SmactStructure
+
+        """
         with open(fname, 'r') as f:
             return SmactStructure.from_poscar(f.read())
 
     @staticmethod
     def from_poscar(poscar: str):
-        """Create `SmactStructure` from a POSCAR string."""
+        """Create `SmactStructure` from a POSCAR string.
+
+        Args:
+            poscar: A SMACT-formatted POSCAR string.
+                See :meth:`~.as_poscar` for format specification.
+
+        Returns:
+            SmactStructure
+
+        """
         lines = poscar.split("\n")
 
         # Find stoichiometry
@@ -214,6 +285,15 @@ class SmactStructure:
 
     @staticmethod
     def __get_sign(charge: int) -> str:
+        """Get string representation of a number's sign.
+
+        Args:
+            charge: The number whose sign to derive.
+
+        Returns:
+            Sign, either '+', '-' or '' for neutral.
+
+        """
         if charge > 0:
             return '+'
         elif charge < 0:
@@ -226,39 +306,92 @@ class SmactStructure:
       template: str,
       delim: Optional[str] = " ",
       include_ground: Optional[bool] = False, ) -> str:
-        """Format a given template string with the composition."""
+        """Format a given template string with the composition.
+
+        Formats a python template string with species information,
+        with each species separated by a given delimiter.
+
+        Args:
+            template: Template string to format, using python's
+                curly brackets notation. Supported keywords are
+                `ele` for the elemental symbol, `stoic` for the
+                stoichiometry, `charge` for the absolute value
+                of oxidation state and `sign` for the 
+                oxidation state's sign.
+            delim: The delimeter between species' templates.
+            include_ground: Whether to include the charge and sign
+                of neutral species. See also :meth:`~.__get_sign`.
+        
+        Returns:
+            String of templates formatted for each species, separated
+                by `delim`.
+        
+        Examples:
+            >>> s = SmactStructure.from_file('tests/files/CaTiO3.txt')
+            >>> template = '{stoic}x{ele}{charge}{sign}'
+            >>> print(s._format_style(template))
+            1xCa2+ 3xO2- 1xTi4+
+
+        """
         if include_ground:
             return delim.join(
               template.format(
                 ele=specie[0],
-                stoic=specie[1],
-                charge=abs(specie[2]),
-                sign="+" if specie[2] >= 0 else "-",
+                stoic=specie[2],
+                charge=abs(specie[1]),
+                sign="+" if specie[1] >= 0 else "-",
               ) for specie in self.species
             )
 
         return delim.join(
           template.format(
             ele=specie[0],
-            stoic=specie[1],
-            charge=abs(specie[2]) if specie[2] != 0 else "",
-            sign=self.__get_sign(specie[2]),
+            stoic=specie[2],
+            charge=abs(specie[1]) if specie[1] != 0 else "",
+            sign=self.__get_sign(specie[1]),
           ) for specie in self.species
         )
 
     @staticmethod
     def _get_ele_stoics(species: List[Tuple[str, int, int]]) -> Dict[str, int]:
-        """Get the number of each element type in the compound, irrespective of oxidation state."""
+        """Get the number of each element type in the compound, irrespective of oxidation state.
+
+        Args:
+            species: See :meth:`~.__init__`.
+
+        Returns:
+            eles: Dictionary of {element: stoichiometry}.
+
+        Examples:
+            >>> species = [('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]
+            >>> print(SmactStructure._get_ele_stoics(species))
+            {'Fe': 3, 'O': 4}
+
+        """
         eles = {}
         for specie in species:
             if specie[0] in eles:
-                eles[specie[0]] += specie[1]
+                eles[specie[0]] += specie[2]
             else:
-                eles[specie[0]] = specie[1]
+                eles[specie[0]] = specie[2]
         return eles
 
     def composition(self) -> str:
-        """Generate a key that describes the composition."""
+        """Generate a key that describes the composition.
+
+        Key format is '{element}_{stoichiometry}_{charge}{sign}'
+        with no delimiter. Species are ordered as stored within
+        the structure, see :class:`~.SmactStructure`.
+
+        Returns:
+            Key describing constituent species.
+
+        Examples:
+            >>> s = SmactStructure.from_file('tests/files/CaTiO3.txt')
+            >>> print(s.composition())
+            Ca_1_2+O_3_2-Ti_1_4+
+
+        """
         comp_style = "{ele}_{stoic}_{charge}{sign}"
         return self._format_style(comp_style, delim="", include_ground=True)
 

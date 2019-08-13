@@ -10,13 +10,26 @@ from smact import Species
 from smact.builder import SmactStructure, StructureDB
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
+TEST_STRUCT = os.path.join(files_dir, "test_struct")
+TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
+
+
+def generate_test_structure(comp: str) -> bool:
+    """Generate a pickled test structure for comparison."""
+    poscar_file = os.path.join(files_dir, f"{comp}.txt")
+    s = SmactStructure.from_file(poscar_file)
+
+    with open(TEST_STRUCT, 'wb') as f:
+        pickle.dump(s, f)
+
+    with open(TEST_POSCAR, 'w') as f:
+        f.write(s.as_poscar())
+
+    return True
 
 
 class StructureTest(unittest.TestCase):
     """`SmactStructure` testing."""
-
-    TEST_STRUCT = os.path.join(files_dir, "test_struct")
-    TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
 
     TEST_SPECIES = {
       "CaTiO3": [('Ca', 2, 1), ('Ti', 4, 1), ('O', -2, 3)],
@@ -80,10 +93,10 @@ class StructureTest(unittest.TestCase):
 
     def test_smactStruc_from_file(self):
         """Test the `from_file` method of `SmactStructure`."""
-        with open(self.TEST_STRUCT, 'rb') as f:
+        with open(TEST_STRUCT, 'rb') as f:
             s1 = pickle.load(f)
 
-        s2 = SmactStructure.from_file(self.TEST_POSCAR)
+        s2 = SmactStructure.from_file(TEST_POSCAR)
 
         self.assertEqual(s1, s2)
 
