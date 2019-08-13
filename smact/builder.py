@@ -21,12 +21,11 @@
 #                                                                              #
 ################################################################################
 
-import functools
 import os
 import re
 import sqlite3
 from operator import itemgetter
-from typing import Dict, List, Optional, Sequence, Tuple, Union, Callable
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from ase.spacegroup import crystal
