@@ -111,7 +111,7 @@ class StructureTest(unittest.TestCase):
 
         for test, expected in [(s1, s1_stoics), (s2, s2_stoics)]:
             with self.subTest(species=test.species):
-                self.assertEqual(test._get_ele_stoics(), expected)
+                self.assertEqual(SmactStructure._get_ele_stoics(test.species), expected)
 
     @unittest.skipUnless(os.environ.get("MPI_KEY"), "requires MPI key to be set.")
     def test_from_mp(self):

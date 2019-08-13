@@ -21,11 +21,12 @@
 #                                                                              #
 ################################################################################
 
+import functools
 import os
 import re
 import sqlite3
 from operator import itemgetter
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union, Callable
 
 import numpy as np
 from ase.spacegroup import crystal
@@ -45,12 +46,17 @@ class SmactStructure:
       lattice_mat: np.ndarray,
       sites: Dict[str, List[List[float]]],
       lattice_param: Optional[float] = 1.0,
+      sanitise_species: Optional[bool] = True,
     ):
         """Initialize class with constituent species."""
-        self.species = self._sanitise_species(species)
+        self.species = self._sanitise_species(species) if sanitise_species else species
+
         self.lattice_mat = lattice_mat
+
         species_strs = self._format_style("{ele}{charge}{sign}")
+
         self.sites = {spec: sites[spec] for spec in species_strs.split(" ")}  # Sort sites
+
         self.lattice_param = lattice_param
 
     def __repr__(self):
@@ -72,7 +78,9 @@ class SmactStructure:
         ])
 
     @staticmethod
-    def _sanitise_species(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
+    def _sanitise_species(
+      species: List[Union[Tuple[str, int, int], Tuple[Species, int]]],
+    ) -> List[Tuple[str, int, int]]:
         """Sanitise and format a list of species."""
         if not isinstance(species, list):
             raise TypeError(f"`species` must be a list, got {type(species)}.")
@@ -104,18 +112,14 @@ class SmactStructure:
         return sanit_species
 
     @staticmethod
-    def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]) -> SmactStructure:
+    def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
         """Create a SmactStructure using the first Materials Project entry for a composition."""
         MPI_KEY = os.environ.get("MPI_KEY")
 
-        with MPRester(MPI_KEY) as m:
-            eles = {}
-            for spec in species:
-                if spec[0] in eles:
-                    eles[spec[0]] += spec[2]
-                else:
-                    eles[spec[0]] = spec[2]
+        sanit_species = SmactStructure._sanitise_species(species)
 
+        with MPRester(MPI_KEY) as m:
+            eles = SmactStructure._get_ele_stoics(sanit_species)
             formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
             structs = m.query(
               criteria={"reduced_cell_formula": formula},
@@ -150,16 +154,21 @@ class SmactStructure:
             else:
                 sites[site_type] = [site.coords.tolist()]
 
-        return SmactStructure(species, lattice_mat, sites, lattice_param)
+        return SmactStructure(
+          sanit_species,
+          lattice_mat,
+          sites,
+          lattice_param,
+          sanitise_species=False, )
 
     @staticmethod
-    def from_file(fname: str) -> SmactStructure:
+    def from_file(fname: str):
         """Create `SmactStructure` from a POSCAR file."""
         with open(fname, 'r') as f:
             return SmactStructure.from_poscar(f.read())
 
     @staticmethod
-    def from_poscar(poscar: str) -> SmactStructure:
+    def from_poscar(poscar: str):
         """Create `SmactStructure` from a POSCAR string."""
         lines = poscar.split("\n")
 
@@ -238,10 +247,11 @@ class SmactStructure:
           ) for specie in self.species
         )
 
-    def _get_ele_stoics(self) -> Dict[str, int]:
+    @staticmethod
+    def _get_ele_stoics(species: List[Tuple[str, int, int]]) -> Dict[str, int]:
         """Get the number of each element type in the compound, irrespective of oxidation state."""
         eles = {}
-        for specie in self.species:
+        for specie in species:
             if specie[0] in eles:
                 eles[specie[0]] += specie[1]
             else:
