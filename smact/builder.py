@@ -24,16 +24,16 @@
 import os
 import re
 import sqlite3
-from typing import List, Tuple, Union, Optional, Dict, Sequence
 from operator import itemgetter
-# First example: using ase
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
-from ase.spacegroup import crystal
-from smact.lattice import Lattice, Site
-from smact import Species
-from pymatgen.ext.matproj import MPRester
-from pymatgen.analysis.bond_valence import BVAnalyzer
 import numpy as np
+from ase.spacegroup import crystal
+from pymatgen.analysis.bond_valence import BVAnalyzer
+from pymatgen.ext.matproj import MPRester
+
+from smact import Species
+from smact.lattice import Lattice, Site
 
 
 class SmactStructure:

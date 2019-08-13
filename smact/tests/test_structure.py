@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import unittest
 import os
 import pickle
+import unittest
+
 import numpy as np
 
 from smact import Species
