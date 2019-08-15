@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+import json
 import os
 import pickle
 import unittest
 
 import numpy as np
+import pymatgen
 
 from smact import Species
 from smact.builder import SmactStructure, StructureDB
@@ -12,6 +14,7 @@ from smact.builder import SmactStructure, StructureDB
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_STRUCT = os.path.join(files_dir, "test_struct")
 TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
+TEST_PY_STRUCT = os.path.join(files_dir, "pymatgen_structure.json")
 
 
 def generate_test_structure(comp: str) -> bool:
@@ -69,6 +72,18 @@ class StructureTest(unittest.TestCase):
 
         sites = {spec: [[]] for spec in species_strs}
         return species, lattice_mat, sites
+
+    def test_from_py_struct(self):
+        """Test generation of SmactStructure from a pymatgen Structure."""
+        with open(TEST_PY_STRUCT, 'r') as f:
+            d = json.load(f)
+            py_structure = pymatgen.Structure.from_dict(d)
+
+        s1 = SmactStructure.from_py_struct(py_structure)
+
+        s2 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
+
+        self.assertEqual(s1, s2)
 
     def test_smactStruc_comp_key(self):
         """Test generation of a composition key for `SmactStructure`s."""

@@ -24,11 +24,13 @@
 import os
 import re
 import sqlite3
+import logging
 from operator import itemgetter
 from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from ase.spacegroup import crystal
+import pymatgen
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.ext.matproj import MPRester
 
@@ -165,6 +167,83 @@ class SmactStructure:
         return sanit_species
 
     @staticmethod
+    def __parse_py_sites(structure: pymatgen.Structure
+                        ) -> Tuple[Dict[str, List[List[float]]], List[Tuple[str, int, int]]]:
+        """Parse the sites of a pymatgen Structure."""
+        if not isinstance(structure, pymatgen.Structure):
+            raise TypeError("structure must be a pymatgen.Strucutre instance.")
+
+        sites = {}
+        for site in structure.sites:
+            site_type = site.species_string
+            # Add charge magnitude, for cases of unit charge
+            if all([
+              site_type[-2] not in map(str, range(10)),
+              site_type[-1] in ("+", "-"), ]):
+                site_type = site_type[:-1] + '1' + site_type[-1]
+
+            if site_type in sites:
+                sites[site_type].append(site.coords.tolist())
+            else:
+                sites[site_type] = [site.coords.tolist()]
+
+        # Find stoichiometry
+        total_specs = [len(val) for val in sites.values()]
+        total_spec_sum = sum(total_specs)
+        total_specs = [x / total_spec_sum for x in total_specs]
+        total_spec_min = min(total_specs)
+        total_specs = [round(x / total_spec_min) for x in total_specs]
+
+        species = []
+        for spec, stoic in zip(sites.keys(), total_specs):
+            charge_match = re.search(r"\d", spec)
+
+            if charge_match:
+                charge_loc = charge_match.start()
+                symb = spec[:charge_loc]
+                charge = int(spec[-1] + spec[charge_loc:-1])
+            else:
+                symb = spec
+                charge = 0
+
+            species.append((symb, charge, stoic))
+
+        return sites, species
+
+    @staticmethod
+    def from_py_struct(structure: pymatgen.Structure):
+        """Create a SmactStructure from a pymatgen Structure object.
+
+        Args:
+            structure: A pymatgen Structure.
+
+        Returns:
+            :class:`~.SmactStructure`
+
+        """
+        if not isinstance(structure, pymatgen.Structure):
+            raise TypeError("structure must be a pymatgen.Strucutre instance.")
+
+        try:
+            bva = BVAnalyzer()
+            struct = bva.get_oxi_state_decorated_structure(struct)
+        except:
+            logging.warn("Couldn't decorate structure with oxidation states.")
+
+        sites, species = SmactStructure.__parse_py_sites(structure)
+
+        lattice_mat = structure.lattice.matrix
+
+        lattice_param = 1.0
+
+        return SmactStructure(
+          species,
+          lattice_mat,
+          sites,
+          lattice_param,
+          sanitise_species=True, )
+
+    @staticmethod
     def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
         """Create a SmactStructure using the first Materials Project entry for a composition.
 
@@ -193,27 +272,16 @@ class SmactStructure:
                 )
 
             struct = structs[0]['structure']  # Default to first found structure
-            if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
-                bva = BVAnalyzer()
-                struct = bva.get_oxi_state_decorated_structure(struct)
+
+        if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
+            bva = BVAnalyzer()
+            struct = bva.get_oxi_state_decorated_structure(struct)
 
         lattice_mat = struct.lattice.matrix
 
         lattice_param = 1.0  # TODO Use actual lattice parameter
 
-        sites = {}
-        for site in struct.sites:
-            site_type = site.species_string
-            # Add charge magnitude, for cases of unit charge
-            if all([
-              site_type[-2] not in map(str, range(10)),
-              site_type[-1] in ("+", "-"), ]):
-                site_type = site_type[:-1] + '1' + site_type[-1]
-
-            if site_type in sites:
-                sites[site_type].append(site.coords.tolist())
-            else:
-                sites[site_type] = [site.coords.tolist()]
+        sites, _ = SmactStructure.__parse_py_sites(struct)
 
         return SmactStructure(
           sanit_species,
