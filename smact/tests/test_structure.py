@@ -146,11 +146,13 @@ class StructureTest(unittest.TestCase):
         """Test downloading structures from materialsproject.org."""
         # TODO Needs ensuring that the structure query gets the same
         # structure as we have downloaded.
+        api_key = os.environ.get("MPI_KEY")
+
         for comp, species in self.TEST_SPECIES.items():
             with self.subTest(comp=comp):
                 comp_file = os.path.join(files_dir, f"{comp}.txt")
                 local_struct = SmactStructure.from_file(comp_file)
-                mp_struct = SmactStructure.from_mp(species)
+                mp_struct = SmactStructure.from_mp(species, api_key)
                 self.assertEqual(local_struct, mp_struct)
 
 
