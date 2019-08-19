@@ -167,8 +167,9 @@ class SmactStructure:
         return sanit_species
 
     @staticmethod
-    def __parse_py_sites(structure: pymatgen.Structure
-                        ) -> Tuple[Dict[str, List[List[float]]], List[Tuple[str, int, int]]]:
+    def __parse_py_sites(
+      structure: pymatgen.Structure,
+    ) -> Tuple[Dict[str, List[List[float]]], List[Tuple[str, int, int]]]:
         """Parse the sites of a pymatgen Structure."""
         if not isinstance(structure, pymatgen.Structure):
             raise TypeError("structure must be a pymatgen.Strucutre instance.")
@@ -244,21 +245,23 @@ class SmactStructure:
           sanitise_species=True, )
 
     @staticmethod
-    def from_mp(species: List[Union[Tuple[str, int, int], Tuple[Species, int]]]):
+    def from_mp(
+      species: List[Union[Tuple[str, int, int], Tuple[Species, int]]],
+      api_key: str, ):
         """Create a SmactStructure using the first Materials Project entry for a composition.
 
         Args:
             species: See :meth:`~.__init__`.
+            api_key: A www.materialsproject.org API key.
 
         Returns:
             :class:`~.SmactStructure`
 
         """
-        MPI_KEY = os.environ.get("MPI_KEY")
 
         sanit_species = SmactStructure._sanitise_species(species)
 
-        with MPRester(MPI_KEY) as m:
+        with MPRester(api_key) as m:
             eles = SmactStructure._get_ele_stoics(sanit_species)
             formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
             structs = m.query(
