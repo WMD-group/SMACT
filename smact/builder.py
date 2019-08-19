@@ -31,6 +31,7 @@ from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from ase.spacegroup import crystal
+import pandas as pd
 import pymatgen
 import pymatgen.analysis.structure_prediction as pymatgen_sp
 from pymatgen.analysis.bond_valence import BVAnalyzer
@@ -661,13 +662,19 @@ class CationMutator:
         """Assign attributes and get lambda table."""
         if lambda_json is not None:
             with open(lambda_json, 'r') as f:
-                self.lambda_tab = json.load(f)
+                lambda_dat = json.load(f)
         else:
             # Get pymatgen lambda table
             py_sp_dir = os.path.dirname(pymatgen_sp.__file__)
             pymatgen_lambda = os.path.join(py_sp_dir, "data", "lambda.json")
             with open(pymatgen_lambda, 'r') as f:
-                self.lambda_tab = json.load(f)
+                lambda_dat = json.load(f)
+
+        # Convert lambda table to pandas DataFrame
+        lambda_dat = [tuple(x) for x in lambda_dat]
+        lambda_df = pd.DataFrame(lambda_dat)
+
+        self.lambda_tab = lambda_df.pivot(index=0, columns=1, values=2)
 
         self.init_structure = init_structure
 
