@@ -178,7 +178,7 @@ class SmactStructure:
     ) -> Tuple[Dict[str, List[List[float]]], List[Tuple[str, int, int]]]:
         """Parse the sites of a pymatgen Structure."""
         if not isinstance(structure, pymatgen.Structure):
-            raise TypeError("structure must be a pymatgen.Strucutre instance.")
+            raise TypeError("structure must be a pymatgen.Structure instance.")
 
         sites = {}
         for site in structure.sites:
@@ -229,7 +229,7 @@ class SmactStructure:
 
         """
         if not isinstance(structure, pymatgen.Structure):
-            raise TypeError("structure must be a pymatgen.Strucutre instance.")
+            raise TypeError("structure must be a pymatgen.Structure instance.")
 
         try:
             bva = BVAnalyzer()
