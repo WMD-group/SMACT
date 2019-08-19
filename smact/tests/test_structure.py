@@ -6,6 +6,7 @@ import pickle
 import unittest
 
 import numpy as np
+import pandas as pd
 import pymatgen
 
 from smact import Species
@@ -205,7 +206,7 @@ class CationMutatorTest(unittest.TestCase):
     def test_pymatgen_lambda_import(self):
         """Test importing pymatgen lambda table."""
         test_mutator = CationMutator(self.test_struct, lambda_json=None)
-        self.assertTrue(test_mutator.lambda_tab)
+        self.assertIsInstance(test_mutator.lambda_tab, pd.DataFrame)
 
 
 if __name__ == "__main__":
