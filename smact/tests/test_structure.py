@@ -9,7 +9,7 @@ import numpy as np
 import pymatgen
 
 from smact import Species
-from smact.builder import SmactStructure, StructureDB
+from smact.builder import CationMutator, SmactStructure, StructureDB
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_STRUCT = os.path.join(files_dir, "test_struct")
@@ -194,10 +194,25 @@ class StructureDBTest(unittest.TestCase):
             self.assertTrue(self.db.add_structs(structs, self.TEST_TABLE))
 
 
+class CationMutatorTest(unittest.TestCase):
+    """Test the CationMutator class."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up the test initial structure."""
+        cls.test_struct = SmactStructure.from_file(TEST_POSCAR)
+
+    def test_pymatgen_lambda_import(self):
+        """Test importing pymatgen lambda table."""
+        test_mutator = CationMutator(self.test_struct, lambda_json=None)
+        self.assertTrue(test_mutator.lambda_tab)
+
+
 if __name__ == "__main__":
     TestLoader = unittest.TestLoader()
     StructureTests = unittest.TestSuite()
     StructureTests.addTests(TestLoader.loadTestsFromTestCase(StructureTest))
     StructureTests.addTests(TestLoader.loadTestsFromTestCase(StructureDBTest))
+    StructureTests.addTests(TestLoader.loadTestsFromTestCase(CationMutatorTest))
     runner = unittest.TextTestRunner()
     result = runner.run(StructureTests)
