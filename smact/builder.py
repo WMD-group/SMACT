@@ -103,10 +103,16 @@ class SmactStructure:
         return self.as_poscar()
 
     def __eq__(self, other):
-        """Determine equality of structures based on their attributes.
+        """Determine equality of SmactStructures based on their attributes.
 
         :attr:`~.species`, :attr:`~.lattice_mat`, :attr:`~.lattice_param` and
         :attr:`~.sites` must all be equal for the comparison to be True.
+
+        Note:
+            For the SmactStructures to be equal their attributes must be
+            *identical*. For example, it is insufficient that the two
+            structures have the same space group or the same species;
+            the site coordinates must be equal also.
 
         """
         if not isinstance(other, SmactStructure):
