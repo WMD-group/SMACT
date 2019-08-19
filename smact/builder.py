@@ -21,6 +21,7 @@
 #                                                                              #
 ################################################################################
 
+import json
 import os
 import re
 import sqlite3
@@ -31,6 +32,7 @@ from typing import Dict, List, Optional, Sequence, Tuple, Union
 import numpy as np
 from ase.spacegroup import crystal
 import pymatgen
+import pymatgen.analysis.structure_prediction as pymatgen_sp
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.ext.matproj import MPRester
 
@@ -264,7 +266,6 @@ class SmactStructure:
             :class:`~.SmactStructure`
 
         """
-
         sanit_species = SmactStructure._sanitise_species(species)
 
         with MPRester(api_key) as m:
@@ -643,6 +644,32 @@ class StructureDB:
               (composition, ), )
             structs = c.fetchall()
         return [SmactStructure.from_poscar(pos[0]) for pos in structs]
+
+
+class CationMutator:
+    """Handles cation mutation of SmactStructures based on substitution probability.
+    
+    Based on the algorithm presented in::
+        Hautier, G., Fischer, C., Ehrlacher, V., Jain, A., and Ceder, G. (2011)
+        Data Mined Ionic Substitutions for the Discovery of New Compounds.
+        Inorganic Chemistry, 50(2), 656-663.
+        `doi:10.1021/ic102031h <https://pubs.acs.org/doi/10.1021/ic102031h>`_
+    
+    """
+
+    def __init__(self, init_structure: SmactStructure, lambda_json: Optional[str] = None):
+        """Assign attributes and get lambda table."""
+        if lambda_json is not None:
+            with open(lambda_json, 'r') as f:
+                self.lambda_tab = json.load(f)
+        else:
+            # Get pymatgen lambda table
+            py_sp_dir = os.path.dirname(pymatgen_sp.__file__)
+            pymatgen_lambda = os.path.join(py_sp_dir, "data", "lambda.json")
+            with open(pymatgen_lambda, 'r') as f:
+                self.lambda_tab = json.load(f)
+
+        self.init_structure = init_structure
 
 
 def cubic_perovskite(species, cell_par=[6, 6, 6, 90, 90, 90], repetitions=[1, 1, 1]):
