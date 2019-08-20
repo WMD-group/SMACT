@@ -227,6 +227,18 @@ class CationMutatorTest(unittest.TestCase):
                 with self.subTest(s1=s1, s2=s2):
                     self.assertEqual(self.test_mutator.get_lambda(s1, s2), expectation)
 
+    def test_ion_mutation(self):
+        """Test mutating an ion of a SmactStructure."""
+        ca_file = os.path.join(files_dir, "CaTiO3.txt")
+        ba_file = os.path.join(files_dir, "BaTiO3.txt")
+
+        CaTiO3 = SmactStructure.from_file(ca_file)
+        BaTiO3 = SmactStructure.from_file(ba_file)
+
+        with self.subTest(s1="CaTiO3", s2="BaTiO3"):
+            mutation = self.test_mutator._mutate_structure(CaTiO3, "Ca2+", "Ba2+")
+            self.assertEqual(mutation, CaTiO3)
+
 
 if __name__ == "__main__":
     TestLoader = unittest.TestLoader()
