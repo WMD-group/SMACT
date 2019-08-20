@@ -125,7 +125,8 @@ class SmactStructure:
           self.species == other.species,
           self.lattice_mat.tolist() == other.lattice_mat.tolist(),
           self.lattice_param == other.lattice_param,
-          self.sites == other.sites
+          self.sites == other.sites,
+          list(self.sites.keys()) == list(other.sites.keys()),
         ])
 
     @staticmethod
@@ -207,7 +208,7 @@ class SmactStructure:
 
         species = []
         for spec, stoic in zip(sites.keys(), total_specs):
-            charge_match = re.search(r"\d", spec)
+            charge_match = re.search(r"\d+", spec)
 
             if charge_match:
                 charge_loc = charge_match.start()
@@ -340,7 +341,7 @@ class SmactStructure:
 
         species = []
         for spec_str, stoic in zip(lines[0].split(" "), total_specs):
-            charge_match = re.search(r"\d", spec_str)
+            charge_match = re.search(r"\d+", spec_str)
 
             if charge_match:
                 charge_loc = charge_match.start()
@@ -709,6 +710,49 @@ class CationMutator:
             l = self.alpha(s1, s2)
 
         return l
+
+    @staticmethod
+    def _mutate_structure(
+      structure: SmactStructure,
+      init_species: str,
+      final_species: str, ) -> SmactStructure:
+        """Mutate an ion within a SmactStructure."""
+
+        def parse_spec(species: str) -> Tuple[str, int]:
+            """Parse a species string into its element and charge."""
+            ele = re.match(r"[A-Za-z]+", species).group(0)
+
+            charge_match = re.search(r"\d+", species)
+            charge = int(charge_match.group(0)) if charge_match else 0
+
+            if '-' in species:
+                charge *= -1
+
+            return ele, charge
+
+        init_spec_tup = parse_spec(init_species)
+        struct_spec_tups = [spec[:2] for spec in structure.species]
+        spec_loc = struct_spec_tups.index(init_spec_tup)
+
+        final_spec_tup = parse_spec(final_species)
+        # Replace species tuple
+        structure.species[spec_loc] = (*final_spec_tup, structure.species[spec_loc][2])
+
+        # Sort species again
+        structure.species.sort(key=itemgetter(1), reverse=True)
+        structure.species.sort(key=itemgetter(0))
+
+        # Replace sites
+        structure.sites[final_species] = structure.sites.pop(init_species)
+        # And sort
+        species_strs = structure._format_style("{ele}{charge}{sign}").split(" ")
+        structure.sites = {spec: structure.sites[spec] for spec in species_strs}
+
+        return structure
+
+    def unary_substitute(self, structure: SmactStructure) -> Tuple[SmactStructure, float]:
+        """Substitute a single ion within a structure."""
+        pass
 
 
 def cubic_perovskite(species, cell_par=[6, 6, 6, 90, 90, 90], repetitions=[1, 1, 1]):
