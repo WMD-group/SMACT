@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import itertools
 import json
 import os
 import pickle
@@ -16,6 +17,7 @@ files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_STRUCT = os.path.join(files_dir, "test_struct")
 TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
 TEST_PY_STRUCT = os.path.join(files_dir, "pymatgen_structure.json")
+TEST_LAMBDA_TAB = os.path.join(files_dir, "test_lambda_tab.json")
 
 
 def generate_test_structure(comp: str) -> bool:
@@ -200,13 +202,30 @@ class CationMutatorTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Set up the test initial structure."""
+        """Set up the test initial structure and mutator."""
         cls.test_struct = SmactStructure.from_file(TEST_POSCAR)
+        cls.test_mutator = CationMutator(cls.test_struct, lambda_json=TEST_LAMBDA_TAB)
+
+    def test_mutator_instance(self):
+        """Test the test_mutator from setUpClass."""
+        self.assertIsInstance(self.test_mutator.lambda_tab, pd.DataFrame)
 
     def test_pymatgen_lambda_import(self):
         """Test importing pymatgen lambda table."""
-        test_mutator = CationMutator(self.test_struct, lambda_json=None)
-        self.assertIsInstance(test_mutator.lambda_tab, pd.DataFrame)
+        test_pymatgen_mutator = CationMutator(self.test_struct, lambda_json=None)
+        self.assertIsInstance(test_pymatgen_mutator.lambda_tab, pd.DataFrame)
+
+    def test_lambda_interface(self):
+        """Test getting lambda values."""
+        test_cases = [itertools.permutations(x) for x in [("A", "B"), ("A", "C"), ("B", "C")]]
+
+        expected = [0.5, -5.0, 0.3]
+
+        for test_case, expectation in zip(test_cases, expected):
+            for spec_comb in test_case:
+                s1, s2 = spec_comb
+                with self.subTest(s1=s1, s2=s2):
+                    self.assertEqual(self.test_mutator.get_lambda(s1, s2), expectation)
 
 
 if __name__ == "__main__":

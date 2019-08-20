@@ -21,13 +21,14 @@
 #                                                                              #
 ################################################################################
 
+import itertools
 import json
 import os
 import re
 import sqlite3
 import logging
 from operator import itemgetter
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from ase.spacegroup import crystal
@@ -232,7 +233,7 @@ class SmactStructure:
 
         """
         if not isinstance(structure, pymatgen.Structure):
-            raise TypeError("structure must be a pymatgen.Structure instance.")
+            raise TypeError("Structure must be a pymatgen.Structure instance.")
 
         try:
             bva = BVAnalyzer()
@@ -658,7 +659,12 @@ class CationMutator:
     
     """
 
-    def __init__(self, init_structure: SmactStructure, lambda_json: Optional[str] = None):
+    def __init__(
+      self,
+      init_structure: SmactStructure,
+      lambda_json: Optional[str] = None,
+      alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
+    ):
         """Assign attributes and get lambda table."""
         if lambda_json is not None:
             with open(lambda_json, 'r') as f:
@@ -677,6 +683,32 @@ class CationMutator:
         self.lambda_tab = lambda_df.pivot(index=0, columns=1, values=2)
 
         self.init_structure = init_structure
+
+        self.alpha = alpha
+
+    def _species_in_lambda(self, species: str) -> bool:
+        """Determine whether a species has records in the lambda table."""
+        return any(species in getattr(self.lambda_tab, x) for x in ["columns", "index"])
+
+    def get_lambda(self, s1: str, s2: str) -> float:
+        """Get lambda values corresponding to a pair of species."""
+        l = np.nan
+
+        if all(self._species_in_lambda(s) for s in [s1, s2]):
+            # s1 and s2 exist in lambda table
+            for si, sj in itertools.permutations([s1, s2]):
+                try:
+                    l = self.lambda_tab.at[si, sj]
+                except KeyError:
+                    continue
+
+                if not np.isnan(l):
+                    break
+
+        if np.isnan(l):
+            l = self.alpha(s1, s2)
+
+        return l
 
 
 def cubic_perovskite(species, cell_par=[6, 6, 6, 90, 90, 90], repetitions=[1, 1, 1]):
