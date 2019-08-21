@@ -239,6 +239,13 @@ class CationMutatorTest(unittest.TestCase):
             mutation = self.test_mutator._mutate_structure(CaTiO3, "Ca2+", "Ba2+")
             self.assertEqual(mutation, CaTiO3)
 
+        na_file = os.path.join(files_dir, "NaCl.txt")
+        NaCl = SmactStructure.from_file(na_file)
+
+        with self.subTest(s1="Na1+Cl1-", s2="Na2+Cl1-"):
+            with self.assertRaises(ValueError):
+                self.test_mutator._mutate_structure(NaCl, "Na1+", "Na2+")
+
         # TODO Confirm functionality with more complex substitutions
 
 
