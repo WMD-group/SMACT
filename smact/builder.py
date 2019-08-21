@@ -690,7 +690,7 @@ class CationMutator:
           )
         )
 
-        pairs = itertools.product(self.specs, repeat=2)
+        pairs = itertools.combinations_with_replacement(self.specs, 2)
         # Replace NaNs with alpha values, and make sure all species combinations exist
         for s1, s2 in pairs:
             try:
@@ -699,11 +699,27 @@ class CationMutator:
                         if not np.isnan(self.lambda_tab.at[s2, s1]):
                             self.lambda_tab.at[s1, s2] = self.lambda_tab.at[s2, s1]
                         else:
-                            self.lambda_tab.at[s1, s2] = alpha(s1, s2)
+                            a = alpha(s1, s2)
+                            self.lambda_tab.at[s1, s2] = a
+                            self.lambda_tab.at[s2, s1] = a
                     except KeyError:
-                        self.lambda_tab.at[s1, s2] = alpha(s1, s2)
+                        a = alpha(s1, s2)
+                        self.lambda_tab.at[s1, s2] = a
+                        self.lambda_tab.at[s2, s1] = a
+                else:
+                    self.lambda_tab.at[s2, s1] = self.lambda_tab.at[s1, s2]
             except KeyError:
-                self.lambda_tab.at[s1, s2] = alpha(s1, s2)
+                try:
+                    if np.isnan(self.lambda_tab.at[s2, s1]):
+                        a = alpha(s1, s2)
+                        self.lambda_tab.at[s1, s2] = a
+                        self.lambda_tab.at[s2, s1] = a
+                    else:
+                        self.lambda_tab.at[s1, s2] = self.lambda_tab.at[s2, s1]
+                except KeyError:
+                    a = alpha(s1, s2)
+                    self.lambda_tab.at[s1, s2] = a
+                    self.lambda_tab.at[s2, s1] = a
 
         self.init_structure = init_structure
         self.alpha = alpha
