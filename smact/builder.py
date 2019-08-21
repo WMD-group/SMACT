@@ -682,17 +682,18 @@ class CationMutator:
         lambda_df = pd.DataFrame(lambda_dat)
 
         self.lambda_tab = lambda_df.pivot(index=0, columns=1, values=2)
-
-        self.init_structure = init_structure
-        self.alpha = alpha
-
-        # Sum over all unique pair values
+        # Make sure table is fully populated
         specs = set(
           itertools.chain.from_iterable(
             set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]
           )
         )
-        pairs = itertools.combinations_with_replacement(specs, 2)
+
+        self.init_structure = init_structure
+        self.alpha = alpha
+
+        # Sum over all unique pair values
+        pairs = itertools.product(specs, repeat=2)
         self.Z = sum(math.exp(self.get_lambda(*pair)) for pair in pairs)
 
     def _species_in_lambda(self, species: str) -> bool:

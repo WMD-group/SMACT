@@ -223,8 +223,8 @@ class CationMutatorTest(unittest.TestCase):
     def test_mutator_instance(self):
         """Test the test_mutator from setUpClass."""
         self.assertIsInstance(self.test_mutator.lambda_tab, pd.DataFrame)
-        # e^0.5 + e^0.3 + 4 \times e^{-5} \approx 3.0255319
-        self.assertAlmostEqual(self.test_mutator.Z, 3.0255319)
+        # 2e^0.5 + 2e^0.3 + 5e^{-5} \approx 6.0308499
+        self.assertAlmostEqual(self.test_mutator.Z, 6.0308499)
 
     def test_pymatgen_lambda_import(self):
         """Test importing pymatgen lambda table."""
