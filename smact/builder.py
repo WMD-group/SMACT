@@ -682,43 +682,40 @@ class CationMutator:
         lambda_df = pd.DataFrame(lambda_dat)
 
         self.lambda_tab = lambda_df.pivot(index=0, columns=1, values=2)
+
         # Make sure table is fully populated
-        specs = set(
+        self.specs = set(
           itertools.chain.from_iterable(
             set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]
           )
         )
 
+        pairs = itertools.product(self.specs, repeat=2)
+        # Replace NaNs with alpha values, and make sure all species combinations exist
+        for s1, s2 in pairs:
+            try:
+                if np.isnan(self.lambda_tab.at[s1, s2]):
+                    try:
+                        if not np.isnan(self.lambda_tab.at[s2, s1]):
+                            self.lambda_tab.at[s1, s2] = self.lambda_tab.at[s2, s1]
+                        else:
+                            self.lambda_tab.at[s1, s2] = alpha(s1, s2)
+                    except KeyError:
+                        self.lambda_tab.at[s1, s2] = alpha(s1, s2)
+            except KeyError:
+                self.lambda_tab.at[s1, s2] = alpha(s1, s2)
+
         self.init_structure = init_structure
         self.alpha = alpha
 
-        # Sum over all unique pair values
-        pairs = itertools.product(specs, repeat=2)
-        self.Z = sum(math.exp(self.get_lambda(*pair)) for pair in pairs)
-
-    def _species_in_lambda(self, species: str) -> bool:
-        """Determine whether a species has records in the lambda table."""
-        return any(species in getattr(self.lambda_tab, x) for x in ["columns", "index"])
+        self.Z = np.exp(self.lambda_tab.to_numpy()).sum()
 
     def get_lambda(self, s1: str, s2: str) -> float:
         """Get lambda values corresponding to a pair of species."""
-        l = np.nan
+        if {s1, s2} <= self.specs:
+            return self.lambda_tab.at[s1, s2]
 
-        if all(self._species_in_lambda(s) for s in [s1, s2]):
-            # s1 and s2 exist in lambda table
-            for si, sj in itertools.permutations([s1, s2]):
-                try:
-                    l = self.lambda_tab.at[si, sj]
-                except KeyError:
-                    continue
-
-                if not np.isnan(l):
-                    break
-
-        if np.isnan(l):
-            l = self.alpha(s1, s2)
-
-        return l
+        return self.alpha(s1, s2)
 
     @staticmethod
     def _mutate_structure(
