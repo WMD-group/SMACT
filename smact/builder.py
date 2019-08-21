@@ -21,6 +21,7 @@
 #                                                                              #
 ################################################################################
 
+from collections import defaultdict
 import itertools
 import json
 import os
@@ -187,7 +188,7 @@ class SmactStructure:
         if not isinstance(structure, pymatgen.Structure):
             raise TypeError("structure must be a pymatgen.Structure instance.")
 
-        sites = {}
+        sites = defaultdict(list)
         for site in structure.sites:
             site_type = site.species_string
             # Add charge magnitude, for cases of unit charge
@@ -196,10 +197,9 @@ class SmactStructure:
               site_type[-1] in ("+", "-"), ]):
                 site_type = site_type[:-1] + '1' + site_type[-1]
 
-            if site_type in sites:
-                sites[site_type].append(site.coords.tolist())
-            else:
-                sites[site_type] = [site.coords.tolist()]
+            sites[site_type].append(site.coords.tolist())
+
+        sites = dict(sites)
 
         # Find stoichiometry
         total_specs = [len(val) for val in sites.values()]
@@ -359,7 +359,7 @@ class SmactStructure:
 
         lattice = np.array([[float(point) for point in line.split(" ")] for line in lines[2:5]])
 
-        sites = {}
+        sites = defaultdict(list)
         for line in lines[8:]:
             if not line:  # EOF
                 break
@@ -368,10 +368,9 @@ class SmactStructure:
             coords = [float(x) for x in split_line[:3]]
             spec = split_line[-1]
 
-            if spec in sites:
-                sites[spec].append(coords)
-            else:
-                sites[spec] = [coords]
+            sites[spec].append(coords)
+
+        sites = dict(sites)
 
         return SmactStructure(species, lattice, sites, lattice_param)
 
@@ -460,13 +459,11 @@ class SmactStructure:
             {'Fe': 3, 'O': 4}
 
         """
-        eles = {}
+        eles = defaultdict(int)
         for specie in species:
-            if specie[0] in eles:
-                eles[specie[0]] += specie[2]
-            else:
-                eles[specie[0]] = specie[2]
-        return eles
+            eles[specie[0]] += specie[2]
+
+        return dict(eles)
 
     def composition(self) -> str:
         """Generate a key that describes the composition.
