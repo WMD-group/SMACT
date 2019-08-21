@@ -56,6 +56,25 @@ class StructureTest(unittest.TestCase):
       "Fe": [('Fe', 0, 1)],
     }
 
+    def assertStructAlmostEqual(
+      self, s1: SmactStructure, s2: SmactStructure, places: int = 7
+    ) -> bool:
+        """Assert that two SmactStructures are almost equal.
+
+        Almost equality dependent on how many decimal places the site coordinates
+        are equal to.
+        """
+        must_equal = ["species", "lattice_param"]
+        for cond in must_equal:
+            self.assertEqual(getattr(s1, cond), getattr(s2, cond))
+
+        self.assertTrue(np.array_equal(s1.lattice_mat, s2.lattice_mat))
+        self.assertEqual(list(s1.sites.keys()), list(s2.sites.keys()))
+
+        for si, sj in zip(s1.sites, s2.sites):
+            for c1, c2 in zip(si, sj):
+                self.assertAlmostEqual(c1, c2, places=places)
+
     def test_as_poscar(self):
         """Test POSCAR generation."""
         for comp in self.TEST_SPECIES.keys():
@@ -100,7 +119,7 @@ class StructureTest(unittest.TestCase):
 
         s2 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
 
-        self.assertEqual(s1, s2)
+        self.assertStructAlmostEqual(s1, s2)
 
     def test_smactStruc_comp_key(self):
         """Test generation of a composition key for `SmactStructure`s."""

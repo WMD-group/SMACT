@@ -127,7 +127,7 @@ class SmactStructure:
             return False
         return all([
           self.species == other.species,
-          self.lattice_mat.tolist() == other.lattice_mat.tolist(),
+          np.array_equal(self.lattice_mat, other.lattice_mat),
           self.lattice_param == other.lattice_param,
           self.sites == other.sites,
           list(self.sites.keys()) == list(other.sites.keys()),
