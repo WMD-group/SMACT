@@ -56,9 +56,7 @@ class StructureTest(unittest.TestCase):
       "Fe": [('Fe', 0, 1)],
     }
 
-    def assertStructAlmostEqual(
-      self, s1: SmactStructure, s2: SmactStructure, places: int = 7
-    ) -> bool:
+    def assertStructAlmostEqual(self, s1: SmactStructure, s2: SmactStructure, places: int = 7):
         """Assert that two SmactStructures are almost equal.
 
         Almost equality dependent on how many decimal places the site coordinates
