@@ -236,6 +236,7 @@ class CationMutatorTest(unittest.TestCase):
         """Set up the test initial structure and mutator."""
         cls.test_struct = SmactStructure.from_file(TEST_POSCAR)
         cls.test_mutator = CationMutator(cls.test_struct, lambda_json=TEST_LAMBDA_TAB)
+        cls.test_pymatgen_mutator = CationMutator(cls.test_struct, lambda_json=None)
 
     def test_mutator_instance(self):
         """Test the test_mutator from setUpClass."""
@@ -245,8 +246,7 @@ class CationMutatorTest(unittest.TestCase):
 
     def test_pymatgen_lambda_import(self):
         """Test importing pymatgen lambda table."""
-        test_pymatgen_mutator = CationMutator(self.test_struct, lambda_json=None)
-        self.assertIsInstance(test_pymatgen_mutator.lambda_tab, pd.DataFrame)
+        self.assertIsInstance(self.test_pymatgen_mutator.lambda_tab, pd.DataFrame)
 
     def test_lambda_interface(self):
         """Test getting lambda values."""
@@ -280,6 +280,18 @@ class CationMutatorTest(unittest.TestCase):
                 self.test_mutator._mutate_structure(NaCl, "Na1+", "Na2+")
 
         # TODO Confirm functionality with more complex substitutions
+
+    @unittest.skip("Not implemented.")
+    def test_subs_probs(self):
+        """Test acquiring multiple substitution probabilities."""
+        ca_sub_probs = self.test_pymatgen_mutator.sub_probs("Ca2+")
+
+    @unittest.skip("Not implemented.")
+    def test_cond_probs(self):
+        """Test acquiring multiple conditional substitution probabilities."""
+        ca_sub_probs = self.test_pymatgen_mutator.cond_sub_probs("Ca2+")
+        print(f"\n Ca sub prob: {ca_sub_probs['Ca2+']}")
+        print(ca_sub_probs.describe())
 
 
 if __name__ == "__main__":

@@ -24,7 +24,6 @@
 from collections import defaultdict
 import itertools
 import json
-import math
 import os
 import re
 import sqlite3
@@ -676,6 +675,11 @@ class CationMutator:
             pymatgen_lambda = os.path.join(py_sp_dir, "data", "lambda.json")
             with open(pymatgen_lambda, 'r') as f:
                 lambda_dat = json.load(f)
+            # Get rid of 'D1+' values
+            # NOTE The author doesn't know why they exist
+            # in the pymatgen lambda table, but they appear
+            # obsolete
+            lambda_dat = [x for x in lambda_dat if 'D1+' not in x]
 
         # Convert lambda table to pandas DataFrame
         lambda_dat = [tuple(x) for x in lambda_dat]
@@ -732,6 +736,13 @@ class CationMutator:
             return self.lambda_tab.at[s1, s2]
 
         return self.alpha(s1, s2)
+
+    def get_lambdas(self, species: str) -> pd.DataFrame:
+        """Get all the lambda values associated with a species."""
+        if not {species} <= self.specs:
+            raise ValueError(f"{species} not in lambda table.")
+
+        return self.lambda_tab.loc[species]
 
     @staticmethod
     def _mutate_structure(
@@ -791,6 +802,45 @@ class CationMutator:
         structure.sites = {spec: structure.sites[spec] for spec in species_strs}
 
         return structure
+
+    def sub_prob(self, s1: str, s2: str) -> float:
+        """Calculate the probability of substitution of two species."""
+        return np.exp(self.get_lambda(s1, s2)) / self.Z
+
+    def sub_probs(self, s1: str) -> pd.DataFrame:
+        """Determine the substitution probabilities of a species with others.
+
+        Determines the probability of substitution of the species with every
+        _other_ species in the lambda table.
+
+        """
+        probs = self.get_lambdas(s1)
+        probs = np.exp(probs)
+        probs /= self.Z
+        return probs
+
+    def pair_corr(self, s1: str, s2: str) -> float:
+        """Determine the pair correlation of two ionic species."""
+        cond = self.sub_prob(s1, s2)
+        cond /= self.sub_probs(s1).sum()
+        cond /= self.sub_probs(s2).sum()
+        return cond
+
+    def cond_sub_prob(self, s1: str, s2: str) -> float:
+        """Calculate the probability of substitution of one species with another."""
+        return np.exp(self.get_lambda(s1, s2)) / np.exp(self.get_lambdas(s2)).sum()
+
+    def cond_sub_probs(self, s1: str) -> pd.DataFrame:
+        """Calculate the probabilities of substitution of a given species.
+
+        Calculates probabilities of substitution of given species with all
+        others in the lambda table.
+
+        """
+        probs = self.get_lambdas(s1)
+        probs = np.exp(probs)
+        probs /= np.exp(self.lambda_tab).sum()
+        return probs
 
     def unary_substitute(self, structure: SmactStructure) -> Tuple[SmactStructure, float]:
         """Substitute a single ion within a structure."""
