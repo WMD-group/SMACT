@@ -2,15 +2,19 @@
 
 import itertools
 import json
+import logging
 import os
 import pickle
 import unittest
+
+from contextlib import contextmanager
 
 import numpy as np
 import pandas as pd
 import pymatgen
 
 from smact import Species
+import smact.builder
 from smact.builder import CationMutator, SmactStructure, StructureDB
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
@@ -32,6 +36,15 @@ def generate_test_structure(comp: str) -> bool:
         f.write(s.as_poscar())
 
     return True
+
+
+@contextmanager
+def ignore_warnings(logger: logging.Logger) -> int:
+    """Ignore logging warnings."""
+    log_lvl_buff = logger.getEffectiveLevel()
+    logger.setLevel(logging.ERROR)
+    yield log_lvl_buff
+    logger.setLevel(log_lvl_buff)
 
 
 class StructureTest(unittest.TestCase):
@@ -82,7 +95,8 @@ class StructureTest(unittest.TestCase):
             d = json.load(f)
             py_structure = pymatgen.Structure.from_dict(d)
 
-        s1 = SmactStructure.from_py_struct(py_structure)
+        with ignore_warnings(smact.builder.logger):
+            s1 = SmactStructure.from_py_struct(py_structure)
 
         s2 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
 

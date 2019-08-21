@@ -41,6 +41,8 @@ from pymatgen.ext.matproj import MPRester
 from smact import Species
 from smact.lattice import Lattice, Site
 
+logger = logging.getLogger(__name__)
+
 
 class SmactStructure:
     """SMACT implementation inspired by pymatgen Structure class.
@@ -240,7 +242,7 @@ class SmactStructure:
             bva = BVAnalyzer()
             struct = bva.get_oxi_state_decorated_structure(struct)
         except:
-            logging.warn("Couldn't decorate structure with oxidation states.")
+            logger.warn("Couldn't decorate structure with oxidation states.")
 
         sites, species = SmactStructure.__parse_py_sites(structure)
 
