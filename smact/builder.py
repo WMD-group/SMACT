@@ -735,8 +735,28 @@ class CationMutator:
         spec_loc = struct_spec_tups.index(init_spec_tup)
 
         final_spec_tup = parse_spec(final_species)
+
+        # # Resolve stoichiometries to maintain charge neutrality
+
+        ## Nonsensical without a change in sites / structure!
+
+        # charge_ratio = final_spec_tup[1] / init_spec_tup[1]
+        # stoics = [spec[2] for spec in structure.species]
+        # stoics = [x * charge_ratio for x in stoics]
+
+        # stoic_sum = sum(stoics)
+        # stoics = [x / stoic_sum for x in stoics]
+        # min_stoic = min(stoics)
+        # stoics = [round(x / min_stoic) for x in stoics]
+
+        # structure.species = [(*x[:2], y) for x, y in zip(structure.species, stoics)]
+
         # Replace species tuple
         structure.species[spec_loc] = (*final_spec_tup, structure.species[spec_loc][2])
+
+        # Check for charge neutrality
+        if sum(x[1] * x[2] for x in structure.species) != 0:
+            raise ValueError("New structure is not charge neutral.")
 
         # Sort species again
         structure.species.sort(key=itemgetter(1), reverse=True)
