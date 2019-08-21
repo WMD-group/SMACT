@@ -239,6 +239,8 @@ class CationMutatorTest(unittest.TestCase):
             mutation = self.test_mutator._mutate_structure(CaTiO3, "Ca2+", "Ba2+")
             self.assertEqual(mutation, CaTiO3)
 
+        # TODO Confirm functionality with more complex substitutions
+
 
 if __name__ == "__main__":
     TestLoader = unittest.TestLoader()
