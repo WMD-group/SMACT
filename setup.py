@@ -29,7 +29,7 @@ if __name__ == "__main__":
                        'data/*.xlsx','data/*.json']},
         zip_safe=False,
         test_suite='smact.tests.test',
-        install_requires=['scipy','numpy','spglib', 'pymatgen', 'ase'],
+        install_requires=['scipy','numpy','spglib', 'pymatgen', 'ase', 'pandas'],
         classifiers=['Programming Language :: Python',
                      'Development Status :: 5 - Production/Stable',
                      'Intended Audience :: Science/Research',
