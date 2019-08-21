@@ -24,6 +24,7 @@
 from collections import defaultdict
 import itertools
 import json
+import math
 import os
 import re
 import sqlite3
@@ -683,8 +684,16 @@ class CationMutator:
         self.lambda_tab = lambda_df.pivot(index=0, columns=1, values=2)
 
         self.init_structure = init_structure
-
         self.alpha = alpha
+
+        # Sum over all unique pair values
+        specs = set(
+          itertools.chain.from_iterable(
+            set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]
+          )
+        )
+        pairs = itertools.combinations_with_replacement(specs, 2)
+        self.Z = sum(math.exp(self.get_lambda(*pair)) for pair in pairs)
 
     def _species_in_lambda(self, species: str) -> bool:
         """Determine whether a species has records in the lambda table."""
