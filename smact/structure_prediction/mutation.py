@@ -52,47 +52,58 @@ class CationMutator:
 
         self.lambda_tab = lambda_df.pivot(index=0, columns=1, values=2)
 
-        # Make sure table is fully populated
         self.specs = set(
           itertools.chain.from_iterable(
             set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]
           )
         )
 
+        self.alpha = alpha
+
+        # Make sure table is fully populated
+        self._populate_lambda()
+
+        self.Z = np.exp(self.lambda_tab.to_numpy()).sum()
+
+    def _populate_lambda(self):
+        """Populate lambda table.
+
+        Ensures no values are NaN and performs alpha calculations,
+        such that an entry exists for every possible species
+        combination in the lambda table.
+        """
         pairs = itertools.combinations_with_replacement(self.specs, 2)
-        # Replace NaNs with alpha values, and make sure all species combinations exist
+
+        def add_alpha(s1, s2):
+            """Add an alpha value to the lambda table at both coordinates."""
+            a = self.alpha(s1, s2)
+            self.lambda_tab.at[s1, s2] = a
+            self.lambda_tab.at[s2, s1] = a
+
+        def mirror_lambda(s1, s2):
+            """Mirror the lambda value at (s2, s1) into (s1, s2)."""
+            self.lambda_tab.at[s1, s2] = self.lambda_tab.at[s2, s1]
+
         for s1, s2 in pairs:
             try:
                 if np.isnan(self.lambda_tab.at[s1, s2]):
                     try:
                         if not np.isnan(self.lambda_tab.at[s2, s1]):
-                            self.lambda_tab.at[s1, s2] = self.lambda_tab.at[s2, s1]
+                            mirror_lambda(s1, s2)
                         else:
-                            a = alpha(s1, s2)
-                            self.lambda_tab.at[s1, s2] = a
-                            self.lambda_tab.at[s2, s1] = a
+                            add_alpha(s1, s2)
                     except KeyError:
-                        a = alpha(s1, s2)
-                        self.lambda_tab.at[s1, s2] = a
-                        self.lambda_tab.at[s2, s1] = a
+                        add_alpha(s1, s2)
                 else:
-                    self.lambda_tab.at[s2, s1] = self.lambda_tab.at[s1, s2]
+                    mirror_lambda(s2, s1)
             except KeyError:
                 try:
                     if np.isnan(self.lambda_tab.at[s2, s1]):
-                        a = alpha(s1, s2)
-                        self.lambda_tab.at[s1, s2] = a
-                        self.lambda_tab.at[s2, s1] = a
+                        add_alpha(s1, s2)
                     else:
-                        self.lambda_tab.at[s1, s2] = self.lambda_tab.at[s2, s1]
+                        mirror_lambda(s1, s2)
                 except KeyError:
-                    a = alpha(s1, s2)
-                    self.lambda_tab.at[s1, s2] = a
-                    self.lambda_tab.at[s2, s1] = a
-
-        self.alpha = alpha
-
-        self.Z = np.exp(self.lambda_tab.to_numpy()).sum()
+                    add_alpha(s1, s2)
 
     def get_lambda(self, s1: str, s2: str) -> float:
         """Get lambda values corresponding to a pair of species."""
