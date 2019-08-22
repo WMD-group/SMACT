@@ -377,8 +377,10 @@ MOCK_MODULES = [
   'ase.spacegroup',
   'ase.utils',
   'ase.utils.geometry',
+  'pandas',
   'pymatgen',
   'pymatgen.analysis.bond_valence',
+  'pymatgen.analysis.structure_prediction',
   'pymatgen.ext.matproj'
 ]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)

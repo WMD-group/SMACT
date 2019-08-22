@@ -17,7 +17,7 @@ from .structure import SmactStructure
 class CationMutator:
     """Handles cation mutation of SmactStructures based on substitution probability.
     
-    Based on the algorithm presented in::
+    Based on the algorithm presented in:
         Hautier, G., Fischer, C., Ehrlacher, V., Jain, A., and Ceder, G. (2011)
         Data Mined Ionic Substitutions for the Discovery of New Compounds.
         Inorganic Chemistry, 50(2), 656-663.
