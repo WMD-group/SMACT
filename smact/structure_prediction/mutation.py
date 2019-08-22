@@ -40,10 +40,9 @@ class CationMutator:
             pymatgen_lambda = os.path.join(py_sp_dir, "data", "lambda.json")
             with open(pymatgen_lambda, 'r') as f:
                 lambda_dat = json.load(f)
-            # Get rid of 'D1+' values
-            # NOTE The author doesn't know why they exist
-            # in the pymatgen lambda table, but they appear
-            # obsolete
+
+            # Get rid of 'D1+' values to reflect pymatgen
+            # implementation
             lambda_dat = [x for x in lambda_dat if 'D1+' not in x]
 
         # Convert lambda table to pandas DataFrame
