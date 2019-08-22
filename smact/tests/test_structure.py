@@ -239,9 +239,29 @@ class CationMutatorTest(unittest.TestCase):
         cls.test_mutator = CationMutator(lambda_json=TEST_LAMBDA_TAB)
         cls.test_pymatgen_mutator = CationMutator(lambda_json=None)
 
-    def test_mutator_instance(self):
-        """Test the test_mutator from setUpClass."""
-        self.assertIsInstance(self.test_mutator.lambda_tab, pd.DataFrame)
+    def assertDataFrameEqual(self, df1: pd.DataFrame, df2: pd.DataFrame):
+        """Assert that two pandas.DataFrames are equal.
+
+        The indices and columns must also have identical labels.
+        """
+        self.assertTrue(df1.equals(df2))
+        self.assertEqual(list(df1.index), list(df2.index))
+        self.assertEqual(list(df1.columns), list(df2.columns))
+
+    def test_lambda_tab_pop(self):
+        """Test if lambda table is populated correctly."""
+        lambda_dat = [
+          [-5.0, 0.5, -5.0],
+          [0.5, -5.0, 0.3],
+          [-5.0, 0.3, -5.0], ]
+        labels = ["A", "B", "C"]
+
+        exp_lambda = pd.DataFrame(lambda_dat, index=labels, columns=labels)
+
+        self.assertDataFrameEqual(self.test_mutator.lambda_tab, exp_lambda)
+
+    def test_partition_func_Z(self):
+        """Test the partition function for the whole table."""
         # 2e^0.5 + 2e^0.3 + 5e^{-5} \approx 6.0308499
         self.assertAlmostEqual(self.test_mutator.Z, 6.0308499)
 
