@@ -661,7 +661,6 @@ class CationMutator:
 
     def __init__(
       self,
-      init_structure: SmactStructure,
       lambda_json: Optional[str] = None,
       alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
     ):
@@ -725,7 +724,6 @@ class CationMutator:
                     self.lambda_tab.at[s1, s2] = a
                     self.lambda_tab.at[s2, s1] = a
 
-        self.init_structure = init_structure
         self.alpha = alpha
 
         self.Z = np.exp(self.lambda_tab.to_numpy()).sum()
@@ -769,21 +767,6 @@ class CationMutator:
 
         final_spec_tup = parse_spec(final_species)
 
-        # # Resolve stoichiometries to maintain charge neutrality
-
-        ## Nonsensical without a change in sites / structure!
-
-        # charge_ratio = final_spec_tup[1] / init_spec_tup[1]
-        # stoics = [spec[2] for spec in structure.species]
-        # stoics = [x * charge_ratio for x in stoics]
-
-        # stoic_sum = sum(stoics)
-        # stoics = [x / stoic_sum for x in stoics]
-        # min_stoic = min(stoics)
-        # stoics = [round(x / min_stoic) for x in stoics]
-
-        # structure.species = [(*x[:2], y) for x, y in zip(structure.species, stoics)]
-
         # Replace species tuple
         structure.species[spec_loc] = (*final_spec_tup, structure.species[spec_loc][2])
 
@@ -818,6 +801,10 @@ class CationMutator:
         probs = np.exp(probs)
         probs /= self.Z
         return probs
+
+    def same_spec_probs(self) -> pd.DataFrame:
+        """Calculate the same species substiution probabilities."""
+        return np.exp(self.lambda_tab.to_numpy().diagonal()) / self.Z
 
     def pair_corr(self, s1: str, s2: str) -> float:
         """Determine the pair correlation of two ionic species."""

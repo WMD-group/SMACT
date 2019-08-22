@@ -235,8 +235,8 @@ class CationMutatorTest(unittest.TestCase):
     def setUpClass(cls):
         """Set up the test initial structure and mutator."""
         cls.test_struct = SmactStructure.from_file(TEST_POSCAR)
-        cls.test_mutator = CationMutator(cls.test_struct, lambda_json=TEST_LAMBDA_TAB)
-        cls.test_pymatgen_mutator = CationMutator(cls.test_struct, lambda_json=None)
+        cls.test_mutator = CationMutator(lambda_json=TEST_LAMBDA_TAB)
+        cls.test_pymatgen_mutator = CationMutator(lambda_json=None)
 
     def test_mutator_instance(self):
         """Test the test_mutator from setUpClass."""
