@@ -22,6 +22,7 @@ class StructureDB:
 
     Examples:
         Connecting to a database in memory:
+
         >>> DB = StructureDB(':memory:')
         >>> with DB as c:
         ...     _ = c.execute("CREATE TABLE test (id, val)")
