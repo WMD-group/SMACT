@@ -22,7 +22,8 @@ files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_STRUCT = os.path.join(files_dir, "test_struct")
 TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
 TEST_PY_STRUCT = os.path.join(files_dir, "pymatgen_structure.json")
-TEST_LAMBDA_TAB = os.path.join(files_dir, "test_lambda_tab.json")
+TEST_LAMBDA_JSON = os.path.join(files_dir, "test_lambda_tab.json")
+TEST_LAMBDA_CSV = os.path.join(files_dir, "test_lambda_tab.csv")
 
 
 def generate_test_structure(comp: str) -> bool:
@@ -236,8 +237,8 @@ class CationMutatorTest(unittest.TestCase):
     def setUpClass(cls):
         """Set up the test initial structure and mutator."""
         cls.test_struct = SmactStructure.from_file(TEST_POSCAR)
-        cls.test_mutator = CationMutator(lambda_json=TEST_LAMBDA_TAB)
-        cls.test_pymatgen_mutator = CationMutator(lambda_json=None)
+        cls.test_mutator = CationMutator.from_json(lambda_json=TEST_LAMBDA_JSON)
+        cls.test_pymatgen_mutator = CationMutator.from_json(lambda_json=None)
 
     def assertDataFrameEqual(self, df1: pd.DataFrame, df2: pd.DataFrame):
         """Assert that two pandas.DataFrames are equal.
@@ -313,6 +314,13 @@ class CationMutatorTest(unittest.TestCase):
         ca_sub_probs = self.test_pymatgen_mutator.cond_sub_probs("Ca2+")
         print(f"\n Ca sub prob: {ca_sub_probs['Ca2+']}")
         print(ca_sub_probs.describe())
+
+    def test_from_df(self):
+        """Test creating a CationMutator from an existing DataFrame."""
+        lambda_df = pd.read_csv(TEST_LAMBDA_CSV, index_col=0)
+
+        csv_test = CationMutator(lambda_df=lambda_df)
+        self.assertDataFrameEqual(csv_test.lambda_tab, self.test_mutator.lambda_tab)
 
 
 if __name__ == "__main__":
