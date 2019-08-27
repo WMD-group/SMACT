@@ -27,10 +27,31 @@ class CationMutator:
 
     def __init__(
       self,
-      lambda_json: Optional[str] = None,
+      lambda_df: pd.DataFrame,
       alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
     ):
         """Assign attributes and get lambda table."""
+        self.lambda_tab = lambda_df
+
+        self.specs = set(
+          itertools.chain.from_iterable(
+            set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]
+          )
+        )
+
+        self.alpha = alpha
+
+        # Make sure table is fully populated
+        self._populate_lambda()
+
+        self.Z = np.exp(self.lambda_tab.to_numpy()).sum()
+
+    @staticmethod
+    def from_json(
+      lambda_json: Optional[str] = None,
+      alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
+    ):
+        """Create a CationMutator instance from a DataFrame."""
         if lambda_json is not None:
             with open(lambda_json, 'r') as f:
                 lambda_dat = json.load(f)
@@ -49,20 +70,9 @@ class CationMutator:
         lambda_dat = [tuple(x) for x in lambda_dat]
         lambda_df = pd.DataFrame(lambda_dat)
 
-        self.lambda_tab = lambda_df.pivot(index=0, columns=1, values=2)
+        lambda_df = lambda_df.pivot(index=0, columns=1, values=2)
 
-        self.specs = set(
-          itertools.chain.from_iterable(
-            set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]
-          )
-        )
-
-        self.alpha = alpha
-
-        # Make sure table is fully populated
-        self._populate_lambda()
-
-        self.Z = np.exp(self.lambda_tab.to_numpy()).sum()
+        return CationMutator(lambda_df, alpha)
 
     def _populate_lambda(self):
         """Populate lambda table.
