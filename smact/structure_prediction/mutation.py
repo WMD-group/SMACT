@@ -167,7 +167,7 @@ class CationMutator:
         """Determine the substitution probabilities of a species with others.
 
         Determines the probability of substitution of the species with every
-        _other_ species in the lambda table.
+        species in the lambda table.
 
         """
         probs = self.get_lambdas(s1)
@@ -175,16 +175,43 @@ class CationMutator:
         probs /= self.Z
         return probs
 
+    def complete_sub_probs(self) -> pd.DataFrame:
+        """Generate a DataFrame with all the substitution probabilities."""
+        return np.exp(self.lambda_tab) / self.Z
+
+    def complete_cond_probs(self) -> pd.DataFrame:
+        """Generate a DataFrame with all the conditional substitution probabilities."""
+        lambda_exp = np.exp(self.lambda_tab)
+        return lambda_exp / lambda_exp.sum(axis=1)
+
+    def complete_pair_corrs(self) -> pd.DataFrame:
+        """Generate a DataFrame with all the pair correlations."""
+        corr = self.complete_sub_probs()
+
+        buff = corr
+
+        row_sums = buff.sum(axis=0)[:, None]
+        row_sums = np.hstack([row_sums] * len(row_sums))
+
+        col_sums = buff.sum(axis=1)
+        col_sums = np.vstack([col_sums] * len(col_sums))
+
+        corr /= row_sums * col_sums
+
+        corr *= self.Z**2
+
+        return corr
+
     def same_spec_probs(self) -> pd.DataFrame:
         """Calculate the same species substiution probabilities."""
         return np.exp(self.lambda_tab.to_numpy().diagonal()) / self.Z
 
     def pair_corr(self, s1: str, s2: str) -> float:
         """Determine the pair correlation of two ionic species."""
-        cond = self.sub_prob(s1, s2)
-        cond /= self.sub_probs(s1).sum()
-        cond /= self.sub_probs(s2).sum()
-        return cond
+        corr = self.sub_prob(s1, s2)
+        corr /= self.sub_probs(s1).sum()
+        corr /= self.sub_probs(s2).sum()
+        return corr
 
     def cond_sub_prob(self, s1: str, s2: str) -> float:
         """Calculate the probability of substitution of one species with another."""
