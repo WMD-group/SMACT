@@ -188,17 +188,14 @@ class CationMutator:
         """Generate a DataFrame with all the pair correlations."""
         corr = self.complete_sub_probs()
 
-        buff = corr
+        # Sum each row (symmetry means this is the same as column sums)
+        sums = corr.sum(axis=0)
+        # Stack into matrix
+        mat_sums = np.vstack([sums] * len(sums))
+        # Make each element the product of (row_sum * col_sum)
+        mat_sums *= sums[:, None]
 
-        row_sums = buff.sum(axis=0)[:, None]
-        row_sums = np.hstack([row_sums] * len(row_sums))
-
-        col_sums = buff.sum(axis=1)
-        col_sums = np.vstack([col_sums] * len(col_sums))
-
-        corr /= row_sums * col_sums
-
-        corr *= self.Z**2
+        corr /= mat_sums
 
         return corr
 
