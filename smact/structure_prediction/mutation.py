@@ -121,7 +121,7 @@ class CationMutator:
 
         return self.alpha(s1, s2)
 
-    def get_lambdas(self, species: str) -> pd.DataFrame:
+    def get_lambdas(self, species: str) -> pd.Series:
         """Get all the lambda values associated with a species."""
         if not {species} <= self.specs:
             raise ValueError(f"{species} not in lambda table.")
@@ -163,7 +163,7 @@ class CationMutator:
         """Calculate the probability of substitution of two species."""
         return np.exp(self.get_lambda(s1, s2)) / self.Z
 
-    def sub_probs(self, s1: str) -> pd.DataFrame:
+    def sub_probs(self, s1: str) -> pd.Series:
         """Determine the substitution probabilities of a species with others.
 
         Determines the probability of substitution of the species with every
@@ -199,7 +199,7 @@ class CationMutator:
 
         return corr
 
-    def same_spec_probs(self) -> pd.DataFrame:
+    def same_spec_probs(self) -> np.ndarray:
         """Calculate the same species substiution probabilities."""
         return np.exp(self.lambda_tab.to_numpy().diagonal()) / self.Z
 
@@ -214,7 +214,7 @@ class CationMutator:
         """Calculate the probability of substitution of one species with another."""
         return np.exp(self.get_lambda(s1, s2)) / np.exp(self.get_lambdas(s2)).sum()
 
-    def cond_sub_probs(self, s1: str) -> pd.DataFrame:
+    def cond_sub_probs(self, s1: str) -> pd.Series:
         """Calculate the probabilities of substitution of a given species.
 
         Calculates probabilities of substitution of given species with all
