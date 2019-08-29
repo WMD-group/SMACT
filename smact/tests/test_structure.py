@@ -7,10 +7,12 @@ import os
 import pickle
 import unittest
 from contextlib import contextmanager
+from random import sample
 
 import numpy as np
 import pandas as pd
 import pymatgen
+from pymatgen.analysis.structure_prediction.substitution_probability import SubstitutionProbability
 
 import smact
 from smact import Species
@@ -237,8 +239,16 @@ class CationMutatorTest(unittest.TestCase):
     def setUpClass(cls):
         """Set up the test initial structure and mutator."""
         cls.test_struct = SmactStructure.from_file(TEST_POSCAR)
+
         cls.test_mutator = CationMutator.from_json(lambda_json=TEST_LAMBDA_JSON)
-        cls.test_pymatgen_mutator = CationMutator.from_json(lambda_json=None)
+        cls.test_pymatgen_mutator = CationMutator.from_json(
+          lambda_json=None, alpha=lambda x, y: -5
+        )
+
+        cls.test_species = sample(cls.test_pymatgen_mutator.specs, 10)
+        cls.test_pairs = itertools.combinations_with_replacement(cls.test_species, 2)
+
+        cls.pymatgen_sp = SubstitutionProbability(lambda_table=None, alpha=-5)
 
     def assertDataFrameEqual(self, df1: pd.DataFrame, df2: pd.DataFrame):
         """Assert that two pandas.DataFrames are equal.
@@ -303,17 +313,31 @@ class CationMutatorTest(unittest.TestCase):
 
         # TODO Confirm functionality with more complex substitutions
 
-    @unittest.skip("Not implemented.")
-    def test_subs_probs(self):
-        """Test acquiring multiple substitution probabilities."""
-        ca_sub_probs = self.test_pymatgen_mutator.sub_probs("Ca2+")
+    def test_sub_prob(self):
+        """Test determining substitution probabilities."""
+        for s1, s2 in self.test_pairs:
+            with self.subTest(s1=s1, s2=s2):
+                self.assertAlmostEqual(
+                  self.pymatgen_sp.prob(s1, s2),
+                  self.test_pymatgen_mutator.sub_prob(s1, s2), )
 
-    @unittest.skip("Not implemented.")
-    def test_cond_probs(self):
-        """Test acquiring multiple conditional substitution probabilities."""
-        ca_sub_probs = self.test_pymatgen_mutator.cond_sub_probs("Ca2+")
-        print(f"\n Ca sub prob: {ca_sub_probs['Ca2+']}")
-        print(ca_sub_probs.describe())
+    def test_cond_sub_prob(self):
+        """Test determining conditional substitution probabilities."""
+        for s1, s2 in self.test_pairs:
+            with self.subTest(s1=s1, s2=s2):
+                self.assertAlmostEqual(
+                  self.pymatgen_sp.cond_prob(s1, s2),
+                  self.test_pymatgen_mutator.cond_sub_prob(s1, s2),
+                )
+
+    def test_pair_corr(self):
+        """Test determining conditional substitution probabilities."""
+        for s1, s2 in self.test_pairs:
+            with self.subTest(s1=s1, s2=s2):
+                self.assertAlmostEqual(
+                  self.pymatgen_sp.pair_corr(s1, s2),
+                  self.test_pymatgen_mutator.pair_corr(s1, s2),
+                )
 
     def test_from_df(self):
         """Test creating a CationMutator from an existing DataFrame."""
