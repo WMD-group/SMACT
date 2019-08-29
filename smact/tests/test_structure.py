@@ -12,6 +12,7 @@ from random import sample
 import numpy as np
 import pandas as pd
 import pymatgen
+from pandas.testing import assert_frame_equal, assert_series_equal
 from pymatgen.analysis.structure_prediction.substitution_probability import SubstitutionProbability
 
 import smact
@@ -245,19 +246,11 @@ class CationMutatorTest(unittest.TestCase):
           lambda_json=None, alpha=lambda x, y: -5
         )
 
-        cls.test_species = sample(cls.test_pymatgen_mutator.specs, 10)
-        cls.test_pairs = itertools.combinations_with_replacement(cls.test_species, 2)
+        # 5 random test species -> 5! test pairs
+        cls.test_species = sample(cls.test_pymatgen_mutator.specs, 5)
+        cls.test_pairs = list(itertools.combinations_with_replacement(cls.test_species, 2))
 
         cls.pymatgen_sp = SubstitutionProbability(lambda_table=None, alpha=-5)
-
-    def assertDataFrameEqual(self, df1: pd.DataFrame, df2: pd.DataFrame):
-        """Assert that two pandas.DataFrames are equal.
-
-        The indices and columns must also have identical labels.
-        """
-        self.assertTrue(df1.equals(df2))
-        self.assertEqual(list(df1.index), list(df2.index))
-        self.assertEqual(list(df1.columns), list(df2.columns))
 
     def test_lambda_tab_pop(self):
         """Test if lambda table is populated correctly."""
@@ -269,7 +262,10 @@ class CationMutatorTest(unittest.TestCase):
 
         exp_lambda = pd.DataFrame(lambda_dat, index=labels, columns=labels)
 
-        self.assertDataFrameEqual(self.test_mutator.lambda_tab, exp_lambda)
+        assert_frame_equal(
+          self.test_mutator.lambda_tab,
+          exp_lambda,
+          check_names=False, )
 
     def test_partition_func_Z(self):
         """Test the partition function for the whole table."""
@@ -321,6 +317,22 @@ class CationMutatorTest(unittest.TestCase):
                   self.pymatgen_sp.prob(s1, s2),
                   self.test_pymatgen_mutator.sub_prob(s1, s2), )
 
+    def test_cond_sub_probs(self):
+        """Test determining conditional substitution probabilities for a row."""
+        for s1 in ["A", "B", "C"]:
+            with self.subTest(s=s1):
+                cond_sub_probs_test = self.test_mutator.cond_sub_probs(s1)
+
+                vals = [
+                  (s1, s2, self.test_mutator.cond_sub_prob(s1, s2)) for s2 in ["A", "B", "C"]
+                ]
+
+                test_df = pd.DataFrame(vals)
+                test_df: pd.DataFrame = test_df.pivot(index=0, columns=1, values=2)
+
+                # Slice to convert to series
+                assert_series_equal(cond_sub_probs_test, test_df.iloc[0])
+
     def test_cond_sub_prob(self):
         """Test determining conditional substitution probabilities."""
         for s1, s2 in self.test_pairs:
@@ -344,7 +356,52 @@ class CationMutatorTest(unittest.TestCase):
         lambda_df = pd.read_csv(TEST_LAMBDA_CSV, index_col=0)
 
         csv_test = CationMutator(lambda_df=lambda_df)
-        self.assertDataFrameEqual(csv_test.lambda_tab, self.test_mutator.lambda_tab)
+        assert_frame_equal(
+          csv_test.lambda_tab,
+          self.test_mutator.lambda_tab,
+          check_names=False, )
+
+    def test_complete_cond_probs(self):
+        """Test getting all conditional probabilities."""
+        pairs = itertools.product(["A", "B", "C"], repeat=2)
+
+        vals = [(
+          s1,
+          s2,
+          self.test_mutator.cond_sub_prob(s1, s2), ) for s1, s2 in pairs]
+
+        cond_probs = pd.DataFrame(vals)
+        cond_probs = cond_probs.pivot(index=0, columns=1, values=2)
+
+        assert_frame_equal(self.test_mutator.complete_cond_probs(), cond_probs)
+
+    def test_complete_sub_probs(self):
+        """Test getting all probabilities."""
+        pairs = itertools.product(["A", "B", "C"], repeat=2)
+
+        vals = [(
+          s1,
+          s2,
+          self.test_mutator.sub_prob(s1, s2), ) for s1, s2 in pairs]
+
+        sub_probs = pd.DataFrame(vals)
+        sub_probs = sub_probs.pivot(index=0, columns=1, values=2)
+
+        assert_frame_equal(self.test_mutator.complete_sub_probs(), sub_probs)
+
+    def test_complete_pair_corrs(self):
+        """Test getting all pair correlations."""
+        pairs = itertools.product(["A", "B", "C"], repeat=2)
+
+        vals = [(
+          s1,
+          s2,
+          self.test_mutator.pair_corr(s1, s2), ) for s1, s2 in pairs]
+
+        pair_corrs = pd.DataFrame(vals)
+        pair_corrs = pair_corrs.pivot(index=0, columns=1, values=2)
+
+        assert_frame_equal(self.test_mutator.complete_pair_corrs(), pair_corrs)
 
 
 if __name__ == "__main__":
