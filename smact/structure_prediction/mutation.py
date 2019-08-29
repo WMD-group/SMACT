@@ -80,6 +80,7 @@ class CationMutator:
         Ensures no values are NaN and performs alpha calculations,
         such that an entry exists for every possible species
         combination in the lambda table.
+        Also ensures lambda table symmetry.
         """
         pairs = itertools.combinations_with_replacement(self.specs, 2)
 
@@ -113,6 +114,10 @@ class CationMutator:
                         mirror_lambda(s1, s2)
                 except KeyError:
                     add_alpha(s1, s2)
+
+        # Ensure symmetry
+        idx = self.lambda_tab.index
+        self.lambda_tab = self.lambda_tab[idx]
 
     def get_lambda(self, s1: str, s2: str) -> float:
         """Get lambda values corresponding to a pair of species."""
@@ -199,9 +204,19 @@ class CationMutator:
 
         return corr
 
-    def same_spec_probs(self) -> np.ndarray:
+    def same_spec_probs(self) -> pd.Series:
         """Calculate the same species substiution probabilities."""
-        return np.exp(self.lambda_tab.to_numpy().diagonal()) / self.Z
+        return np.exp(
+          pd.Series(
+            np.diag(self.lambda_tab),
+            index=[self.lambda_tab.index, self.lambda_tab.columns], )
+        ) / self.Z
+
+    def same_spec_cond_probs(self) -> pd.Series:
+        """Calculate the same species conditional substiution probabilities."""
+        return (
+          np.exp(self.lambda_tab.to_numpy().diagonal()) / np.exp(self.lambda_tab).sum(axis=0)
+        )
 
     def pair_corr(self, s1: str, s2: str) -> float:
         """Determine the pair correlation of two ionic species."""
