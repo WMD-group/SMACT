@@ -28,4 +28,5 @@ Submodules
     smact.structure_prediction.database
     smact.structure_prediction.mutation
     smact.structure_prediction.structure
+    smact.structure_prediction.probability_models
     smact.structure_prediction.utilities
