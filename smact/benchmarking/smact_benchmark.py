@@ -19,10 +19,11 @@ class MutatorBenchmarker:
         self.cm = CationMutator.from_json()
 
     @timeit
-    def __pair_corr(self) -> pd.DataFrame:
+    def __pair_corr(self):
         """Get pair correlations."""
-        return self.cm.complete_pair_corrs()
+        self.cm.complete_pair_corrs()
 
 
-if __name__ == "__main__":
+@timeit(delim=True, n=100)
+def mutator_test_run():
     MutatorBenchmarker().run_tests()
