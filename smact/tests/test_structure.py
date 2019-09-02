@@ -298,7 +298,7 @@ class CationMutatorTest(unittest.TestCase):
 
         with self.subTest(s1="CaTiO3", s2="BaTiO3"):
             mutation = self.test_mutator._mutate_structure(CaTiO3, "Ca2+", "Ba2+")
-            self.assertEqual(mutation, CaTiO3)
+            self.assertEqual(mutation, BaTiO3)
 
         na_file = os.path.join(files_dir, "NaCl.txt")
         NaCl = SmactStructure.from_file(na_file)
