@@ -4,8 +4,9 @@ import itertools
 import json
 import os
 import re
+from copy import deepcopy
 from operator import itemgetter
-from typing import Callable, Optional, Tuple
+from typing import Callable, Generator, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -139,30 +140,31 @@ class CationMutator:
       init_species: str,
       final_species: str, ) -> SmactStructure:
         """Mutate an ion within a SmactStructure."""
+        struct_buff = deepcopy(structure)
         init_spec_tup = parse_spec(init_species)
-        struct_spec_tups = [spec[:2] for spec in structure.species]
+        struct_spec_tups = list(map(itemgetter(0, 1), struct_buff.species))
         spec_loc = struct_spec_tups.index(init_spec_tup)
 
         final_spec_tup = parse_spec(final_species)
 
         # Replace species tuple
-        structure.species[spec_loc] = (*final_spec_tup, structure.species[spec_loc][2])
+        struct_buff.species[spec_loc] = (*final_spec_tup, struct_buff.species[spec_loc][2])
 
         # Check for charge neutrality
-        if sum(x[1] * x[2] for x in structure.species) != 0:
+        if sum(x[1] * x[2] for x in struct_buff.species) != 0:
             raise ValueError("New structure is not charge neutral.")
 
         # Sort species again
-        structure.species.sort(key=itemgetter(1), reverse=True)
-        structure.species.sort(key=itemgetter(0))
+        struct_buff.species.sort(key=itemgetter(1), reverse=True)
+        struct_buff.species.sort(key=itemgetter(0))
 
         # Replace sites
-        structure.sites[final_species] = structure.sites.pop(init_species)
+        struct_buff.sites[final_species] = struct_buff.sites.pop(init_species)
         # And sort
-        species_strs = structure._format_style("{ele}{charge}{sign}").split(" ")
-        structure.sites = {spec: structure.sites[spec] for spec in species_strs}
+        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(" ")
+        struct_buff.sites = {spec: struct_buff.sites[spec] for spec in species_strs}
 
-        return structure
+        return struct_buff
 
     def sub_prob(self, s1: str, s2: str) -> float:
         """Calculate the probability of substitution of two species."""
@@ -241,6 +243,20 @@ class CationMutator:
         probs /= np.exp(self.lambda_tab).sum()
         return probs
 
-    def unary_substitute(self, structure: SmactStructure) -> Tuple[SmactStructure, float]:
-        """Substitute a single ion within a structure."""
-        pass
+    def unary_substitute(
+      self,
+      structure: SmactStructure,
+      thresh: Optional[float] = 1e-5, ) -> Generator[Tuple[SmactStructure, float], None, None]:
+        """Find all structures with 1 substitution with probability above a threshold."""
+        species_strings = structure._format_style("{ele}{charge}{sign}").split(' ')
+
+        for specie in species_strings:
+            cond_probs = self.cond_sub_probs(specie)
+            likely_probs = cond_probs.loc[cond_probs > thresh]
+
+            for new_spec, prob in likely_probs.items():
+                if any([
+                  new_spec == specie,
+                  parse_spec(specie)[1] != parse_spec(new_spec)[1], ]):
+                    continue
+                yield (self._mutate_structure(structure, specie, new_spec), prob)
