@@ -82,6 +82,7 @@ class CationMutator:
         such that an entry exists for every possible species
         combination in the lambda table.
         Also ensures lambda table symmetry.
+
         """
         pairs = itertools.combinations_with_replacement(self.specs, 2)
 
@@ -247,7 +248,17 @@ class CationMutator:
       self,
       structure: SmactStructure,
       thresh: Optional[float] = 1e-5, ) -> Generator[Tuple[SmactStructure, float], None, None]:
-        """Find all structures with 1 substitution with probability above a threshold."""
+        """Find all structures with 1 substitution with probability above a threshold.
+
+        Args:
+            structure: A :class:`SmactStructure` instance from which to generate compounds.
+            thresh (float): The probability threshold; discard all substitutions that are have probability
+                to generate a naturally-occuring compound less than this.
+
+        Yields:
+            Tuples of (:class:`SmactStructure`, probability).
+
+        """
         species_strings = structure._format_style("{ele}{charge}{sign}").split(' ')
 
         for specie in species_strings:
