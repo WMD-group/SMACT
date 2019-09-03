@@ -14,6 +14,7 @@ from pymatgen.ext.matproj import MPRester
 import smact
 
 from . import logger
+from .utilities import get_sign
 
 
 class SmactStructure:
@@ -343,24 +344,6 @@ class SmactStructure:
 
         return SmactStructure(species, lattice, sites, lattice_param)
 
-    @staticmethod
-    def __get_sign(charge: int) -> str:
-        """Get string representation of a number's sign.
-
-        Args:
-            charge: The number whose sign to derive.
-
-        Returns:
-            Sign; either '+', '-' or '' for neutral.
-
-        """
-        if charge > 0:
-            return '+'
-        elif charge < 0:
-            return '-'
-        else:
-            return ''
-
     def _format_style(
       self,
       template: str,
@@ -380,7 +363,7 @@ class SmactStructure:
                 oxidation state's sign.
             delim: The delimeter between species' templates.
             include_ground: Whether to include the charge and sign
-                of neutral species. See also :meth:`~.__get_sign`.
+                of neutral species.
         
         Returns:
             String of templates formatted for each species, separated
@@ -408,7 +391,7 @@ class SmactStructure:
             ele=specie[0],
             stoic=specie[2],
             charge=abs(specie[1]) if specie[1] != 0 else "",
-            sign=self.__get_sign(specie[1]),
+            sign=get_sign(specie[1]),
           ) for specie in self.species
         )
 
