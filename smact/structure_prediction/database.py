@@ -1,8 +1,11 @@
 """Tools for database interfacing for high throughput IO."""
 
-from typing import Sequence, List
+import itertools
+from operator import itemgetter
+from typing import Sequence, List, Tuple
 
 from .structure import SmactStructure
+from .utilities import get_sign
 import sqlite3
 
 
@@ -123,4 +126,30 @@ class StructureDB:
               f"SELECT structure FROM {table} WHERE composition = ?",
               (composition, ), )
             structs = c.fetchall()
+        return [SmactStructure.from_poscar(pos[0]) for pos in structs]
+
+    def get_with_species(
+      self,
+      species: List[Tuple[str, int]],
+      table: str, ) -> List[SmactStructure]:
+        """Get SmactStructures containing given species."""
+        glob = "*".join("{}_*_{}{}" for _ in range(len(species)))
+        glob = "*" + glob + "*"
+
+        species.sort(key=itemgetter(1), reverse=True)
+        species.sort(key=itemgetter(0))
+
+        # Generate a list of [element1, charge1, sign1, element2, ...]
+        vals = list(
+          itertools.chain.from_iterable([x[0], abs(x[1]), get_sign(x[1])] for x in species)
+        )
+
+        glob_form = glob.format(*vals)
+
+        with self as c:
+            c.execute(
+              f"SELECT structure FROM {table} WHERE composition GLOB ?",
+              (glob_form, ), )
+            structs = c.fetchall()
+
         return [SmactStructure.from_poscar(pos[0]) for pos in structs]
