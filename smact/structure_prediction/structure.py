@@ -417,6 +417,10 @@ class SmactStructure:
 
         return dict(eles)
 
+    def has_species(self, species: Tuple[str, int]) -> bool:
+        """Determine whether a given species is in the structure."""
+        return species in map(itemgetter(0, 1), self.species)
+
     def get_spec_strs(self) -> List[str]:
         """Get string representations of the constituent species.
 

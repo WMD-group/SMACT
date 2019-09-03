@@ -124,6 +124,14 @@ class StructureTest(unittest.TestCase):
 
         self.assertStructAlmostEqual(s1, s2)
 
+    def test_has_species(self):
+        """Test determining whether a species is in a `SmactStructure`."""
+        s1 = SmactStructure(*self._gen_empty_structure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
+
+        self.assertTrue(s1.has_species(('Ba', 2)))
+        self.assertFalse(s1.has_species(('Ba', 3)))
+        self.assertFalse(s1.has_species(('Ca', 2)))
+
     def test_smactStruc_comp_key(self):
         """Test generation of a composition key for `SmactStructure`s."""
         s1 = SmactStructure(*self._gen_empty_structure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
