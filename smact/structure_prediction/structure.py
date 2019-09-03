@@ -67,9 +67,7 @@ class SmactStructure:
 
         self.lattice_mat = lattice_mat
 
-        species_strs = self._format_style("{ele}{charge}{sign}")
-
-        self.sites = {spec: sites[spec] for spec in species_strs.split(" ")}  # Sort sites
+        self.sites = {spec: sites[spec] for spec in self.get_spec_strs()}  # Sort sites
 
         self.lattice_param = lattice_param
 
@@ -436,6 +434,20 @@ class SmactStructure:
 
         return dict(eles)
 
+    def get_spec_strs(self) -> List[str]:
+        """Get string representations of the constituent species.
+
+        Returns:
+            A list of strings, formatted as '{element}{charge}{sign}'.
+        
+        Examples:
+            >>> s = SmactStructure.from_file('tests/files/CaTiO3.txt')
+            >>> s.get_spec_strs()
+            ['Ca2+', 'O2-', 'Ti4+']
+        
+        """
+        return self._format_style("{ele}{charge}{sign}").split(' ')
+
     def composition(self) -> str:
         """Generate a key that describes the composition.
 
@@ -478,7 +490,7 @@ class SmactStructure:
             str: POSCAR-style representation of the structure.
 
         """
-        poscar = self._format_style("{ele}{charge}{sign}") + "\n"
+        poscar = " ".join(self.get_spec_strs()) + "\n"
 
         poscar += f"{self.lattice_param}\n"
 
@@ -488,8 +500,7 @@ class SmactStructure:
 
         poscar += self._format_style("{ele}") + "\n"
 
-        species_strs = self._format_style("{ele}{charge}{sign}")
-        poscar += " ".join(str(spec_count[spec]) for spec in species_strs.split(" ")) + "\n"
+        poscar += " ".join(str(spec_count[spec]) for spec in self.get_spec_strs()) + "\n"
 
         poscar += "Cartesian\n"
         for spec, coords in self.sites.items():
