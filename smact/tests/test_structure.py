@@ -232,6 +232,27 @@ class StructureDBTest(unittest.TestCase):
         with self.subTest(msg="Adding multiple structures to table."):
             self.assertTrue(self.db.add_structs(structs, self.TEST_TABLE))
 
+        test_with_species_args = [
+          [("Na", 1)],
+          [("Cl", -1)],
+          [("Na", 1), ("Cl", -1)],
+          [("Cl", -1), ("Na", 1)],
+          [("Na", 1), ("Cl", 1)],
+          [("Ca", 2), ("Ti", 4), ("O", -2)],
+        ]
+
+        test_with_species_exp = [
+          [structs[0]],
+          [structs[0]],
+          [structs[0]],
+          [structs[0]],
+          [],
+          [struct], ]
+
+        for spec, expected in zip(test_with_species_args, test_with_species_exp):
+            with self.subTest(msg=f"Retrieving species with {spec}"):
+                self.assertEqual(self.db.get_with_species(spec, self.TEST_TABLE), expected)
+
 
 class CationMutatorTest(unittest.TestCase):
     """Test the CationMutator class."""
