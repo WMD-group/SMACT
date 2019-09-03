@@ -252,8 +252,8 @@ class CationMutator:
 
         Args:
             structure: A :class:`SmactStructure` instance from which to generate compounds.
-            thresh (float): The probability threshold; discard all substitutions that are have probability
-                to generate a naturally-occuring compound less than this.
+            thresh (float): The probability threshold; discard all substitutions that have
+                a probability to generate a naturally-occuring compound less than this.
 
         Yields:
             Tuples of (:class:`SmactStructure`, probability).
