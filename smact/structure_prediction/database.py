@@ -134,7 +134,7 @@ class StructureDB:
       table: str, ) -> List[SmactStructure]:
         """Get SmactStructures containing given species."""
         glob = "*".join("{}_*_{}{}" for _ in range(len(species)))
-        glob = "*" + glob + "*"
+        glob = f"*{glob}*"
 
         species.sort(key=itemgetter(1), reverse=True)
         species.sort(key=itemgetter(0))
