@@ -259,9 +259,7 @@ class CationMutator:
             Tuples of (:class:`SmactStructure`, probability).
 
         """
-        species_strings = structure._format_style("{ele}{charge}{sign}").split(' ')
-
-        for specie in species_strings:
+        for specie in structure.get_spec_strs():
             cond_probs = self.cond_sub_probs(specie)
             likely_probs = cond_probs.loc[cond_probs > thresh]
 
