@@ -15,3 +15,21 @@ def parse_spec(species: str) -> Tuple[str, int]:
         charge *= -1
 
     return ele, charge
+
+
+def get_sign(charge: int) -> str:
+    """Get string representation of a number's sign.
+
+    Args:
+        charge: The number whose sign to derive.
+
+    Returns:
+        Sign; either '+', '-' or '' for neutral.
+
+    """
+    if charge > 0:
+        return '+'
+    elif charge < 0:
+        return '-'
+    else:
+        return ''
