@@ -1,10 +1,12 @@
 """Structure prediction implementation."""
 
+import itertools
 from typing import Generator, List, Tuple, Optional
 
 from .database import StructureDB
 from .mutation import CationMutator
 from .structure import SmactStructure
+from .utilities import unparse_spec
 
 
 class StructurePredictor:
@@ -44,4 +46,45 @@ class StructurePredictor:
             Potential structures, as tuples of (structure, probability).
 
         """
-        raise NotImplementedError
+        # For now, consider just structures with the same species, and unary substitutions.
+        # This means we need only consider structures with a difference of 0 or 1 species.
+
+        for identical in self.db.get_with_species(species):
+            yield (identical, 1.0)
+
+        sub_spec = itertools.combinations(species, len(species) - 1)
+
+        potential_unary_parents: List[List[SmactStructure]] = list(
+          self.db.get_with_species(specs) for specs in sub_spec
+        )
+
+        for spec_idx, parents in enumerate(potential_unary_parents):
+            # Get missing ion
+            (diff_spec, ) = set(species[spec_idx]) - set(sub_spec[spec_idx])
+            diff_spec_str = unparse_spec(diff_spec)
+
+            # Determine conditional substitution likelihoods
+            diff_sub_probs = self.cm.cond_sub_probs(diff_spec_str)
+
+            for parent in parents:
+                # Filter out any structures with identical species
+                if parent.has_species(diff_spec):
+                    continue
+
+                # Ensure parent has as many species as target
+                if len(parent.species) != len(species):
+                    continue
+
+                ## Determine probability
+                # Get species to be substituted
+                (alt_spec, ) = (
+                  set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - {diff_spec_str}
+                )
+                try:
+                    p = diff_sub_probs.loc[alt_spec]
+                except:
+                    # Not in the Series
+                    continue
+
+                if p > thresh:
+                    yield (cm._mutate_structure(parent, alt_spec, diff_spec), p)
