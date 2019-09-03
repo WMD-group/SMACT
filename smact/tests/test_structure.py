@@ -237,7 +237,9 @@ class StructureDBTest(unittest.TestCase):
           [("Cl", -1)],
           [("Na", 1), ("Cl", -1)],
           [("Cl", -1), ("Na", 1)],
+          [("Cl", -1)],
           [("Na", 1), ("Cl", 1)],
+          [("O", -2)],
           [("Ca", 2), ("Ti", 4), ("O", -2)],
         ]
 
@@ -246,7 +248,9 @@ class StructureDBTest(unittest.TestCase):
           [structs[0]],
           [structs[0]],
           [structs[0]],
+          [structs[0]],
           [],
+          [struct],
           [struct], ]
 
         for spec, expected in zip(test_with_species_args, test_with_species_exp):
