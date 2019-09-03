@@ -17,6 +17,15 @@ def parse_spec(species: str) -> Tuple[str, int]:
     return ele, charge
 
 
+def unparse_spec(species: Tuple[str, int]) -> str:
+    """Unparse a species into a string representation.
+
+    The analogue of :func:`parse_spec`.
+
+    """
+    return f"{species[0]}{abs(species[1])}{get_sign(species[1])}"
+
+
 def get_sign(charge: int) -> str:
     """Get string representation of a number's sign.
 
