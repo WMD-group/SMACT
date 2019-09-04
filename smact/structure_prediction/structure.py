@@ -195,7 +195,9 @@ class SmactStructure:
         return sites, species
 
     @staticmethod
-    def from_py_struct(structure: pymatgen.Structure):
+    def from_py_struct(
+      structure: pymatgen.Structure,
+      force_oxi: Optional[bool] = False, ):
         """Create a SmactStructure from a pymatgen Structure object.
 
         Args:
@@ -212,6 +214,8 @@ class SmactStructure:
             bva = BVAnalyzer()
             struct = bva.get_oxi_state_decorated_structure(struct)
         except:
+            if force_oxi:
+                raise Exception("Couldn't decorate structure with oxidation states.")
             logger.warn("Couldn't decorate structure with oxidation states.")
 
         sites, species = SmactStructure.__parse_py_sites(structure)
