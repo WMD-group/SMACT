@@ -2,8 +2,12 @@
 
 import itertools
 from operator import itemgetter
-from typing import Sequence, List, Tuple
+from typing import Generator, Sequence, List, Tuple, Dict, Union
 
+import pymatgen
+from pymatgen.ext.matproj import MPRester
+
+from . import logger
 from .structure import SmactStructure
 from .utilities import get_sign
 import sqlite3
@@ -53,6 +57,36 @@ class StructureDB:
         """Close database connection."""
         self.conn.commit()
         self.conn.close()
+
+    def add_mp_icsd(self, table: str, mp_api_key: str):
+        """Add a table populated with Materials Project-hosted ICSD structures.
+
+        Args:
+            table (str): The name of the table to add.
+            mp_api_key (str): A Materials Project API key.
+
+        """
+        with MPRester(mp_api_key) as m:
+            data = m.query(
+              criteria={
+                'icsd_ids': {
+                  '$exists': True
+                }, },
+              properties=['structure', 'material_id'],
+            )
+
+        def parse_mprest(
+          data: List[Dict[str, Union[pymatgen.Structure, str]]],
+        ) -> Generator[SmactStructure, None, None]:
+            """Parse MPRester query data to generate structures."""
+            for val in data:
+                try:
+                    yield SmactStructure.from_py_struct(val["structure"], force_oxi=True)
+                except:
+                    # Couldn't decorate with oxidation states
+                    logger.warn(f"Couldn't decorate {val['material_id']} with oxidation states.")
+
+        self.add_structs(parse_mprest(data), table)
 
     def add_table(self, table: str) -> bool:
         """Add a table to the database.
