@@ -81,7 +81,7 @@ class StructureDB:
             """Parse MPRester query data to generate structures."""
             for val in data:
                 try:
-                    yield SmactStructure.from_py_struct(val["structure"], force_oxi=True)
+                    yield SmactStructure.from_py_struct(val["structure"])
                 except:
                     # Couldn't decorate with oxidation states
                     logger.warn(f"Couldn't decorate {val['material_id']} with oxidation states.")
