@@ -59,25 +59,38 @@ class StructureDB:
         self.conn.commit()
         self.conn.close()
 
-    def add_mp_icsd(self, table: str, mp_api_key: str, threads: Optional[int] = None) -> int:
+    def add_mp_icsd(
+      self,
+      table: str,
+      mp_data: Optional[List[Dict[str, Union[pymatgen.Structure, str]]]] = None,
+      mp_api_key: Optional[str] = None,
+      threads: Optional[int] = None
+    ) -> int:
         """Add a table populated with Materials Project-hosted ICSD structures.
 
         Args:
             table (str): The name of the table to add.
-            mp_api_key (str): A Materials Project API key.
+            mp_data: The Materials Project data to parse. If this is None, data
+                will be downloaded. Downloading data needs `mp_api_key` to be set.
+            mp_api_key (str): A Materials Project API key. Only needed if `mp_data`
+                is None.
+            threads (int): The number of processing threads to use for `mp.Pool`.
         
         Returns:
             The number of structs added.
 
         """
-        with MPRester(mp_api_key) as m:
-            data = m.query(
-              criteria={
-                'icsd_ids': {
-                  '$exists': True
-                }, },
-              properties=['structure', 'material_id'],
-            )
+        if mp_data is None:
+            with MPRester(mp_api_key) as m:
+                data = m.query(
+                  criteria={
+                    'icsd_ids': {
+                      '$exists': True
+                    }, },
+                  properties=['structure', 'material_id'],
+                )
+        else:
+            data = mp_data
 
         def parse_mprest(
           data: Dict[str, Union[pymatgen.Structure, str]],
