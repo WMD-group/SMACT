@@ -92,18 +92,17 @@ class StructureDB:
         else:
             data = mp_data
 
-        def parse_mprest(
-          data: Dict[str, Union[pymatgen.Structure, str]],
-        ) -> Generator[SmactStructure, None, None]:
+        def parse_mprest(data: Dict[str, Union[pymatgen.Structure, str]], ) -> SmactStructure:
             """Parse MPRester query data to generate structures."""
             try:
-                yield SmactStructure.from_py_struct(data["structure"])
+                return SmactStructure.from_py_struct(data["structure"])
             except:
                 # Couldn't decorate with oxidation states
                 logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")
 
         with Pool(threads) as p:
-            return self.add_structs(p.imap_unordered(parse_mprest, data, 500), table)
+            parse_iter = p.imap_unordered(parse_mprest, data, 500)
+            return self.add_structs(parse_iter, table)
 
     def add_table(self, table: str) -> bool:
         """Add a table to the database.
@@ -153,6 +152,9 @@ class StructureDB:
         """
         with self as c:
             for idx, struct in enumerate(structs):
+                if struct is None:
+                    # Handling for poorly decorated structures
+                    continue
                 entry = (struct.composition(), struct.as_poscar())
                 c.execute(f"INSERT into {table} VALUES (?, ?)", entry)
 
