@@ -1,8 +1,9 @@
 """Tools for database interfacing for high throughput IO."""
 
 import itertools
+from multiprocessing import Pool
 from operator import itemgetter
-from typing import Generator, Sequence, List, Tuple, Dict, Union
+from typing import Generator, Sequence, List, Tuple, Dict, Union, Optional
 
 import pymatgen
 from pymatgen.ext.matproj import MPRester
@@ -58,12 +59,15 @@ class StructureDB:
         self.conn.commit()
         self.conn.close()
 
-    def add_mp_icsd(self, table: str, mp_api_key: str):
+    def add_mp_icsd(self, table: str, mp_api_key: str, threads: Optional[int] = None) -> int:
         """Add a table populated with Materials Project-hosted ICSD structures.
 
         Args:
             table (str): The name of the table to add.
             mp_api_key (str): A Materials Project API key.
+        
+        Returns:
+            The number of structs added.
 
         """
         with MPRester(mp_api_key) as m:
@@ -76,17 +80,17 @@ class StructureDB:
             )
 
         def parse_mprest(
-          data: List[Dict[str, Union[pymatgen.Structure, str]]],
+          data: Dict[str, Union[pymatgen.Structure, str]],
         ) -> Generator[SmactStructure, None, None]:
             """Parse MPRester query data to generate structures."""
-            for val in data:
-                try:
-                    yield SmactStructure.from_py_struct(val["structure"])
-                except:
-                    # Couldn't decorate with oxidation states
-                    logger.warn(f"Couldn't decorate {val['material_id']} with oxidation states.")
+            try:
+                yield SmactStructure.from_py_struct(data["structure"])
+            except:
+                # Couldn't decorate with oxidation states
+                logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")
 
-        self.add_structs(parse_mprest(data), table)
+        with Pool(threads) as p:
+            return self.add_structs(p.imap_unordered(parse_mprest, data, 500), table)
 
     def add_table(self, table: str) -> bool:
         """Add a table to the database.
@@ -123,7 +127,7 @@ class StructureDB:
 
         return True
 
-    def add_structs(self, structs: Sequence[SmactStructure], table: str) -> bool:
+    def add_structs(self, structs: Sequence[SmactStructure], table: str) -> int:
         """Add several SmactStructures to a table.
 
         Args:
@@ -131,17 +135,15 @@ class StructureDB:
             table: The name of the table to add the structs to.
 
         Returns:
-            bool: Whether the operation was successful.
+            The number of structures added.
 
         """
         with self as c:
-            entries = [(
-              struct.composition(),
-              struct.as_poscar(), ) for struct in structs]
+            for idx, struct in enumerate(structs):
+                entry = (struct.composition(), struct.as_poscar())
+                c.execute(f"INSERT into {table} VALUES (?, ?)", entry)
 
-            c.executemany(f"INSERT into {table} VALUES (?, ?)", entries)
-
-        return True
+        return idx + 1
 
     def get_structs(self, composition: str, table: str) -> List[SmactStructure]:
         """Get SmactStructures for a given composition.
