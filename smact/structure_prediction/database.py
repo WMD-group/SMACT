@@ -44,18 +44,33 @@ class StructureDB:
     """
 
     def __init__(self, db: str):
-        """Set database name."""
+        """Set database name.
+
+        Args:
+            db (str): The name of the database. Can also be ':memory:'
+                to connect to a database in RAM.
+
+        """
         self.db = db
 
     def __enter__(self) -> sqlite3.Cursor:
-        """Initialize database connection."""
+        """Initialize database connection.
+
+        Returns:
+            An SQLite cursor for interfacing with the database.
+
+        """
         self.conn = sqlite3.connect(self.db)
         self.cur = self.conn.cursor()
 
         return self.cur
 
     def __exit__(self, *args):
-        """Close database connection."""
+        """Close database connection.
+
+        Commits all changes before closing.
+
+        """
         self.conn.commit()
         self.conn.close()
 
@@ -93,7 +108,16 @@ class StructureDB:
             data = mp_data
 
         def parse_mprest(data: Dict[str, Union[pymatgen.Structure, str]], ) -> SmactStructure:
-            """Parse MPRester query data to generate structures."""
+            """Parse MPRester query data to generate structures.
+
+            Args:
+                data: A dictionary containing the keys 'structure' and
+                    'material_id', with the associated values.
+
+            Returns:
+                An oxidation-state-decorated :class:`SmactStructure`.
+
+            """
             try:
                 return SmactStructure.from_py_struct(data["structure"])
             except:
@@ -183,7 +207,16 @@ class StructureDB:
       self,
       species: List[Tuple[str, int]],
       table: str, ) -> List[SmactStructure]:
-        """Get SmactStructures containing given species."""
+        """Get SmactStructures containing given species.
+
+        Args:
+            species: A list of species as tuples, in (element, charge) format.
+            table: The name of the table from which to get the species.
+
+        Returns:
+            A list of :class:`SmactStructure`s in the table that contain the species.
+
+        """
         glob = "*".join("{}_*_{}{}" for _ in range(len(species)))
         glob = f"*{glob}*"
 
