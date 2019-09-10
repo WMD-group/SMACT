@@ -1,22 +1,9 @@
-"""Tools for database interfacing for high throughput IO.
-
-Todo:
-    Implement multiprocessing for adding several structures
-    from the Materials Project website, at the point of
-    parsing the structures using :meth:`SmactStructure.from_py_struct`.
-
-    This requires use of the `copyreg` library; simply attempting to
-    use `mp.Pool` with the current implementation results in the
-    following error::
-
-        AttributeError: Can't pickle local object
-        'StructureDB.add_mp_icsd.<locals>.parse_mprest'
-
-"""
+"""Tools for database interfacing for high throughput IO."""
 
 import itertools
 from multiprocessing import Pool
 from operator import itemgetter
+from pathos.pools import ParallelPool
 from typing import Generator, Sequence, List, Tuple, Dict, Union, Optional
 
 import pymatgen
@@ -136,7 +123,11 @@ class StructureDB:
                 # Couldn't decorate with oxidation states
                 logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")
 
-        parse_iter = map(parse_mprest, data)
+        self.add_table(table)
+
+        pool = ParallelPool()
+        parse_iter = pool.uimap(parse_mprest, data)
+
         return self.add_structs(parse_iter, table)
 
     def add_table(self, table: str) -> bool:
