@@ -1,4 +1,18 @@
-"""Tools for database interfacing for high throughput IO."""
+"""Tools for database interfacing for high throughput IO.
+
+Todo:
+    Implement multiprocessing for adding several structures
+    from the Materials Project website, at the point of
+    parsing the structures using :meth:`SmactStructure.from_py_struct`.
+
+    This requires use of the `copyreg` library; simply attempting to
+    use `mp.Pool` with the current implementation results in the
+    following error::
+
+        AttributeError: Can't pickle local object
+        'StructureDB.add_mp_icsd.<locals>.parse_mprest'
+
+"""
 
 import itertools
 from multiprocessing import Pool
@@ -78,8 +92,7 @@ class StructureDB:
       self,
       table: str,
       mp_data: Optional[List[Dict[str, Union[pymatgen.Structure, str]]]] = None,
-      mp_api_key: Optional[str] = None,
-      threads: Optional[int] = None
+      mp_api_key: Optional[str] = None
     ) -> int:
         """Add a table populated with Materials Project-hosted ICSD structures.
 
@@ -89,7 +102,6 @@ class StructureDB:
                 will be downloaded. Downloading data needs `mp_api_key` to be set.
             mp_api_key (str): A Materials Project API key. Only needed if `mp_data`
                 is None.
-            threads (int): The number of processing threads to use for `mp.Pool`.
         
         Returns:
             The number of structs added.
@@ -124,9 +136,8 @@ class StructureDB:
                 # Couldn't decorate with oxidation states
                 logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")
 
-        with Pool(threads) as p:
-            parse_iter = p.imap_unordered(parse_mprest, data, 500)
-            return self.add_structs(parse_iter, table)
+        parse_iter = map(parse_mprest, data)
+        return self.add_structs(parse_iter, table)
 
     def add_table(self, table: str) -> bool:
         """Add a table to the database.
