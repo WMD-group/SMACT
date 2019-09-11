@@ -31,7 +31,19 @@ class CationMutator:
       lambda_df: pd.DataFrame,
       alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
     ):
-        """Assign attributes and get lambda table."""
+        """Assign attributes and get lambda table.
+
+        Args:
+            lambda_df: A pandas DataFrame, with column and index labels
+                as species strings and lambda values as entries.
+            alpha: A function to call to fill in missing lambda values.
+                The function must take the two species' strings as
+                arguments, and return a floating point lambda
+                value.
+                Defaults to a function that unconditionally returns
+                -5.0.
+
+        """
         self.lambda_tab = lambda_df
 
         self.specs = set(
@@ -52,7 +64,21 @@ class CationMutator:
       lambda_json: Optional[str] = None,
       alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
     ):
-        """Create a CationMutator instance from a DataFrame."""
+        """Create a CationMutator instance from a DataFrame.
+
+        Args:
+            lambda_json (str, optional): JSON-style representation of the
+                lambda table. This is a list of entries, containing pairs
+                and their associated lambda values.
+                Each entry is a list of [species1, species2, lambda].
+                If not supplied, defaults to the lambda table
+                included with pymatgen.
+            alpha: See :meth:`__init__`.
+
+        Returns:
+            A :class:`CationMutator` instance.
+
+        """
         if lambda_json is not None:
             with open(lambda_json, 'r') as f:
                 lambda_dat = json.load(f)
@@ -122,14 +148,34 @@ class CationMutator:
         self.lambda_tab = self.lambda_tab[idx]
 
     def get_lambda(self, s1: str, s2: str) -> float:
-        """Get lambda values corresponding to a pair of species."""
+        """Get lambda values corresponding to a pair of species.
+
+        Args:
+            s1 (str): One of the species.
+            s2 (str): The other species.
+
+        Returns:
+            lambda (float): The lambda value, if it exists
+                in the table. Otherwise, the alpha value
+                for the two species.
+
+        """
         if {s1, s2} <= self.specs:
             return self.lambda_tab.at[s1, s2]
 
         return self.alpha(s1, s2)
 
     def get_lambdas(self, species: str) -> pd.Series:
-        """Get all the lambda values associated with a species."""
+        """Get all the lambda values associated with a species.
+
+        Args:
+            species (str): The species for which to get the
+                lambda values.
+
+        Returns:
+            A pandas Series, with index-labelled lambda entries.
+
+        """
         if not {species} <= self.specs:
             raise ValueError(f"{species} not in lambda table.")
 
@@ -140,7 +186,31 @@ class CationMutator:
       structure: SmactStructure,
       init_species: str,
       final_species: str, ) -> SmactStructure:
-        """Mutate an ion within a SmactStructure."""
+        """Mutate a species within a SmactStructure.
+
+        Replaces all instances of the species within the
+        structure. Every site occupied by the species
+        has its label changed to the new species,
+        and the list of species of the structure is
+        changed to reflect the mutation.
+        Stoichiometry is maintained.
+        Requires the species to have the same charge.
+
+        Note:
+            Creates a deepcopy of the supplied structure,
+            such that the original instance is not modified.
+
+        Args:
+            init_species (str): The species within the structure
+                to mutate.
+            final_species (str): The species to replace the
+                initial species with.
+
+        Returns:
+            A :class:`.~SmactStructure`, with the species
+                mutated.
+
+        """
         struct_buff = deepcopy(structure)
         init_spec_tup = parse_spec(init_species)
         struct_spec_tups = list(map(itemgetter(0, 1), struct_buff.species))
