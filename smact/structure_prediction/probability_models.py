@@ -1,4 +1,17 @@
-"""Probability models for species substitution."""
+"""Probability models for species substitution.
+
+Implements base class :class:`SubstitutionModel`,
+which can be extended to allow for development of new
+lambda tables. An example of such an extension,
+:class:`RadiusModel`, is also implemented.
+
+Todo:
+    * Allow for parallelism in lambda table calculations
+        by implementing a `sub_probs` abstractmethod
+        that :meth:`SubstitutionModel.gen_lambda` uses,
+        if available.
+
+"""
 
 import abc
 import os
@@ -56,7 +69,15 @@ class RadiusModel(SubstitutionModel):
     """Substitution probability model based on Shannon radii."""
 
     def __init__(self):
+        r"""Parse Shannon radii data file.
 
+        Also calculates "spring constant", _k_, based on maximum
+        difference in Shannon radii:
+
+        .. math::
+            k = \Delta r_\mathrm{max}^{-2}.
+
+        """
         shannon_file = os.path.join(data_directory, "shannon_radii.csv")
 
         self.shannon_data = pd.read_csv(shannon_file, index_col=0)
@@ -66,7 +87,22 @@ class RadiusModel(SubstitutionModel):
         )**-2
 
     def sub_prob(self, s1, s2):
+        r"""Calculate the probability of substituting species s1 for s2.
 
+        Based on the difference in Shannon radii, the probability is
+        assumed to be:
+
+        .. math::
+            p = 1 - k \Delta r^2.
+
+        Args:
+            s1: The species being substituted.
+            s2: The species substituting.
+
+        Returns:
+            The probability of substitution.
+
+        """
         spec1 = parse_spec(s1)
         spec2 = parse_spec(s2)
 
