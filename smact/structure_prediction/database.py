@@ -1,10 +1,4 @@
-"""Tools for database interfacing for high throughput IO.
-
-Todo:
-    * Implement rollback routine for exiting :class:`StructureDB`
-        contextmanager when an error is raised.
-
-"""
+"""Tools for database interfacing for high throughput IO."""
 
 import itertools
 from multiprocessing import Pool
@@ -72,13 +66,19 @@ class StructureDB:
 
         return self.cur
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type, *args):
         """Close database connection.
 
         Commits all changes before closing.
+        Alternatively, rolls back any changes if an exception
+        was raised, causing the context to be exited.
 
         """
-        self.conn.commit()
+        if exc_type is not None:
+            self.conn.rollback()
+        else:
+            self.conn.commit()
+
         self.conn.close()
 
     def add_mp_icsd(
