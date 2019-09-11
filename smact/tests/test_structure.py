@@ -27,6 +27,7 @@ TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
 TEST_PY_STRUCT = os.path.join(files_dir, "pymatgen_structure.json")
 TEST_LAMBDA_JSON = os.path.join(files_dir, "test_lambda_tab.json")
 TEST_LAMBDA_CSV = os.path.join(files_dir, "test_lambda_tab.csv")
+TEST_MP_DATA = os.path.join(files_dir, "mp_data")
 
 
 def generate_test_structure(comp: str) -> bool:
@@ -274,6 +275,13 @@ class StructureDBTest(unittest.TestCase):
         for spec, expected in zip(test_with_species_args, test_with_species_exp):
             with self.subTest(msg=f"Retrieving species with {spec}"):
                 self.assertEqual(self.db.get_with_species(spec, self.TEST_TABLE), expected)
+
+        with open(TEST_MP_DATA, "rb") as f:
+            mp_data = pickle.load(f)
+
+        with self.subTest(msg="Testing adding downloaded MP structures."):
+            added: int = self.db.add_mp_icsd(self.TEST_TABLE, mp_data)
+            self.assertEqual(added, 3)
 
 
 class CationMutatorTest(unittest.TestCase):

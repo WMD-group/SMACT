@@ -105,7 +105,7 @@ class StructureDB:
             The number of structs added.
 
         """
-        if mp_data is None:
+        if mp_data is None:  # pragma: no cover
             with MPRester(mp_api_key) as m:
                 data = m.query(
                   criteria={
