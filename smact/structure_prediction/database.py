@@ -139,7 +139,7 @@ class StructureDB:
         pool = ParallelPool()
         parse_iter = pool.uimap(parse_mprest, data)
 
-        return self.add_structs(parse_iter, table)
+        return self.add_structs(parse_iter, table, commit_after_each=True)
 
     def add_table(self, table: str):
         """Add a table to the database.
@@ -167,12 +167,23 @@ class StructureDB:
         with self as c:
             c.execute(f"INSERT into {table} VALUES (?, ?)", entry)
 
-    def add_structs(self, structs: Sequence[SmactStructure], table: str) -> int:
+    def add_structs(
+      self,
+      structs: Sequence[SmactStructure],
+      table: str,
+      commit_after_each: Optional[bool] = False
+    ) -> int:
         """Add several SmactStructures to a table.
 
         Args:
             structs: Iterable of :class:`~.SmactStructure`s to add to table.
             table: The name of the table to add the structs to.
+            commit_after_each (bool, optional): Whether to commit the addition
+                after each structure is added.
+                This is useful when adding a large number of structures over
+                a long timeframe, as it ensures some structures are added,
+                even if the program terminates before completion.
+                Defaults to False.
 
         Returns:
             The number of structures added.
@@ -185,6 +196,9 @@ class StructureDB:
                     continue
                 entry = (struct.composition(), struct.as_poscar())
                 c.execute(f"INSERT into {table} VALUES (?, ?)", entry)
+
+                if commit_after_each:
+                    self.conn.commit()
 
         return idx + 1
 
