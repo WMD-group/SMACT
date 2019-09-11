@@ -76,6 +76,7 @@ class SmactStructure:
         """Represent the structure as a POSCAR.
 
         Alias for :meth:`~.as_poscar`.
+
         """
         return self.as_poscar()
 
@@ -154,7 +155,21 @@ class SmactStructure:
     def __parse_py_sites(
       structure: pymatgen.Structure,
     ) -> Tuple[Dict[str, List[List[float]]], List[Tuple[str, int, int]]]:
-        """Parse the sites of a pymatgen Structure."""
+        """Parse the sites of a pymatgen Structure.
+
+        Args:
+            structure: A :class:`pymatgen.Structure` instance.
+
+        Returns:
+            sites (dict): In which a key is a species string
+                and its corresponding value is a list of the coordinates
+                that species occupies in the supercell. The coordinates
+                are represented by lists containing three elements: one
+                for each spatial dimension.
+            species (list): A list of each species in the structure,
+                represented by a tuple of (element, charge, stoichiometry).
+
+        """
         if not isinstance(structure, pymatgen.Structure):
             raise TypeError("structure must be a pymatgen.Structure instance.")
 
