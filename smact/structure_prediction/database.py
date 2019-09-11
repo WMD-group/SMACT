@@ -1,4 +1,10 @@
-"""Tools for database interfacing for high throughput IO."""
+"""Tools for database interfacing for high throughput IO.
+
+Todo:
+    * Implement rollback routine for exiting :class:`StructureDB`
+        contextmanager when an error is raised.
+
+"""
 
 import itertools
 from multiprocessing import Pool
@@ -83,6 +89,11 @@ class StructureDB:
     ) -> int:
         """Add a table populated with Materials Project-hosted ICSD structures.
 
+        Note:
+            This is very computationally expensive for large datasets
+            and will not likely run on a laptop.
+            If possible, download a pre-constructed database.
+
         Args:
             table (str): The name of the table to add.
             mp_data: The Materials Project data to parse. If this is None, data
@@ -130,14 +141,11 @@ class StructureDB:
 
         return self.add_structs(parse_iter, table)
 
-    def add_table(self, table: str) -> bool:
+    def add_table(self, table: str):
         """Add a table to the database.
 
         Args:
             table: The name of the table to add
-
-        Returns:
-            bool: Whether the operation was successful.
 
         """
         with self as c:
@@ -145,25 +153,19 @@ class StructureDB:
               f"""CREATE TABLE {table}
                 (composition TEXT NOT NULL, structure TEXT NOT NULL)""",
             )
-        return True
 
-    def add_struct(self, struct: SmactStructure, table: str) -> bool:
+    def add_struct(self, struct: SmactStructure, table: str):
         """Add a SmactStructure to a table.
 
         Args:
             struct: The :class:`~.SmactStructure` to add.
             table: The name of the table to add the structure to.
 
-        Returns:
-            bool: Whether the operation was successful.
-
         """
         entry = (struct.composition(), struct.as_poscar())
 
         with self as c:
             c.execute(f"INSERT into {table} VALUES (?, ?)", entry)
-
-        return True
 
     def add_structs(self, structs: Sequence[SmactStructure], table: str) -> int:
         """Add several SmactStructures to a table.
