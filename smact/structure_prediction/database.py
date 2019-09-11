@@ -115,11 +115,8 @@ class StructureDB:
             with MPRester(mp_api_key) as m:
                 data = m.query(
                   criteria={
-                    'icsd_ids': {
-                      '$exists': True
-                    }, },
-                  properties=['structure', 'material_id'],
-                )
+                    'has_icsd_id': True, },
+                  properties=['structure', 'material_id'], )
         else:
             data = mp_data
 
@@ -199,17 +196,19 @@ class StructureDB:
 
         """
         with self as c:
-            for idx, struct in enumerate(structs):
+            num = 0
+            for struct in structs:
                 if struct is None:
                     # Handling for poorly decorated structures
                     continue
                 entry = (struct.composition(), struct.as_poscar())
                 c.execute(f"INSERT into {table} VALUES (?, ?)", entry)
+                num += 1
 
                 if commit_after_each:
                     self.conn.commit()
 
-        return idx + 1
+        return num
 
     def get_structs(self, composition: str, table: str) -> List[SmactStructure]:
         """Get SmactStructures for a given composition.
