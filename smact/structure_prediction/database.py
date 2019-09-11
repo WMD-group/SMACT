@@ -3,7 +3,13 @@
 import itertools
 from multiprocessing import Pool
 from operator import itemgetter
-from pathos.pools import ParallelPool
+
+try:
+    from pathos.pools import ParallelPool
+    pathos_available = True
+except ImportError:
+    pathos_available = False
+
 from typing import Generator, Sequence, List, Tuple, Dict, Union, Optional
 
 import pymatgen
@@ -105,7 +111,7 @@ class StructureDB:
             The number of structs added.
 
         """
-        if mp_data is None:  # pragma: no cover
+        if mp_data is None:  #pragma: no cover
             with MPRester(mp_api_key) as m:
                 data = m.query(
                   criteria={
@@ -136,8 +142,11 @@ class StructureDB:
 
         self.add_table(table)
 
-        pool = ParallelPool()
-        parse_iter = pool.uimap(parse_mprest, data)
+        if pathos_available:
+            pool = ParallelPool()
+            parse_iter = pool.uimap(parse_mprest, data)
+        else:  #pragma: no cover
+            parse_iter = map(parse_mprest, data)
 
         return self.add_structs(parse_iter, table, commit_after_each=True)
 
