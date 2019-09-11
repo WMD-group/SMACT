@@ -221,13 +221,19 @@ class StructureDBTest(unittest.TestCase):
             self.db = StructureDB(self.TEST_DB)
 
         with self.subTest(msg="Adding table."):
-            self.assertTrue(self.db.add_table(self.TEST_TABLE))
+            try:
+                self.db.add_table(self.TEST_TABLE)
+            except Exception as e:
+                self.fail(e)
 
         struct_file = os.path.join(files_dir, "CaTiO3.txt")
         struct = SmactStructure.from_file(struct_file)
 
         with self.subTest(msg="Adding structure to table."):
-            self.assertTrue(self.db.add_struct(struct, self.TEST_TABLE))
+            try:
+                self.db.add_struct(struct, self.TEST_TABLE)
+            except Exception as e:
+                self.fail(e)
 
         with self.subTest(msg="Getting structure from table."):
             struct_list = self.db.get_structs(struct.composition(), self.TEST_TABLE)
@@ -238,7 +244,10 @@ class StructureDBTest(unittest.TestCase):
         structs = [SmactStructure.from_file(fname) for fname in struct_files]
 
         with self.subTest(msg="Adding multiple structures to table."):
-            self.assertTrue(self.db.add_structs(structs, self.TEST_TABLE))
+            try:
+                self.db.add_structs(structs, self.TEST_TABLE)
+            except Exception as e:
+                self.fail(e)
 
         test_with_species_args = [
           [("Na", 1)],
@@ -259,7 +268,8 @@ class StructureDBTest(unittest.TestCase):
           [structs[0]],
           [],
           [struct],
-          [struct], ]
+          [struct],
+        ]
 
         for spec, expected in zip(test_with_species_args, test_with_species_exp):
             with self.subTest(msg=f"Retrieving species with {spec}"):
