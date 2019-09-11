@@ -1,4 +1,12 @@
-"""Structure prediction implementation."""
+"""Structure prediction implementation.
+
+Todo:
+    * Test with a fully populated database.
+    * Implement n-ary substitution probabilities;
+        at the moment, only zero- and single-species
+        substitutions are considered.
+
+"""
 
 import itertools
 from typing import Generator, List, Tuple, Optional
@@ -26,7 +34,14 @@ class StructurePredictor:
     """
 
     def __init__(self, mutator: CationMutator, struct_db: StructureDB):
-        """Initialize class."""
+        """Initialize class.
+
+        Args:
+            mutator: A :class:`CationMutator` for probability calculations.
+            struct_db: A :class:`StructureDB` from which to read strucutures
+                to attempt to mutate.
+
+        """
         self.cm = mutator
         self.db = struct_db
 
