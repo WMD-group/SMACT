@@ -10,5 +10,6 @@ if __name__ == "__main__":
     suite.addTests(loader.loadTestsFromTestCase(StructureTest))
     suite.addTests(loader.loadTestsFromTestCase(StructureDBTest))
     suite.addTests(loader.loadTestsFromTestCase(CationMutatorTest))
+    suite.addTests(TestLoader.loadTestsFromTestCase(PredictorTest))
     runner = unittest.TextTestRunner()
     result = runner.run(suite)

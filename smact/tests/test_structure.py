@@ -7,6 +7,7 @@ import os
 import pickle
 import unittest
 from contextlib import contextmanager
+from operator import itemgetter
 from random import sample
 
 import numpy as np
@@ -19,6 +20,7 @@ import smact
 from smact import Species
 from smact.structure_prediction.database import StructureDB
 from smact.structure_prediction.mutation import CationMutator
+from smact.structure_prediction.prediction import StructurePredictor
 from smact.structure_prediction.structure import SmactStructure
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
@@ -28,6 +30,8 @@ TEST_PY_STRUCT = os.path.join(files_dir, "pymatgen_structure.json")
 TEST_LAMBDA_JSON = os.path.join(files_dir, "test_lambda_tab.json")
 TEST_LAMBDA_CSV = os.path.join(files_dir, "test_lambda_tab.csv")
 TEST_MP_DATA = os.path.join(files_dir, "mp_data")
+TEST_PREDICTOR_DB = os.path.join(files_dir, "test_predictor.db")
+TEST_PREDICTOR_TABLE = "TEST"
 
 
 def generate_test_structure(comp: str) -> bool:
@@ -456,11 +460,63 @@ class CationMutatorTest(unittest.TestCase):
         assert_frame_equal(self.test_mutator.complete_pair_corrs(), pair_corrs)
 
 
+class PredictorTest(unittest.TestCase):
+    """Testing for the StructurePredictor wrapper."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Initialize the prerequisites."""
+        cls.db = StructureDB(TEST_PREDICTOR_DB)
+        # NOTE: This may break if the pymatgen lambda table is updated
+        cls.cm = CationMutator.from_json()
+        cls.table = TEST_PREDICTOR_TABLE
+
+    def test_prediction(self):
+        """Test prediction pipeline."""
+        with self.subTest(msg="Testing predictor setup"):
+            sp = StructurePredictor(self.cm, self.db, self.table)
+
+        test_specs = [("Ca", 2), ("Ti", 4), ("O", -2)]
+
+        # At time of creation, results with thresh=0 and include_same=True are as follows:
+        #
+        # Ca_1_2+O_4_2-Ti_2_4+: p=1.0, from Ca_1_2+O_4_2-Ti_2_4+
+        # Ca_1_2+O_3_2-Ti_1_4+: p=0.0088406421433475, from Ca_1_2+O_3_2-Si_1_4+
+        # Ca_1_2+O_3_2-Ti_1_4+: p=0.05502122697602804, from Ca_1_2+Mo_1_4+O_3_2-
+        # Ca_1_2+O_3_2-Ti_1_4+: p=0.0445515892332118, from Ca_1_2+O_3_2-V_1_4+
+        # Ca_2_2+O_4_2-Ti_1_4+: p=0.0274412135813993, from Fe_2_2+O_4_2-Ti_1_4+
+
+        with self.subTest(msg="Acquiring predictions"):
+            try:
+                predictions = list(sp.predict_structs(test_specs, thresh=0.02, include_same=False))
+            except Exception as e:
+                self.fail(e)
+
+        expected_comps = ["Ca_1_2+Mo_1_4+O_3_2-", "Ca_1_2+O_3_2-V_1_4+", "Fe_2_2+O_4_2-Ti_1_4+"]
+        expected_probs = [0.05502122697602804, 0.0445515892332118, 0.0274412135813993]
+
+        # Sort from highest to lowest probability
+        predictions.sort(key=itemgetter(1), reverse=True)
+
+        parents = [x[2].composition() for x in predictions]
+
+        with self.subTest(msg="Ensuring same parents"):
+            self.assertEqual(parents, expected_comps)
+
+        probs = [x[1] for x in predictions]
+
+        with self.subTest(msg="Ensuring similar probabilities"):
+            for p1, p2 in zip(probs, expected_probs):
+                with self.subTest(p1=p1, p2=p2):
+                    self.assertAlmostEqual(p1, p2)
+
+
 if __name__ == "__main__":
     TestLoader = unittest.TestLoader()
     StructureTests = unittest.TestSuite()
     StructureTests.addTests(TestLoader.loadTestsFromTestCase(StructureTest))
     StructureTests.addTests(TestLoader.loadTestsFromTestCase(StructureDBTest))
     StructureTests.addTests(TestLoader.loadTestsFromTestCase(CationMutatorTest))
+    StructureTests.addTests(TestLoader.loadTestsFromTestCase(PredictorTest))
     runner = unittest.TextTestRunner()
     result = runner.run(StructureTests)
