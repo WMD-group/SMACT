@@ -86,13 +86,16 @@ class StructurePredictor:
             # Get missing ion
             (diff_spec, ) = set(species) - set(sub_spec[spec_idx])
             diff_spec_str = unparse_spec(diff_spec)
+            # print(diff_spec_str)
 
             # Determine conditional substitution likelihoods
             diff_sub_probs = self.cm.cond_sub_probs(diff_spec_str)
 
             for parent in parents:
+                # print("Testing parent")
                 # Filter out any structures with identical species
                 if parent.has_species(diff_spec):
+                    # print("Parent has species")
                     continue
 
                 # Ensure parent has as many species as target
@@ -104,14 +107,16 @@ class StructurePredictor:
                 (alt_spec, ) = (
                   set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - {diff_spec_str}
                 )
+                # print(f"Alternate: {alt_spec}")
                 try:
                     p = diff_sub_probs.loc[alt_spec]
                 except:
                     # Not in the Series
+                    # print("Species not in lambda table")
                     continue
 
                 if p > thresh:
                     yield (
-                      cm._mutate_structure(parent, alt_spec, diff_spec),
+                      self.cm._mutate_structure(parent, alt_spec, diff_spec),
                       p,
                       parent, )
