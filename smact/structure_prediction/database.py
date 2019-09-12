@@ -114,9 +114,11 @@ class StructureDB:
         if mp_data is None:  #pragma: no cover
             with MPRester(mp_api_key) as m:
                 data = m.query(
-                  criteria={
-                    'has_icsd_id': True, },
-                  properties=['structure', 'material_id'], )
+                  criteria={'icsd_ids.0': {
+                    '$exists': True
+                  }},
+                  properties=['structure', 'material_id'],
+                )
         else:
             data = mp_data
 
