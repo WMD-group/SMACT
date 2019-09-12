@@ -33,17 +33,19 @@ class StructurePredictor:
 
     """
 
-    def __init__(self, mutator: CationMutator, struct_db: StructureDB):
+    def __init__(self, mutator: CationMutator, struct_db: StructureDB, table: str):
         """Initialize class.
 
         Args:
             mutator: A :class:`CationMutator` for probability calculations.
             struct_db: A :class:`StructureDB` from which to read strucutures
                 to attempt to mutate.
+            table: The table to reference within the database
 
         """
         self.cm = mutator
         self.db = struct_db
+        self.table = table
 
     def predict_structs(
       self,
@@ -70,13 +72,13 @@ class StructurePredictor:
         # This means we need only consider structures with a difference of 0 or 1 species.
 
         if include_same:
-            for identical in self.db.get_with_species(species):
+            for identical in self.db.get_with_species(species, self.table):
                 yield (identical, 1.0, identical)
 
         sub_spec = itertools.combinations(species, len(species) - 1)
 
         potential_unary_parents: List[List[SmactStructure]] = list(
-          self.db.get_with_species(specs) for specs in sub_spec
+          self.db.get_with_species(specs, self.table) for specs in sub_spec
         )
 
         for spec_idx, parents in enumerate(potential_unary_parents):
