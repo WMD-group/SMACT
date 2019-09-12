@@ -209,6 +209,7 @@ class StructureDBTest(unittest.TestCase):
 
     TEST_DB = os.path.join(files_dir, "test_db.tmp")
     TEST_TABLE = "Structures"
+    TEST_MP_TABLE = "Structures1"
 
     @classmethod
     def tearDownClass(cls):
@@ -280,7 +281,7 @@ class StructureDBTest(unittest.TestCase):
             mp_data = pickle.load(f)
 
         with self.subTest(msg="Testing adding downloaded MP structures."):
-            added: int = self.db.add_mp_icsd(self.TEST_TABLE, mp_data)
+            added: int = self.db.add_mp_icsd(self.TEST_MP_TABLE, mp_data)
             self.assertEqual(added, 3)
 
 
