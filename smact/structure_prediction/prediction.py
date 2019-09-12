@@ -48,7 +48,9 @@ class StructurePredictor:
     def predict_structs(
       self,
       species: List[Tuple[str, int]],
-      thresh: Optional[float] = 1e-3, ) -> Generator[Tuple[SmactStructure, float], None, None]:
+      thresh: Optional[float] = 1e-3,
+      include_same: Optional[bool] = True,
+    ) -> Generator[Tuple[SmactStructure, float, SmactStructure], None, None]:
         """Predict structures for a combination of species.
 
         Args:
@@ -56,16 +58,20 @@ class StructurePredictor:
                 of the target compound.
             thresh: The probability threshold, below which to discard
                 predictions.
+            include_same: Whether to include unmodified structures
+                from the database, i.e. structures containing all the
+                same species. Defaults to True.
 
         Yields:
-            Potential structures, as tuples of (structure, probability).
+            Potential structures, as tuples of (structure, probability, parent).
 
         """
         # For now, consider just structures with the same species, and unary substitutions.
         # This means we need only consider structures with a difference of 0 or 1 species.
 
-        for identical in self.db.get_with_species(species):
-            yield (identical, 1.0)
+        if include_same:
+            for identical in self.db.get_with_species(species):
+                yield (identical, 1.0, identical)
 
         sub_spec = itertools.combinations(species, len(species) - 1)
 
@@ -102,4 +108,7 @@ class StructurePredictor:
                     continue
 
                 if p > thresh:
-                    yield (cm._mutate_structure(parent, alt_spec, diff_spec), p)
+                    yield (
+                      cm._mutate_structure(parent, alt_spec, diff_spec),
+                      p,
+                      parent, )
