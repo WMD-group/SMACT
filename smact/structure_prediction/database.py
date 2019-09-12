@@ -184,7 +184,7 @@ class StructureDB:
         """Add several SmactStructures to a table.
 
         Args:
-            structs: Iterable of :class:`~.SmactStructure`s to add to table.
+            structs: Iterable of :class:`~.SmactStructure` s to add to table.
             table: The name of the table to add the structs to.
             commit_after_each (bool, optional): Whether to commit the addition
                 after each structure is added.
@@ -242,7 +242,7 @@ class StructureDB:
             table: The name of the table from which to get the species.
 
         Returns:
-            A list of :class:`SmactStructure`s in the table that contain the species.
+            A list of :class:`SmactStructure` s in the table that contain the species.
 
         """
         glob = "*".join("{}_*_{}{}" for _ in range(len(species)))

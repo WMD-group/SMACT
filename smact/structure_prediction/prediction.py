@@ -3,8 +3,8 @@
 Todo:
     * Test with a fully populated database.
     * Implement n-ary substitution probabilities;
-        at the moment, only zero- and single-species
-        substitutions are considered.
+      at the moment, only zero- and single-species
+      substitutions are considered.
 
 """
 

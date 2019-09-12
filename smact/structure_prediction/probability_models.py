@@ -7,9 +7,9 @@ lambda tables. An example of such an extension,
 
 Todo:
     * Allow for parallelism in lambda table calculations
-        by implementing a `sub_probs` abstractmethod
-        that :meth:`SubstitutionModel.gen_lambda` uses,
-        if available.
+      by implementing a `sub_probs` abstractmethod
+      that :meth:`SubstitutionModel.gen_lambda` uses,
+      if available.
 
 """
 
