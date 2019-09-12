@@ -122,23 +122,6 @@ class StructureDB:
         else:
             data = mp_data
 
-        def parse_mprest(data: Dict[str, Union[pymatgen.Structure, str]], ) -> SmactStructure:
-            """Parse MPRester query data to generate structures.
-
-            Args:
-                data: A dictionary containing the keys 'structure' and
-                    'material_id', with the associated values.
-
-            Returns:
-                An oxidation-state-decorated :class:`SmactStructure`.
-
-            """
-            try:
-                return SmactStructure.from_py_struct(data["structure"])
-            except:
-                # Couldn't decorate with oxidation states
-                logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")
-
         self.add_table(table)
 
         if pathos_available:
@@ -265,3 +248,21 @@ class StructureDB:
             structs = c.fetchall()
 
         return [SmactStructure.from_poscar(pos[0]) for pos in structs]
+
+
+def parse_mprest(data: Dict[str, Union[pymatgen.Structure, str]], ) -> SmactStructure:
+    """Parse MPRester query data to generate structures.
+
+    Args:
+        data: A dictionary containing the keys 'structure' and
+            'material_id', with the associated values.
+
+    Returns:
+        An oxidation-state-decorated :class:`SmactStructure`.
+
+    """
+    try:
+        return SmactStructure.from_py_struct(data["structure"])
+    except:
+        # Couldn't decorate with oxidation states
+        logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")
