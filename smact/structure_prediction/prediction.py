@@ -76,6 +76,7 @@ class StructurePredictor:
                 yield (identical, 1.0, identical)
 
         sub_spec = itertools.combinations(species, len(species) - 1)
+        sub_spec = list(map(list, sub_spec))
 
         potential_unary_parents: List[List[SmactStructure]] = list(
           self.db.get_with_species(specs, self.table) for specs in sub_spec
@@ -83,7 +84,7 @@ class StructurePredictor:
 
         for spec_idx, parents in enumerate(potential_unary_parents):
             # Get missing ion
-            (diff_spec, ) = set(species[spec_idx]) - set(sub_spec[spec_idx])
+            (diff_spec, ) = set(species) - set(sub_spec[spec_idx])
             diff_spec_str = unparse_spec(diff_spec)
 
             # Determine conditional substitution likelihoods
