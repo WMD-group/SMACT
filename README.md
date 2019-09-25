@@ -1,7 +1,7 @@
 [![DOI](https://zenodo.org/badge/14117740.svg)](https://zenodo.org/badge/latestdoi/14117740)
 [![Documentation Status](https://readthedocs.org/projects/smact/badge/?version=latest)](http://smact.readthedocs.org/en/latest/?badge=latest)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
-[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/WMD-group/SMACT.svg?branch=master)](https://travis-ci.org/WMD-group/SMACT)
 [![DOI](http://joss.theoj.org/papers/10.21105/joss.01361/status.svg)](https://doi.org/10.21105/joss.01361)
 [![HitCount](http://hits.dwyl.io/wmd-group/smact.svg)](http://hits.dwyl.io/wmd-group/smact)
@@ -106,9 +106,7 @@ to the code will be immediately reflected on the PATH.
 License and attribution
 -----------------------
 
-Python code and original data tables are licensed under the GNU General Public License (GPL) v3.
-
-The following files have their own licenses: **data/elements.txt** is from the [OpenBabel](http://openbabel.sourceforge.net) project and licensed under the GPL v2, which is included in the parent folder.
+Python code and original data tables are licensed under the MIT License.
 
 Development notes
 -----------------
