@@ -9,4 +9,4 @@ install:
   - export PYTHONPATH="/home/travis/WMD-group/SMACT/smact:$PYTHONPATH"
 
 script: 
-  - python3 -m smact.tests.test -v
+  - python3 -m smact.tests.__init__ -v

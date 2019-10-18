@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
+import os
 import smact
 from smact.properties import compound_electroneg, band_gap_Harrison
 from smact.builder import wurtzite
@@ -13,9 +14,6 @@ from pymatgen import Specie
 from smact import Species
 
 class TestSequenceFunctions(unittest.TestCase):
-
-    def setUp(self):
-        pass
 
     # ---------------- TOP-LEVEL ----------------
 

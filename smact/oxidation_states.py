@@ -1,4 +1,3 @@
-
 """
 smact.oxidation_states: Module for predicting the likelihood of species
 coexisting in a compound based on statistical analysis of oxidation states.

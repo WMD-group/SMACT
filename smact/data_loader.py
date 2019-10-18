@@ -1,4 +1,3 @@
-
 """
 Provide data from text files while transparently caching for efficiency.
 

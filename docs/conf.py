@@ -29,11 +29,11 @@ sys.path.insert(0, os.path.abspath('..'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.todo',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
+  'sphinx.ext.autodoc',
+  'sphinx.ext.todo',
+  'sphinx.ext.mathjax',
+  'sphinx.ext.napoleon',
+  'sphinx.ext.viewcode',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -107,7 +107,6 @@ pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
-
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -210,26 +209,24 @@ htmlhelp_basename = 'smactdoc'
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+  # The paper size ('letterpaper' or 'a4paper').
+  #'papersize': 'letterpaper',
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+  # The font size ('10pt', '11pt' or '12pt').
+  #'pointsize': '10pt',
 
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
+  # Additional stuff for the LaTeX preamble.
+  #'preamble': '',
 
-# Latex figure (float) alignment
-#'figure_align': 'htbp',
+  # Latex figure (float) alignment
+  #'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'smact.tex', u'smact Documentation',
-     u'Author', 'manual'),
-]
+  (master_doc, 'smact.tex', u'smact Documentation', u'Author', 'manual'), ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -251,19 +248,14 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'smact', u'smact Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, 'smact', u'smact Documentation', [author], 1)]
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
-
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -271,9 +263,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'smact', u'smact Documentation',
-     author, 'smact', 'One line description of project.',
-     'Miscellaneous'),
+  (
+    master_doc,
+    'smact',
+    u'smact Documentation',
+    author,
+    'smact',
+    'One line description of project.',
+    'Miscellaneous'
+  ),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -287,7 +285,6 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-
 
 # -- Options for Epub output ----------------------------------------------
 
@@ -363,12 +360,27 @@ epub_exclude_files = ['search.html']
 import sys
 from mock import Mock as MagicMock
 
+
 class Mock(MagicMock):
+
     @classmethod
     def __getattr__(cls, name):
-            return Mock()
+        return Mock()
 
-MOCK_MODULES = ['spglib', 'pyspglib', 'ase', 'numpy',
-                    'ase.lattice', 'ase.spacegroup',
-                    'ase.utils', 'ase.utils.geometry', 'pymatgen']
+
+MOCK_MODULES = [
+  'spglib',
+  'pyspglib',
+  'ase',
+  'numpy',
+  'ase.lattice',
+  'ase.spacegroup',
+  'ase.utils',
+  'ase.utils.geometry',
+  'pandas',
+  'pymatgen',
+  'pymatgen.analysis.bond_valence',
+  'pymatgen.analysis.structure_prediction',
+  'pymatgen.ext.matproj'
+]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)

@@ -1,0 +1,1 @@
+"""SMACT benchmarking."""
