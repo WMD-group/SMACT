@@ -1,7 +1,7 @@
 import unittest
 
 import smact.tests.test
-from smact.tests.test_structure import CationMutatorTest, StructureDBTest, StructureTest
+from smact.tests.test_structure import CationMutatorTest, StructureDBTest, StructureTest, PredictorTest
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
