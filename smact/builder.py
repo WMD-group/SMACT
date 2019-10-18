@@ -4,6 +4,7 @@
 # TODO:
 # Estimate the cell parameters based on radii from tables.
 # Add further types, Spinnel, Flourite, Delafossite ....
+
 # Implement Structure class, c.f. dev_docs.
 
 from ase.spacegroup import crystal
