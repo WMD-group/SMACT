@@ -129,6 +129,24 @@ Run the tests using `python -m smact.tests.test -v`.
 
 We also use integrated testing on Github via [travis](https://travis-ci.org).
 
+### List of Developers
+Contributors to SMACT: 
+- Daniel Davies
+- Keith Butler
+- Adam Jackson
+- Jonathan Skelton
+- Aron Walsh
+- Jarvist Frost
+- Kazuki Morita
+- Alex Moriarty
+- Tim Gauntlet
+
+ Thanks to [JOSS](https://github.com/openjournals/joss-reviews/issues/1361) reviewers and editors: 
+ - Adam Symington
+ - Alex Ganose
+ - Daniel Katz
+ - Lorena Barba
+
 References
 ----------
 
