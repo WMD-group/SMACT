@@ -193,7 +193,7 @@ class Species(Element):
 
         if shannon_data:
             for dataset in shannon_data:
-                if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
+                if dataset['charge'] == oxidation and str(coordination) == dataset['coordination'].split('_')[0]:
                     self.shannon_radius = dataset['crystal_radius'];
 
         # Get ionic radius
@@ -201,7 +201,7 @@ class Species(Element):
 
         if shannon_data:
             for dataset in shannon_data:
-                if dataset['charge'] == oxidation and dataset['coordination'] == coordination:
+                if dataset['charge'] == oxidation and str(coordination) == dataset['coordination'].split('_')[0]:
                     self.ionic_radius = dataset['ionic_radius'];
 
         # Get SSE_2015 (revised) for the oxidation state.
