@@ -19,10 +19,6 @@ import smact
 from . import logger
 from .utilities import get_sign
 
-def find_gcd(list):
-    x = reduce(gcd, list)
-    return x
-
 class SmactStructure:
     """SMACT implementation inspired by pymatgen Structure class.
 
@@ -194,7 +190,7 @@ class SmactStructure:
 
         # Find stoichiometry
         total_specs = [len(val) for val in sites.values()]
-        hcf = find_gcd(total_specs)
+        hcf = reduce(gcd, total_specs)
         total_specs = [int(x / hcf) for x in total_specs]
 
         species = []
@@ -322,7 +318,7 @@ class SmactStructure:
 
         # Find stoichiometry
         total_specs = [int(x) for x in lines[6].split(" ")]
-        hcf=find_gcd(total_specs)
+        hcf = reduce(gcd, total_specs)
         total_specs = [int(x / hcf) for x in total_specs]
 
         species = []
