@@ -6,6 +6,9 @@ from collections import defaultdict
 from operator import itemgetter
 from typing import Dict, List, Optional, Tuple, Union
 
+from math import gcd
+from functools import reduce
+
 import numpy as np
 import pymatgen
 from pymatgen.analysis.bond_valence import BVAnalyzer
@@ -15,7 +18,6 @@ import smact
 
 from . import logger
 from .utilities import get_sign
-
 
 class SmactStructure:
     """SMACT implementation inspired by pymatgen Structure class.
@@ -188,10 +190,8 @@ class SmactStructure:
 
         # Find stoichiometry
         total_specs = [len(val) for val in sites.values()]
-        total_spec_sum = sum(total_specs)
-        total_specs = [x / total_spec_sum for x in total_specs]
-        total_spec_min = min(total_specs)
-        total_specs = [round(x / total_spec_min) for x in total_specs]
+        hcf = reduce(gcd, total_specs)
+        total_specs = [int(x / hcf) for x in total_specs]
 
         species = []
         for spec, stoic in zip(sites.keys(), total_specs):
@@ -318,10 +318,8 @@ class SmactStructure:
 
         # Find stoichiometry
         total_specs = [int(x) for x in lines[6].split(" ")]
-        total_spec_sum = sum(total_specs)
-        total_specs = [x / total_spec_sum for x in total_specs]
-        total_spec_min = min(total_specs)
-        total_specs = [round(x / total_spec_min) for x in total_specs]
+        hcf = reduce(gcd, total_specs)
+        total_specs = [int(x / hcf) for x in total_specs]
 
         species = []
         for spec_str, stoic in zip(lines[0].split(" "), total_specs):
