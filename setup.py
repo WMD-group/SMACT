@@ -24,7 +24,7 @@ if __name__ == "__main__":
       author='Daniel W. Davies',
       author_email='d.davies16@imperial.ac.uk',
       license='MIT',
-      packages=['smact', 'smact.tests'],
+      packages=['smact', 'smact.tests', 'smact.structure_prediction'],
       package_data={
         'smact': ['data/*.txt', 'data/*.csv', 'data/*.data', 'data/*.xlsx', 'data/*.json']
       },
