@@ -104,7 +104,7 @@ class StructurePredictor:
                 # Get species to be substituted
                 # Ensure only 1 species is obtained
                 if len(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - {diff_spec_str})>1:
-                  continue
+                     continue
                 (alt_spec, ) = (
                   set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - {diff_spec_str}
                 )
