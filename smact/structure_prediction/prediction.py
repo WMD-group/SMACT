@@ -84,6 +84,9 @@ class StructurePredictor:
 
         for spec_idx, parents in enumerate(potential_unary_parents):
             # Get missing ion
+            # Ensure a different ion is obtained
+            if len(set(species) - set(sub_spec[spec_idx])) <1:
+               continue
             (diff_spec, ) = set(species) - set(sub_spec[spec_idx])
             diff_spec_str = unparse_spec(diff_spec)
 
