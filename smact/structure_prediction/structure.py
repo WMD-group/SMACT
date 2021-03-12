@@ -155,12 +155,12 @@ class SmactStructure:
 
     @staticmethod
     def __parse_py_sites(
-      structure: pymatgen.Structure,
+      structure: pymatgen.core.Structure,
     ) -> Tuple[Dict[str, List[List[float]]], List[Tuple[str, int, int]]]:
         """Parse the sites of a pymatgen Structure.
 
         Args:
-            structure: A :class:`pymatgen.Structure` instance.
+            structure: A :class:`pymatgen.core.Structure` instance.
 
         Returns:
             sites (dict): In which a key is a species string
@@ -172,8 +172,8 @@ class SmactStructure:
                 represented by a tuple of (element, charge, stoichiometry).
 
         """
-        if not isinstance(structure, pymatgen.Structure):
-            raise TypeError("structure must be a pymatgen.Structure instance.")
+        if not isinstance(structure, pymatgen.core.Structure):
+            raise TypeError("structure must be a pymatgen.core.Structure instance.")
 
         sites = defaultdict(list)
         for site in structure.sites:
@@ -210,7 +210,7 @@ class SmactStructure:
         return sites, species
 
     @staticmethod
-    def from_py_struct(structure: pymatgen.Structure):
+    def from_py_struct(structure: pymatgen.core.Structure):
         """Create a SmactStructure from a pymatgen Structure object.
 
         Args:
@@ -220,8 +220,8 @@ class SmactStructure:
             :class:`~.SmactStructure`
 
         """
-        if not isinstance(structure, pymatgen.Structure):
-            raise TypeError("Structure must be a pymatgen.Structure instance.")
+        if not isinstance(structure, pymatgen.core.Structure):
+            raise TypeError("Structure must be a pymatgen.core.Structure instance.")
 
         bva = BVAnalyzer()
         struct = bva.get_oxi_state_decorated_structure(structure)
