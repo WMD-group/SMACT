@@ -9,6 +9,7 @@ Todo:
 """
 
 import itertools
+import numpy as np
 from typing import Generator, List, Tuple, Optional
 
 from .database import StructureDB
@@ -217,9 +218,11 @@ class StructurePredictor:
             except:
                 #Not in the Series
                 continue
+
+            p=np.prod(p)
             
         
-            if all(i > thresh for i in p):
+            if p>thresh:
                 try:
                     mutated=self.cm._nary_mutate_structure(parent,alt_spec, diff_spec_str)
                 
