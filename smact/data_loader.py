@@ -428,7 +428,7 @@ def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
 
     global _element_shannon_radii_data_extendedML
 
-    if __element_shannon_radii_data_extendedML is None:
+    if _element_shannon_radii_data_extendedML is None:
         _element_shannon_radii_data_extendedML = {}
 
         with open(os.path.join(data_directory, "shannon_radii_ML_extended.csv"),
