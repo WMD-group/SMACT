@@ -449,8 +449,9 @@ def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
                 dataset = {
                     'charge': int(row[1]),
                     'coordination': row[2],
-                    'ionic_radius': float(row[3]),
-                    'comment': row[4]
+                    'crystal_radius': float(row[3]),
+                    'ionic_radius': float(row[4]),
+                    'comment': row[5]
                     }
 
                 if key in _element_shannon_radii_data_extendedML:
