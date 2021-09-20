@@ -10,7 +10,7 @@ import smact.lattice
 import smact.lattice_parameters
 import smact.distorter
 import smact.oxidation_states
-from pymatgen import Specie
+from pymatgen.core.periodic_table import Specie
 from smact import Species
 
 class TestSequenceFunctions(unittest.TestCase):
