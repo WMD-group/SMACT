@@ -120,7 +120,7 @@ class StructureTest(unittest.TestCase):
         """Test generation of SmactStructure from a pymatgen Structure."""
         with open(TEST_PY_STRUCT, 'r') as f:
             d = json.load(f)
-            py_structure = pymatgen.Structure.from_dict(d)
+            py_structure = pymatgen.core.Structure.from_dict(d)
 
         with ignore_warnings(smact.structure_prediction.logger):
             s1 = SmactStructure.from_py_struct(py_structure)
