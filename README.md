@@ -4,7 +4,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/WMD-group/SMACT.svg?branch=master)](https://travis-ci.org/WMD-group/SMACT)
 [![DOI](http://joss.theoj.org/papers/10.21105/joss.01361/status.svg)](https://doi.org/10.21105/joss.01361)
-[![HitCount](http://hits.dwyl.io/wmd-group/smact.svg)](http://hits.dwyl.io/wmd-group/smact)
 
 SMACT
 =====
@@ -131,15 +130,16 @@ We also use integrated testing on Github via [travis](https://travis-ci.org).
 
 ### List of Developers
 Contributors to SMACT: 
-- Daniel Davies
 - Keith Butler
+- Daniel Davies
+- Jarvist Frost
+- Tim Gauntlet
 - Adam Jackson
+- Alex Moriarty
+- Kazuki Morita
+- Anthony Onwuli
 - Jonathan Skelton
 - Aron Walsh
-- Jarvist Frost
-- Kazuki Morita
-- Alex Moriarty
-- Tim Gauntlet
 
  Thanks to [JOSS](https://github.com/openjournals/joss-reviews/issues/1361) reviewers and editors: 
  - Adam Symington
@@ -152,6 +152,9 @@ References
 
 [D. W. Davies et al,
 "SMACT: Semiconducting Materials by Analogy and Chemical Theory" *JOSS* **4**, 1361 (2019)](https://joss.theoj.org/papers/7efd2f2ad60d25bdccee3fbd3fc11448)
+
+[D. W. Davies et al, 
+"Data-driven discovery of photoactive quaternary oxides using first-principles machine learning" *Chem. Mater.* **31**, 7221 (2019)](https://pubs.acs.org/doi/abs/10.1021/acs.chemmater.9b01519)
 
 [D. W. Davies et al,
 "Materials discovery by chemical analogy: role of oxidation states in structure prediction" *Faraday Discuss.* **211**, 553 (2018)](https://pubs.rsc.org/en/Content/ArticleLanding/2018/FD/C8FD00032H)
