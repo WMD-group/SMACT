@@ -90,7 +90,7 @@ class StructureDB:
     def add_mp_icsd(
       self,
       table: str,
-      mp_data: Optional[List[Dict[str, Union[pymatgen.Structure, str]]]] = None,
+      mp_data: Optional[List[Dict[str, Union[pymatgen.core.Structure, str]]]] = None,
       mp_api_key: Optional[str] = None
     ) -> int:
         """Add a table populated with Materials Project-hosted ICSD structures.
@@ -250,7 +250,7 @@ class StructureDB:
         return [SmactStructure.from_poscar(pos[0]) for pos in structs]
 
 
-def parse_mprest(data: Dict[str, Union[pymatgen.Structure, str]], ) -> SmactStructure:
+def parse_mprest(data: Dict[str, Union[pymatgen.core.Structure, str]], ) -> SmactStructure:
     """Parse MPRester query data to generate structures.
 
     Args:

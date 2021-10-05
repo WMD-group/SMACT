@@ -2,7 +2,7 @@
 
 __author__ = "Daniel W. Davies"
 __copyright__ = "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
-__version__ = "2.2.1"
+__version__ = "2.3"
 __maintainer__ = "Daniel W. Davies"
 __email__ = "d.davies16@imperial.ac.uk"
 __date__ = "Jun 10 2019"
@@ -53,3 +53,4 @@ if __name__ == "__main__":
             "Topic :: Scientific/Engineering",
         ],
     )
+

@@ -10,8 +10,8 @@ from os import path
 import json
 from numpy import mean
 from smact import data_directory, Element, Species
-from pymatgen import Specie as pmgSpecies
-from pymatgen import Structure
+from pymatgen.core.periodic_table import Specie as pmgSpecies
+from pymatgen.core import Structure
 
 class Oxidation_state_probability_finder:
     '''

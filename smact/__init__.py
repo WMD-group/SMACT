@@ -179,7 +179,7 @@ class Species(Element):
 
     """
 
-    def __init__(self,symbol,oxidation,coordination=4):
+    def __init__(self,symbol,oxidation,coordination=4, radii_source="shannon"):
         Element.__init__(self,symbol)
 
         self.oxidation = oxidation
@@ -189,7 +189,15 @@ class Species(Element):
 
         self.shannon_radius = None;
 
-        shannon_data = data_loader.lookup_element_shannon_radius_data(symbol);
+        if radii_source=="shannon":
+
+            shannon_data = data_loader.lookup_element_shannon_radius_data(symbol);
+        
+        elif radii_source == "extended":
+            shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(symbol)
+
+        else:
+            print("Data source not recognised. Please select 'shannon' or 'extended'. ") 
 
         if shannon_data:
             for dataset in shannon_data:

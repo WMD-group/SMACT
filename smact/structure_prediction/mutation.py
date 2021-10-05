@@ -237,6 +237,55 @@ class CationMutator:
 
         return struct_buff
 
+    @staticmethod
+    def _nary_mutate_structure(
+        structure: SmactStructure,
+        init_species: list,
+        final_species: list, ) -> SmactStructure:
+        """Perform a n-ary mutation of a SmactStructure (n>1).
+        Replaces all instances of a group of species within the structure.
+        Stoichiometry is maintained.
+        Charge neutrality is preserved, but the species pair do not need the same charge.
+        
+        Args:
+            init_species (list): A list of species within the structure to mutate.
+            final_species (list): The list of species to replace the initial species with
+            
+        """
+        #Determine the number of species to mutate
+        n=len(init_species)
+
+        struct_buff=deepcopy(structure)
+        init_spec_tup_list=[parse_spec(i) for i in init_species]
+        struct_spec_tups = list(map(itemgetter(0,1), struct_buff.species))
+        spec_loc=[struct_spec_tups.index(init_spec_tup_list[i]) for i in range(n)]
+    
+        final_spec_tup_list=[parse_spec(i) for i in final_species]
+    
+        #Replace species tuple
+        for i in range(n):
+            struct_buff.species[spec_loc[i]] = (*final_spec_tup_list[i], struct_buff.species[spec_loc[i]][2])
+
+        #Check for charge neutrality
+        if sum(x[1]*x[2] for x in struct_buff.species) !=0:
+            raise ValueError("New structure is not charge neutral")
+
+
+        #Sort species again
+        struct_buff.species.sort(key=itemgetter(1), reverse=True)
+        struct_buff.species.sort(key=itemgetter(0))
+
+    
+        #Replace sites
+        for i in range(n):
+            struct_buff.sites[final_species[i]]=struct_buff.sites.pop(init_species[i])
+        
+        #And sort
+        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(" ")
+        struct_buff.sites={spec: struct_buff.sites[spec] for spec in species_strs}
+    
+        return struct_buff
+
     def sub_prob(self, s1: str, s2: str) -> float:
         """Calculate the probability of substitution of two species."""
         return np.exp(self.get_lambda(s1, s2)) / self.Z
