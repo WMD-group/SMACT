@@ -1,6 +1,9 @@
 name: Publish SMACT distributions to PyPI
 
-on: push
+on:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build-n-publish:
@@ -12,7 +15,7 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: "3.x"
-      - name: Insta;; pypa/build
+      - name: Install pypa/build
         run: >-
           python -m
           pip install
@@ -24,7 +27,7 @@ jobs:
           build
           --sdist
           --wheel
-          -outdir dist/
+          --outdir dist/
           .
       - name: Publish distribution to PyPI
         if: startsWith(github.ref, 'refs/tags')
