@@ -2,10 +2,10 @@
 
 __author__ = "Daniel W. Davies"
 __copyright__ = "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
-__version__ = "2.3"
+__version__ = "2.3.1"
 __maintainer__ = "Anthony O. Onwuli"
 __email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "Oct 6 2021"
+__date__ = "Nov 4 2021"
 
 from setuptools import setup, Extension
 import os
