@@ -134,6 +134,19 @@ def lookup_element_oxidation_states_icsd(symbol, copy=True):
                                                  "oxidation_states_icsd.txt")):
             _el_ox_states_icsd[items[0]] = [int(oxidationState)
                                        for oxidationState in items[1:]]
+    if symbol in _el_ox_states_icsd:
+        if copy:
+            # _el_ox_states_icsd stores lists -> if copy is set, make an implicit
+            # deep copy. The elements of the lists are integers, which are
+            # "value types" in Python.
+            return [oxidationState for oxidationState in _el_ox_states_icsd[symbol]]
+        else:
+            return _el_ox_states_icsd[symbol]
+    else:
+        if _print_warnings:
+            print("WARNING: Oxidation states for element {0}"
+            "not found.".format(symbol))
+        return None
 
 _el_ox_states_sp = None
 
@@ -386,7 +399,7 @@ _element_shannon_radii_data_extendedML = None
 
 def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
     """
-    Retrieve the machine learned extended Shannon radii for 
+    Retrieve the machine learned extended Shannon radii for
     known states of an element.
 
 
@@ -395,7 +408,7 @@ def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
 
     Source of extended radii is:
     Baloch, A.A., Alqahtani, S.M., Mumtaz, F., Muqaibel, A.H., Rashkeev,
-    S.N. and Alharbi, F.H., 2021. 
+    S.N. and Alharbi, F.H., 2021.
     Extending Shannon's Ionic Radii Database Using Machine Learning.
     arXiv preprint arXiv:2101.00269.
 
