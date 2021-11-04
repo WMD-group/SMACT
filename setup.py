@@ -16,7 +16,7 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 if __name__ == "__main__":
     setup(
         name="SMACT",
-        version="2.3",
+        version="2.3.1"
         description="Semiconducting Materials by Analogy and Chemical Theory",
         long_description=open(os.path.join(module_dir, "README.md")).read(),
         long_description_content_type="text/markdown",
