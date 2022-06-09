@@ -282,7 +282,8 @@ def smact_filter(els, threshold=8, species_unique=True, oxidation_states_set='de
         species_unique (bool): Whether or not to consider elements in different
         oxidation states as unique in the results.
         oxidation_states_set (string): A string to choose which set of oxidation
-        states should be chosen
+        states should be chosen. Options are 'default', 'icsd' and 'pymatgen' for
+        the default, icsd, and pymatgen structure predictor oxidation states. 
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
         in the form [(elements), (oxidation states), (ratios)] if species_unique=True
