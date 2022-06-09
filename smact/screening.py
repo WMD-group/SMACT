@@ -271,7 +271,7 @@ def ml_rep_generator(composition, stoichs=None):
     norm = [float(i)/sum(ML_rep) for i in ML_rep]
     return norm
 
-def smact_filter(els, threshold=8, species_unique=True):
+def smact_filter(els, threshold=8, species_unique=True, oxidation_states_set='default'):
     """Function that applies the charge neutrality and electronegativity
     tests in one go for simple application in external scripts that
     wish to apply the general 'smact test'.
@@ -281,17 +281,30 @@ def smact_filter(els, threshold=8, species_unique=True):
         threshold (int): Threshold for stoichiometry limit, default = 8
         species_unique (bool): Whether or not to consider elements in different
         oxidation states as unique in the results.
+        oxidation_states_set (string): A string to choose which set of oxidation
+        states should be chosen
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
         in the form [(elements), (oxidation states), (ratios)] if species_unique=True
         or in the form [(elements), (ratios)] if species_unique=False.
     """
+    
     compositions = []
 
     # Get symbols and electronegativities
     symbols = tuple(e.symbol for e in els)
     electronegs = [e.pauling_eneg for e in els]
-    ox_combos = [e.oxidation_states for e in els]
+
+    # Select the specified oxidation states set:
+    oxi_set = {
+        'default':[e.oxidation_states for e in els],
+        'icsd':[e.oxidation_states_icsd for e in els],
+        'pymatgen': [e.oxidation_states_sp for e in els]
+        }
+    if oxidation_states_set in oxi_set:
+        ox_combos = oxi_set[oxidation_states_set]
+    else:
+        raise(Exception(f'{oxidation_states_set} is not valid. Enter either "default", "icsd" or "pymatgen" for oxidation_states_set.'))
     for ox_states in itertools.product(*ox_combos):
         # Test for charge balance
         cn_e, cn_r = neutral_ratios(ox_states, threshold=threshold)
