@@ -10,6 +10,7 @@ from builtins import map
 from builtins import range
 from builtins import object
 from os import path
+import pandas as pd
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, 'data')
 import itertools
@@ -149,7 +150,10 @@ class Species(Element):
     In addition to the standard properties from the periodic table
     (inherited from the  Element class), Species objects use the
     oxidation state and coordination environment to provide further
-    properties.
+    properties. 
+    The Species object can be created with either a default set of shannon radii (radii_source='shannon') or with a set of machine-learnt shannon radii (radii_source='extended').
+    The source of the machine-learnt shannon radii set is
+    Baloch, A.A., Alqahtani, S.M., Mumtaz, F., Muqaibel, A.H., Rashkeev, S.N. and Alharbi, F.H., 2021. Extending Shannon's ionic radii database using machine learning. Physical Review Materials, 5(4), p.043804.
 
     Attributes:
         Species.symbol: Elemental symbol used to retrieve data
@@ -172,6 +176,10 @@ class Species(Element):
         Species.shannon_radius: Shannon radius of Species.
 
         Species.ionic_radius: Ionic radius of Species.
+
+        Species.average_shannon_radius: An average shannon radius for the species. The average is taken over all coordination environments.
+        
+        Species.average_ionic_radius: An average ionic radius for the species. The average is taken over all coordination environments.
 
     Raises:
         NameError: Element not found in element.txt
@@ -211,6 +219,22 @@ class Species(Element):
             for dataset in shannon_data:
                 if dataset['charge'] == oxidation and str(coordination) == dataset['coordination'].split('_')[0]:
                     self.ionic_radius = dataset['ionic_radius'];
+
+        # Get the average shannon and ionic radii
+        self.average_shannon_radius = None
+        self.average_ionic_radius = None
+        
+        if shannon_data:
+            # Get the rows of the shannon radius table for the element
+            shannon_data_df=pd.DataFrame(shannon_data)
+            
+            # Get the rows corresponding to the oxidation state of the species
+            charge_rows=shannon_data_df.loc[shannon_data_df['charge']==oxidation]
+
+            # Get the mean
+            self.average_shannon_radius = charge_rows['crystal_radius'].mean()
+            self.average_ionic_radius = charge_rows['ionic_radius'].mean()
+
 
         # Get SSE_2015 (revised) for the oxidation state.
 
