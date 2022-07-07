@@ -2,10 +2,10 @@
 
 __author__ = "Daniel W. Davies"
 __copyright__ = "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
-__version__ = "2.3.2"
+__version__ = "2.3.4"
 __maintainer__ = "Anthony O. Onwuli"
 __email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "Nov 4 2021"
+__date__ = "July 7 2022"
 
 from setuptools import setup, Extension
 import os
@@ -16,7 +16,7 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 if __name__ == "__main__":
     setup(
         name="SMACT",
-        version="2.3.2",
+        version="2.3.3",
         description="Semiconducting Materials by Analogy and Chemical Theory",
         long_description=open(os.path.join(module_dir, "README.md")).read(),
         long_description_content_type="text/markdown",
