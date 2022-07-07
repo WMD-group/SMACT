@@ -2,7 +2,7 @@
 
 __author__ = "Daniel W. Davies"
 __copyright__ = "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
-__version__ = "2.3.4"
+__version__ = "2.3.3"
 __maintainer__ = "Anthony O. Onwuli"
 __email__ = "anthony.onwuli16@imperial.ac.uk"
 __date__ = "July 7 2022"
