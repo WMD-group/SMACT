@@ -122,11 +122,11 @@ is also helpful, including a good model for docstrings.
 - Add tests wherever possible, and use the test suite to check if you broke anything.
 
 ### Tests
-Testing modules should be pass/fail and wrapped into **tests/test.py**.
-Run the tests using `python -m smact.tests.test -v`.
+Testing modules should be pass/fail and wrapped into **tests/test_core.py** or another **tests/test_something.py** file added, if appropriate. 
+Run the tests using `python -m pytest -v`.
 (The final `-v` is optional and adds more detail to the output.)
 
-We also use integrated testing on Github via [travis](https://travis-ci.org).
+We also use integrated testing on Github via [GitHub Actions](hhttps://github.com/features/actions).
 
 ### List of Developers
 Contributors to SMACT: 
