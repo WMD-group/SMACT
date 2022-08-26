@@ -540,11 +540,19 @@ class PredictorTest(unittest.TestCase):
                 self.fail(e)
 
         expected_comps = [
+            "Ca_2_2+O_8_2-Sn_3_4+",
             "Ca_1_2+Mo_1_4+O_3_2-",
             "Ca_1_2+O_3_2-V_1_4+",
+            "Ca_2_2+O_8_2-V_3_4+",
             "Fe_2_2+O_4_2-Ti_1_4+",
         ]
-        expected_probs = [0.05502122697602804, 0.0445515892332118, 0.0274412135813993]
+        expected_probs = [
+            0.05604346851066936,
+            0.05502122697602808,
+            0.04455158923321182,
+            0.04455158923321182,
+            0.02744121358139931,
+        ]
 
         # Sort from highest to lowest probability
         predictions.sort(key=itemgetter(1), reverse=True)
