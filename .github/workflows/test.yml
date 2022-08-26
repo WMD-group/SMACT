@@ -16,4 +16,4 @@ jobs:
         python -m pip install --upgrade pip wheel
         pip install -r requirements.txt
     - name: Run tests
-      run: python -m smact.tests.__init__ -v 
+      run: python -m pytest -v
