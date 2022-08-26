@@ -14,7 +14,9 @@ import numpy as np
 import pandas as pd
 import pymatgen
 from pandas.testing import assert_frame_equal, assert_series_equal
-from pymatgen.analysis.structure_prediction.substitution_probability import SubstitutionProbability
+from pymatgen.analysis.structure_prediction.substitution_probability import (
+    SubstitutionProbability,
+)
 
 import smact
 from smact import Species
@@ -39,10 +41,10 @@ def generate_test_structure(comp: str) -> bool:
     poscar_file = os.path.join(files_dir, f"{comp}.txt")
     s = SmactStructure.from_file(poscar_file)
 
-    with open(TEST_STRUCT, 'wb') as f:
+    with open(TEST_STRUCT, "wb") as f:
         pickle.dump(s, f)
 
-    with open(TEST_POSCAR, 'w') as f:
+    with open(TEST_POSCAR, "w") as f:
         f.write(s.as_poscar())
 
     return True
@@ -61,12 +63,14 @@ class StructureTest(unittest.TestCase):
     """`SmactStructure` testing."""
 
     TEST_SPECIES = {
-      "CaTiO3": [('Ca', 2, 1), ('Ti', 4, 1), ('O', -2, 3)],
-      "NaCl": [('Na', 1, 1), ('Cl', -1, 1)],
-      "Fe": [('Fe', 0, 1)],
+        "CaTiO3": [("Ca", 2, 1), ("Ti", 4, 1), ("O", -2, 3)],
+        "NaCl": [("Na", 1, 1), ("Cl", -1, 1)],
+        "Fe": [("Fe", 0, 1)],
     }
 
-    def assertStructAlmostEqual(self, s1: SmactStructure, s2: SmactStructure, places: int = 7):
+    def assertStructAlmostEqual(
+        self, s1: SmactStructure, s2: SmactStructure, places: int = 7
+    ):
         """Assert that two SmactStructures are almost equal.
 
         Almost equality dependent on how many decimal places the site coordinates
@@ -99,18 +103,21 @@ class StructureTest(unittest.TestCase):
 
         if isinstance(species[0][0], str):
             species_strs = [
-              "{ele}{charge}{sign}".format(
-                ele=spec[0],
-                charge=abs(spec[1]),
-                sign='+' if spec[1] >= 0 else '-', ) for spec in species
+                "{ele}{charge}{sign}".format(
+                    ele=spec[0],
+                    charge=abs(spec[1]),
+                    sign="+" if spec[1] >= 0 else "-",
+                )
+                for spec in species
             ]
         else:
             species_strs = [
-              "{ele}{charge}{sign}".format(
-                ele=spec[0].symbol,
-                charge=abs(spec[0].oxidation),
-                sign='+' if spec[0].oxidation >= 0 else '-',
-              ) for spec in species
+                "{ele}{charge}{sign}".format(
+                    ele=spec[0].symbol,
+                    charge=abs(spec[0].oxidation),
+                    sign="+" if spec[0].oxidation >= 0 else "-",
+                )
+                for spec in species
             ]
 
         sites = {spec: [[]] for spec in species_strs}
@@ -118,7 +125,7 @@ class StructureTest(unittest.TestCase):
 
     def test_from_py_struct(self):
         """Test generation of SmactStructure from a pymatgen Structure."""
-        with open(TEST_PY_STRUCT, 'r') as f:
+        with open(TEST_PY_STRUCT, "r") as f:
             d = json.load(f)
             py_structure = pymatgen.core.Structure.from_dict(d)
 
@@ -131,22 +138,28 @@ class StructureTest(unittest.TestCase):
 
     def test_has_species(self):
         """Test determining whether a species is in a `SmactStructure`."""
-        s1 = SmactStructure(*self._gen_empty_structure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
+        s1 = SmactStructure(
+            *self._gen_empty_structure([("Ba", 2, 2), ("O", -2, 1), ("F", -1, 2)])
+        )
 
-        self.assertTrue(s1.has_species(('Ba', 2)))
-        self.assertFalse(s1.has_species(('Ba', 3)))
-        self.assertFalse(s1.has_species(('Ca', 2)))
+        self.assertTrue(s1.has_species(("Ba", 2)))
+        self.assertFalse(s1.has_species(("Ba", 3)))
+        self.assertFalse(s1.has_species(("Ca", 2)))
 
     def test_smactStruc_comp_key(self):
         """Test generation of a composition key for `SmactStructure`s."""
-        s1 = SmactStructure(*self._gen_empty_structure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
-        s2 = SmactStructure(*self._gen_empty_structure([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
+        s1 = SmactStructure(
+            *self._gen_empty_structure([("Ba", 2, 2), ("O", -2, 1), ("F", -1, 2)])
+        )
+        s2 = SmactStructure(
+            *self._gen_empty_structure([("Fe", 2, 1), ("Fe", 3, 2), ("O", -2, 4)])
+        )
 
-        Ba = Species('Ba', 2)
-        O = Species('O', -2)
-        F = Species('F', -1)
-        Fe2 = Species('Fe', 2)
-        Fe3 = Species('Fe', 3)
+        Ba = Species("Ba", 2)
+        O = Species("O", -2)
+        F = Species("F", -1)
+        Fe2 = Species("Fe", 2)
+        Fe3 = Species("Fe", 3)
 
         s3 = SmactStructure(*self._gen_empty_structure([(Ba, 2), (O, 1), (F, 2)]))
         s4 = SmactStructure(*self._gen_empty_structure([(Fe2, 1), (Fe3, 2), (O, 4)]))
@@ -160,7 +173,7 @@ class StructureTest(unittest.TestCase):
 
     def test_smactStruc_from_file(self):
         """Test the `from_file` method of `SmactStructure`."""
-        with open(TEST_STRUCT, 'rb') as f:
+        with open(TEST_STRUCT, "rb") as f:
             s1 = pickle.load(f)
 
         s2 = SmactStructure.from_file(TEST_POSCAR)
@@ -184,10 +197,14 @@ class StructureTest(unittest.TestCase):
 
     def test_ele_stoics(self):
         """Test acquiring element stoichiometries."""
-        s1 = SmactStructure(*self._gen_empty_structure([('Fe', 2, 1), ('Fe', 3, 2), ('O', -2, 4)]))
-        s1_stoics = {'Fe': 3, 'O': 4}
-        s2 = SmactStructure(*self._gen_empty_structure([('Ba', 2, 2), ('O', -2, 1), ('F', -1, 2)]))
-        s2_stoics = {'Ba': 2, 'O': 1, 'F': 2}
+        s1 = SmactStructure(
+            *self._gen_empty_structure([("Fe", 2, 1), ("Fe", 3, 2), ("O", -2, 4)])
+        )
+        s1_stoics = {"Fe": 3, "O": 4}
+        s2 = SmactStructure(
+            *self._gen_empty_structure([("Ba", 2, 2), ("O", -2, 1), ("F", -1, 2)])
+        )
+        s2_stoics = {"Ba": 2, "O": 1, "F": 2}
 
         for test, expected in [(s1, s1_stoics), (s2, s2_stoics)]:
             with self.subTest(species=test.species):
@@ -256,30 +273,32 @@ class StructureDBTest(unittest.TestCase):
                 self.fail(e)
 
         test_with_species_args = [
-          [("Na", 1)],
-          [("Cl", -1)],
-          [("Na", 1), ("Cl", -1)],
-          [("Cl", -1), ("Na", 1)],
-          [("Cl", -1)],
-          [("Na", 1), ("Cl", 1)],
-          [("O", -2)],
-          [("Ca", 2), ("Ti", 4), ("O", -2)],
+            [("Na", 1)],
+            [("Cl", -1)],
+            [("Na", 1), ("Cl", -1)],
+            [("Cl", -1), ("Na", 1)],
+            [("Cl", -1)],
+            [("Na", 1), ("Cl", 1)],
+            [("O", -2)],
+            [("Ca", 2), ("Ti", 4), ("O", -2)],
         ]
 
         test_with_species_exp = [
-          [structs[0]],
-          [structs[0]],
-          [structs[0]],
-          [structs[0]],
-          [structs[0]],
-          [],
-          [struct],
-          [struct],
+            [structs[0]],
+            [structs[0]],
+            [structs[0]],
+            [structs[0]],
+            [structs[0]],
+            [],
+            [struct],
+            [struct],
         ]
 
         for spec, expected in zip(test_with_species_args, test_with_species_exp):
             with self.subTest(msg=f"Retrieving species with {spec}"):
-                self.assertEqual(self.db.get_with_species(spec, self.TEST_TABLE), expected)
+                self.assertEqual(
+                    self.db.get_with_species(spec, self.TEST_TABLE), expected
+                )
 
         with open(TEST_MP_DATA, "rb") as f:
             mp_data = pickle.load(f)
@@ -299,29 +318,33 @@ class CationMutatorTest(unittest.TestCase):
 
         cls.test_mutator = CationMutator.from_json(lambda_json=TEST_LAMBDA_JSON)
         cls.test_pymatgen_mutator = CationMutator.from_json(
-          lambda_json=None, alpha=lambda x, y: -5
+            lambda_json=None, alpha=lambda x, y: -5
         )
 
         # 5 random test species -> 5! test pairs
         cls.test_species = sample(cls.test_pymatgen_mutator.specs, 5)
-        cls.test_pairs = list(itertools.combinations_with_replacement(cls.test_species, 2))
+        cls.test_pairs = list(
+            itertools.combinations_with_replacement(cls.test_species, 2)
+        )
 
         cls.pymatgen_sp = SubstitutionProbability(lambda_table=None, alpha=-5)
 
     def test_lambda_tab_pop(self):
         """Test if lambda table is populated correctly."""
         lambda_dat = [
-          [-5.0, 0.5, -5.0],
-          [0.5, -5.0, 0.3],
-          [-5.0, 0.3, -5.0], ]
+            [-5.0, 0.5, -5.0],
+            [0.5, -5.0, 0.3],
+            [-5.0, 0.3, -5.0],
+        ]
         labels = ["A", "B", "C"]
 
         exp_lambda = pd.DataFrame(lambda_dat, index=labels, columns=labels)
 
         assert_frame_equal(
-          self.test_mutator.lambda_tab,
-          exp_lambda,
-          check_names=False, )
+            self.test_mutator.lambda_tab,
+            exp_lambda,
+            check_names=False,
+        )
 
     def test_partition_func_Z(self):
         """Test the partition function for the whole table."""
@@ -334,7 +357,9 @@ class CationMutatorTest(unittest.TestCase):
 
     def test_lambda_interface(self):
         """Test getting lambda values."""
-        test_cases = [itertools.permutations(x) for x in [("A", "B"), ("A", "C"), ("B", "C")]]
+        test_cases = [
+            itertools.permutations(x) for x in [("A", "B"), ("A", "C"), ("B", "C")]
+        ]
 
         expected = [0.5, -5.0, 0.3]
 
@@ -370,8 +395,9 @@ class CationMutatorTest(unittest.TestCase):
         for s1, s2 in self.test_pairs:
             with self.subTest(s1=s1, s2=s2):
                 self.assertAlmostEqual(
-                  self.pymatgen_sp.prob(s1, s2),
-                  self.test_pymatgen_mutator.sub_prob(s1, s2), )
+                    self.pymatgen_sp.prob(s1, s2),
+                    self.test_pymatgen_mutator.sub_prob(s1, s2),
+                )
 
     def test_cond_sub_probs(self):
         """Test determining conditional substitution probabilities for a row."""
@@ -380,7 +406,8 @@ class CationMutatorTest(unittest.TestCase):
                 cond_sub_probs_test = self.test_mutator.cond_sub_probs(s1)
 
                 vals = [
-                  (s1, s2, self.test_mutator.cond_sub_prob(s1, s2)) for s2 in ["A", "B", "C"]
+                    (s1, s2, self.test_mutator.cond_sub_prob(s1, s2))
+                    for s2 in ["A", "B", "C"]
                 ]
 
                 test_df = pd.DataFrame(vals)
@@ -394,8 +421,8 @@ class CationMutatorTest(unittest.TestCase):
         for s1, s2 in self.test_pairs:
             with self.subTest(s1=s1, s2=s2):
                 self.assertAlmostEqual(
-                  self.pymatgen_sp.cond_prob(s1, s2),
-                  self.test_pymatgen_mutator.cond_sub_prob(s1, s2),
+                    self.pymatgen_sp.cond_prob(s1, s2),
+                    self.test_pymatgen_mutator.cond_sub_prob(s1, s2),
                 )
 
     def test_pair_corr(self):
@@ -403,8 +430,8 @@ class CationMutatorTest(unittest.TestCase):
         for s1, s2 in self.test_pairs:
             with self.subTest(s1=s1, s2=s2):
                 self.assertAlmostEqual(
-                  self.pymatgen_sp.pair_corr(s1, s2),
-                  self.test_pymatgen_mutator.pair_corr(s1, s2),
+                    self.pymatgen_sp.pair_corr(s1, s2),
+                    self.test_pymatgen_mutator.pair_corr(s1, s2),
                 )
 
     def test_from_df(self):
@@ -413,18 +440,23 @@ class CationMutatorTest(unittest.TestCase):
 
         csv_test = CationMutator(lambda_df=lambda_df)
         assert_frame_equal(
-          csv_test.lambda_tab,
-          self.test_mutator.lambda_tab,
-          check_names=False, )
+            csv_test.lambda_tab,
+            self.test_mutator.lambda_tab,
+            check_names=False,
+        )
 
     def test_complete_cond_probs(self):
         """Test getting all conditional probabilities."""
         pairs = itertools.product(["A", "B", "C"], repeat=2)
 
-        vals = [(
-          s1,
-          s2,
-          self.test_mutator.cond_sub_prob(s1, s2), ) for s1, s2 in pairs]
+        vals = [
+            (
+                s1,
+                s2,
+                self.test_mutator.cond_sub_prob(s1, s2),
+            )
+            for s1, s2 in pairs
+        ]
 
         cond_probs = pd.DataFrame(vals)
         cond_probs = cond_probs.pivot(index=0, columns=1, values=2)
@@ -435,10 +467,14 @@ class CationMutatorTest(unittest.TestCase):
         """Test getting all probabilities."""
         pairs = itertools.product(["A", "B", "C"], repeat=2)
 
-        vals = [(
-          s1,
-          s2,
-          self.test_mutator.sub_prob(s1, s2), ) for s1, s2 in pairs]
+        vals = [
+            (
+                s1,
+                s2,
+                self.test_mutator.sub_prob(s1, s2),
+            )
+            for s1, s2 in pairs
+        ]
 
         sub_probs = pd.DataFrame(vals)
         sub_probs = sub_probs.pivot(index=0, columns=1, values=2)
@@ -449,10 +485,14 @@ class CationMutatorTest(unittest.TestCase):
         """Test getting all pair correlations."""
         pairs = itertools.product(["A", "B", "C"], repeat=2)
 
-        vals = [(
-          s1,
-          s2,
-          self.test_mutator.pair_corr(s1, s2), ) for s1, s2 in pairs]
+        vals = [
+            (
+                s1,
+                s2,
+                self.test_mutator.pair_corr(s1, s2),
+            )
+            for s1, s2 in pairs
+        ]
 
         pair_corrs = pd.DataFrame(vals)
         pair_corrs = pair_corrs.pivot(index=0, columns=1, values=2)
@@ -488,11 +528,17 @@ class PredictorTest(unittest.TestCase):
 
         with self.subTest(msg="Acquiring predictions"):
             try:
-                predictions = list(sp.predict_structs(test_specs, thresh=0.02, include_same=False))
+                predictions = list(
+                    sp.predict_structs(test_specs, thresh=0.02, include_same=False)
+                )
             except Exception as e:
                 self.fail(e)
 
-        expected_comps = ["Ca_1_2+Mo_1_4+O_3_2-", "Ca_1_2+O_3_2-V_1_4+", "Fe_2_2+O_4_2-Ti_1_4+"]
+        expected_comps = [
+            "Ca_1_2+Mo_1_4+O_3_2-",
+            "Ca_1_2+O_3_2-V_1_4+",
+            "Fe_2_2+O_4_2-Ti_1_4+",
+        ]
         expected_probs = [0.05502122697602804, 0.0445515892332118, 0.0274412135813993]
 
         # Sort from highest to lowest probability
@@ -509,14 +555,3 @@ class PredictorTest(unittest.TestCase):
             for p1, p2 in zip(probs, expected_probs):
                 with self.subTest(p1=p1, p2=p2):
                     self.assertAlmostEqual(p1, p2)
-
-
-if __name__ == "__main__":
-    TestLoader = unittest.TestLoader()
-    StructureTests = unittest.TestSuite()
-    StructureTests.addTests(TestLoader.loadTestsFromTestCase(StructureTest))
-    StructureTests.addTests(TestLoader.loadTestsFromTestCase(StructureDBTest))
-    StructureTests.addTests(TestLoader.loadTestsFromTestCase(CationMutatorTest))
-    StructureTests.addTests(TestLoader.loadTestsFromTestCase(PredictorTest))
-    runner = unittest.TextTestRunner()
-    result = runner.run(StructureTests)

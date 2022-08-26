@@ -229,8 +229,3 @@ class TestSequenceFunctions(unittest.TestCase):
         Species('Fe',+3), Species('O',-2)),
         0.74280230326)
         self.assertEqual(len(ox.get_included_species()), 173)
-
-
-
-if __name__ == '__main__':
-    unittest.main()
