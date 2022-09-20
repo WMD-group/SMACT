@@ -135,6 +135,7 @@ Contributors to SMACT:
 - Jarvist Frost
 - Tim Gauntlet
 - Adam Jackson
+- Chloe (Jiwoo) Lee (이지우)
 - Alex Moriarty
 - Kazuki Morita
 - Anthony Onwuli
