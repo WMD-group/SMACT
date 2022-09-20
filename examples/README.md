@@ -63,3 +63,6 @@ for use at the command line using argparse.
 ### Structure prediction
 Contains an example workflow of using the structure prediction submodule which is based on ionic substitution of SMACT. The inspiration for this submodule was from a [2011 paper by Hautier et al.](https://pubs.acs.org/doi/abs/10.1021/ic102031h).
 The notebooks involve setting up a database of SMACT compatible structures, generating the compositions, and using the structure prediction tool to assign compositions to a known crystal structure system.
+
+### Dopant prediction
+Contains an example of using the dopant prediction submodule.
