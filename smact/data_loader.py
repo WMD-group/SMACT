@@ -196,6 +196,53 @@ def lookup_element_oxidation_states_sp(symbol, copy=True):
                   "not found.".format(symbol))
         return None
 
+_el_ox_states_wiki = None
+
+def lookup_element_oxidation_states_wiki(symbol, copy=True):
+    """
+    Retrieve a list of known oxidation states for an element.
+    The oxidation states list used contains only those that
+    are on Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements).
+
+    Args:
+        symbol (str) : the atomic symbol of the element to look up.
+        copy (Optional(bool)): if True (default), return a copy of the
+            oxidation-state list, rather than a reference to the cached
+            data -- only use copy=False in performance-sensitive code
+            and where the list will not be modified!
+
+    Returns:
+        list: List of known oxidation states for the element.
+
+            Return None if oxidation states for the Element were not
+            found in the external data.
+    """
+
+    global _el_ox_states_wiki
+
+    if _el_ox_states_wiki is None:
+        _el_ox_states_wiki = {}
+
+        for items in _get_data_rows(os.path.join(data_directory,
+                                                 "oxidation_states_wiki.txt")):
+            _el_ox_states_wiki[items[0]] = [int(oxidationState)
+                                       for oxidationState in items[1:]]
+
+
+    if symbol in _el_ox_states_wiki:
+        if copy:
+            # _el_ox_states_wiki stores lists -> if copy is set, make an implicit
+            # deep copy.  The elements of the lists are integers, which are
+            # "value types" in Python.
+
+            return [oxidationState for oxidationState in _el_ox_states_wiki[symbol]]
+        else:
+            return _el_ox_states_wiki[symbol]
+    else:
+        if _print_warnings:
+            print("WARNING: Oxidation states for element {0} "
+                  "not found.".format(symbol))
+        return None
 # Loader and cache for the element HHI scores.
 
 _element_hhis = None

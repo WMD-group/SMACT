@@ -14,6 +14,7 @@ import pandas as pd
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, 'data')
 import itertools
+import warnings
 
 
 from math import gcd
@@ -58,6 +59,8 @@ class Element(object):
         Element.oxidation_states_sp (list) : List of oxdation states recognised by the Pymatgen Structure Predictor
 
         Element.oxidation_states_icsd (list) : List of oxidation states that appear in the ICSD
+
+        Element.oxidation_states_wiki (list): List of oxidation states that appear wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) Data retrieved: 2022-09-22
 
         Element.coord_envs (list): The allowed coordination enviroments for the ion
 
@@ -134,6 +137,8 @@ class Element(object):
              data_loader.lookup_element_oxidation_states_icsd(symbol)),
             ('oxidation_states_sp',
              data_loader.lookup_element_oxidation_states_sp(symbol)),
+            ('oxidation_states_wiki',
+             data_loader.lookup_element_oxidation_states_wiki(symbol)),
             ('dipol', dataset['dipol']),
             ('pauling_eneg', dataset['el_neg']),
             ('SSE', sse),
