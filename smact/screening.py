@@ -2,6 +2,7 @@ from builtins import zip
 from itertools import combinations
 from smact import Element, neutral_ratios
 import itertools
+import warnings
 
 def pauling_test(oxidation_states, electronegativities,
                  symbols=[], repeat_anions=True,
@@ -280,7 +281,7 @@ def smact_filter(els, threshold=8, species_unique=True, oxidation_states_set='de
         els (tuple/list): A list of smact.Element objects
         threshold (int): Threshold for stoichiometry limit, default = 8
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
-        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd' and 'pymatgen' for the default, icsd, and pymatgen structure predictor oxidation states. 
+        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd', 'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states. 
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
         in the form [(elements), (oxidation states), (ratios)] if species_unique=True
@@ -297,12 +298,16 @@ def smact_filter(els, threshold=8, species_unique=True, oxidation_states_set='de
     oxi_set = {
         'default':[e.oxidation_states for e in els],
         'icsd':[e.oxidation_states_icsd for e in els],
-        'pymatgen': [e.oxidation_states_sp for e in els]
+        'pymatgen': [e.oxidation_states_sp for e in els],
+        'wiki':[e.oxidation_states_wiki for e in els]
         }
     if oxidation_states_set in oxi_set:
         ox_combos = oxi_set[oxidation_states_set]
     else:
-        raise(Exception(f'{oxidation_states_set} is not valid. Enter either "default", "icsd" or "pymatgen" for oxidation_states_set.'))
+        raise(Exception(f'{oxidation_states_set} is not valid. Enter either "default", "icsd", "pymatgen" or "wiki" for oxidation_states_set.'))
+    if oxidation_states_set == 'wiki':
+        warnings.warn('This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.', stacklevel=2)
+
     for ox_states in itertools.product(*ox_combos):
         # Test for charge balance
         cn_e, cn_r = neutral_ratios(ox_states, threshold=threshold)
