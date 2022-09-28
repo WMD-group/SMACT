@@ -1,7 +1,3 @@
-### This Jupyter notebook creates ntype ptype possiblie dopants for input species
-### using SMACT structure prediction 
-### Working with Kieth from SCIML and Anthony 
-
 from smact.structure_prediction import mutation, utilities
 import smact
 import re
@@ -9,7 +5,7 @@ from pymatgen.util import plotting
 
 class Doper:
     '''
-    A class to search for n & p type dopants
+    A class to search for n and p type dopants
     Methods: get_dopants, plot_dopants
     '''
     def __init__(self, original_species: tuple[str], 
@@ -21,13 +17,14 @@ class Doper:
       #self.match_oxi_sign = match_oxi_sign
     def get_dopants(self) -> dict:
         '''
-    Note currently limited to binaries
+    Note currently limited to binary compounds 
+    
     Args:
         ex) get_dopants(('Ti4+','O2-'))
         
         original_species (tuple(str)) = ('Cd2+', 'O2-')
         num_dopants (int) = The number of suggestions to return for n- and p-type dopants.
-        match_oxi_sign (bool) = ? shoud do some tests
+        match_oxi_sign (bool) = ? should do some tests
     
     Returns:
         (dict): Dopant suggestions, given as a dictionary with keys 
@@ -104,15 +101,12 @@ class Doper:
         # return the top (num_dopants) results for each case 
         return self.results
     
-    
     def plot_dopants(self):
         '''
-        Uses pymatgen plotting utilities to plot the results of doping search
+        Uses pymatgen plotting utilities to plot the results of the dopant search
         '''
         for val in self.results.values():
             dict_results = dict((utilities.parse_spec(x)[0], y) for x, y in val)
             plotting.periodic_table_heatmap(elemental_data=dict_results, cmap='rainbow',
                                                 blank_color='gainsboro', edge_color='white')
     
-
-
