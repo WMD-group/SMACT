@@ -381,6 +381,7 @@ MOCK_MODULES = [
   'pymatgen',
   'pymatgen.analysis.bond_valence',
   'pymatgen.analysis.structure_prediction',
+  'pymatgen.core',
   'pymatgen.core.periodic_table',
   'pymatgen.ext.matproj'
 ]
