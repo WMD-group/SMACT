@@ -132,7 +132,7 @@ def surface_vectors(lattice,miller):
 	Returns:
 		vectors[0/1] : the surface vectors (u,v), list of real numbers.
 	'''
-	surf = surface.surface(lattice,miller,layers=1)
+	surf = surface(lattice,miller,layers=1)
 	vectors = surf.cell[0:2]
 	return vectors[0],vectors[1]
 
