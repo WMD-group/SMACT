@@ -80,7 +80,7 @@ class Oxidation_state_probability_finder:
     def pair_probability(self, species1, species2):
         '''
         Get the anion-cation oxidation state probability for a provided pair of smact Species.
-        I.e. $P_{SA} = N_{SX} / N_{MX}$ in the original paper (DOI:10.1039/C8FD00032H).
+        i.e. :math:`P_{SA}=\\frac{N_{SX}}{N_{MX}}` in the original paper (DOI:10.1039/C8FD00032H).
 
         Args:
             species1 (smact.Species): Cation or anion species
