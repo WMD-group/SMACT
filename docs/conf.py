@@ -384,6 +384,7 @@ MOCK_MODULES = [
   'pymatgen.core',
   'pymatgen.core.periodic_table',
   'pymatgen.ext.matproj',
-  'pymatgen.util'
+  'pymatgen.util',
+  'pymatgen.analysis.structure_prediction'
 ]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
