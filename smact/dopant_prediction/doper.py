@@ -2,13 +2,14 @@ from smact.structure_prediction import mutation, utilities
 import smact
 import re
 from pymatgen.util import plotting
+from typing import Tuple
 
 class Doper:
     '''
     A class to search for n and p type dopants
     Methods: get_dopants, plot_dopants
     '''
-    def __init__(self, original_species: tuple[str], 
+    def __init__(self, original_species: Tuple[str], 
                   num_dopants=5
                   #match_oxi_sign=False):
                 ):
