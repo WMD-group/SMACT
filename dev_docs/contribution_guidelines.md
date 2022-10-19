@@ -5,7 +5,7 @@ This is a quick guide on how to follow best practice and contribute smoothly to 
 ## Workflow
 
 We follow the [GitHub flow]
-(https://guides.github.com/introduction/flow/index.html), using
+(<https://guides.github.com/introduction/flow/index.html>), using
 branches for new work and pull requests for verifying the work.
 
 The steps for a new piece of work can be summarised as follows:
@@ -30,3 +30,22 @@ When creating a pull request you should:
 * Reference the issue which the pull request is closing
 
 Recommended reading: [How to Write the Perfect Pull Request](https://github.blog/2015-01-21-how-to-write-the-perfect-pull-request/)
+
+## Dev requirements
+
+When developing `SMACT` locally, it is recommended to install the python packages in `requirements-dev.txt`.
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+This will allow you to run the tests locally with pytest as described in the main README,
+as well as run pre-commit hooks to automatically format python files with isort and black.
+To install the pre-commit hooks (only needs to be done once):
+
+```bash
+pre-commit install
+pre-commit run --all-files # optionally run hooks on all files
+```
+
+Pre-commit hooks will check all files when you commit changes, automatically fixing any files which are not formatted correctly. Those files will need to be staged again before re-attempting the commit.
