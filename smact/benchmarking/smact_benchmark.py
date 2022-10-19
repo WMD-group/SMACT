@@ -1,7 +1,7 @@
 """SMACT benchmarking."""
 
-from .utilities import timeit
 from ..structure_prediction.mutation import CationMutator
+from .utilities import timeit
 
 
 class MutatorBenchmarker:

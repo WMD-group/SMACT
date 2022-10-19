@@ -4,13 +4,13 @@ import logging
 
 __author__ = "Alexander Moriarty"
 __credits__ = {
-  "WMD Group",
-  "Imperial College London",
-  "Andrew Jackson",
-  "Dan Davies",
-  "Keith Butler",
-  "Aron Walsh",
-  "Alexander Moriarty"
+    "WMD Group",
+    "Imperial College London",
+    "Andrew Jackson",
+    "Dan Davies",
+    "Keith Butler",
+    "Aron Walsh",
+    "Alexander Moriarty",
 }
 __status__ = "Development"
 

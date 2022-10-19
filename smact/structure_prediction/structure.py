@@ -3,11 +3,10 @@
 import logging
 import re
 from collections import defaultdict
+from functools import reduce
+from math import gcd
 from operator import itemgetter
 from typing import Dict, List, Optional, Tuple, Union
-
-from math import gcd
-from functools import reduce
 
 import numpy as np
 import pymatgen
@@ -18,6 +17,7 @@ import smact
 
 from . import logger
 from .utilities import get_sign
+
 
 class SmactStructure:
     """SMACT implementation inspired by pymatgen Structure class.
@@ -46,12 +46,12 @@ class SmactStructure:
     """
 
     def __init__(
-      self,
-      species: List[Union[Tuple[str, int, int], Tuple[smact.Species, int]]],
-      lattice_mat: np.ndarray,
-      sites: Dict[str, List[List[float]]],
-      lattice_param: Optional[float] = 1.0,
-      sanitise_species: Optional[bool] = True,
+        self,
+        species: List[Union[Tuple[str, int, int], Tuple[smact.Species, int]]],
+        lattice_mat: np.ndarray,
+        sites: Dict[str, List[List[float]]],
+        lattice_param: Optional[float] = 1.0,
+        sanitise_species: Optional[bool] = True,
     ):
         """Initialize structure with constituent species.
 
@@ -97,17 +97,19 @@ class SmactStructure:
         """
         if not isinstance(other, SmactStructure):
             return False
-        return all([
-          self.species == other.species,
-          np.array_equal(self.lattice_mat, other.lattice_mat),
-          self.lattice_param == other.lattice_param,
-          self.sites == other.sites,
-          list(self.sites.keys()) == list(other.sites.keys()),
-        ])
+        return all(
+            [
+                self.species == other.species,
+                np.array_equal(self.lattice_mat, other.lattice_mat),
+                self.lattice_param == other.lattice_param,
+                self.sites == other.sites,
+                list(self.sites.keys()) == list(other.sites.keys()),
+            ]
+        )
 
     @staticmethod
     def _sanitise_species(
-      species: List[Union[Tuple[str, int, int], Tuple[smact.Species, int]]],
+        species: List[Union[Tuple[str, int, int], Tuple[smact.Species, int]]],
     ) -> List[Tuple[str, int, int]]:
         """Sanitise and format a list of species.
 
@@ -129,12 +131,14 @@ class SmactStructure:
         if len(species) == 0:
             raise ValueError("`species` cannot be empty.")
         if not isinstance(species[0], tuple):
-            raise TypeError(f"`species` must be a list of tuples, got list of {type(species[0])}.")
+            raise TypeError(
+                f"`species` must be a list of tuples, got list of {type(species[0])}."
+            )
 
         species_error = (
-          "`species` list of tuples must contain either "
-          "2-tuples of Species objects and stoichiometries, "
-          "or 3-tuples of elements, oxidations and stoichiometries."
+            "`species` list of tuples must contain either "
+            "2-tuples of Species objects and stoichiometries, "
+            "or 3-tuples of elements, oxidations and stoichiometries."
         )
         if len(species[0]) not in {2, 3}:
             raise ValueError(species_error)
@@ -144,7 +148,9 @@ class SmactStructure:
             species.sort(key=itemgetter(0))
             sanit_species = species
 
-        elif isinstance(species[0][0], smact.Species):  # Species class variation of instantiation
+        elif isinstance(
+            species[0][0], smact.Species
+        ):  # Species class variation of instantiation
             species.sort(key=lambda x: (x[0].symbol, -x[0].oxidation))
             sanit_species = [(x[0].symbol, x[0].oxidation, x[1]) for x in species]
 
@@ -155,7 +161,7 @@ class SmactStructure:
 
     @staticmethod
     def __parse_py_sites(
-      structure: pymatgen.core.Structure,
+        structure: pymatgen.core.Structure,
     ) -> Tuple[Dict[str, List[List[float]]], List[Tuple[str, int, int]]]:
         """Parse the sites of a pymatgen Structure.
 
@@ -179,10 +185,13 @@ class SmactStructure:
         for site in structure.sites:
             site_type = site.species_string
             # Add charge magnitude, for cases of unit charge
-            if all([
-              site_type[-2] not in map(str, range(10)),
-              site_type[-1] in ("+", "-"), ]):
-                site_type = site_type[:-1] + '1' + site_type[-1]
+            if all(
+                [
+                    site_type[-2] not in map(str, range(10)),
+                    site_type[-1] in ("+", "-"),
+                ]
+            ):
+                site_type = site_type[:-1] + "1" + site_type[-1]
 
             sites[site_type].append(site.coords.tolist())
 
@@ -233,16 +242,18 @@ class SmactStructure:
         lattice_param = 1.0
 
         return SmactStructure(
-          species,
-          lattice_mat,
-          sites,
-          lattice_param,
-          sanitise_species=True, )
+            species,
+            lattice_mat,
+            sites,
+            lattice_param,
+            sanitise_species=True,
+        )
 
     @staticmethod
     def from_mp(
-      species: List[Union[Tuple[str, int, int], Tuple[smact.Species, int]]],
-      api_key: str, ):
+        species: List[Union[Tuple[str, int, int], Tuple[smact.Species, int]]],
+        api_key: str,
+    ):
         """Create a SmactStructure using the first Materials Project entry for a composition.
 
         Args:
@@ -259,16 +270,17 @@ class SmactStructure:
             eles = SmactStructure._get_ele_stoics(sanit_species)
             formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
             structs = m.query(
-              criteria={"reduced_cell_formula": formula},
-              properties=["structure"], )
+                criteria={"reduced_cell_formula": formula},
+                properties=["structure"],
+            )
 
             if len(structs) == 0:
                 raise ValueError(
-                  "Could not find composition in Materials Project Database, "
-                  "please supply a structure."
+                    "Could not find composition in Materials Project Database, "
+                    "please supply a structure."
                 )
 
-            struct = structs[0]['structure']  # Default to first found structure
+            struct = structs[0]["structure"]  # Default to first found structure
 
         if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
             bva = BVAnalyzer()
@@ -281,11 +293,12 @@ class SmactStructure:
         sites, _ = SmactStructure.__parse_py_sites(struct)
 
         return SmactStructure(
-          sanit_species,
-          lattice_mat,
-          sites,
-          lattice_param,
-          sanitise_species=False, )
+            sanit_species,
+            lattice_mat,
+            sites,
+            lattice_param,
+            sanitise_species=False,
+        )
 
     @staticmethod
     def from_file(fname: str):
@@ -299,7 +312,7 @@ class SmactStructure:
             :class:`~.SmactStructure`
 
         """
-        with open(fname, 'r') as f:
+        with open(fname, "r") as f:
             return SmactStructure.from_poscar(f.read())
 
     @staticmethod
@@ -337,7 +350,9 @@ class SmactStructure:
 
         lattice_param = float(lines[1])
 
-        lattice = np.array([[float(point) for point in line.split(" ")] for line in lines[2:5]])
+        lattice = np.array(
+            [[float(point) for point in line.split(" ")] for line in lines[2:5]]
+        )
 
         sites = defaultdict(list)
         for line in lines[8:]:
@@ -355,10 +370,11 @@ class SmactStructure:
         return SmactStructure(species, lattice, sites, lattice_param)
 
     def _format_style(
-      self,
-      template: str,
-      delim: Optional[str] = " ",
-      include_ground: Optional[bool] = False, ) -> str:
+        self,
+        template: str,
+        delim: Optional[str] = " ",
+        include_ground: Optional[bool] = False,
+    ) -> str:
         """Format a given template string with the composition.
 
         Formats a python template string with species information,
@@ -369,16 +385,16 @@ class SmactStructure:
                 curly brackets notation. Supported keywords are
                 `ele` for the elemental symbol, `stoic` for the
                 stoichiometry, `charge` for the absolute value
-                of oxidation state and `sign` for the 
+                of oxidation state and `sign` for the
                 oxidation state's sign.
             delim: The delimeter between species' templates.
             include_ground: Whether to include the charge and sign
                 of neutral species.
-        
+
         Returns:
             String of templates formatted for each species, separated
                 by `delim`.
-        
+
         Examples:
             >>> s = SmactStructure.from_file('tests/files/CaTiO3.txt')
             >>> template = '{stoic}x{ele}{charge}{sign}'
@@ -388,21 +404,23 @@ class SmactStructure:
         """
         if include_ground:
             return delim.join(
-              template.format(
-                ele=specie[0],
-                stoic=specie[2],
-                charge=abs(specie[1]),
-                sign="+" if specie[1] >= 0 else "-",
-              ) for specie in self.species
+                template.format(
+                    ele=specie[0],
+                    stoic=specie[2],
+                    charge=abs(specie[1]),
+                    sign="+" if specie[1] >= 0 else "-",
+                )
+                for specie in self.species
             )
 
         return delim.join(
-          template.format(
-            ele=specie[0],
-            stoic=specie[2],
-            charge=abs(specie[1]) if specie[1] != 0 else "",
-            sign=get_sign(specie[1]),
-          ) for specie in self.species
+            template.format(
+                ele=specie[0],
+                stoic=specie[2],
+                charge=abs(specie[1]) if specie[1] != 0 else "",
+                sign=get_sign(specie[1]),
+            )
+            for specie in self.species
         )
 
     @staticmethod
@@ -436,14 +454,14 @@ class SmactStructure:
 
         Returns:
             A list of strings, formatted as '{element}{charge}{sign}'.
-        
+
         Examples:
             >>> s = SmactStructure.from_file('tests/files/CaTiO3.txt')
             >>> s.get_spec_strs()
             ['Ca2+', 'O2-', 'Ti4+']
-        
+
         """
-        return self._format_style("{ele}{charge}{sign}").split(' ')
+        return self._format_style("{ele}{charge}{sign}").split(" ")
 
     def composition(self) -> str:
         """Generate a key that describes the composition.
@@ -491,13 +509,18 @@ class SmactStructure:
 
         poscar += f"{self.lattice_param}\n"
 
-        poscar += "\n".join(" ".join(map(str, vec)) for vec in self.lattice_mat.tolist()) + "\n"
+        poscar += (
+            "\n".join(" ".join(map(str, vec)) for vec in self.lattice_mat.tolist())
+            + "\n"
+        )
 
         spec_count = {spec: len(coords) for spec, coords in self.sites.items()}
 
         poscar += self._format_style("{ele}") + "\n"
 
-        poscar += " ".join(str(spec_count[spec]) for spec in self.get_spec_strs()) + "\n"
+        poscar += (
+            " ".join(str(spec_count[spec]) for spec in self.get_spec_strs()) + "\n"
+        )
 
         poscar += "Cartesian\n"
         for spec, coords in self.sites.items():

@@ -26,7 +26,7 @@ def parse_spec(species: str) -> Tuple[str, int]:
     charge_match = re.search(r"\d+", species)
     charge = int(charge_match.group(0)) if charge_match else 0
 
-    if '-' in species:
+    if "-" in species:
         charge *= -1
 
     return ele, charge
@@ -64,8 +64,8 @@ def get_sign(charge: int) -> str:
 
     """
     if charge > 0:
-        return '+'
+        return "+"
     elif charge < 0:
-        return '-'
+        return "-"
     else:
-        return ''
+        return ""

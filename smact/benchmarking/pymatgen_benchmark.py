@@ -1,7 +1,10 @@
 """Benchmarking functions for pymatgen."""
 
 from itertools import combinations_with_replacement as cwr
-from pymatgen.analysis.structure_prediction.substitution_probability import SubstitutionProbability
+
+from pymatgen.analysis.structure_prediction.substitution_probability import (
+    SubstitutionProbability,
+)
 
 from .utilities import timeit
 

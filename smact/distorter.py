@@ -1,4 +1,3 @@
-
 """
 smact.distorter: Module for generating symmetry-unique substitutions on a given sub-lattice.
 
@@ -11,7 +10,9 @@ for equivalence.
 """
 
 import copy
+
 import smact
+
 try:
     from pyspglib import spglib
 except ImportError:
@@ -34,10 +35,11 @@ def get_sg(lattice):
         sg (int): integer number of the spacegroup
     """
     spacegroup = spglib.get_spacegroup(lattice, symprec=1e-5)
-    space_split=spacegroup.split()
-    spg_num = space_split[1].replace('(','').replace(')','')
+    space_split = spacegroup.split()
+    spg_num = space_split[1].replace("(", "").replace(")", "")
     sg = Spacegroup(int(spg_num))
     return sg
+
 
 def get_inequivalent_sites(sub_lattice, lattice):
     """Given a sub lattice, returns symmetry unique sites for substitutions.
@@ -55,12 +57,12 @@ def get_inequivalent_sites(sub_lattice, lattice):
     inequivalent_sites = []
     for site in sub_lattice:
         new_site = True
-# Check against the existing members of the list of inequivalent sites
+        # Check against the existing members of the list of inequivalent sites
         if len(inequivalent_sites) > 0:
             for inequiv_site in inequivalent_sites:
                 if smact.are_eq(site, inequiv_site) == True:
                     new_site = False
-# Check against symmetry related members of the list of inequivalent sites
+            # Check against symmetry related members of the list of inequivalent sites
             equiv_inequiv_sites, _ = sg.equivalent_sites(inequiv_site)
             for equiv_inequiv_site in equiv_inequiv_sites:
                 if smact.are_eq(site, equiv_inequiv_site) == True:
@@ -72,7 +74,7 @@ def get_inequivalent_sites(sub_lattice, lattice):
     return inequivalent_sites
 
 
-def make_substitution(lattice,site,new_species):
+def make_substitution(lattice, site, new_species):
     """Change atomic species on lattice site to new_species.
 
     Args:
@@ -82,7 +84,7 @@ def make_substitution(lattice,site,new_species):
 
     Returns:
         lattice
-     """
+    """
     i = 0
     # NBNBNBNB  It is necessary to use deepcopy for objects, otherwise changes applied to a clone
     # will also apply to the parent object.

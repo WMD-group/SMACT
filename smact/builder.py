@@ -8,6 +8,7 @@
 # Implement Structure class, c.f. dev_docs.
 
 from ase.spacegroup import crystal
+
 from smact.lattice import Lattice, Site
 
 
@@ -24,11 +25,13 @@ def cubic_perovskite(species, cell_par=[6, 6, 6, 90, 90, 90], repetitions=[1, 1,
         ASE crystal system of the unit cell.
 
     """
-    system = crystal((species),
-                     basis=[(0, 0, 0), (0.5, 0.5, 0.5), (0.5, 0.5, 0)],
-                     spacegroup=221,
-                     size=repetitions,
-                     cellpar=cell_par)
+    system = crystal(
+        (species),
+        basis=[(0, 0, 0), (0.5, 0.5, 0.5), (0.5, 0.5, 0)],
+        spacegroup=221,
+        size=repetitions,
+        cellpar=cell_par,
+    )
 
     sites_list = []
     oxidation_states = [[2]] + [[4]] + [[-2]] * 3
@@ -51,11 +54,13 @@ def wurtzite(species, cell_par=[2, 2, 6, 90, 90, 120], repetitions=[1, 1, 1]):
         ASE crystal system of the unit cell.
 
     """
-    system = crystal((species),
-                     basis=[(2. / 3., 1. / 3., 0), (2. / 3., 1. / 3., 5. / 8.)],
-                     spacegroup=186,
-                     size=repetitions,
-                     cellpar=[3, 3, 6, 90, 90, 120])
+    system = crystal(
+        (species),
+        basis=[(2.0 / 3.0, 1.0 / 3.0, 0), (2.0 / 3.0, 1.0 / 3.0, 5.0 / 8.0)],
+        spacegroup=186,
+        size=repetitions,
+        cellpar=[3, 3, 6, 90, 90, 120],
+    )
 
     sites_list = []
     oxidation_states = [[1], [2], [3], [4]] + [[-1], [-2], [-3], [-4]]

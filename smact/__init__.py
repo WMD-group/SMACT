@@ -5,22 +5,20 @@ A collection of fast screening tools from elemental data
 """
 
 # get correct path for datafiles when called from another directory
-from builtins import filter
-from builtins import map
-from builtins import range
-from builtins import object
+from builtins import filter, map, object, range
 from os import path
+
 import pandas as pd
+
 module_directory = path.abspath(path.dirname(__file__))
-data_directory = path.join(module_directory, 'data')
+data_directory = path.join(module_directory, "data")
 import itertools
 import warnings
-
-
 from math import gcd
 from operator import mul as multiply
 
 from smact import data_loader
+
 
 class Element(object):
     """Collection of standard elemental properties for given element.
@@ -79,6 +77,7 @@ class Element(object):
         Warning: Element not found in Eigenvalues.csv
 
     """
+
     def __init__(self, symbol):
         """Initialise Element class
 
@@ -95,10 +94,12 @@ class Element(object):
         # Set coordination-environment data from the Shannon-radius data.
         # As above, it is safe to use copy = False with this Get* function.
 
-        shannon_data = data_loader.lookup_element_shannon_radius_data(symbol, copy=False)
+        shannon_data = data_loader.lookup_element_shannon_radius_data(
+            symbol, copy=False
+        )
 
         if shannon_data != None:
-            coord_envs = [row['coordination'] for row in shannon_data]
+            coord_envs = [row["coordination"] for row in shannon_data]
         else:
             coord_envs = None
 
@@ -108,45 +109,51 @@ class Element(object):
 
         sse_data = data_loader.lookup_element_sse_data(symbol)
         if sse_data:
-            sse = sse_data['SolidStateEnergy']
+            sse = sse_data["SolidStateEnergy"]
         else:
             sse = None
 
         sse_Pauling_data = data_loader.lookup_element_sse_pauling_data(symbol)
         if sse_Pauling_data:
-            sse_Pauling = sse_Pauling_data['SolidStateEnergyPauling']
+            sse_Pauling = sse_Pauling_data["SolidStateEnergyPauling"]
         else:
             sse_Pauling = None
 
         for attribute, value in (
-            ('coord_envs', coord_envs),
-            ('covalent_radius', dataset['r_cov']),
-            ('crustal_abundance', dataset['Abundance']),
-            ('e_affinity', dataset['e_affinity']),
-            ('eig', dataset['p_eig']),
-            ('eig_s', dataset['s_eig']),
-            ('HHI_p', HHI_scores[0]),
-            ('HHI_r', HHI_scores[1]),
-            ('ionpot', dataset['ion_pot']),
-            ('mass', dataset['Mass']),
-            ('name', dataset['Name']),
-            ('number', dataset['Z']),
-            ('oxidation_states',
-             data_loader.lookup_element_oxidation_states(symbol)),
-            ('oxidation_states_icsd',
-             data_loader.lookup_element_oxidation_states_icsd(symbol)),
-            ('oxidation_states_sp',
-             data_loader.lookup_element_oxidation_states_sp(symbol)),
-            ('oxidation_states_wiki',
-             data_loader.lookup_element_oxidation_states_wiki(symbol)),
-            ('dipol', dataset['dipol']),
-            ('pauling_eneg', dataset['el_neg']),
-            ('SSE', sse),
-            ('SSEPauling', sse_Pauling),
-            ('symbol', symbol),
-            #('vdw_radius', dataset['RVdW']),
-            ):
+            ("coord_envs", coord_envs),
+            ("covalent_radius", dataset["r_cov"]),
+            ("crustal_abundance", dataset["Abundance"]),
+            ("e_affinity", dataset["e_affinity"]),
+            ("eig", dataset["p_eig"]),
+            ("eig_s", dataset["s_eig"]),
+            ("HHI_p", HHI_scores[0]),
+            ("HHI_r", HHI_scores[1]),
+            ("ionpot", dataset["ion_pot"]),
+            ("mass", dataset["Mass"]),
+            ("name", dataset["Name"]),
+            ("number", dataset["Z"]),
+            ("oxidation_states", data_loader.lookup_element_oxidation_states(symbol)),
+            (
+                "oxidation_states_icsd",
+                data_loader.lookup_element_oxidation_states_icsd(symbol),
+            ),
+            (
+                "oxidation_states_sp",
+                data_loader.lookup_element_oxidation_states_sp(symbol),
+            ),
+            (
+                "oxidation_states_wiki",
+                data_loader.lookup_element_oxidation_states_wiki(symbol),
+            ),
+            ("dipol", dataset["dipol"]),
+            ("pauling_eneg", dataset["el_neg"]),
+            ("SSE", sse),
+            ("SSEPauling", sse_Pauling),
+            ("symbol", symbol),
+            # ('vdw_radius', dataset['RVdW']),
+        ):
             setattr(self, attribute, value)
+
 
 class Species(Element):
     """
@@ -155,7 +162,7 @@ class Species(Element):
     In addition to the standard properties from the periodic table
     (inherited from the  Element class), Species objects use the
     oxidation state and coordination environment to provide further
-    properties. 
+    properties.
     The Species object can be created with either a default set of shannon radii (radii_source='shannon') or with a set of machine-learnt shannon radii (radii_source='extended').
     The source of the machine-learnt shannon radii set is
     Baloch, A.A., Alqahtani, S.M., Mumtaz, F., Muqaibel, A.H., Rashkeev, S.N. and Alharbi, F.H., 2021. Extending Shannon's ionic radii database using machine learning. Physical Review Materials, 5(4), p.043804.
@@ -183,7 +190,7 @@ class Species(Element):
         Species.ionic_radius: Ionic radius of Species.
 
         Species.average_shannon_radius: An average shannon radius for the species. The average is taken over all coordination environments.
-        
+
         Species.average_ionic_radius: An average ionic radius for the species. The average is taken over all coordination environments.
 
     Raises:
@@ -192,68 +199,76 @@ class Species(Element):
 
     """
 
-    def __init__(self,symbol,oxidation,coordination=4, radii_source="shannon"):
-        Element.__init__(self,symbol)
+    def __init__(self, symbol, oxidation, coordination=4, radii_source="shannon"):
+        Element.__init__(self, symbol)
 
         self.oxidation = oxidation
         self.coordination = coordination
 
         # Get shannon radius for the oxidation state and coordination.
 
-        self.shannon_radius = None;
+        self.shannon_radius = None
 
-        if radii_source=="shannon":
+        if radii_source == "shannon":
 
-            shannon_data = data_loader.lookup_element_shannon_radius_data(symbol);
-        
+            shannon_data = data_loader.lookup_element_shannon_radius_data(symbol)
+
         elif radii_source == "extended":
-            shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(symbol)
+            shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(
+                symbol
+            )
 
         else:
-            print("Data source not recognised. Please select 'shannon' or 'extended'. ") 
+            print("Data source not recognised. Please select 'shannon' or 'extended'. ")
 
         if shannon_data:
             for dataset in shannon_data:
-                if dataset['charge'] == oxidation and str(coordination) == dataset['coordination'].split('_')[0]:
-                    self.shannon_radius = dataset['crystal_radius'];
+                if (
+                    dataset["charge"] == oxidation
+                    and str(coordination) == dataset["coordination"].split("_")[0]
+                ):
+                    self.shannon_radius = dataset["crystal_radius"]
 
         # Get ionic radius
-        self.ionic_radius = None;
+        self.ionic_radius = None
 
         if shannon_data:
             for dataset in shannon_data:
-                if dataset['charge'] == oxidation and str(coordination) == dataset['coordination'].split('_')[0]:
-                    self.ionic_radius = dataset['ionic_radius'];
+                if (
+                    dataset["charge"] == oxidation
+                    and str(coordination) == dataset["coordination"].split("_")[0]
+                ):
+                    self.ionic_radius = dataset["ionic_radius"]
 
         # Get the average shannon and ionic radii
         self.average_shannon_radius = None
         self.average_ionic_radius = None
-        
+
         if shannon_data:
             # Get the rows of the shannon radius table for the element
-            shannon_data_df=pd.DataFrame(shannon_data)
-            
+            shannon_data_df = pd.DataFrame(shannon_data)
+
             # Get the rows corresponding to the oxidation state of the species
-            charge_rows=shannon_data_df.loc[shannon_data_df['charge']==oxidation]
+            charge_rows = shannon_data_df.loc[shannon_data_df["charge"] == oxidation]
 
             # Get the mean
-            self.average_shannon_radius = charge_rows['crystal_radius'].mean()
-            self.average_ionic_radius = charge_rows['ionic_radius'].mean()
-
+            self.average_shannon_radius = charge_rows["crystal_radius"].mean()
+            self.average_ionic_radius = charge_rows["ionic_radius"].mean()
 
         # Get SSE_2015 (revised) for the oxidation state.
 
         self.SSE_2015 = None
 
-        sse_2015_data = data_loader.lookup_element_sse2015_data(symbol);
+        sse_2015_data = data_loader.lookup_element_sse2015_data(symbol)
         if sse_2015_data:
             for dataset in sse_2015_data:
-                if dataset['OxidationState'] == oxidation:
-                    self.SSE_2015 = dataset['SolidStateEnergy2015']
+                if dataset["OxidationState"] == oxidation:
+                    self.SSE_2015 = dataset["SolidStateEnergy2015"]
         else:
             self.SSE_2015 = None
 
-def ordered_elements(x,y):
+
+def ordered_elements(x, y):
     """
     Return a list of element symbols, ordered by proton number in the range x -> y
     Args:
@@ -261,8 +276,7 @@ def ordered_elements(x,y):
     Returns:
         list: Ordered list of element symbols
     """
-    with open(path.join(data_directory,
-                        'ordered_periodic.txt'), 'r') as f:
+    with open(path.join(data_directory, "ordered_periodic.txt"), "r") as f:
         data = f.readlines()
     elements = []
     for line in data:
@@ -270,10 +284,11 @@ def ordered_elements(x,y):
         elements.append(inp[0])
 
     ordered_elements = []
-    for i in range(x,y+1):
-        ordered_elements.append(elements[i-1])
+    for i in range(x, y + 1):
+        ordered_elements.append(elements[i - 1])
 
     return ordered_elements
+
 
 def element_dictionary(elements=None):
     """
@@ -290,11 +305,11 @@ def element_dictionary(elements=None):
             objects as data
     """
     if elements == None:
-        elements = ordered_elements(1,103)
+        elements = ordered_elements(1, 103)
     return {symbol: Element(symbol) for symbol in elements}
 
 
-def are_eq(A,B,tolerance=1e-4):
+def are_eq(A, B, tolerance=1e-4):
     """Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
     Args:
         A, B (lists): 1-D list of values for approximate equality comparison
@@ -322,15 +337,13 @@ def lattices_are_same(lattice1, lattice2, tolerance=1e-4):
         lattice1,lattice2 : ASE crystal class
     Returns:
         boolean
-        """
+    """
     lattices_are_same = False
     i = 0
     for site1 in lattice1:
         for site2 in lattice2:
             if site1.symbol == site2.symbol:
-                if are_eq(site1.position,
-                          site2.position,
-                          tolerance=tolerance):
+                if are_eq(site1.position, site2.position, tolerance=tolerance):
                     i += 1
     if i == len(lattice1):
         lattices_are_same = True
@@ -346,6 +359,7 @@ def _gcd_recursive(*args):
     else:
         return gcd(args[0], _gcd_recursive(*args[1:]))
 
+
 def _isneutral(oxidations, stoichs):
     """
     Check if set of oxidation states is neutral in given stoichiometry
@@ -355,6 +369,7 @@ def _isneutral(oxidations, stoichs):
         stoichs (tuple): Stoichiometry values corresponding to `oxidations`
     """
     return 0 == sum(map(multiply, oxidations, stoichs))
+
 
 def neutral_ratios_iter(oxidations, stoichs=False, threshold=5):
     """
@@ -374,7 +389,7 @@ def neutral_ratios_iter(oxidations, stoichs=False, threshold=5):
         tuple: ratio that gives neutrality
     """
     if not stoichs:
-        stoichs = [list(range(1,threshold+1))] * len(oxidations)
+        stoichs = [list(range(1, threshold + 1))] * len(oxidations)
 
     # First filter: remove combinations which have a common denominator
     # greater than 1 (i.e. Use simplest form of each set of ratios)
@@ -382,8 +397,9 @@ def neutral_ratios_iter(oxidations, stoichs=False, threshold=5):
     return filter(
         lambda x: _isneutral(oxidations, x) and _gcd_recursive(*x) == 1,
         # Generator: enumerate all combinations of stoichiometry
-        itertools.product(*stoichs)
-        )
+        itertools.product(*stoichs),
+    )
+
 
 def neutral_ratios(oxidations, stoichs=False, threshold=5):
     """
@@ -416,25 +432,129 @@ def neutral_ratios(oxidations, stoichs=False, threshold=5):
             Ratios of atoms in given oxidation
             states which yield a charge-neutral structure
     """
-    allowed_ratios = [x for x in neutral_ratios_iter(oxidations,
-                                                        stoichs=stoichs,
-                                                        threshold=threshold)]
+    allowed_ratios = [
+        x for x in neutral_ratios_iter(oxidations, stoichs=stoichs, threshold=threshold)
+    ]
     return (len(allowed_ratios) > 0, allowed_ratios)
 
+
 # List of metals
-metals = ['Li','Be','Na','Mg','Al','K','Ca','Sc','Ti','V','Cr','Mn','Fe','Co','Ni',
-'Cu','Zn','Ga','Ge','Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn','Sb',
-'Cs','Ba','La','Ce', 'Pr','Nd','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb',
-'Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','Fr','Ra','Ac',
-'Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No']
+metals = [
+    "Li",
+    "Be",
+    "Na",
+    "Mg",
+    "Al",
+    "K",
+    "Ca",
+    "Sc",
+    "Ti",
+    "V",
+    "Cr",
+    "Mn",
+    "Fe",
+    "Co",
+    "Ni",
+    "Cu",
+    "Zn",
+    "Ga",
+    "Ge",
+    "Rb",
+    "Sr",
+    "Y",
+    "Zr",
+    "Nb",
+    "Mo",
+    "Tc",
+    "Ru",
+    "Rh",
+    "Pd",
+    "Ag",
+    "Cd",
+    "In",
+    "Sn",
+    "Sb",
+    "Cs",
+    "Ba",
+    "La",
+    "Ce",
+    "Pr",
+    "Nd",
+    "Sm",
+    "Eu",
+    "Gd",
+    "Tb",
+    "Dy",
+    "Ho",
+    "Er",
+    "Tm",
+    "Yb",
+    "Lu",
+    "Hf",
+    "Ta",
+    "W",
+    "Re",
+    "Os",
+    "Ir",
+    "Pt",
+    "Au",
+    "Hg",
+    "Tl",
+    "Pb",
+    "Bi",
+    "Po",
+    "Fr",
+    "Ra",
+    "Ac",
+    "Th",
+    "Pa",
+    "U",
+    "Np",
+    "Pu",
+    "Am",
+    "Cm",
+    "Bk",
+    "Cf",
+    "Es",
+    "Fm",
+    "Md",
+    "No",
+]
 
 # List of elements that can be considered 'anions'.
 # Similar to the Pymatgen 'electronegative elements' but excluding H, B, C & Si.
-anions = ["N", "P", "As", "Sb",
-           "O", "S", "Se", "Te",
-           "F", "Cl", "Br", "I"]
+anions = ["N", "P", "As", "Sb", "O", "S", "Se", "Te", "F", "Cl", "Br", "I"]
 
 # List of d-block metals
-d_block = ['Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn',
-           'Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
-           'La','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg']
+d_block = [
+    "Sc",
+    "Ti",
+    "V",
+    "Cr",
+    "Mn",
+    "Fe",
+    "Co",
+    "Ni",
+    "Cu",
+    "Zn",
+    "Y",
+    "Zr",
+    "Nb",
+    "Mo",
+    "Tc",
+    "Ru",
+    "Rh",
+    "Pd",
+    "Ag",
+    "Cd",
+    "La",
+    "Hf",
+    "Ta",
+    "W",
+    "Re",
+    "Os",
+    "Ir",
+    "Pt",
+    "Au",
+    "Hg",
+]
