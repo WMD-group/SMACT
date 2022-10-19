@@ -48,7 +48,7 @@ The distorter module uses the [ASE Python library](https://wiki.fysik.dtu.dk/ase
  Usually, the perovskite structure contains an A cationm, a B cation and an X anion in the ratio 1:1:3 ([see wikipeidia for more information](https://en.wikipedia.org/wiki/Perovskite_(structure))).
  Here we search for charge inverted perovskites, i.e. with an anion on the A site. This class of material is closely related to perovskites, and may represent another fruitful search space for new photovoltaic materials.
 
-In this example  we assume a simple [formate moelcule](https://en.wikipedia.org/wiki/Formate) as the C-site and uses [Goldschmidt ratio rules](https://en.wikipedia.org/wiki/Goldschmidt_tolerance_factor) as part of the screening.
+In this example  we assume a simple [formate molecule](https://en.wikipedia.org/wiki/Formate) as the C-site and uses [Goldschmidt ratio rules](https://en.wikipedia.org/wiki/Goldschmidt_tolerance_factor) as part of the screening.
 These rules allow us to estimate whether or not a perovskite structure is likely to form based on data about ionic size alone.
 We also apply the standard charge neutrality and electronegativity tests as described [in the docs](https://smact.readthedocs.io/en/latest/examples.html#neutral-combinations).
 
@@ -66,3 +66,6 @@ The notebooks involve setting up a database of SMACT compatible structures, gene
 
 ### Dopant prediction
 Contains an example of using the dopant prediction submodule.
+
+### Oxidation states
+Contains an example of using the `smact.oxidation_states` submodule to predict the likelihood of metal cations coexisting with halide anions in ternary compounds based on a statistical analysis of oxidation states. Full details of the oxidation states model can be found in [this publication](https://pubs.rsc.org/en/content/articlelanding/2018/FD/C8FD00032H).
