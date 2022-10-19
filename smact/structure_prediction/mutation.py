@@ -11,25 +11,26 @@ from typing import Callable, Generator, Optional, Tuple
 import numpy as np
 import pandas as pd
 import pymatgen.analysis.structure_prediction as pymatgen_sp
-from .utilities import parse_spec
+
 from .structure import SmactStructure
+from .utilities import parse_spec
 
 
 class CationMutator:
     """Handles cation mutation of SmactStructures based on substitution probability.
-    
+
     Based on the algorithm presented in:
         Hautier, G., Fischer, C., Ehrlacher, V., Jain, A., and Ceder, G. (2011)
         Data Mined Ionic Substitutions for the Discovery of New Compounds.
         Inorganic Chemistry, 50(2), 656-663.
         `doi:10.1021/ic102031h <https://pubs.acs.org/doi/10.1021/ic102031h>`_
-    
+
     """
 
     def __init__(
-      self,
-      lambda_df: pd.DataFrame,
-      alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
+        self,
+        lambda_df: pd.DataFrame,
+        alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
     ):
         """Assign attributes and get lambda table.
 
@@ -47,9 +48,9 @@ class CationMutator:
         self.lambda_tab = lambda_df
 
         self.specs = set(
-          itertools.chain.from_iterable(
-            set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]
-          )
+            itertools.chain.from_iterable(
+                set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]
+            )
         )
 
         self.alpha = alpha
@@ -61,8 +62,8 @@ class CationMutator:
 
     @staticmethod
     def from_json(
-      lambda_json: Optional[str] = None,
-      alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
+        lambda_json: Optional[str] = None,
+        alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
     ):
         """Create a CationMutator instance from a DataFrame.
 
@@ -80,18 +81,18 @@ class CationMutator:
 
         """
         if lambda_json is not None:
-            with open(lambda_json, 'r') as f:
+            with open(lambda_json, "r") as f:
                 lambda_dat = json.load(f)
         else:
             # Get pymatgen lambda table
             py_sp_dir = os.path.dirname(pymatgen_sp.__file__)
             pymatgen_lambda = os.path.join(py_sp_dir, "data", "lambda.json")
-            with open(pymatgen_lambda, 'r') as f:
+            with open(pymatgen_lambda, "r") as f:
                 lambda_dat = json.load(f)
 
             # Get rid of 'D1+' values to reflect pymatgen
             # implementation
-            lambda_dat = [x for x in lambda_dat if 'D1+' not in x]
+            lambda_dat = [x for x in lambda_dat if "D1+" not in x]
 
         # Convert lambda table to pandas DataFrame
         lambda_dat = [tuple(x) for x in lambda_dat]
@@ -183,9 +184,10 @@ class CationMutator:
 
     @staticmethod
     def _mutate_structure(
-      structure: SmactStructure,
-      init_species: str,
-      final_species: str, ) -> SmactStructure:
+        structure: SmactStructure,
+        init_species: str,
+        final_species: str,
+    ) -> SmactStructure:
         """Mutate a species within a SmactStructure.
 
         Replaces all instances of the species within the
@@ -219,7 +221,10 @@ class CationMutator:
         final_spec_tup = parse_spec(final_species)
 
         # Replace species tuple
-        struct_buff.species[spec_loc] = (*final_spec_tup, struct_buff.species[spec_loc][2])
+        struct_buff.species[spec_loc] = (
+            *final_spec_tup,
+            struct_buff.species[spec_loc][2],
+        )
 
         # Check for charge neutrality
         if sum(x[1] * x[2] for x in struct_buff.species) != 0:
@@ -241,49 +246,51 @@ class CationMutator:
     def _nary_mutate_structure(
         structure: SmactStructure,
         init_species: list,
-        final_species: list, ) -> SmactStructure:
+        final_species: list,
+    ) -> SmactStructure:
         """Perform a n-ary mutation of a SmactStructure (n>1).
         Replaces all instances of a group of species within the structure.
         Stoichiometry is maintained.
         Charge neutrality is preserved, but the species pair do not need the same charge.
-        
+
         Args:
             init_species (list): A list of species within the structure to mutate.
             final_species (list): The list of species to replace the initial species with
-            
+
         """
-        #Determine the number of species to mutate
-        n=len(init_species)
+        # Determine the number of species to mutate
+        n = len(init_species)
 
-        struct_buff=deepcopy(structure)
-        init_spec_tup_list=[parse_spec(i) for i in init_species]
-        struct_spec_tups = list(map(itemgetter(0,1), struct_buff.species))
-        spec_loc=[struct_spec_tups.index(init_spec_tup_list[i]) for i in range(n)]
-    
-        final_spec_tup_list=[parse_spec(i) for i in final_species]
-    
-        #Replace species tuple
+        struct_buff = deepcopy(structure)
+        init_spec_tup_list = [parse_spec(i) for i in init_species]
+        struct_spec_tups = list(map(itemgetter(0, 1), struct_buff.species))
+        spec_loc = [struct_spec_tups.index(init_spec_tup_list[i]) for i in range(n)]
+
+        final_spec_tup_list = [parse_spec(i) for i in final_species]
+
+        # Replace species tuple
         for i in range(n):
-            struct_buff.species[spec_loc[i]] = (*final_spec_tup_list[i], struct_buff.species[spec_loc[i]][2])
+            struct_buff.species[spec_loc[i]] = (
+                *final_spec_tup_list[i],
+                struct_buff.species[spec_loc[i]][2],
+            )
 
-        #Check for charge neutrality
-        if sum(x[1]*x[2] for x in struct_buff.species) !=0:
+        # Check for charge neutrality
+        if sum(x[1] * x[2] for x in struct_buff.species) != 0:
             raise ValueError("New structure is not charge neutral")
 
-
-        #Sort species again
+        # Sort species again
         struct_buff.species.sort(key=itemgetter(1), reverse=True)
         struct_buff.species.sort(key=itemgetter(0))
 
-    
-        #Replace sites
+        # Replace sites
         for i in range(n):
-            struct_buff.sites[final_species[i]]=struct_buff.sites.pop(init_species[i])
-        
-        #And sort
+            struct_buff.sites[final_species[i]] = struct_buff.sites.pop(init_species[i])
+
+        # And sort
         species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(" ")
-        struct_buff.sites={spec: struct_buff.sites[spec] for spec in species_strs}
-    
+        struct_buff.sites = {spec: struct_buff.sites[spec] for spec in species_strs}
+
         return struct_buff
 
     def sub_prob(self, s1: str, s2: str) -> float:
@@ -328,17 +335,21 @@ class CationMutator:
 
     def same_spec_probs(self) -> pd.Series:
         """Calculate the same species substiution probabilities."""
-        return np.exp(
-          pd.Series(
-            np.diag(self.lambda_tab),
-            index=[self.lambda_tab.index, self.lambda_tab.columns], )
-        ) / self.Z
+        return (
+            np.exp(
+                pd.Series(
+                    np.diag(self.lambda_tab),
+                    index=[self.lambda_tab.index, self.lambda_tab.columns],
+                )
+            )
+            / self.Z
+        )
 
     def same_spec_cond_probs(self) -> pd.Series:
         """Calculate the same species conditional substiution probabilities."""
-        return (
-          np.exp(self.lambda_tab.to_numpy().diagonal()) / np.exp(self.lambda_tab).sum(axis=0)
-        )
+        return np.exp(self.lambda_tab.to_numpy().diagonal()) / np.exp(
+            self.lambda_tab
+        ).sum(axis=0)
 
     def pair_corr(self, s1: str, s2: str) -> float:
         """Determine the pair correlation of two ionic species."""
@@ -364,9 +375,10 @@ class CationMutator:
         return probs
 
     def unary_substitute(
-      self,
-      structure: SmactStructure,
-      thresh: Optional[float] = 1e-5, ) -> Generator[Tuple[SmactStructure, float], None, None]:
+        self,
+        structure: SmactStructure,
+        thresh: Optional[float] = 1e-5,
+    ) -> Generator[Tuple[SmactStructure, float], None, None]:
         """Find all structures with 1 substitution with probability above a threshold.
 
         Args:
@@ -383,8 +395,11 @@ class CationMutator:
             likely_probs = cond_probs.loc[cond_probs > thresh]
 
             for new_spec, prob in likely_probs.items():
-                if any([
-                  new_spec == specie,
-                  parse_spec(specie)[1] != parse_spec(new_spec)[1], ]):
+                if any(
+                    [
+                        new_spec == specie,
+                        parse_spec(specie)[1] != parse_spec(new_spec)[1],
+                    ]
+                ):
                     continue
                 yield (self._mutate_structure(structure, specie, new_spec), prob)

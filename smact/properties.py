@@ -1,8 +1,9 @@
-from builtins import map
-from builtins import input
-from builtins import range
+from builtins import input, map, range
+
+from numpy import product, sqrt
+
 import smact
-from numpy import sqrt, product
+
 
 def eneg_mulliken(element):
     """Get Mulliken electronegativity from the IE and EA.
@@ -19,13 +20,12 @@ def eneg_mulliken(element):
     elif type(element) != smact.Element:
         raise Exception("Unexpected type: {0}".format(type(element)))
 
-    mulliken = (element.ionpot+element.e_affinity)/2.0
+    mulliken = (element.ionpot + element.e_affinity) / 2.0
 
     return mulliken
 
 
-def band_gap_Harrison(anion, cation, verbose=False,
-                      distance=None):
+def band_gap_Harrison(anion, cation, verbose=False, distance=None):
 
     """
     Estimates the band gap from elemental data.
@@ -61,15 +61,15 @@ def band_gap_Harrison(anion, cation, verbose=False,
     An, Cat = elements_dict[An], elements_dict[Cat]
 
     # Calculate values of equation components
-    V1_Cat = (Cat.eig - Cat.eig_s)/4
-    V1_An = (An.eig - An.eig_s)/4
-    V1_bar = (V1_An + V1_Cat)/2
+    V1_Cat = (Cat.eig - Cat.eig_s) / 4
+    V1_An = (An.eig - An.eig_s) / 4
+    V1_bar = (V1_An + V1_Cat) / 2
     V2 = 2.16 * hbarsq_over_m / (d**2)
-    V3 = (Cat.eig - An.eig)/2
-    alpha_m = (1.11*V1_bar)/sqrt(V2**2 + V3**2)
+    V3 = (Cat.eig - An.eig) / 2
+    alpha_m = (1.11 * V1_bar) / sqrt(V2**2 + V3**2)
 
     # Calculate Band gap [(3-43) Harrison 1980 ]
-    Band_gap = (3.60/3.)*(sqrt(V2**2 + V3**2))*(1-alpha_m)
+    Band_gap = (3.60 / 3.0) * (sqrt(V2**2 + V3**2)) * (1 - alpha_m)
     if verbose:
         print("V1_bar = ", V1_bar)
         print("V2 = ", V2)
@@ -79,8 +79,7 @@ def band_gap_Harrison(anion, cation, verbose=False,
     return Band_gap
 
 
-def compound_electroneg(verbose=False, elements=None, stoichs=None,
-                                                source='Mulliken'):
+def compound_electroneg(verbose=False, elements=None, stoichs=None, source="Mulliken"):
 
     """Estimate electronegativity of compound from elemental data.
 
@@ -112,7 +111,9 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
     elif type(elements[0]) == smact.Element:
         elementlist = elements
     else:
-        raise Exception("Please supply a list of element symbols or SMACT Element objects")
+        raise Exception(
+            "Please supply a list of element symbols or SMACT Element objects"
+        )
 
     stoichslist = stoichs
     # Convert stoichslist from string to float
@@ -120,16 +121,15 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
 
     # Get electronegativity values for each element
 
-    if source == 'Mulliken':
-        elementlist = [(el.ionpot+el.e_affinity)/2.0
-                       for el in elementlist]
+    if source == "Mulliken":
+        elementlist = [(el.ionpot + el.e_affinity) / 2.0 for el in elementlist]
 
-    elif source == 'Pauling':
-        elementlist = [(2.86 * el.pauling_eneg)
-                       for el in elementlist]
+    elif source == "Pauling":
+        elementlist = [(2.86 * el.pauling_eneg) for el in elementlist]
     else:
-        raise Exception("Electronegativity type '{0}'".format(source),
-                        "is not recognised")
+        raise Exception(
+            "Electronegativity type '{0}'".format(source), "is not recognised"
+        )
 
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.
@@ -139,11 +139,11 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None,
     # Raise each electronegativity to its appropriate power
     # to account for stoichiometry.
     for i in range(0, len(elementlist)):
-        elementlist[i] = [elementlist[i]**stoichslist[i]]
+        elementlist[i] = [elementlist[i] ** stoichslist[i]]
 
     # Calculate geometric mean (n-th root of product)
     prod = product(elementlist)
-    compelectroneg = (prod)**(1.0/(sum(stoichslist)))
+    compelectroneg = (prod) ** (1.0 / (sum(stoichslist)))
 
     if verbose:
         print("Geometric mean = Compound 'electronegativity'=", compelectroneg)

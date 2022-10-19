@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 
-import time
-import smact
 import itertools
+import time
+from multiprocessing import Pool
 from sys import stdout
 
+import smact
 from smact.screening import eneg_states_test
-from multiprocessing import Pool
 
 element_list = smact.ordered_elements(1, 103)
 elements = smact.element_dictionary(element_list)
@@ -26,9 +26,10 @@ mp_use = True
 mp_processes = 4
 mp_chunk_size = 10
 
+
 def print_status(text):
     "Refresh progress meter on one line"
-    stdout.write(text + '\r')
+    stdout.write(text + "\r")
     stdout.flush()
 
 
@@ -60,9 +61,9 @@ def count_element_combination(args):
     # each represented as (symbol, state, eneg)
     oxidation_states_list = [
         (element.symbol, oxidation_state, element.pauling_eneg)
-            for element in element_combination
-                for oxidation_state in element.oxidation_states
-        ]
+        for element in element_combination
+        for oxidation_state in element.oxidation_states
+    ]
 
     # Screen on charge neutrality
     # and on electronegativity ordering if include_pauling_test = True
@@ -74,10 +75,11 @@ def count_element_combination(args):
         pauling_electronegativities = [x[2] for x in state_combination]
 
         sorted_states = tuple(sorted(oxidation_states))
-        
+
         if include_pauling_test:
-            if (neutral_stoichs_lookup[sorted_states] and
-                eneg_states_test(oxidation_states, pauling_electronegativities)):
+            if neutral_stoichs_lookup[sorted_states] and eneg_states_test(
+                oxidation_states, pauling_electronegativities
+            ):
                 count += neutral_stoichs_lookup[sorted_states]
         else:
             count += neutral_stoichs_lookup[sorted_states]
@@ -92,23 +94,24 @@ def main():
 
     # Obtain the unique oxidation states across all the elements considered.
     oxidation_states = set(
-        oxidation_state for element in list(elements.values())
-            for oxidation_state in element.oxidation_states
-        )
+        oxidation_state
+        for element in list(elements.values())
+        for oxidation_state in element.oxidation_states
+    )
 
     # List unique oxidation-state combinations for each set of
     # n-element combinations
     oxidation_state_combinations = {
         n: list(itertools.combinations_with_replacement(oxidation_states, n))
-            for n in range(2, max_n + 1)
+        for n in range(2, max_n + 1)
     }
 
     # Sort combinations and cast to tuples --
     # these will be used as keys to a lookup table below.
     oxidation_state_combinations = {
         key: [tuple(sorted(item)) for item in value]
-            for key, value in list(oxidation_state_combinations.items())
-        }
+        for key, value in list(oxidation_state_combinations.items())
+    }
 
     # Print the number of combinations of oxidation states for each value
     # of n to be analysed. Note that this will include ridiculous combinations
@@ -140,27 +143,25 @@ def main():
         #     neutral_stoichiometries.update({oxidation_states: count})
 
         def n_neutral_ratios(oxidation_states, threshold=8):
-            return len(smact.neutral_ratios(oxidation_states,
-                                            threshold=threshold)[1])
-       
+            return len(smact.neutral_ratios(oxidation_states, threshold=threshold)[1])
+
         neutral_stoichiometries = {
             oxidation_states: n_neutral_ratios(
-                oxidation_states, threshold=neutral_stoichiometries_threshold)
-                for oxidation_states in oxidation_state_combinations[n]
-            }
-        
+                oxidation_states, threshold=neutral_stoichiometries_threshold
+            )
+            for oxidation_states in oxidation_state_combinations[n]
+        }
+
         start_time = time.time()
 
-        
         # Count the number of element combinations - this is needed for the
         # progress indicator.
 
         combination_count = sum(
-            count_iter(itertools.combinations(element_list, i))
-            for i in range(2, n + 1))
+            count_iter(itertools.combinations(element_list, i)) for i in range(2, n + 1)
+        )
 
-        print(("Counting ({0} element combinations)"
-              "...".format(combination_count)))
+        print(("Counting ({0} element combinations)" "...".format(combination_count)))
 
         # Combinations are counted in chunks set by count_progress_interval.
         # In Python 2.7 the // symbol is "integer division" which rounds
@@ -182,7 +183,8 @@ def main():
         combination_generator = (
             [elements[symbol] for symbol in element_combination]
             for i in range(2, n + 1)
-            for element_combination in itertools.combinations(element_list, i))
+            for element_combination in itertools.combinations(element_list, i)
+        )
 
         # Count and sum charge-neutral combinations of oxidation states for
         # each of the combinations in element_combinations.
@@ -192,25 +194,28 @@ def main():
         while data_pointer < combination_count:
             iterations = min(batch_size, combination_count - data_pointer)
 
-            imap_arg_generator = ((next(combination_generator),
-                                   n, neutral_stoichiometries)
-                                  for i in range(0, iterations))
+            imap_arg_generator = (
+                (next(combination_generator), n, neutral_stoichiometries)
+                for i in range(0, iterations)
+            )
 
             if mp_use:
                 # Threaded code path -- iteration over element combinations is
                 # done using the multiprocessing.Pool.imap_unordered()
                 # function.
 
-                count = count + sum(thread_pool.imap_unordered(
-                                        count_element_combination,
-                                        imap_arg_generator,
-                                        chunksize=mp_chunk_size))
+                count = count + sum(
+                    thread_pool.imap_unordered(
+                        count_element_combination,
+                        imap_arg_generator,
+                        chunksize=mp_chunk_size,
+                    )
+                )
             else:
                 # Serial code path -- iteration over element combinations is
                 # done using the itertools.imap() function.
 
-                count = count + sum(map(count_element_combination,
-                                                   imap_arg_generator))
+                count = count + sum(map(count_element_combination, imap_arg_generator))
 
             # After each chunk, report the % progress, elapsed time and an
             # estimate of the remaining time.  The smact.pauling_test() calls
@@ -223,15 +228,20 @@ def main():
             percent_done = 100 * float(data_pointer) / float(combination_count)
 
             time_elapsed = time.time() - start_time
-            time_remaining = (combination_count * (time_elapsed / data_pointer)
-                              - time_elapsed)
+            time_remaining = (
+                combination_count * (time_elapsed / data_pointer) - time_elapsed
+            )
 
-            print_status("  -> {0}/{1} done ({2:.2f} %); {3:.2f} s elapsed, "
-                         "~{4:.2f} s remaining".format(data_pointer,
-                                                       combination_count,
-                                                       percent_done,
-                                                       time_elapsed,
-                                                       time_remaining))
+            print_status(
+                "  -> {0}/{1} done ({2:.2f} %); {3:.2f} s elapsed, "
+                "~{4:.2f} s remaining".format(
+                    data_pointer,
+                    combination_count,
+                    percent_done,
+                    time_elapsed,
+                    time_remaining,
+                )
+            )
 
         print("")
 
@@ -239,14 +249,20 @@ def main():
 
         # Print results and total time for counting.
 
-        print(("Number of charge-neutral stoichiometries for combinations "
-              "of {0} elements".format(n)))
-        print(("(using known oxidation states, not including zero): "
-              "{0}".format(count)))
+        print(
+            (
+                "Number of charge-neutral stoichiometries for combinations "
+                "of {0} elements".format(n)
+            )
+        )
+        print(
+            ("(using known oxidation states, not including zero): " "{0}".format(count))
+        )
         print("")
 
         print("Total time for counting: {0:.3f} sec".format(total_time))
         print("")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

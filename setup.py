@@ -7,9 +7,10 @@ __maintainer__ = "Anthony O. Onwuli"
 __email__ = "anthony.onwuli16@imperial.ac.uk"
 __date__ = "September 20 2022"
 
-from setuptools import setup, Extension
 import os
 import unittest
+
+from setuptools import Extension, setup
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,7 +27,12 @@ if __name__ == "__main__":
         maintainer="Anthony O. Onwuli",
         maintainer_email="anthony.onwuli16@imperial.ac.uk",
         license="MIT",
-        packages=["smact", "smact.tests", "smact.structure_prediction", "smact.dopant_prediction"],
+        packages=[
+            "smact",
+            "smact.tests",
+            "smact.structure_prediction",
+            "smact.dopant_prediction",
+        ],
         package_data={
             "smact": [
                 "data/*.txt",

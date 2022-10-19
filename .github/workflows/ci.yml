@@ -1,9 +1,17 @@
-name: SMACT Tests
+name: SMACT CI
 
 on: [push]
 
 jobs:
+
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: pre-commit/action@v2.0.2
+
   test:
+    needs: qa
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

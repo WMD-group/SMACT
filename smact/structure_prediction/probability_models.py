@@ -83,8 +83,9 @@ class RadiusModel(SubstitutionModel):
         self.shannon_data = pd.read_csv(shannon_file, index_col=0)
 
         self.k = (
-          self.shannon_data["ionic_radius"].max() - self.shannon_data["ionic_radius"].min()
-        )**-2
+            self.shannon_data["ionic_radius"].max()
+            - self.shannon_data["ionic_radius"].min()
+        ) ** -2
 
     def sub_prob(self, s1, s2):
         r"""Calculate the probability of substituting species s1 for s2.
@@ -120,4 +121,4 @@ class RadiusModel(SubstitutionModel):
         mean_spec2_r = spec2_rows["ionic_radius"].mean()
 
         # Hooke's law-style probability
-        return 1 - self.k * (mean_spec1_r - mean_spec2_r)**2
+        return 1 - self.k * (mean_spec1_r - mean_spec2_r) ** 2

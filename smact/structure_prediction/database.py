@@ -6,11 +6,13 @@ from operator import itemgetter
 
 try:
     from pathos.pools import ParallelPool
+
     pathos_available = True
 except ImportError:
     pathos_available = False
 
-from typing import Generator, Sequence, List, Tuple, Dict, Union, Optional
+import sqlite3
+from typing import Dict, Generator, List, Optional, Sequence, Tuple, Union
 
 import pymatgen
 from pymatgen.ext.matproj import MPRester
@@ -18,7 +20,6 @@ from pymatgen.ext.matproj import MPRester
 from . import logger
 from .structure import SmactStructure
 from .utilities import get_sign
-import sqlite3
 
 
 class StructureDB:
@@ -88,10 +89,10 @@ class StructureDB:
         self.conn.close()
 
     def add_mp_icsd(
-      self,
-      table: str,
-      mp_data: Optional[List[Dict[str, Union[pymatgen.core.Structure, str]]]] = None,
-      mp_api_key: Optional[str] = None
+        self,
+        table: str,
+        mp_data: Optional[List[Dict[str, Union[pymatgen.core.Structure, str]]]] = None,
+        mp_api_key: Optional[str] = None,
     ) -> int:
         """Add a table populated with Materials Project-hosted ICSD structures.
 
@@ -106,18 +107,16 @@ class StructureDB:
                 will be downloaded. Downloading data needs `mp_api_key` to be set.
             mp_api_key (str): A Materials Project API key. Only needed if `mp_data`
                 is None.
-        
+
         Returns:
             The number of structs added.
 
         """
-        if mp_data is None:  #pragma: no cover
+        if mp_data is None:  # pragma: no cover
             with MPRester(mp_api_key) as m:
                 data = m.query(
-                  criteria={'icsd_ids.0': {
-                    '$exists': True
-                  }},
-                  properties=['structure', 'material_id'],
+                    criteria={"icsd_ids.0": {"$exists": True}},
+                    properties=["structure", "material_id"],
                 )
         else:
             data = mp_data
@@ -127,7 +126,7 @@ class StructureDB:
         if pathos_available:
             pool = ParallelPool()
             parse_iter = pool.uimap(parse_mprest, data)
-        else:  #pragma: no cover
+        else:  # pragma: no cover
             parse_iter = map(parse_mprest, data)
 
         return self.add_structs(parse_iter, table, commit_after_each=True)
@@ -141,7 +140,7 @@ class StructureDB:
         """
         with self as c:
             c.execute(
-              f"""CREATE TABLE {table}
+                f"""CREATE TABLE {table}
                 (composition TEXT NOT NULL, structure TEXT NOT NULL)""",
             )
 
@@ -159,10 +158,10 @@ class StructureDB:
             c.execute(f"INSERT into {table} VALUES (?, ?)", entry)
 
     def add_structs(
-      self,
-      structs: Sequence[SmactStructure],
-      table: str,
-      commit_after_each: Optional[bool] = False
+        self,
+        structs: Sequence[SmactStructure],
+        table: str,
+        commit_after_each: Optional[bool] = False,
     ) -> int:
         """Add several SmactStructures to a table.
 
@@ -209,15 +208,17 @@ class StructureDB:
         """
         with self as c:
             c.execute(
-              f"SELECT structure FROM {table} WHERE composition = ?",
-              (composition, ), )
+                f"SELECT structure FROM {table} WHERE composition = ?",
+                (composition,),
+            )
             structs = c.fetchall()
         return [SmactStructure.from_poscar(pos[0]) for pos in structs]
 
     def get_with_species(
-      self,
-      species: List[Tuple[str, int]],
-      table: str, ) -> List[SmactStructure]:
+        self,
+        species: List[Tuple[str, int]],
+        table: str,
+    ) -> List[SmactStructure]:
         """Get SmactStructures containing given species.
 
         Args:
@@ -236,21 +237,26 @@ class StructureDB:
 
         # Generate a list of [element1, charge1, sign1, element2, ...]
         vals = list(
-          itertools.chain.from_iterable([x[0], abs(x[1]), get_sign(x[1])] for x in species)
+            itertools.chain.from_iterable(
+                [x[0], abs(x[1]), get_sign(x[1])] for x in species
+            )
         )
 
         glob_form = glob.format(*vals)
 
         with self as c:
             c.execute(
-              f"SELECT structure FROM {table} WHERE composition GLOB ?",
-              (glob_form, ), )
+                f"SELECT structure FROM {table} WHERE composition GLOB ?",
+                (glob_form,),
+            )
             structs = c.fetchall()
 
         return [SmactStructure.from_poscar(pos[0]) for pos in structs]
 
 
-def parse_mprest(data: Dict[str, Union[pymatgen.core.Structure, str]], ) -> SmactStructure:
+def parse_mprest(
+    data: Dict[str, Union[pymatgen.core.Structure, str]],
+) -> SmactStructure:
     """Parse MPRester query data to generate structures.
 
     Args:
