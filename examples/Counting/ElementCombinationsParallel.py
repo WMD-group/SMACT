@@ -92,7 +92,7 @@ def main():
 
     # Obtain the unique oxidation states across all the elements considered.
     oxidation_states = set(
-        oxidation_state for element in elements.values()
+        oxidation_state for element in list(elements.values())
             for oxidation_state in element.oxidation_states
         )
 
@@ -107,18 +107,18 @@ def main():
     # these will be used as keys to a lookup table below.
     oxidation_state_combinations = {
         key: [tuple(sorted(item)) for item in value]
-            for key, value in oxidation_state_combinations.items()
+            for key, value in list(oxidation_state_combinations.items())
         }
 
     # Print the number of combinations of oxidation states for each value
     # of n to be analysed. Note that this will include ridiculous combinations
     # such as (+1, +2, +1)
-    print "Combinations of known oxidation states:"
+    print("Combinations of known oxidation states:")
 
     for i in range(2, max_n + 1):
-        print "m = {0}: {1}".format(i, len(oxidation_state_combinations[i]))
+        print("m = {0}: {1}".format(i, len(oxidation_state_combinations[i])))
 
-    print ""
+    print("")
 
     # Initialise a thread pool for multi-threaded calculations if required
     thread_pool = Pool(processes=mp_processes) if mp_use else None
@@ -159,8 +159,8 @@ def main():
             count_iter(itertools.combinations(element_list, i))
             for i in range(2, n + 1))
 
-        print("Counting ({0} element combinations)"
-              "...".format(combination_count))
+        print(("Counting ({0} element combinations)"
+              "...".format(combination_count)))
 
         # Combinations are counted in chunks set by count_progress_interval.
         # In Python 2.7 the // symbol is "integer division" which rounds
@@ -209,7 +209,7 @@ def main():
                 # Serial code path -- iteration over element combinations is
                 # done using the itertools.imap() function.
 
-                count = count + sum(itertools.imap(count_element_combination,
+                count = count + sum(map(count_element_combination,
                                                    imap_arg_generator))
 
             # After each chunk, report the % progress, elapsed time and an
@@ -233,20 +233,20 @@ def main():
                                                        time_elapsed,
                                                        time_remaining))
 
-        print ""
+        print("")
 
         total_time = time.time() - start_time
 
         # Print results and total time for counting.
 
-        print("Number of charge-neutral stoichiometries for combinations "
-              "of {0} elements".format(n))
-        print("(using known oxidation states, not including zero): "
-              "{0}".format(count))
-        print ""
+        print(("Number of charge-neutral stoichiometries for combinations "
+              "of {0} elements".format(n)))
+        print(("(using known oxidation states, not including zero): "
+              "{0}".format(count)))
+        print("")
 
-        print "Total time for counting: {0:.3f} sec".format(total_time)
-        print ""
+        print("Total time for counting: {0:.3f} sec".format(total_time))
+        print("")
 
 if __name__ == '__main__':
     main()
