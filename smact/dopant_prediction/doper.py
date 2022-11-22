@@ -22,10 +22,10 @@ class Doper:
         self.original_species = original_species
         self.num_dopants = num_dopants
         # self.match_oxi_sign = match_oxi_sign
-        
+
     def __len__(self):
         return self.num_dopants
-    
+
     def get_dopants(self) -> dict:
         """
         Note currently limited to binary compounds
