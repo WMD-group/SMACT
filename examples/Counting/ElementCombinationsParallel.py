@@ -215,8 +215,7 @@ def main():
                 # Serial code path -- iteration over element combinations is
                 # done using the itertools.imap() function.
 
-                count = count + \
-                    sum(map(count_element_combination, imap_arg_generator))
+                count = count + sum(map(count_element_combination, imap_arg_generator))
 
             # After each chunk, report the % progress, elapsed time and an
             # estimate of the remaining time.  The smact.pauling_test() calls
@@ -230,8 +229,7 @@ def main():
 
             time_elapsed = time.time() - start_time
             time_remaining = (
-                combination_count *
-                (time_elapsed / data_pointer) - time_elapsed
+                combination_count * (time_elapsed / data_pointer) - time_elapsed
             )
 
             print_status(

@@ -142,8 +142,7 @@ class StructurePredictor:
                         # Poorly decorated
                         continue
                     yield (
-                        self.cm._mutate_structure(
-                            parent, alt_spec, diff_spec_str),
+                        self.cm._mutate_structure(parent, alt_spec, diff_spec_str),
                         p,
                         parent,
                     )
@@ -261,8 +260,7 @@ class StructurePredictor:
                     # Poorly decorated
                     continue
                 yield (
-                    self.cm._nary_mutate_structure(
-                        parent, alt_spec, diff_spec_str),
+                    self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str),
                     p,
                     parent,
                 )

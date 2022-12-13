@@ -28,8 +28,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(Pt.dipol, 44.00)
 
     def test_ordered_elements(self):
-        self.assertEqual(smact.ordered_elements(
-            65, 68), ["Tb", "Dy", "Ho", "Er"])
+        self.assertEqual(smact.ordered_elements(65, 68), ["Tb", "Dy", "Ho", "Er"])
         self.assertEqual(smact.ordered_elements(52, 52), ["Te"])
 
     def test_element_dictionary(self):
@@ -42,11 +41,9 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_are_eq(self):
         self.assertTrue(
-            smact.are_eq([1.00, 2.00, 3.00], [
-                         1.001, 1.999, 3.00], tolerance=1e-2)
+            smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00], tolerance=1e-2)
         )
-        self.assertFalse(smact.are_eq(
-            [1.00, 2.00, 3.00], [1.001, 1.999, 3.00]))
+        self.assertFalse(smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00]))
 
     def test_gcd_recursive(self):
         self.assertEqual(smact._gcd_recursive(4, 12, 10, 32), 2)
@@ -97,8 +94,7 @@ class TestSequenceFunctions(unittest.TestCase):
             )
         )
         self.assertFalse(
-            smact.screening.pauling_test(
-                (-2, +2), (Sn.pauling_eneg, S.pauling_eneg))
+            smact.screening.pauling_test((-2, +2), (Sn.pauling_eneg, S.pauling_eneg))
         )
         self.assertFalse(
             smact.screening.pauling_test(
@@ -322,10 +318,8 @@ class TestSequenceFunctions(unittest.TestCase):
             0.0,
             0.0,
         ]
-        self.assertEqual(smact.screening.ml_rep_generator(
-            ["Pb", "O"], [1, 2]), PbO2_ml)
-        self.assertEqual(smact.screening.ml_rep_generator(
-            [Pb, O], [1, 2]), PbO2_ml)
+        self.assertEqual(smact.screening.ml_rep_generator(["Pb", "O"], [1, 2]), PbO2_ml)
+        self.assertEqual(smact.screening.ml_rep_generator([Pb, O], [1, 2]), PbO2_ml)
 
     def test_smact_filter(self):
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
@@ -350,8 +344,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     # ---------- Lattice parameters -----------
     def test_lattice_parameters(self):
-        perovskite = smact.lattice_parameters.cubic_perovskite(
-            [1.81, 1.33, 1.82])
+        perovskite = smact.lattice_parameters.cubic_perovskite([1.81, 1.33, 1.82])
         wurtz = smact.lattice_parameters.wurtzite([1.81, 1.33])
         self.assertAlmostEqual(perovskite[0], 6.3)
         self.assertAlmostEqual(perovskite[1], 6.3)
@@ -363,11 +356,9 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_oxidation_states(self):
         ox = smact.oxidation_states.Oxidation_state_probability_finder()
         self.assertAlmostEqual(
-            ox.compound_probability(
-                [Specie("Fe", +3), Specie("O", -2)]), 0.74280230326
+            ox.compound_probability([Specie("Fe", +3), Specie("O", -2)]), 0.74280230326
         )
         self.assertAlmostEqual(
-            ox.pair_probability(Species("Fe", +3),
-                                Species("O", -2)), 0.74280230326
+            ox.pair_probability(Species("Fe", +3), Species("O", -2)), 0.74280230326
         )
         self.assertEqual(len(ox.get_included_species()), 173)

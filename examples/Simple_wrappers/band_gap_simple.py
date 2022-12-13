@@ -24,12 +24,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Compound band gap estimates from elemental data."
     )
-    parser.add_argument("-a", "--anion", type=str,
-                        help="Element symbol for anion.")
-    parser.add_argument("-c", "--cation", type=str,
-                        help="Element symbol for cation.")
-    parser.add_argument("-d", "--distance", type=float,
-                        help="Internuclear separation.")
+    parser.add_argument("-a", "--anion", type=str, help="Element symbol for anion.")
+    parser.add_argument("-c", "--cation", type=str, help="Element symbol for cation.")
+    parser.add_argument("-d", "--distance", type=float, help="Internuclear separation.")
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="More Verbose output."
     )

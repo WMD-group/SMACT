@@ -210,8 +210,7 @@ class Species(Element):
 
         if radii_source == "shannon":
 
-            shannon_data = data_loader.lookup_element_shannon_radius_data(
-                symbol)
+            shannon_data = data_loader.lookup_element_shannon_radius_data(symbol)
 
         elif radii_source == "extended":
             shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(
