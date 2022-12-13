@@ -2,10 +2,10 @@
 
 __author__ = "Daniel W. Davies"
 __copyright__ = "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
-__version__ = "2.4.1"
+__version__ = "2.4.2"
 __maintainer__ = "Anthony O. Onwuli"
 __email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "September 20 2022"
+__date__ = "December 13 2022"
 
 import os
 import unittest
@@ -17,7 +17,7 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 if __name__ == "__main__":
     setup(
         name="SMACT",
-        version="2.4.1",
+        version="2.4.2",
         description="Semiconducting Materials by Analogy and Chemical Theory",
         long_description=open(os.path.join(module_dir, "README.md")).read(),
         long_description_content_type="text/markdown",
