@@ -4,19 +4,19 @@ Semiconducting Materials from Analogy and Chemical Theory
 A collection of fast screening tools from elemental data
 """
 
-# get correct path for datafiles when called from another directory
-from os import path
-
-import pandas as pd
-
-module_directory = path.abspath(path.dirname(__file__))
-data_directory = path.join(module_directory, "data")
 import itertools
 import warnings
 from math import gcd
 from operator import mul as multiply
+from os import path
 
+import pandas as pd
+
+# get correct path for datafiles when called from another directory
 from smact import data_loader
+
+module_directory = path.abspath(path.dirname(__file__))
+data_directory = path.join(module_directory, "data")
 
 
 class Element:
@@ -210,7 +210,8 @@ class Species(Element):
 
         if radii_source == "shannon":
 
-            shannon_data = data_loader.lookup_element_shannon_radius_data(symbol)
+            shannon_data = data_loader.lookup_element_shannon_radius_data(
+                symbol)
 
         elif radii_source == "extended":
             shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(

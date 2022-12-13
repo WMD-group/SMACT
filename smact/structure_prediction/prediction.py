@@ -105,7 +105,7 @@ class StructurePredictor:
                 if len(parent.species) != len(species):
                     continue
 
-                ## Determine probability
+                # Determine probability
                 # Get species to be substituted
                 # Ensure only 1 species is obtained
                 if (
@@ -142,7 +142,8 @@ class StructurePredictor:
                         # Poorly decorated
                         continue
                     yield (
-                        self.cm._mutate_structure(parent, alt_spec, diff_spec_str),
+                        self.cm._mutate_structure(
+                            parent, alt_spec, diff_spec_str),
                         p,
                         parent,
                     )
@@ -216,7 +217,7 @@ class StructurePredictor:
             if len(parent.species) != len(species):
                 continue
 
-            ## Determine probability
+            # Determine probability
             # Get species to be substituted
             # Ensure n species are obtained
 
@@ -260,7 +261,8 @@ class StructurePredictor:
                     # Poorly decorated
                     continue
                 yield (
-                    self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str),
+                    self.cm._nary_mutate_structure(
+                        parent, alt_spec, diff_spec_str),
                     p,
                     parent,
                 )

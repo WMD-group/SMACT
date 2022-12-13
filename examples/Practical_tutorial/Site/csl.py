@@ -47,7 +47,8 @@ def find_max_csl(surfs_1, surfs_2, multiplicity1, multiplicity2):
                     for i in np.arange(0, 1, 0.1):
                         for j in np.arange(0, 1, 0.1):
                             t_surf = translate(surf_2_super, [i, j])
-                            csl_values.append(csl(surf_1_super, t_surf, multiplicity1))
+                            csl_values.append(
+                                csl(surf_1_super, t_surf, multiplicity1))
 
     return max(csl_values)
 

@@ -24,7 +24,6 @@ def eneg_mulliken(element):
 
 
 def band_gap_Harrison(anion, cation, verbose=False, distance=None):
-
     """
     Estimates the band gap from elemental data.
 
@@ -78,7 +77,6 @@ def band_gap_Harrison(anion, cation, verbose=False, distance=None):
 
 
 def compound_electroneg(verbose=False, elements=None, stoichs=None, source="Mulliken"):
-
     """Estimate electronegativity of compound from elemental data.
 
     Uses Mulliken electronegativity by default, which uses elemental
@@ -125,7 +123,8 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None, source="Mull
     elif source == "Pauling":
         elementlist = [(2.86 * el.pauling_eneg) for el in elementlist]
     else:
-        raise Exception(f"Electronegativity type '{source}'", "is not recognised")
+        raise Exception(
+            f"Electronegativity type '{source}'", "is not recognised")
 
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.

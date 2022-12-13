@@ -100,7 +100,8 @@ def lookup_element_oxidation_states(symbol, copy=True):
     else:
         if _print_warnings:
             print(
-                "WARNING: Oxidation states for element {} " "not found.".format(symbol)
+                "WARNING: Oxidation states for element {} " "not found.".format(
+                    symbol)
             )
         return None
 
@@ -150,7 +151,8 @@ def lookup_element_oxidation_states_icsd(symbol, copy=True):
     else:
         if _print_warnings:
             print(
-                "WARNING: Oxidation states for element {}" "not found.".format(symbol)
+                "WARNING: Oxidation states for element {}" "not found.".format(
+                    symbol)
             )
         return None
 
@@ -202,7 +204,8 @@ def lookup_element_oxidation_states_sp(symbol, copy=True):
     else:
         if _print_warnings:
             print(
-                "WARNING: Oxidation states for element {} " "not found.".format(symbol)
+                "WARNING: Oxidation states for element {} " "not found.".format(
+                    symbol)
             )
         return None
 
@@ -254,7 +257,8 @@ def lookup_element_oxidation_states_wiki(symbol, copy=True):
     else:
         if _print_warnings:
             print(
-                "WARNING: Oxidation states for element {} " "not found.".format(symbol)
+                "WARNING: Oxidation states for element {} " "not found.".format(
+                    symbol)
             )
         return None
 
@@ -290,7 +294,8 @@ def lookup_element_hhis(symbol):
                 if line[0] != "#":
                     items = line.split()
 
-                    _element_hhis[items[0]] = (float(items[1]), float(items[2]))
+                    _element_hhis[items[0]] = (
+                        float(items[1]), float(items[2]))
 
     if symbol in _element_hhis:
         return _element_hhis[symbol]
@@ -350,7 +355,8 @@ def lookup_element_data(symbol, copy=True):
             # or, if not clearly a number, to None
             clean_items = items[0:2] + list(map(float_or_None, items[2:]))
 
-            _element_data.update({items[0]: dict(list(zip(keys, clean_items)))})
+            _element_data.update(
+                {items[0]: dict(list(zip(keys, clean_items)))})
 
     if symbol in _element_data:
         if copy:

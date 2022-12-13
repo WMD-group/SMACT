@@ -31,7 +31,8 @@ class Oxidation_state_probability_finder:
         """
         if probability_table == None:
             with open(
-                path.join(data_directory, "oxidation_state_probability_table.json")
+                path.join(data_directory,
+                          "oxidation_state_probability_table.json")
             ) as f:
                 probability_data = json.load(f)
             # Put data into the required format
@@ -131,7 +132,8 @@ class Oxidation_state_probability_finder:
             elif all(isinstance(i, pmgSpecies) for i in structure):
                 structure = [Species(i.symbol, i.oxi_state) for i in structure]
             else:
-                raise TypeError("Input requires a list of SMACT or Pymatgen species.")
+                raise TypeError(
+                    "Input requires a list of SMACT or Pymatgen species.")
         elif type(structure) == Structure:
             species = structure.species
             if not all(isinstance(i, pmgSpecies) for i in species):
@@ -156,6 +158,7 @@ class Oxidation_state_probability_finder:
             species_pairs = list(set(species_pairs))
 
         # Do the maths
-        pair_probs = [self.pair_probability(pair[0], pair[1]) for pair in species_pairs]
+        pair_probs = [self.pair_probability(
+            pair[0], pair[1]) for pair in species_pairs]
         compound_prob = mean(pair_probs)
         return compound_prob

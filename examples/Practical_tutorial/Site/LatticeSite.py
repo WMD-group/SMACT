@@ -83,6 +83,8 @@ parser.add_option("-v", action="store_true", dest="verbose")
 (options, args) = parser.parse_args()
 
 # Define some basic algebra
+
+
 def dotproduct(v1, v2):
     return sum((a * b) for a, b in zip(v1, v2))
 
@@ -260,7 +262,7 @@ material1 = re.sub(r"\.cif$", "", options.mater1)
 material2 = re.sub(r"\.cif$", "", options.mater2)
 
 # Code output header, for God's sake clean this up!
-## God's will be done.
+# God's will be done.
 
 # Scan through the various miller indices
 indices_a = list(itertools.product([0, 1], repeat=3))
@@ -274,14 +276,16 @@ for index_a in indices_a:
     if index_a != (0, 0, 0):
         vec1, vec2 = surface_vectors(xtalA, index_a)
         r_vec1, r_vec2 = reduce_vectors(vec1, vec2)
-        surface_vector_1 = (length(r_vec1), length(r_vec2), angle(r_vec1, r_vec2))
+        surface_vector_1 = (length(r_vec1), length(
+            r_vec2), angle(r_vec1, r_vec2))
     # Set the  values for material B
     indices_b = list(itertools.product([0, 1], repeat=3))
     for index_b in indices_b:
         if index_b != (0, 0, 0):
             vec1, vec2 = surface_vectors(xtalB, index_b)
             r_vec1, r_vec2 = reduce_vectors(vec1, vec2)
-            surface_vector_2 = (length(r_vec1), length(r_vec2), angle(r_vec1, r_vec2))
+            surface_vector_2 = (length(r_vec1), length(
+                r_vec2), angle(r_vec1, r_vec2))
             epitaxy, a, b, strains = surface_ratios(
                 surface_vector_1, surface_vector_2, threshold=options.strain, limit=5
             )
@@ -305,7 +309,8 @@ for index_a in indices_a:
                     print("Surface super-cell vector: ", surface_super_cell_b)
                     print("------   ------   ------   ------   ------")
             else:
-                new = Pair(material1, material2, index_a, index_b, a, b, strains, 0.0)
+                new = Pair(material1, material2, index_a,
+                           index_b, a, b, strains, 0.0)
                 isnew = True
                 if len(matched_pairs) == 0 and new.strains[2] == 0.0:
                     matched_pairs.append(new)
