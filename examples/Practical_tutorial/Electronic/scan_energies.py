@@ -41,7 +41,7 @@ parser.add_option(
 (options, args) = parser.parse_args()
 
 
-f = open("CollatedData.txt", "r")
+f = open("CollatedData.txt")
 lines = f.readlines()
 f.close()
 

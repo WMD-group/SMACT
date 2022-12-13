@@ -312,7 +312,7 @@ class SmactStructure:
             :class:`~.SmactStructure`
 
         """
-        with open(fname, "r") as f:
+        with open(fname) as f:
             return SmactStructure.from_poscar(f.read())
 
     @staticmethod

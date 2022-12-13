@@ -56,7 +56,7 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_neutral_ratios(self):
         ox = [1, -2, 1]
         is_neutral, neutral_combos = smact.neutral_ratios(ox)
-        self.assertTrue((is_neutral))
+        self.assertTrue(is_neutral)
         self.assertEqual(len(neutral_combos), 9)
         self.assertTrue((3, 2, 1) in neutral_combos)
 

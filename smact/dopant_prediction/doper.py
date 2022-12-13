@@ -135,7 +135,7 @@ class Doper:
         Uses pymatgen plotting utilities to plot the results of the dopant search
         """
         for val in self.results.values():
-            dict_results = dict((utilities.parse_spec(x)[0], y) for x, y in val)
+            dict_results = {utilities.parse_spec(x)[0]: y for x, y in val}
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
                 cmap="rainbow",

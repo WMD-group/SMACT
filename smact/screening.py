@@ -1,6 +1,5 @@
 import itertools
 import warnings
-from builtins import zip
 from itertools import combinations
 
 from smact import Element, neutral_ratios

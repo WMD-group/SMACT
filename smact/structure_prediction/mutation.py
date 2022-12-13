@@ -81,13 +81,13 @@ class CationMutator:
 
         """
         if lambda_json is not None:
-            with open(lambda_json, "r") as f:
+            with open(lambda_json) as f:
                 lambda_dat = json.load(f)
         else:
             # Get pymatgen lambda table
             py_sp_dir = os.path.dirname(pymatgen_sp.__file__)
             pymatgen_lambda = os.path.join(py_sp_dir, "data", "lambda.json")
-            with open(pymatgen_lambda, "r") as f:
+            with open(pymatgen_lambda) as f:
                 lambda_dat = json.load(f)
 
             # Get rid of 'D1+' values to reflect pymatgen

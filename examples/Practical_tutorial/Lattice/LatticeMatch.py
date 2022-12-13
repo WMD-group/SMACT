@@ -1,5 +1,3 @@
-# coding: utf-8
-
 import glob
 import itertools
 import math
@@ -16,7 +14,7 @@ import numpy as np
 
 
 # We need a class "pair" which contains the information about a matching interface pair
-class Pair(object):
+class Pair:
     """Class providing standard nformation on interface matching pairs."""
 
     def __init__(

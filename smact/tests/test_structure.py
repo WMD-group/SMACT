@@ -91,7 +91,7 @@ class StructureTest(unittest.TestCase):
         for comp in self.TEST_SPECIES.keys():
             with self.subTest(comp=comp):
                 comp_file = os.path.join(files_dir, f"{comp}.txt")
-                with open(comp_file, "r") as f:
+                with open(comp_file) as f:
                     struct = SmactStructure.from_file(comp_file)
                     self.assertEqual(struct.as_poscar(), f.read())
 
@@ -124,7 +124,7 @@ class StructureTest(unittest.TestCase):
 
     def test_from_py_struct(self):
         """Test generation of SmactStructure from a pymatgen Structure."""
-        with open(TEST_PY_STRUCT, "r") as f:
+        with open(TEST_PY_STRUCT) as f:
             d = json.load(f)
             py_structure = pymatgen.core.Structure.from_dict(d)
 

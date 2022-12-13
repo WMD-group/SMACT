@@ -1,4 +1,4 @@
-"""
+r"""
 \mainpage
 
 This is the mainpage of the smact package

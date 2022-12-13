@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # smact documentation build configuration file, created by
 # sphinx-quickstart on Fri Feb 26 10:22:56 2016.
@@ -356,8 +355,7 @@ epub_exclude_files = ["search.html"]
 # Mock out spglib and ase modules to avoid import failures
 
 import sys
-
-from mock import Mock as MagicMock
+from unittest.mock import Mock as MagicMock
 
 
 class Mock(MagicMock):
