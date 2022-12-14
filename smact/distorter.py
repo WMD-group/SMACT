@@ -25,7 +25,6 @@ from ase.spacegroup import Spacegroup
 
 
 def get_sg(lattice):
-
     """
     Get the space-group of the system.
 

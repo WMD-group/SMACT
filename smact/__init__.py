@@ -4,23 +4,21 @@ Semiconducting Materials from Analogy and Chemical Theory
 A collection of fast screening tools from elemental data
 """
 
-# get correct path for datafiles when called from another directory
-from builtins import filter, map, object, range
+import itertools
+import warnings
+from math import gcd
+from operator import mul as multiply
 from os import path
 
 import pandas as pd
 
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, "data")
-import itertools
-import warnings
-from math import gcd
-from operator import mul as multiply
-
+# get correct path for datafiles when called from another directory
 from smact import data_loader
 
 
-class Element(object):
+class Element:
     """Collection of standard elemental properties for given element.
 
     Data is drawn from "data/element.txt", part of the Open Babel
@@ -89,7 +87,7 @@ class Element(object):
         dataset = data_loader.lookup_element_data(symbol, copy=False)
 
         if dataset == None:
-            raise NameError("Elemental data for {0} not found.".format(symbol))
+            raise NameError(f"Elemental data for {symbol} not found.")
 
         # Set coordination-environment data from the Shannon-radius data.
         # As above, it is safe to use copy = False with this Get* function.
@@ -276,7 +274,7 @@ def ordered_elements(x, y):
     Returns:
         list: Ordered list of element symbols
     """
-    with open(path.join(data_directory, "ordered_periodic.txt"), "r") as f:
+    with open(path.join(data_directory, "ordered_periodic.txt")) as f:
         data = f.readlines()
     elements = []
     for line in data:

@@ -280,7 +280,8 @@ class SmactStructure:
                     "please supply a structure."
                 )
 
-            struct = structs[0]["structure"]  # Default to first found structure
+            # Default to first found structure
+            struct = structs[0]["structure"]
 
         if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
             bva = BVAnalyzer()
@@ -312,7 +313,7 @@ class SmactStructure:
             :class:`~.SmactStructure`
 
         """
-        with open(fname, "r") as f:
+        with open(fname) as f:
             return SmactStructure.from_poscar(f.read())
 
     @staticmethod

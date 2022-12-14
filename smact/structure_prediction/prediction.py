@@ -105,7 +105,7 @@ class StructurePredictor:
                 if len(parent.species) != len(species):
                     continue
 
-                ## Determine probability
+                # Determine probability
                 # Get species to be substituted
                 # Ensure only 1 species is obtained
                 if (
@@ -216,7 +216,7 @@ class StructurePredictor:
             if len(parent.species) != len(species):
                 continue
 
-            ## Determine probability
+            # Determine probability
             # Get species to be substituted
             # Ensure n species are obtained
 

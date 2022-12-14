@@ -31,7 +31,7 @@ class Oxidation_state_probability_finder:
         """
         if probability_table == None:
             with open(
-                path.join(data_directory, "oxidation_state_probability_table.json"), "r"
+                path.join(data_directory, "oxidation_state_probability_table.json")
             ) as f:
                 probability_data = json.load(f)
             # Put data into the required format
@@ -41,8 +41,8 @@ class Oxidation_state_probability_finder:
 
         self._probability_table = probability_table
         # Define set of species for which we have data
-        included_anions = set([i[0] for i in self._probability_table.keys()])
-        included_cations = set([i[1] for i in self._probability_table.keys()])
+        included_anions = {i[0] for i in self._probability_table.keys()}
+        included_cations = {i[1] for i in self._probability_table.keys()}
         included_species = list(included_anions) + list(included_cations)
 
         self._included_species = included_species
@@ -78,7 +78,7 @@ class Oxidation_state_probability_finder:
         # Check that both the species are included in the probability table
         if not all(elem in self._included_species for elem in [an_key, cat_key]):
             raise NameError(
-                "One or both of [{0}, {1}] are not in the probability table.".format(
+                "One or both of [{}, {}] are not in the probability table.".format(
                     cat_key, an_key
                 )
             )

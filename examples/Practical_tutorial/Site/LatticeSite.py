@@ -1,5 +1,3 @@
-# coding: utf-8
-
 import glob
 import itertools
 import math
@@ -16,7 +14,7 @@ import surface_points
 
 
 # We need a class "pair" which contains the information about a matching interface pair
-class Pair(object):
+class Pair:
     """Class providing standard nformation on interface matching pairs."""
 
     def __init__(
@@ -85,6 +83,8 @@ parser.add_option("-v", action="store_true", dest="verbose")
 (options, args) = parser.parse_args()
 
 # Define some basic algebra
+
+
 def dotproduct(v1, v2):
     return sum((a * b) for a, b in zip(v1, v2))
 
@@ -262,7 +262,7 @@ material1 = re.sub(r"\.cif$", "", options.mater1)
 material2 = re.sub(r"\.cif$", "", options.mater2)
 
 # Code output header, for God's sake clean this up!
-## God's will be done.
+# God's will be done.
 
 # Scan through the various miller indices
 indices_a = list(itertools.product([0, 1], repeat=3))

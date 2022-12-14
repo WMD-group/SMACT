@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # smact documentation build configuration file, created by
 # sphinx-quickstart on Fri Feb 26 10:22:56 2016.
@@ -14,6 +13,7 @@
 
 import os
 import sys
+from unittest.mock import Mock as MagicMock
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -210,13 +210,13 @@ htmlhelp_basename = "smactdoc"
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
+    # 'papersize': 'letterpaper',
     # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
+    # 'pointsize': '10pt',
     # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
+    # 'preamble': '',
     # Latex figure (float) alignment
-    #'figure_align': 'htbp',
+    # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -354,10 +354,6 @@ epub_exclude_files = ["search.html"]
 # epub_use_index = True
 
 # Mock out spglib and ase modules to avoid import failures
-
-import sys
-
-from mock import Mock as MagicMock
 
 
 class Mock(MagicMock):
