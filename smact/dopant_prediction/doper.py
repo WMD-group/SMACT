@@ -10,6 +10,8 @@
          test.get_dopants(num_dopants = 10, plot_heatmap = True)"""
 
 
+from typing import Tuple
+
 from pymatgen.util import plotting
 
 import smact
@@ -22,7 +24,7 @@ class Doper:
     Methods: get_dopants, plot_dopants
     """
 
-    def __init__(self, original_species: tuple[str]):
+    def __init__(self, original_species: Tuple[str, ...]):
 
         self.original_species = original_species
 
