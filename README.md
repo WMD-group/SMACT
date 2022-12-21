@@ -75,7 +75,7 @@ List of modules
 Requirements
 ------------
 
-The main language is Python 3 and has been tested using Python 3.6+.
+The main language is Python 3 and has been tested using Python 3.8+.
 Basic requirements are Numpy and Scipy.
 The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](www.pymatgen.org) are also required for many components.
 
