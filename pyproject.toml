@@ -1,0 +1,7 @@
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = ["setuptools"]  # PEP 508 specifications.
+
+[tool.semantic_release]
+version_variable = "setup.py:__version__"
+version_source = "tag"
