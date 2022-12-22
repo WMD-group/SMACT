@@ -1,9 +1,11 @@
+from typing import List, Optional, Union
+
 from numpy import product, sqrt
 
 import smact
 
 
-def eneg_mulliken(element):
+def eneg_mulliken(element: Union[smact.Element, str]) -> float:
     """Get Mulliken electronegativity from the IE and EA.
 
     Arguments:
@@ -23,7 +25,12 @@ def eneg_mulliken(element):
     return mulliken
 
 
-def band_gap_Harrison(anion, cation, verbose=False, distance=None):
+def band_gap_Harrison(
+    anion: str,
+    cation: str,
+    verbose: bool = False,
+    distance: Optional[Union[float, str]] = None,
+) -> float:
     """
     Estimates the band gap from elemental data.
 
@@ -76,7 +83,12 @@ def band_gap_Harrison(anion, cation, verbose=False, distance=None):
     return Band_gap
 
 
-def compound_electroneg(verbose=False, elements=None, stoichs=None, source="Mulliken"):
+def compound_electroneg(
+    verbose: bool = False,
+    elements: List[Union[str, smact.Element]] = None,
+    stoichs: List[Union[int, float]] = None,
+    source: str = "Mulliken",
+) -> float:
     """Estimate electronegativity of compound from elemental data.
 
     Uses Mulliken electronegativity by default, which uses elemental
@@ -123,7 +135,9 @@ def compound_electroneg(verbose=False, elements=None, stoichs=None, source="Mull
     elif source == "Pauling":
         elementlist = [(2.86 * el.pauling_eneg) for el in elementlist]
     else:
-        raise Exception(f"Electronegativity type '{source}'", "is not recognised")
+        raise Exception(
+            f"Electronegativity type '{source}'", "is not recognised"
+        )
 
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.

@@ -11,8 +11,12 @@ class dopant_prediction_test(unittest.TestCase):
         test_specie = ("Cu+", "Ga3+", "S2-")
         test = doper.Doper(test_specie)
 
-        cation_max_charge = max(test_specie, key=lambda x: utilities.parse_spec(x)[1])
-        anion_min_charge = min(test_specie, key=lambda x: utilities.parse_spec(x)[1])
+        cation_max_charge = max(
+            test_specie, key=lambda x: utilities.parse_spec(x)[1]
+        )
+        anion_min_charge = min(
+            test_specie, key=lambda x: utilities.parse_spec(x)[1]
+        )
         _, cat_charge = utilities.parse_spec(cation_max_charge)
         _, an_charge = utilities.parse_spec(anion_min_charge)
 
@@ -38,7 +42,9 @@ class dopant_prediction_test(unittest.TestCase):
 if __name__ == "__main__":
     TestLoader = unittest.TestLoader()
     DoperTests = unittest.TestSuite()
-    DoperTests.addTests(TestLoader.loadTestsFromTestCase(dopant_prediction_test))
+    DoperTests.addTests(
+        TestLoader.loadTestsFromTestCase(dopant_prediction_test)
+    )
 
     runner = unittest.TextTestRunner()
     result = runner.run(DoperTests)

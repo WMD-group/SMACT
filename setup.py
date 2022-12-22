@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 __author__ = "Daniel W. Davies"
-__copyright__ = "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
+__copyright__ = (
+    "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
+)
 __version__ = "2.4.2"
 __maintainer__ = "Anthony O. Onwuli"
 __email__ = "anthony.onwuli16@imperial.ac.uk"
@@ -54,10 +56,16 @@ if __name__ == "__main__":
             "pathos",
         ],
         classifiers=[
-            "Programming Language :: Python",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
             "Development Status :: 5 - Production/Stable",
             "Intended Audience :: Science/Research",
             "Operating System :: OS Independent",
+            "License :: OSI Approved :: MIT License",
             "Topic :: Scientific/Engineering",
+            "Topic :: Chemistry",
         ],
+        python_requires=">=3.8",
     )

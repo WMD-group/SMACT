@@ -276,16 +276,27 @@ for index_a in indices_a:
     if index_a != (0, 0, 0):
         vec1, vec2 = surface_vectors(xtalA, index_a)
         r_vec1, r_vec2 = reduce_vectors(vec1, vec2)
-        surface_vector_1 = (length(r_vec1), length(r_vec2), angle(r_vec1, r_vec2))
+        surface_vector_1 = (
+            length(r_vec1),
+            length(r_vec2),
+            angle(r_vec1, r_vec2),
+        )
     # Set the  values for material B
     indices_b = list(itertools.product([0, 1], repeat=3))
     for index_b in indices_b:
         if index_b != (0, 0, 0):
             vec1, vec2 = surface_vectors(xtalB, index_b)
             r_vec1, r_vec2 = reduce_vectors(vec1, vec2)
-            surface_vector_2 = (length(r_vec1), length(r_vec2), angle(r_vec1, r_vec2))
+            surface_vector_2 = (
+                length(r_vec1),
+                length(r_vec2),
+                angle(r_vec1, r_vec2),
+            )
             epitaxy, a, b, strains = surface_ratios(
-                surface_vector_1, surface_vector_2, threshold=options.strain, limit=5
+                surface_vector_1,
+                surface_vector_2,
+                threshold=options.strain,
+                limit=5,
             )
             if epitaxy:
                 if options.verbose:
@@ -307,7 +318,9 @@ for index_a in indices_a:
                     print("Surface super-cell vector: ", surface_super_cell_b)
                     print("------   ------   ------   ------   ------")
             else:
-                new = Pair(material1, material2, index_a, index_b, a, b, strains, 0.0)
+                new = Pair(
+                    material1, material2, index_a, index_b, a, b, strains, 0.0
+                )
                 isnew = True
                 if len(matched_pairs) == 0 and new.strains[2] == 0.0:
                     matched_pairs.append(new)

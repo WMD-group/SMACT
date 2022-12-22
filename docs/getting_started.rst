@@ -6,7 +6,7 @@ Getting Started
 Requirements
 ============
 
-The main language is Python 3 and has been tested using Python 3.6+. Basic requirements are Numpy and Scipy.
+The main language is Python 3 and has been tested using Python 3.8+. Basic requirements are Numpy and Scipy.
 The `Atomic Simulation Environment <https://wiki.fysik.dtu.dk/ase>`_
 (ASE), `spglib <http://atztogo.github.io/spglib>`_,
 and `pymatgen <http://pymatgen.org>`_ are also required for many components.

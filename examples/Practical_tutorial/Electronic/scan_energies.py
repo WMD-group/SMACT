@@ -58,7 +58,10 @@ for line in lines:
         EA = float(inp[2])
         IP = float(inp[3])
         if Eg > 2.0:
-            if EA >= options.EA - window * 0.5 and EA <= options.EA + window * 0.5:
+            if (
+                EA >= options.EA - window * 0.5
+                and EA <= options.EA + window * 0.5
+            ):
                 ETL.append(inp[0])
             if Eg < options.gap:
                 conducting_ETL.append(inp[0])

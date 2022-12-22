@@ -12,7 +12,9 @@ from ase.spacegroup import crystal
 from smact.lattice import Lattice, Site
 
 
-def cubic_perovskite(species, cell_par=[6, 6, 6, 90, 90, 90], repetitions=[1, 1, 1]):
+def cubic_perovskite(
+    species, cell_par=[6, 6, 6, 90, 90, 90], repetitions=[1, 1, 1]
+):
     """
     Build a perovskite cell using the crystal function in ASE.
 
