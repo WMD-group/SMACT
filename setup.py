@@ -66,7 +66,7 @@ if __name__ == "__main__":
             "Operating System :: OS Independent",
             "License :: OSI Approved :: MIT License",
             "Topic :: Scientific/Engineering",
-            "Topic :: Chemistry",
+            "Topic :: Scientific/Engineering :: Chemistry",
         ],
         python_requires=">=3.8",
     )
