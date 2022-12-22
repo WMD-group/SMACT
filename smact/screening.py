@@ -7,10 +7,10 @@ from typing import Iterable, List, Optional, Tuple, Union
 from smact import Element, neutral_ratios
 
 # Use named tuple to improve readability of smact_filter outputs
-allowed_compositions = namedtuple(
+_allowed_compositions = namedtuple(
     "Composition", ["element_symbols", "oxidation_states", "stoichiometries"]
 )
-allowed_compositions_nonunique = namedtuple(
+_allowed_compositions_nonunique = namedtuple(
     "Composition", ["element_symbols", "stoichiometries"]
 )
 
@@ -365,7 +365,7 @@ def smact_filter(
             if electroneg_OK:
                 for ratio in cn_r:
                     compositions.append(
-                        allowed_compositions(symbols, ox_states, ratio)
+                        _allowed_compositions(symbols, ox_states, ratio)
                     )
 
     # Return list depending on whether we are interested in unique species combinations
@@ -374,7 +374,7 @@ def smact_filter(
         return compositions
     else:
         compositions = [
-            allowed_compositions_nonunique(i[0], i[2]) for i in compositions
+            _allowed_compositions_nonunique(i[0], i[2]) for i in compositions
         ]
         compositions = list(set(compositions))
         return compositions
