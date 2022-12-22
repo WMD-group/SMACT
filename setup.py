@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 __author__ = "Daniel W. Davies"
+__author_email__ = "d.w.davies@imperial.ac.uk"
 __copyright__ = (
     "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
 )
-__version__ = "2.4.2"
+__version__ = "2.5.0"
 __maintainer__ = "Anthony O. Onwuli"
-__email__ = "anthony.onwuli16@imperial.ac.uk"
+__maintaier_email__ = "anthony.onwuli16@imperial.ac.uk"
 __date__ = "December 13 2022"
 
 import os
@@ -24,10 +25,10 @@ if __name__ == "__main__":
         long_description=open(os.path.join(module_dir, "README.md")).read(),
         long_description_content_type="text/markdown",
         url="https://github.com/WMD-group/SMACT",
-        author="Daniel W. Davies",
-        author_email="d.davies16@imperial.ac.uk",
-        maintainer="Anthony O. Onwuli",
-        maintainer_email="anthony.onwuli16@imperial.ac.uk",
+        author=__author__,
+        author_email=__author_email__,
+        maintainer=__maintainer__,
+        maintainer_email=__maintaier_email__,
         license="MIT",
         packages=[
             "smact",
