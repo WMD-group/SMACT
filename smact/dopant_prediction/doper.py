@@ -24,11 +24,11 @@ class Doper:
     Methods: get_dopants, plot_dopants
 
     Attributes:
-        original_species: A tuple which describes the constituent species of a material.
+        original_species: A tuple which describes the constituent species of a material. For example:
 
-        >>> test= Doper(('Cu1+','Zn2+','Ge4+','S2-'))
-        >>> test.original_species
-            ('Cu1+','Zn2+','Ge4+','S2-')
+            >>> test= Doper(('Cu1+','Zn2+','Ge4+','S2-'))
+            >>> test.original_species
+                ('Cu1+','Zn2+','Ge4+','S2-')
 
     """
 
@@ -109,8 +109,8 @@ class Doper:
     ) -> dict:
         """
         Args:
-            num_dopants (int) = The number of suggestions to return for n- and p-type dopants.
-            plot_heatmap(bool) If True, the results of the doping search are plotted as heatmaps
+            num_dopants (int) - The number of suggestions to return for n- and p-type dopants.
+            plot_heatmap(bool) - If True, the results of the doping search are plotted as heatmaps
 
         Returns:
             (dict): Dopant suggestions, given as a dictionary with keys
