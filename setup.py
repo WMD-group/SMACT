@@ -8,7 +8,7 @@ __copyright__ = (
 __version__ = "2.5.0"
 __maintainer__ = "Anthony O. Onwuli"
 __maintaier_email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "December 13 2022"
+__date__ = "December 22 2022"
 
 import os
 import unittest
