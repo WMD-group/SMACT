@@ -19,7 +19,7 @@ from pymatgen.ext.matproj import MPRester
 
 from . import logger
 from .structure import SmactStructure
-from .utilities import get_sign
+from .utilities import get_sign, convert_next_gen_mprest_data
 
 
 class StructureDB:
@@ -114,10 +114,17 @@ class StructureDB:
         """
         if mp_data is None:  # pragma: no cover
             with MPRester(mp_api_key) as m:
-                data = m.query(
-                    criteria={"icsd_ids.0": {"$exists": True}},
-                    properties=["structure", "material_id"],
-                )
+                try:
+                    data = m.query(
+                        criteria={"icsd_ids.0": {"$exists": True}},
+                        properties=["structure", "material_id"],
+                    )
+                except NotImplementedError:
+                    docs = m.summary.search(
+                        theoretical=False,
+                        fields=["structure","material_id"]
+                    )
+                    data=[convert_next_gen_mprest_data(doc) for doc in docs]
         else:
             data = mp_data
 
@@ -267,6 +274,11 @@ def parse_mprest(
         An oxidation-state-decorated :class:`SmactStructure`.
 
     """
+    # Convert next gen query data to a dic
+    # TODO check if the data is the same type as MPDataDoc
+    if not isinstance(data,dict):
+        data = convert_next_gen_mprest_data(data)
+
     try:
         return SmactStructure.from_py_struct(data["structure"])
     except:
