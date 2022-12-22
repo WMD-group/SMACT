@@ -16,7 +16,7 @@ from pymatgen.ext.matproj import MPRester
 import smact
 
 from . import logger
-from .utilities import get_sign
+from .utilities import convert_next_gen_mprest_data, get_sign
 
 
 class SmactStructure:
@@ -269,10 +269,16 @@ class SmactStructure:
         with MPRester(api_key) as m:
             eles = SmactStructure._get_ele_stoics(sanit_species)
             formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
-            structs = m.query(
-                criteria={"reduced_cell_formula": formula},
-                properties=["structure"],
-            )
+            try:
+                # Legacy API routine
+                structs = m.query(
+                    criteria={"reduced_cell_formula": formula},
+                    properties=["structure"],
+                )
+            except NotImplementedError:
+                # New API routine
+                docs = m.summary.search(formula=formula, fields=["structure"])
+                structs = [convert_next_gen_mprest_data(doc) for doc in docs]
 
             if len(structs) == 0:
                 raise ValueError(
