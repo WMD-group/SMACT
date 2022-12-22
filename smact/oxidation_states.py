@@ -8,6 +8,7 @@ Prediction - DOI: 10.1039/C8FD00032H.
 
 import json
 from os import path
+from typing import Dict, Optional, Tuple
 
 from numpy import mean
 from pymatgen.core import Structure
@@ -22,7 +23,9 @@ class Oxidation_state_probability_finder:
     to compute the likelihood of metal species existing in solids in the presence of certain anions.
     """
 
-    def __init__(self, probability_table=None):
+    def __init__(
+        self, probability_table: Optional[Dict[Tuple[str,str], float]] = None
+    ):
         """
         Args:
             probability_table (dict): Lookup table to get probabilities for anion-cation pairs.
@@ -31,7 +34,9 @@ class Oxidation_state_probability_finder:
         """
         if probability_table == None:
             with open(
-                path.join(data_directory, "oxidation_state_probability_table.json")
+                path.join(
+                    data_directory, "oxidation_state_probability_table.json"
+                )
             ) as f:
                 probability_data = json.load(f)
             # Put data into the required format
@@ -49,7 +54,7 @@ class Oxidation_state_probability_finder:
         self._included_cations = included_cations
         self._included_anions = included_anions
 
-    def _generate_lookup_key(self, species1, species2):
+    def _generate_lookup_key(self, species1: Species, species2: Species):
         """
         Internal function to generate keys to lookup table.
 
@@ -76,17 +81,17 @@ class Oxidation_state_probability_finder:
         an_key = "".join([anion.symbol, str(int(anion.oxidation))])
 
         # Check that both the species are included in the probability table
-        if not all(elem in self._included_species for elem in [an_key, cat_key]):
+        if not all(
+            elem in self._included_species for elem in [an_key, cat_key]
+        ):
             raise NameError(
-                "One or both of [{}, {}] are not in the probability table.".format(
-                    cat_key, an_key
-                )
+                f"One or both of [{cat_key}, {an_key}] are not in the probability table."
             )
 
         table_key = (an_key, cat_key)
         return table_key
 
-    def pair_probability(self, species1, species2):
+    def pair_probability(self, species1: Species, species2: Species) -> float:
         """
         Get the anion-cation oxidation state probability for a provided pair of smact Species.
         i.e. :math:`P_{SA}=\\frac{N_{SX}}{N_{MX}}` in the original paper (DOI:10.1039/C8FD00032H).
@@ -110,7 +115,9 @@ class Oxidation_state_probability_finder:
         """
         return self._included_species
 
-    def compound_probability(self, structure, ignore_stoichiometry=True):
+    def compound_probability(
+        self, structure: Structure, ignore_stoichiometry: bool = True
+    ) -> float:
         """
         calculate overall probability for structure or composition.
 
@@ -131,7 +138,9 @@ class Oxidation_state_probability_finder:
             elif all(isinstance(i, pmgSpecies) for i in structure):
                 structure = [Species(i.symbol, i.oxi_state) for i in structure]
             else:
-                raise TypeError("Input requires a list of SMACT or Pymatgen species.")
+                raise TypeError(
+                    "Input requires a list of SMACT or Pymatgen species."
+                )
         elif type(structure) == Structure:
             species = structure.species
             if not all(isinstance(i, pmgSpecies) for i in species):
@@ -156,6 +165,8 @@ class Oxidation_state_probability_finder:
             species_pairs = list(set(species_pairs))
 
         # Do the maths
-        pair_probs = [self.pair_probability(pair[0], pair[1]) for pair in species_pairs]
+        pair_probs = [
+            self.pair_probability(pair[0], pair[1]) for pair in species_pairs
+        ]
         compound_prob = mean(pair_probs)
         return compound_prob
