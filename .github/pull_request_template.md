@@ -29,7 +29,7 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 
 ## Reviewers
 
-@mention individuals who you specifically want to involve in the discussion for this pull request and mention why they are needed in the dicussion/why they are needed to review the pull request.
+@mention individuals who you specifically want to involve in the discussion for this pull request and mention why they are needed in the discussion/why they are needed to review the pull request.
 
 
 ## Checklist:
