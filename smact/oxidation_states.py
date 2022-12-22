@@ -24,7 +24,7 @@ class Oxidation_state_probability_finder:
     """
 
     def __init__(
-        self, probability_table: Optional[Dict[Tuple[str,str], float]] = None
+        self, probability_table: Optional[Dict[Tuple[str, str], float]] = None
     ):
         """
         Args:

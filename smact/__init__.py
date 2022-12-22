@@ -379,7 +379,7 @@ def _gcd_recursive(*args: Iterable[int]):
         return gcd(args[0], _gcd_recursive(*args[1:]))
 
 
-def _isneutral(oxidations: Tuple[int,...], stoichs: Tuple[int,...]):
+def _isneutral(oxidations: Tuple[int, ...], stoichs: Tuple[int, ...]):
     """
     Check if set of oxidation states is neutral in given stoichiometry
 
