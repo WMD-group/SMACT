@@ -1,9 +1,12 @@
 """Miscellaneous tools for data parsing."""
 
 import re
-from typing import Tuple, Dict, Union, Optional
+from typing import Dict, Optional, Tuple, Union
+
 import pymatgen
+
 from . import logger
+
 
 def parse_spec(species: str) -> Tuple[str, int]:
     """Parse a species string into its element and charge.
@@ -71,9 +74,12 @@ def get_sign(charge: int) -> str:
     else:
         return ""
 
-def convert_next_gen_mprest_data(doc) -> Dict[str,Union[pymatgen.core.Structure,Optional[str]]]:
-    """ Converts the `MPDataDoc` object returned by a next-gen MP query to a dictionary
-    
+
+def convert_next_gen_mprest_data(
+    doc,
+) -> Dict[str, Union[pymatgen.core.Structure, Optional[str]]]:
+    """Converts the `MPDataDoc` object returned by a next-gen MP query to a dictionary
+
     Args:
         doc (MPDataDoc): A MPDataDoc object (based on a pydantic model) with fields 'structure' and 'material_id'
     Returns:
@@ -82,7 +88,7 @@ def convert_next_gen_mprest_data(doc) -> Dict[str,Union[pymatgen.core.Structure,
 
     """
     try:
-       return doc.dict(exclude={'fields_not_requested'})
+        return doc.dict(exclude={"fields_not_requested"})
     except:
-        logger.warn(f'Could not convert input:\n {doc}\n to a dictionary.')
+        logger.warn(f"Could not convert input:\n {doc}\n to a dictionary.")
         raise TypeError("Input is not an MPDataDoc object.")

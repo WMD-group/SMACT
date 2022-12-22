@@ -19,7 +19,7 @@ from pymatgen.ext.matproj import MPRester
 
 from . import logger
 from .structure import SmactStructure
-from .utilities import get_sign, convert_next_gen_mprest_data
+from .utilities import convert_next_gen_mprest_data, get_sign
 
 
 class StructureDB:
@@ -121,10 +121,9 @@ class StructureDB:
                     )
                 except NotImplementedError:
                     docs = m.summary.search(
-                        theoretical=False,
-                        fields=["structure","material_id"]
+                        theoretical=False, fields=["structure", "material_id"]
                     )
-                    data=[convert_next_gen_mprest_data(doc) for doc in docs]
+                    data = [convert_next_gen_mprest_data(doc) for doc in docs]
         else:
             data = mp_data
 
@@ -276,7 +275,7 @@ def parse_mprest(
     """
     # Convert next gen query data to a dic
     # TODO check if the data is the same type as MPDataDoc
-    if not isinstance(data,dict):
+    if not isinstance(data, dict):
         data = convert_next_gen_mprest_data(data)
 
     try:

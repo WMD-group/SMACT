@@ -16,7 +16,7 @@ from pymatgen.ext.matproj import MPRester
 import smact
 
 from . import logger
-from .utilities import get_sign, convert_next_gen_mprest_data
+from .utilities import convert_next_gen_mprest_data, get_sign
 
 
 class SmactStructure:
@@ -277,7 +277,7 @@ class SmactStructure:
                 )
             except NotImplementedError:
                 # New API routine
-                docs = m.summary.search(formula=formula,fields=['structure'])
+                docs = m.summary.search(formula=formula, fields=["structure"])
                 structs = [convert_next_gen_mprest_data(doc) for doc in docs]
 
             if len(structs) == 0:
