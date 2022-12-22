@@ -1,17 +1,27 @@
 import itertools
 import warnings
+from collections import namedtuple
 from itertools import combinations
+from typing import Iterable, List, Optional, Tuple, Union
 
 from smact import Element, neutral_ratios
 
+# Use named tuple to improve readability of smact_filter outputs
+allowed_compositions = namedtuple(
+    "Composition", ["element_symbols", "oxidation_states", "stoichiometries"]
+)
+allowed_compositions_nonunique = namedtuple(
+    "Composition", ["element_symbols", "stoichiometries"]
+)
+
 
 def pauling_test(
-    oxidation_states,
-    electronegativities,
-    symbols=[],
-    repeat_anions=True,
-    repeat_cations=True,
-    threshold=0.0,
+    oxidation_states: List[int],
+    electronegativities: List[float],
+    symbols: List[str] = [],
+    repeat_anions: bool = True,
+    repeat_cations: bool = True,
+    threshold: float = 0.0,
 ):
     """Check if a combination of ions makes chemical sense,
         (i.e. positive ions should be of lower electronegativity).
@@ -58,7 +68,12 @@ def pauling_test(
             return False
 
 
-def _no_repeats(oxidation_states, symbols, repeat_anions=False, repeat_cations=False):
+def _no_repeats(
+    oxidation_states: List[int],
+    symbols: List[str],
+    repeat_anions: bool = False,
+    repeat_cations: bool = False,
+):
     """
     Check if any anion or cation appears twice.
 
@@ -92,7 +107,12 @@ def _no_repeats(oxidation_states, symbols, repeat_anions=False, repeat_cations=F
 
 
 def pauling_test_old(
-    ox, paul, symbols, repeat_anions=True, repeat_cations=True, threshold=0.0
+    ox: List[int],
+    paul: List[float],
+    symbols: List[str],
+    repeat_anions: bool = True,
+    repeat_cations: bool = True,
+    threshold: float = 0.0,
 ):
     """Check if a combination of ions makes chemical sense,
     (i.e. positive ions should be of lower Pauling electronegativity).
@@ -153,7 +173,7 @@ def pauling_test_old(
         return True
 
 
-def eneg_states_test(ox_states, enegs):
+def eneg_states_test(ox_states: List[int], enegs: List[float]):
     """
     Internal function for checking electronegativity criterion
 
@@ -173,7 +193,9 @@ def eneg_states_test(ox_states, enegs):
             anions, otherwise False
 
     """
-    for ((ox1, eneg1), (ox2, eneg2)) in combinations(list(zip(ox_states, enegs)), 2):
+    for ((ox1, eneg1), (ox2, eneg2)) in combinations(
+        list(zip(ox_states, enegs)), 2
+    ):
         if (ox1 > 0) and (ox2 < 0) and (eneg1 >= eneg2):
             return False
         elif (ox1 < 0) and (ox2 > 0) and (eneg1 <= eneg2):
@@ -184,7 +206,9 @@ def eneg_states_test(ox_states, enegs):
         return True
 
 
-def eneg_states_test_threshold(ox_states, enegs, threshold=0):
+def eneg_states_test_threshold(
+    ox_states: List[int], enegs: List[float], threshold: Optional[float] = 0
+):
     """Internal function for checking electronegativity criterion
 
     This implementation is fast as it 'short-circuits' as soon as it
@@ -208,7 +232,9 @@ def eneg_states_test_threshold(ox_states, enegs, threshold=0):
             anions, otherwise False
 
     """
-    for ((ox1, eneg1), (ox2, eneg2)) in combinations(list(zip(ox_states, enegs)), 2):
+    for ((ox1, eneg1), (ox2, eneg2)) in combinations(
+        list(zip(ox_states, enegs)), 2
+    ):
         if (ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold):
             return False
         elif (ox1 < 0) and (ox2 > 0) and (eneg2 - eneg1) > threshold:
@@ -217,7 +243,7 @@ def eneg_states_test_threshold(ox_states, enegs, threshold=0):
         return True
 
 
-def eneg_states_test_alternate(ox_states, enegs):
+def eneg_states_test_alternate(ox_states: List[int], enegs: List[float]):
     """Internal function for checking electronegativity criterion
 
     This implementation appears to be slightly slower than
@@ -243,7 +269,10 @@ def eneg_states_test_alternate(ox_states, enegs):
     return min_cation_eneg > max_anion_eneg
 
 
-def ml_rep_generator(composition, stoichs=None):
+def ml_rep_generator(
+    composition: Union[List[Element], List[str]],
+    stoichs: Optional[List[int]] = None,
+):
     """Function to take a composition of Elements and return a
     list of values between 0 and 1 that describes the composition,
     useful for machine learning.
@@ -279,7 +308,12 @@ def ml_rep_generator(composition, stoichs=None):
     return norm
 
 
-def smact_filter(els, threshold=8, species_unique=True, oxidation_states_set="default"):
+def smact_filter(
+    els: Union[Tuple[Element], List[Element]],
+    threshold: int = 8,
+    species_unique: bool = True,
+    oxidation_states_set: str = "default",
+) -> Union[List[Tuple[str, int, int]], List[Tuple[str, int]]]:
     """Function that applies the charge neutrality and electronegativity
     tests in one go for simple application in external scripts that
     wish to apply the general 'smact test'.
@@ -288,7 +322,7 @@ def smact_filter(els, threshold=8, species_unique=True, oxidation_states_set="de
         els (tuple/list): A list of smact.Element objects
         threshold (int): Threshold for stoichiometry limit, default = 8
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
-        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd', 'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states.
+        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd', 'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
         in the form [(elements), (oxidation states), (ratios)] if species_unique=True
@@ -330,13 +364,17 @@ def smact_filter(els, threshold=8, species_unique=True, oxidation_states_set="de
             electroneg_OK = pauling_test(ox_states, electronegs)
             if electroneg_OK:
                 for ratio in cn_r:
-                    compositions.append(tuple([symbols, ox_states, ratio]))
+                    compositions.append(
+                        allowed_compositions(symbols, ox_states, ratio)
+                    )
 
     # Return list depending on whether we are interested in unique species combinations
     # or just unique element combinations.
     if species_unique:
         return compositions
     else:
-        compositions = [(i[0], i[2]) for i in compositions]
+        compositions = [
+            allowed_compositions_nonunique(i[0], i[2]) for i in compositions
+        ]
         compositions = list(set(compositions))
         return compositions
