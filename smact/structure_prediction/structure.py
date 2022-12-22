@@ -12,6 +12,9 @@ import numpy as np
 import pymatgen
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.ext.matproj import MPRester
+from pymatgen.transformations.standard_transformations import (
+    OxidationStateDecorationTransformation,
+)
 
 import smact
 
@@ -227,11 +230,16 @@ class SmactStructure:
         return sites, species
 
     @staticmethod
-    def from_py_struct(structure: pymatgen.core.Structure):
+    def from_py_struct(
+        structure: pymatgen.core.Structure, determine_oxi: str = "BV"
+    ):
         """Create a SmactStructure from a pymatgen Structure object.
 
         Args:
             structure: A pymatgen Structure.
+            determine_oxi (str): The method to determine the assignments oxidation states in the structure.
+                Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence,
+                ICSD statistics or trial both sequentially, respectively.
 
         Returns:
             :class:`~.SmactStructure`
@@ -242,8 +250,34 @@ class SmactStructure:
                 "Structure must be a pymatgen.core.Structure instance."
             )
 
-        bva = BVAnalyzer()
-        struct = bva.get_oxi_state_decorated_structure(structure)
+        if determine_oxi == "BV":
+            bva = BVAnalyzer()
+            struct = bva.get_oxi_state_decorated_structure(structure)
+
+        elif determine_oxi == "comp_ICSD":
+            comp = structure.composition
+            oxi_transform = OxidationStateDecorationTransformation(
+                comp.oxi_state_guesses()[0]
+            )
+            struct = oxi_transform.apply_transformation(structure)
+            print("Charge assigned based on ICSD statistics")
+
+        elif determine_oxi == "both":
+            try:
+                bva = BVAnalyzer()
+                struct = bva.get_oxi_state_decorated_structure(structure)
+                print("Oxidation states assigned using bond valence")
+            except ValueError:
+                comp = structure.composition
+                oxi_transform = OxidationStateDecorationTransformation(
+                    comp.oxi_state_guesses()[0]
+                )
+                struct = oxi_transform.apply_transformation(structure)
+                print("Oxidation states assigned based on ICSD statistics")
+        else:
+            raise ValueError(
+                f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either 'BV','comp_ICSD' or 'both'."
+            )
 
         sites, species = SmactStructure.__parse_py_sites(struct)
 
@@ -263,11 +297,15 @@ class SmactStructure:
     def from_mp(
         species: List[Union[Tuple[str, int, int], Tuple[smact.Species, int]]],
         api_key: str,
+        determine_oxi: str = "BV",
     ):
         """Create a SmactStructure using the first Materials Project entry for a composition.
 
         Args:
             species: See :meth:`~.__init__`.
+            determine_oxi (str): The method to determine the assignments oxidation states in the structure.
+                Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence,
+                ICSD statistics or trial both sequentially, respectively.
             api_key: A www.materialsproject.org API key.
 
         Returns:
@@ -296,9 +334,34 @@ class SmactStructure:
         if 0 not in (
             spec[1] for spec in sanit_species
         ):  # If everything's charged
-            bva = BVAnalyzer()
-            struct = bva.get_oxi_state_decorated_structure(struct)
+            if determine_oxi == "BV":
+                bva = BVAnalyzer()
+                struct = bva.get_oxi_state_decorated_structure(struct)
 
+            elif determine_oxi == "comp_ICSD":
+                comp = struct.composition
+                oxi_transform = OxidationStateDecorationTransformation(
+                    comp.oxi_state_guesses()[0]
+                )
+                struct = oxi_transform.apply_transformation(struct)
+                print("Charge assigned based on ICSD statistics")
+
+            elif determine_oxi == "both":
+                try:
+                    bva = BVAnalyzer()
+                    struct = bva.get_oxi_state_decorated_structure(struct)
+                    print("Oxidation states assigned using bond valence")
+                except ValueError:
+                    comp = struct.composition
+                    oxi_transform = OxidationStateDecorationTransformation(
+                        comp.oxi_state_guesses()[0]
+                    )
+                    struct = oxi_transform.apply_transformation(struct)
+                    print("Oxidation states assigned based on ICSD statistics")
+            else:
+                raise ValueError(
+                    f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either 'BV','comp_ICSD' or 'both'."
+                )
         lattice_mat = struct.lattice.matrix
 
         lattice_param = 1.0  # TODO Use actual lattice parameter

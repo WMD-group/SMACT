@@ -260,19 +260,25 @@ class StructureDB:
 
 def parse_mprest(
     data: Dict[str, Union[pymatgen.core.Structure, str]],
+    determine_oxi: str = "BV",
 ) -> SmactStructure:
     """Parse MPRester query data to generate structures.
 
     Args:
         data: A dictionary containing the keys 'structure' and
             'material_id', with the associated values.
+        determine_oxi (str): The method to determine the assignments oxidation states in the structure.
+                Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence,
+                ICSD statistics or trial both sequentially, respectively.
 
     Returns:
         An oxidation-state-decorated :class:`SmactStructure`.
 
     """
     try:
-        return SmactStructure.from_py_struct(data["structure"])
+        return SmactStructure.from_py_struct(
+            data["structure"], determine_oxi="BV"
+        )
     except:
         # Couldn't decorate with oxidation states
         logger.warn(

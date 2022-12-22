@@ -135,6 +135,21 @@ class StructureTest(unittest.TestCase):
 
         self.assertStructAlmostEqual(s1, s2)
 
+    def test_from_py_struct_icsd(self):
+        """Test generation of SmactStructure from a pymatgen Structure using ICSD statistics to determine oxidation states."""
+        with open(TEST_PY_STRUCT) as f:
+            d = json.load(f)
+            py_structure = pymatgen.core.Structure.from_dict(d)
+
+        with ignore_warnings(smact.structure_prediction.logger):
+            s1 = SmactStructure.from_py_struct(
+                py_structure, determine_oxi="comp_ICSD"
+            )
+
+        s2 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
+
+        self.assertStructAlmostEqual(s1, s2)
+
     def test_has_species(self):
         """Test determining whether a species is in a `SmactStructure`."""
         s1 = SmactStructure(
