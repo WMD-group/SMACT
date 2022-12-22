@@ -109,8 +109,8 @@ class Doper:
     ) -> dict:
         """
         Args:
-            num_dopants (int) - The number of suggestions to return for n- and p-type dopants.
-            plot_heatmap(bool) - If True, the results of the doping search are plotted as heatmaps
+            num_dopants (int): The number of suggestions to return for n- and p-type dopants.
+            plot_heatmap (bool): If True, the results of the doping search are plotted as heatmaps
 
         Returns:
             (dict): Dopant suggestions, given as a dictionary with keys
