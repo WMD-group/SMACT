@@ -66,11 +66,15 @@ class SmactStructure:
                 :meth:`~.from_mp`.
 
         """
-        self.species = self._sanitise_species(species) if sanitise_species else species
+        self.species = (
+            self._sanitise_species(species) if sanitise_species else species
+        )
 
         self.lattice_mat = lattice_mat
 
-        self.sites = {spec: sites[spec] for spec in self.get_spec_strs()}  # Sort sites
+        self.sites = {
+            spec: sites[spec] for spec in self.get_spec_strs()
+        }  # Sort sites
 
         self.lattice_param = lattice_param
 
@@ -152,7 +156,9 @@ class SmactStructure:
             species[0][0], smact.Species
         ):  # Species class variation of instantiation
             species.sort(key=lambda x: (x[0].symbol, -x[0].oxidation))
-            sanit_species = [(x[0].symbol, x[0].oxidation, x[1]) for x in species]
+            sanit_species = [
+                (x[0].symbol, x[0].oxidation, x[1]) for x in species
+            ]
 
         else:
             raise TypeError(species_error)
@@ -179,7 +185,9 @@ class SmactStructure:
 
         """
         if not isinstance(structure, pymatgen.core.Structure):
-            raise TypeError("structure must be a pymatgen.core.Structure instance.")
+            raise TypeError(
+                "structure must be a pymatgen.core.Structure instance."
+            )
 
         sites = defaultdict(list)
         for site in structure.sites:
@@ -230,7 +238,9 @@ class SmactStructure:
 
         """
         if not isinstance(structure, pymatgen.core.Structure):
-            raise TypeError("Structure must be a pymatgen.core.Structure instance.")
+            raise TypeError(
+                "Structure must be a pymatgen.core.Structure instance."
+            )
 
         bva = BVAnalyzer()
         struct = bva.get_oxi_state_decorated_structure(structure)
@@ -283,7 +293,9 @@ class SmactStructure:
             # Default to first found structure
             struct = structs[0]["structure"]
 
-        if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
+        if 0 not in (
+            spec[1] for spec in sanit_species
+        ):  # If everything's charged
             bva = BVAnalyzer()
             struct = bva.get_oxi_state_decorated_structure(struct)
 
@@ -352,7 +364,10 @@ class SmactStructure:
         lattice_param = float(lines[1])
 
         lattice = np.array(
-            [[float(point) for point in line.split(" ")] for line in lines[2:5]]
+            [
+                [float(point) for point in line.split(" ")]
+                for line in lines[2:5]
+            ]
         )
 
         sites = defaultdict(list)
@@ -511,7 +526,9 @@ class SmactStructure:
         poscar += f"{self.lattice_param}\n"
 
         poscar += (
-            "\n".join(" ".join(map(str, vec)) for vec in self.lattice_mat.tolist())
+            "\n".join(
+                " ".join(map(str, vec)) for vec in self.lattice_mat.tolist()
+            )
             + "\n"
         )
 
@@ -520,7 +537,8 @@ class SmactStructure:
         poscar += self._format_style("{ele}") + "\n"
 
         poscar += (
-            " ".join(str(spec_count[spec]) for spec in self.get_spec_strs()) + "\n"
+            " ".join(str(spec_count[spec]) for spec in self.get_spec_strs())
+            + "\n"
         )
 
         poscar += "Cartesian\n"

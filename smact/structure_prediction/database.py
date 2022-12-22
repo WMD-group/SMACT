@@ -91,7 +91,9 @@ class StructureDB:
     def add_mp_icsd(
         self,
         table: str,
-        mp_data: Optional[List[Dict[str, Union[pymatgen.core.Structure, str]]]] = None,
+        mp_data: Optional[
+            List[Dict[str, Union[pymatgen.core.Structure, str]]]
+        ] = None,
         mp_api_key: Optional[str] = None,
     ) -> int:
         """Add a table populated with Materials Project-hosted ICSD structures.
@@ -194,7 +196,9 @@ class StructureDB:
 
         return num
 
-    def get_structs(self, composition: str, table: str) -> List[SmactStructure]:
+    def get_structs(
+        self, composition: str, table: str
+    ) -> List[SmactStructure]:
         """Get SmactStructures for a given composition.
 
         Args:
@@ -271,4 +275,6 @@ def parse_mprest(
         return SmactStructure.from_py_struct(data["structure"])
     except:
         # Couldn't decorate with oxidation states
-        logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")
+        logger.warn(
+            f"Couldn't decorate {data['material_id']} with oxidation states."
+        )

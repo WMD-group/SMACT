@@ -143,7 +143,9 @@ def main():
         #     neutral_stoichiometries.update({oxidation_states: count})
 
         def n_neutral_ratios(oxidation_states, threshold=8):
-            return len(smact.neutral_ratios(oxidation_states, threshold=threshold)[1])
+            return len(
+                smact.neutral_ratios(oxidation_states, threshold=threshold)[1]
+            )
 
         neutral_stoichiometries = {
             oxidation_states: n_neutral_ratios(
@@ -158,10 +160,14 @@ def main():
         # progress indicator.
 
         combination_count = sum(
-            count_iter(itertools.combinations(element_list, i)) for i in range(2, n + 1)
+            count_iter(itertools.combinations(element_list, i))
+            for i in range(2, n + 1)
         )
 
-        print("Counting ({} element combinations)" "...".format(combination_count))
+        print(
+            "Counting ({} element combinations)"
+            "...".format(combination_count)
+        )
 
         # Combinations are counted in chunks set by count_progress_interval.
         # In Python 2.7 the // symbol is "integer division" which rounds
@@ -215,7 +221,9 @@ def main():
                 # Serial code path -- iteration over element combinations is
                 # done using the itertools.imap() function.
 
-                count = count + sum(map(count_element_combination, imap_arg_generator))
+                count = count + sum(
+                    map(count_element_combination, imap_arg_generator)
+                )
 
             # After each chunk, report the % progress, elapsed time and an
             # estimate of the remaining time.  The smact.pauling_test() calls
@@ -229,7 +237,8 @@ def main():
 
             time_elapsed = time.time() - start_time
             time_remaining = (
-                combination_count * (time_elapsed / data_pointer) - time_elapsed
+                combination_count * (time_elapsed / data_pointer)
+                - time_elapsed
             )
 
             print_status(
@@ -253,7 +262,10 @@ def main():
             "Number of charge-neutral stoichiometries for combinations "
             "of {} elements".format(n)
         )
-        print("(using known oxidation states, not including zero): " "{}".format(count))
+        print(
+            "(using known oxidation states, not including zero): "
+            "{}".format(count)
+        )
         print("")
 
         print(f"Total time for counting: {total_time:.3f} sec")

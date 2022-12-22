@@ -35,7 +35,9 @@ class StructurePredictor:
 
     """
 
-    def __init__(self, mutator: CationMutator, struct_db: StructureDB, table: str):
+    def __init__(
+        self, mutator: CationMutator, struct_db: StructureDB, table: str
+    ):
         """Initialize class.
 
         Args:
@@ -142,7 +144,9 @@ class StructurePredictor:
                         # Poorly decorated
                         continue
                     yield (
-                        self.cm._mutate_structure(parent, alt_spec, diff_spec_str),
+                        self.cm._mutate_structure(
+                            parent, alt_spec, diff_spec_str
+                        ),
                         p,
                         parent,
                     )
@@ -179,7 +183,8 @@ class StructurePredictor:
         sub_species = list(map(list, sub_species))
 
         potential_nary_parents: List[List[SmactStructure]] = list(
-            self.db.get_with_species(specs, self.table) for specs in sub_species
+            self.db.get_with_species(specs, self.table)
+            for specs in sub_species
         )
 
         for spec_idx, parents in enumerate(potential_nary_parents):
@@ -260,7 +265,9 @@ class StructurePredictor:
                     # Poorly decorated
                     continue
                 yield (
-                    self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str),
+                    self.cm._nary_mutate_structure(
+                        parent, alt_spec, diff_spec_str
+                    ),
                     p,
                     parent,
                 )
