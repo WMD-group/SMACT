@@ -9,6 +9,8 @@
 ![dependencies](https://img.shields.io/librariesio/release/pypi/smact)
 [![CI Status](https://github.com/WMD-group/SMACT/actions/workflows/ci.yml/badge.svg)](https://github.com/WMD-group/SMACT/actions/workflows/ci.yml)
 ![python version](https://img.shields.io/pypi/pyversions/smact)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/smact)
+[![codecov](https://codecov.io/gh/WMD-group/SMACT/branch/master/graph/badge.svg?token=UtgVxjoYNP)](https://codecov.io/gh/WMD-group/SMACT)
 
 
 SMACT
