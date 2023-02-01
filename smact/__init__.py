@@ -218,7 +218,6 @@ class Species(Element):
         self.shannon_radius = None
 
         if radii_source == "shannon":
-
             shannon_data = data_loader.lookup_element_shannon_radius_data(
                 symbol
             )
