@@ -33,7 +33,6 @@ class Doper:
     """
 
     def __init__(self, original_species: Tuple[str, ...]):
-
         """
         Intialise the `Doper` class with a tuple of species
 
