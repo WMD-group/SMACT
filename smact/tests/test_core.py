@@ -17,7 +17,6 @@ from smact.properties import band_gap_Harrison, compound_electroneg
 
 
 class TestSequenceFunctions(unittest.TestCase):
-
     # ---------------- TOP-LEVEL ----------------
 
     def test_Element_class_Pt(self):
