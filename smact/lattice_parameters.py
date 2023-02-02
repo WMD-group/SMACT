@@ -252,6 +252,7 @@ def zincblende(shannon_radius):
 # The distance of that Zn-Zn (diagonally to half the face) is (using the cosine rule) is
 # root[2(r1+r2)^2 - 2(r1+r2)^(2)cos(ZnSZn angle)].
 
+
 # B10
 def b10(shannon_radius):  # Litharge
     """The lattice parameters of Litharge
