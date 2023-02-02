@@ -91,7 +91,6 @@ def _no_repeats(
     if repeat_anions is False and repeat_cations is False:
         return len(symbols) == len(set(symbols))
     else:
-
         anions, cations = [], []
         for state, symbol in zip(oxidation_states, symbols):
             if state > 0:
@@ -193,7 +192,7 @@ def eneg_states_test(ox_states: List[int], enegs: List[float]):
             anions, otherwise False
 
     """
-    for ((ox1, eneg1), (ox2, eneg2)) in combinations(
+    for (ox1, eneg1), (ox2, eneg2) in combinations(
         list(zip(ox_states, enegs)), 2
     ):
         if (ox1 > 0) and (ox2 < 0) and (eneg1 >= eneg2):
@@ -232,7 +231,7 @@ def eneg_states_test_threshold(
             anions, otherwise False
 
     """
-    for ((ox1, eneg1), (ox2, eneg2)) in combinations(
+    for (ox1, eneg1), (ox2, eneg2) in combinations(
         list(zip(ox_states, enegs)), 2
     ):
         if (ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold):
