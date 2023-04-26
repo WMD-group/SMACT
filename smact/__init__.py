@@ -391,7 +391,7 @@ def _isneutral(oxidations: Tuple[int, ...], stoichs: Tuple[int, ...]):
 
 def neutral_ratios_iter(
     oxidations: List[int],
-    stoichs: Union[bool, List[int]] = False,
+    stoichs: Union[bool, List[List[int]]] = False,
     threshold: Optional[int] = 5,
 ):
     """
@@ -424,7 +424,9 @@ def neutral_ratios_iter(
 
 
 def neutral_ratios(
-    oxidations: List[int], stoichs: Union[bool, List[int]] = False, threshold=5
+    oxidations: List[int],
+    stoichs: Union[bool, List[List[int]]] = False,
+    threshold=5,
 ):
     """
     Get a list of charge-neutral compounds
