@@ -309,8 +309,8 @@ def ml_rep_generator(
 
 def smact_filter(
     els: Union[Tuple[Element], List[Element]],
-    threshold: int = 8,
-    stoichs: Optional[List[int]] = None,
+    threshold: Optional[int] = 8,
+    stoichs: Optional[List[List[int]]] = None,
     species_unique: bool = True,
     oxidation_states_set: str = "default",
 ) -> Union[List[Tuple[str, int, int]], List[Tuple[str, int]]]:
