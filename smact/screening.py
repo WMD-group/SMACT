@@ -310,6 +310,7 @@ def ml_rep_generator(
 def smact_filter(
     els: Union[Tuple[Element], List[Element]],
     threshold: int = 8,
+    stoichs: Optional[List[int]] = None,
     species_unique: bool = True,
     oxidation_states_set: str = "default",
 ) -> Union[List[Tuple[str, int, int]], List[Tuple[str, int]]]:
@@ -320,6 +321,7 @@ def smact_filter(
     Args:
         els (tuple/list): A list of smact.Element objects
         threshold (int): Threshold for stoichiometry limit, default = 8
+        stoichs (list[int]): A selection of valid stoichiometric ratios for each site.
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
         oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd', 'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
     Returns:
@@ -357,7 +359,9 @@ def smact_filter(
 
     for ox_states in itertools.product(*ox_combos):
         # Test for charge balance
-        cn_e, cn_r = neutral_ratios(ox_states, threshold=threshold)
+        cn_e, cn_r = neutral_ratios(
+            ox_states, stoichs=stoichs, threshold=threshold
+        )
         # Electronegativity test
         if cn_e:
             electroneg_OK = pauling_test(ox_states, electronegs)
