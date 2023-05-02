@@ -334,7 +334,6 @@ def smact_filter(
         >>> from smact import Element
         >>> els = (Element('Cs'), Element('Pb'), Element('I'))
         >>> comps = smact_filter(els, threshold =5 )
-        >>> comps_113 = smact_filter(els, stoichs = [[1],[1],[3]] )
         >>> for comp in comps:
         >>>     print(comp)
         Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, -4, -1), stoichiometries=(5, 1, 1))
@@ -344,7 +343,11 @@ def smact_filter(
         Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(3, 1, 5))
         Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 4, -1), stoichiometries=(1, 1, 5))
 
-        >>> for comp in comps_113:
+        Example (using stoichs):
+        >>> from smact.screening import smact_filter
+        >>> from smact import Element
+        >>> comps = smact_filter(els, stoichs = [[1],[1],[3]] )
+        >>> for comp in comps:
         >>>     print(comp)
         Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(1, 1, 3))
 
