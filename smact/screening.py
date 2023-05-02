@@ -343,7 +343,7 @@ def smact_filter(
         Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(3, 1, 5))
         Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 4, -1), stoichiometries=(1, 1, 5))
 
-        Example (using stoichs):
+    Example (using stoichs):
         >>> from smact.screening import smact_filter
         >>> from smact import Element
         >>> comps = smact_filter(els, stoichs = [[1],[1],[3]] )
