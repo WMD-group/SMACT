@@ -338,8 +338,9 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_smact_filter(self):
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
+        result = smact.screening.smact_filter([Na, Fe, Cl], threshold=2)
         self.assertEqual(
-            smact.screening.smact_filter([Na, Fe, Cl], threshold=2),
+            [(r[0], r[1], r[2]) for r in result],
             [
                 (("Na", "Fe", "Cl"), (1, -1, -1), (2, 1, 1)),
                 (("Na", "Fe", "Cl"), (1, 1, -1), (1, 1, 2)),
@@ -347,6 +348,21 @@ class TestSequenceFunctions(unittest.TestCase):
         )
         self.assertEqual(
             len(smact.screening.smact_filter([Na, Fe, Cl], threshold=8)), 77
+        )
+
+        result = smact.screening.smact_filter(
+            [Na, Fe, Cl], stoichs=[[1], [1], [4]]
+        )
+        self.assertEqual(
+            [(r[0], r[1], r[2]) for r in result],
+            [
+                (("Na", "Fe", "Cl"), (1, 3, -1), (1, 1, 4)),
+            ],
+        )
+        stoichs = [list(range(1, 5)), list(range(1, 5)), list(range(1, 10))]
+        self.assertEqual(
+            len(smact.screening.smact_filter([Na, Fe, Cl], stoichs=stoichs)),
+            45,
         )
 
     # ---------------- Lattice ----------------
