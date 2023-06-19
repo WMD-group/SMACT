@@ -371,7 +371,7 @@ class CationMutatorTest(unittest.TestCase):
         )
 
         # 5 random test species -> 5! test pairs
-        cls.test_species = sample(cls.test_pymatgen_mutator.specs, 5)
+        cls.test_species = sample(list(cls.test_pymatgen_mutator.specs), 5)
         cls.test_pairs = list(
             itertools.combinations_with_replacement(cls.test_species, 2)
         )

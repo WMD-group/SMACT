@@ -339,7 +339,7 @@ class CationMutator:
         # Stack into matrix
         mat_sums = np.vstack([sums] * len(sums))
         # Make each element the product of (row_sum * col_sum)
-        mat_sums *= sums[:, None]
+        mat_sums *= sums.to_numpy()[:, None]
 
         corr /= mat_sums
 
