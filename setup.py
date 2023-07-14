@@ -5,10 +5,10 @@ __author_email__ = "d.w.davies@imperial.ac.uk"
 __copyright__ = (
     "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
 )
-__version__ = "2.5.1"
+__version__ = "2.5.2"
 __maintainer__ = "Anthony O. Onwuli"
 __maintaier_email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "May 2 2023"
+__date__ = "July 13 2023"
 
 import os
 import unittest

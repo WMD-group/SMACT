@@ -313,6 +313,7 @@ def smact_filter(
     stoichs: Optional[List[List[int]]] = None,
     species_unique: bool = True,
     oxidation_states_set: str = "default",
+    comp_tuple: bool = False,
 ) -> Union[List[Tuple[str, int, int]], List[Tuple[str, int]]]:
     """Function that applies the charge neutrality and electronegativity
     tests in one go for simple application in external scripts that
@@ -324,6 +325,7 @@ def smact_filter(
         stoichs (list[int]): A selection of valid stoichiometric ratios for each site.
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
         oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd', 'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
+        composition_tuple (bool): Whether or not to return the results as a named tuple of elements and stoichiometries (True) or as a normal tuple of elements and stoichiometries (False).
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
         in the form [(elements), (oxidation states), (ratios)] if species_unique=True
@@ -336,17 +338,17 @@ def smact_filter(
         >>> comps = smact_filter(els, threshold =5 )
         >>> for comp in comps:
         >>>     print(comp)
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, -4, -1), stoichiometries=(5, 1, 1))
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(1, 1, 3))
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(1, 2, 5))
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(2, 1, 4))
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(3, 1, 5))
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 4, -1), stoichiometries=(1, 1, 5))
+        [('Cs', 'Pb', 'I'), (1, -4, -1), (5, 1, 1)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 1, 3)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 2, 5)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (2, 1, 4)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (3, 1, 5)]
+        [('Cs', 'Pb', 'I'), (1, 4, -1), (1, 1, 5)]
 
     Example (using stoichs):
         >>> from smact.screening import smact_filter
         >>> from smact import Element
-        >>> comps = smact_filter(els, stoichs = [[1],[1],[3]] )
+        >>> comps = smact_filter(els, stoichs = [[1],[1],[3]], composition_tuple=True )
         >>> for comp in comps:
         >>>     print(comp)
         Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(1, 1, 3))
@@ -393,6 +395,8 @@ def smact_filter(
                 for ratio in cn_r:
                     compositions.append(
                         _allowed_compositions(symbols, ox_states, ratio)
+                        if comp_tuple
+                        else (symbols, ox_states, ratio)
                     )
 
     # Return list depending on whether we are interested in unique species combinations
@@ -400,8 +404,12 @@ def smact_filter(
     if species_unique:
         return compositions
     else:
-        compositions = [
-            _allowed_compositions_nonunique(i[0], i[2]) for i in compositions
-        ]
+        if comp_tuple:
+            compositions = [
+                _allowed_compositions_nonunique(i[0], i[2])
+                for i in compositions
+            ]
+        else:
+            compositions = [(i[0], i[2]) for i in compositions]
         compositions = list(set(compositions))
         return compositions
