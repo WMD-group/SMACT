@@ -339,13 +339,11 @@ def smact_filter(
         >>> for comp in comps:
         >>>     print(comp)
         [('Cs', 'Pb', 'I'), (1, -4, -1), (5, 1, 1)]
-
-        [('Cs', 'Pb', 'I'), (1, 2, -1),(1, 1, 3))
-
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(1, 2, 5))
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(2, 1, 4))
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(3, 1, 5))
-        Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 4, -1), stoichiometries=(1, 1, 5))
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 1, 3)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 2, 5)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (2, 1, 4)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (3, 1, 5)]
+        [('Cs', 'Pb', 'I'), (1, 4, -1), (1, 1, 5)]
 
     Example (using stoichs):
         >>> from smact.screening import smact_filter
