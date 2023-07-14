@@ -346,6 +346,23 @@ class TestSequenceFunctions(unittest.TestCase):
                 (("Na", "Fe", "Cl"), (1, 1, -1), (1, 1, 2)),
             ],
         )
+        result_comp_tuple = smact.screening.smact_filter(
+            [Na, Fe, Cl], threshold=2, comp_tuple=True
+        )
+        self.assertTupleEqual(
+            result_comp_tuple[0].element_symbols, ("Na", "Fe", "Cl")
+        )
+        self.assertTupleEqual(result_comp_tuple[0].stoichiometries, (2, 1, 1))
+        self.assertTupleEqual(
+            result_comp_tuple[0].oxidation_states, (1, -1, -1)
+        )
+        self.assertEqual(
+            smact.screening.smact_filter(
+                [Na, Fe, Cl], threshold=2, species_unique=False
+            ),
+            [(("Na", "Fe", "Cl"), (2, 1, 1)), (("Na", "Fe", "Cl"), (1, 1, 2))],
+        )
+
         self.assertEqual(
             len(smact.screening.smact_filter([Na, Fe, Cl], threshold=8)), 77
         )
