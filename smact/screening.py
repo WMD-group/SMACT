@@ -325,7 +325,7 @@ def smact_filter(
         stoichs (list[int]): A selection of valid stoichiometric ratios for each site.
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
         oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd', 'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
-        composition_tuple (bool): Whether or not to return the results as a named tuple of elements and stoichiometries (True) or as a normal tuple of elements and stoichiometries (False).
+        comp_tuple (bool): Whether or not to return the results as a named tuple of elements and stoichiometries (True) or as a normal tuple of elements and stoichiometries (False).
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
         in the form [(elements), (oxidation states), (ratios)] if species_unique=True
@@ -348,7 +348,7 @@ def smact_filter(
     Example (using stoichs):
         >>> from smact.screening import smact_filter
         >>> from smact import Element
-        >>> comps = smact_filter(els, stoichs = [[1],[1],[3]], composition_tuple=True )
+        >>> comps = smact_filter(els, stoichs = [[1],[1],[3]], comp_tuple=True )
         >>> for comp in comps:
         >>>     print(comp)
         Composition(element_symbols=('Cs', 'Pb', 'I'), oxidation_states=(1, 2, -1), stoichiometries=(1, 1, 3))
