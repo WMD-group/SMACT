@@ -363,8 +363,8 @@ class TestSequenceFunctions(unittest.TestCase):
                 )
             ),
             {
-                    (("Na", "Fe", "Cl"), (2, 1, 1)),
-                    (("Na", "Fe", "Cl"), (1, 1, 2)),
+                (("Na", "Fe", "Cl"), (2, 1, 1)),
+                (("Na", "Fe", "Cl"), (1, 1, 2)),
             },
         )
 
