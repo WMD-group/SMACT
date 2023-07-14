@@ -357,10 +357,15 @@ class TestSequenceFunctions(unittest.TestCase):
             result_comp_tuple[0].oxidation_states, (1, -1, -1)
         )
         self.assertEqual(
-            smact.screening.smact_filter(
-                [Na, Fe, Cl], threshold=2, species_unique=False
+            set(
+                smact.screening.smact_filter(
+                    [Na, Fe, Cl], threshold=2, species_unique=False
+                )
             ),
-            [(("Na", "Fe", "Cl"), (2, 1, 1)), (("Na", "Fe", "Cl"), (1, 1, 2))],
+            {
+                    (("Na", "Fe", "Cl"), (2, 1, 1)),
+                    (("Na", "Fe", "Cl"), (1, 1, 2)),
+            },
         )
 
         self.assertEqual(
