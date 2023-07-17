@@ -1,9 +1,15 @@
+[![DOI](http://joss.theoj.org/papers/10.21105/joss.01361/status.svg)](https://doi.org/10.21105/joss.01361)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5553202.svg)](https://doi.org/10.5281/zenodo.5553202)
 [![Documentation Status](https://readthedocs.org/projects/smact/badge/?version=latest)](http://smact.readthedocs.org/en/latest/?badge=latest)
-[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://travis-ci.org/WMD-group/SMACT.svg?branch=master)](https://travis-ci.org/WMD-group/SMACT)
-[![DOI](http://joss.theoj.org/papers/10.21105/joss.01361/status.svg)](https://doi.org/10.21105/joss.01361)
+![python version](https://img.shields.io/pypi/pyversions/smact)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPi](https://img.shields.io/pypi/v/smact)](https://pypi.org/project/SMACT/)
+[![GitHub issues](https://img.shields.io/github/issues-raw/WMD-Group/SMACT)](https://github.com/WMD-group/SMACT/issues)
+![dependencies](https://img.shields.io/librariesio/release/pypi/smact)
+[![CI Status](https://github.com/WMD-group/SMACT/actions/workflows/ci.yml/badge.svg)](https://github.com/WMD-group/SMACT/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/WMD-group/SMACT/branch/master/graph/badge.svg?token=UtgVxjoYNP)](https://codecov.io/gh/WMD-group/SMACT)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/smact)
 
 SMACT
 =====
@@ -75,7 +81,7 @@ List of modules
 Requirements
 ------------
 
-The main language is Python 3 and has been tested using Python 3.6+.
+The main language is Python 3 and has been tested using Python 3.8+.
 Basic requirements are Numpy and Scipy.
 The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](www.pymatgen.org) are also required for many components.
 
@@ -111,7 +117,7 @@ Development notes
 -----------------
 
 ### Bugs, features and questions
-Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact Dan Davies by e-mail: D.Davies16@imperial.ac.uk. 
+Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact either Dan Davies (author) or Anthony Onwuli (maintainer) by e-mail: d.w.davies@imperial.ac.uk or anthony.onwuli16@imperial.ac.uk respectively.
 
 ### Code contributions
 We are always looking for ways to make SMACT better and more useful to the wider community; contributions are very welcome. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following:
@@ -127,26 +133,6 @@ Run the tests using `python -m pytest -v`.
 (The final `-v` is optional and adds more detail to the output.)
 
 We also use integrated testing on Github via [GitHub Actions](hhttps://github.com/features/actions).
-
-### List of Developers
-Contributors to SMACT: 
-- Keith Butler
-- Daniel Davies
-- Jarvist Frost
-- Tim Gauntlet
-- Adam Jackson
-- Chloe (Jiwoo) Lee (이지우)
-- Alex Moriarty
-- Kazuki Morita
-- Anthony Onwuli
-- Jonathan Skelton
-- Aron Walsh
-
- Thanks to [JOSS](https://github.com/openjournals/joss-reviews/issues/1361) reviewers and editors: 
- - Adam Symington
- - Alex Ganose
- - Daniel Katz
- - Lorena Barba
 
 References
 ----------

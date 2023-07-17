@@ -93,11 +93,11 @@ def main():
     """
 
     # Obtain the unique oxidation states across all the elements considered.
-    oxidation_states = set(
+    oxidation_states = {
         oxidation_state
         for element in list(elements.values())
         for oxidation_state in element.oxidation_states
-    )
+    }
 
     # List unique oxidation-state combinations for each set of
     # n-element combinations
@@ -119,7 +119,7 @@ def main():
     print("Combinations of known oxidation states:")
 
     for i in range(2, max_n + 1):
-        print("m = {0}: {1}".format(i, len(oxidation_state_combinations[i])))
+        print(f"m = {i}: {len(oxidation_state_combinations[i])}")
 
     print("")
 
@@ -143,7 +143,9 @@ def main():
         #     neutral_stoichiometries.update({oxidation_states: count})
 
         def n_neutral_ratios(oxidation_states, threshold=8):
-            return len(smact.neutral_ratios(oxidation_states, threshold=threshold)[1])
+            return len(
+                smact.neutral_ratios(oxidation_states, threshold=threshold)[1]
+            )
 
         neutral_stoichiometries = {
             oxidation_states: n_neutral_ratios(
@@ -158,10 +160,14 @@ def main():
         # progress indicator.
 
         combination_count = sum(
-            count_iter(itertools.combinations(element_list, i)) for i in range(2, n + 1)
+            count_iter(itertools.combinations(element_list, i))
+            for i in range(2, n + 1)
         )
 
-        print(("Counting ({0} element combinations)" "...".format(combination_count)))
+        print(
+            "Counting ({} element combinations)"
+            "...".format(combination_count)
+        )
 
         # Combinations are counted in chunks set by count_progress_interval.
         # In Python 2.7 the // symbol is "integer division" which rounds
@@ -215,7 +221,9 @@ def main():
                 # Serial code path -- iteration over element combinations is
                 # done using the itertools.imap() function.
 
-                count = count + sum(map(count_element_combination, imap_arg_generator))
+                count = count + sum(
+                    map(count_element_combination, imap_arg_generator)
+                )
 
             # After each chunk, report the % progress, elapsed time and an
             # estimate of the remaining time.  The smact.pauling_test() calls
@@ -229,12 +237,13 @@ def main():
 
             time_elapsed = time.time() - start_time
             time_remaining = (
-                combination_count * (time_elapsed / data_pointer) - time_elapsed
+                combination_count * (time_elapsed / data_pointer)
+                - time_elapsed
             )
 
             print_status(
-                "  -> {0}/{1} done ({2:.2f} %); {3:.2f} s elapsed, "
-                "~{4:.2f} s remaining".format(
+                "  -> {}/{} done ({:.2f} %); {:.2f} s elapsed, "
+                "~{:.2f} s remaining".format(
                     data_pointer,
                     combination_count,
                     percent_done,
@@ -250,17 +259,16 @@ def main():
         # Print results and total time for counting.
 
         print(
-            (
-                "Number of charge-neutral stoichiometries for combinations "
-                "of {0} elements".format(n)
-            )
+            "Number of charge-neutral stoichiometries for combinations "
+            "of {} elements".format(n)
         )
         print(
-            ("(using known oxidation states, not including zero): " "{0}".format(count))
+            "(using known oxidation states, not including zero): "
+            "{}".format(count)
         )
         print("")
 
-        print("Total time for counting: {0:.3f} sec".format(total_time))
+        print(f"Total time for counting: {total_time:.3f} sec")
         print("")
 
 

@@ -12,7 +12,6 @@ are used in the background and it is not necessary to use them directly.
 
 import csv
 import os
-from builtins import map, next, zip
 
 from smact import data_directory
 
@@ -38,7 +37,7 @@ def set_warnings(enable=True):
 
 def _get_data_rows(filename):
     """Generator for datafile entries by row"""
-    with open(filename, "r") as file:
+    with open(filename) as file:
         for line in file:
             line = line.strip()
             if line[0] != "#":
@@ -101,7 +100,8 @@ def lookup_element_oxidation_states(symbol, copy=True):
     else:
         if _print_warnings:
             print(
-                "WARNING: Oxidation states for element {0} " "not found.".format(symbol)
+                "WARNING: Oxidation states for element {} "
+                "not found.".format(symbol)
             )
         return None
 
@@ -145,13 +145,16 @@ def lookup_element_oxidation_states_icsd(symbol, copy=True):
             # _el_ox_states_icsd stores lists -> if copy is set, make an implicit
             # deep copy. The elements of the lists are integers, which are
             # "value types" in Python.
-            return [oxidationState for oxidationState in _el_ox_states_icsd[symbol]]
+            return [
+                oxidationState for oxidationState in _el_ox_states_icsd[symbol]
+            ]
         else:
             return _el_ox_states_icsd[symbol]
     else:
         if _print_warnings:
             print(
-                "WARNING: Oxidation states for element {0}" "not found.".format(symbol)
+                "WARNING: Oxidation states for element {}"
+                "not found.".format(symbol)
             )
         return None
 
@@ -197,13 +200,16 @@ def lookup_element_oxidation_states_sp(symbol, copy=True):
             # deep copy.  The elements of the lists are integers, which are
             # "value types" in Python.
 
-            return [oxidationState for oxidationState in _el_ox_states_sp[symbol]]
+            return [
+                oxidationState for oxidationState in _el_ox_states_sp[symbol]
+            ]
         else:
             return _el_ox_states_sp[symbol]
     else:
         if _print_warnings:
             print(
-                "WARNING: Oxidation states for element {0} " "not found.".format(symbol)
+                "WARNING: Oxidation states for element {} "
+                "not found.".format(symbol)
             )
         return None
 
@@ -249,13 +255,16 @@ def lookup_element_oxidation_states_wiki(symbol, copy=True):
             # deep copy.  The elements of the lists are integers, which are
             # "value types" in Python.
 
-            return [oxidationState for oxidationState in _el_ox_states_wiki[symbol]]
+            return [
+                oxidationState for oxidationState in _el_ox_states_wiki[symbol]
+            ]
         else:
             return _el_ox_states_wiki[symbol]
     else:
         if _print_warnings:
             print(
-                "WARNING: Oxidation states for element {0} " "not found.".format(symbol)
+                "WARNING: Oxidation states for element {} "
+                "not found.".format(symbol)
             )
         return None
 
@@ -284,20 +293,25 @@ def lookup_element_hhis(symbol):
     if _element_hhis is None:
         _element_hhis = {}
 
-        with open(os.path.join(data_directory, "HHIs.txt"), "r") as file:
+        with open(os.path.join(data_directory, "HHIs.txt")) as file:
             for line in file:
                 line = line.strip()
 
                 if line[0] != "#":
                     items = line.split()
 
-                    _element_hhis[items[0]] = (float(items[1]), float(items[2]))
+                    _element_hhis[items[0]] = (
+                        float(items[1]),
+                        float(items[2]),
+                    )
 
     if symbol in _element_hhis:
         return _element_hhis[symbol]
     else:
         if _print_warnings:
-            print("WARNING: HHI data for element " "{0} not found.".format(symbol))
+            print(
+                "WARNING: HHI data for element " "{} not found.".format(symbol)
+            )
 
         return None
 
@@ -345,13 +359,17 @@ def lookup_element_data(symbol, copy=True):
             "ion_pot",
             "dipol",
         )
-        for items in _get_data_rows(os.path.join(data_directory, "element_data.txt")):
+        for items in _get_data_rows(
+            os.path.join(data_directory, "element_data.txt")
+        ):
             # First two columns are strings and should be left intact
             # Everything else is numerical and should be cast to a float
             # or, if not clearly a number, to None
             clean_items = items[0:2] + list(map(float_or_None, items[2:]))
 
-            _element_data.update({items[0]: dict(list(zip(keys, clean_items)))})
+            _element_data.update(
+                {items[0]: dict(list(zip(keys, clean_items)))}
+            )
 
     if symbol in _element_data:
         if copy:
@@ -366,7 +384,9 @@ def lookup_element_data(symbol, copy=True):
             return _element_data[symbol]
     else:
         if _print_warnings:
-            print("WARNING: Elemental data for {0}" " not found.".format(symbol))
+            print(
+                "WARNING: Elemental data for {}" " not found.".format(symbol)
+            )
             print(_element_data)
         return None
 
@@ -417,7 +437,7 @@ def lookup_element_shannon_radius_data(symbol, copy=True):
     if _element_shannon_radii_data is None:
         _element_shannon_radii_data = {}
 
-        with open(os.path.join(data_directory, "shannon_radii.csv"), "r") as file:
+        with open(os.path.join(data_directory, "shannon_radii.csv")) as file:
             reader = csv.reader(file)
 
             # Skip the first row (headers).
@@ -451,13 +471,15 @@ def lookup_element_shannon_radius_data(symbol, copy=True):
             # function on each element.
             # The dictionary values are all Python "value types", so
             # nothing further is required to make a deep copy.
-            return [item.copy() for item in _element_shannon_radii_data[symbol]]
+            return [
+                item.copy() for item in _element_shannon_radii_data[symbol]
+            ]
         else:
             return _element_shannon_radii_data[symbol]
     else:
         if _print_warnings:
             print(
-                "WARNING: Shannon-radius data for element {0} not "
+                "WARNING: Shannon-radius data for element {} not "
                 "found.".format(symbol)
             )
 
@@ -517,7 +539,7 @@ def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
         _element_shannon_radii_data_extendedML = {}
 
         with open(
-            os.path.join(data_directory, "shannon_radii_ML_extended.csv"), "r"
+            os.path.join(data_directory, "shannon_radii_ML_extended.csv")
         ) as file:
             reader = csv.reader(file)
 
@@ -553,14 +575,15 @@ def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
             # The dictionary values are all Python "value types", so
             # nothing further is required to make a deep copy.
             return [
-                item.copy() for item in _element_shannon_radii_data_extendedML[symbol]
+                item.copy()
+                for item in _element_shannon_radii_data_extendedML[symbol]
             ]
         else:
             return _element_shannon_radii_data_extendedML[symbol]
     else:
         if _print_warnings:
             print(
-                "WARNING: Extended Shannon-radius data for element {0} not "
+                "WARNING: Extended Shannon-radius data for element {} not "
                 "found.".format(symbol)
             )
 
@@ -607,7 +630,7 @@ def lookup_element_sse_data(symbol):
     if _element_ssedata is None:
         _element_ssedata = {}
 
-        with open(os.path.join(data_directory, "SSE.csv"), "r") as file:
+        with open(os.path.join(data_directory, "SSE.csv")) as file:
             reader = csv.reader(file)
 
             for row in reader:
@@ -627,7 +650,7 @@ def lookup_element_sse_data(symbol):
     else:
         if _print_warnings:
             print(
-                "WARNING: Solid-state energy data for element {0} not"
+                "WARNING: Solid-state energy data for element {} not"
                 " found.".format(symbol)
             )
 
@@ -672,7 +695,7 @@ def lookup_element_sse2015_data(symbol, copy=True):
     if _element_sse2015_data is None:
         _element_sse2015_data = {}
 
-        with open(os.path.join(data_directory, "SSE_2015.csv"), "r") as file:
+        with open(os.path.join(data_directory, "SSE_2015.csv")) as file:
             reader = csv.reader(file)
 
             for row in reader:
@@ -700,7 +723,7 @@ def lookup_element_sse2015_data(symbol, copy=True):
         if _print_warnings:
             print(
                 "WARNING: Solid-state energy (revised 2015) data for "
-                "element {0} not found.".format(symbol)
+                "element {} not found.".format(symbol)
             )
 
         return None
@@ -733,7 +756,7 @@ def lookup_element_sse_pauling_data(symbol):
     if _element_ssepauling_data is None:
         _element_ssepauling_data = {}
 
-        with open(os.path.join(data_directory, "SSE_Pauling.csv"), "r") as file:
+        with open(os.path.join(data_directory, "SSE_Pauling.csv")) as file:
             reader = csv.reader(file)
 
             for row in reader:
@@ -748,7 +771,7 @@ def lookup_element_sse_pauling_data(symbol):
             print(
                 "WARNING: Solid-state energy data from Pauling "
                 " electronegativity regression fit for "
-                " element {0} not found.".format(symbol)
+                " element {} not found.".format(symbol)
             )
 
         return None

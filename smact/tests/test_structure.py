@@ -91,7 +91,7 @@ class StructureTest(unittest.TestCase):
         for comp in self.TEST_SPECIES.keys():
             with self.subTest(comp=comp):
                 comp_file = os.path.join(files_dir, f"{comp}.txt")
-                with open(comp_file, "r") as f:
+                with open(comp_file) as f:
                     struct = SmactStructure.from_file(comp_file)
                     self.assertEqual(struct.as_poscar(), f.read())
 
@@ -124,7 +124,7 @@ class StructureTest(unittest.TestCase):
 
     def test_from_py_struct(self):
         """Test generation of SmactStructure from a pymatgen Structure."""
-        with open(TEST_PY_STRUCT, "r") as f:
+        with open(TEST_PY_STRUCT) as f:
             d = json.load(f)
             py_structure = pymatgen.core.Structure.from_dict(d)
 
@@ -135,10 +135,27 @@ class StructureTest(unittest.TestCase):
 
         self.assertStructAlmostEqual(s1, s2)
 
+    def test_from_py_struct_icsd(self):
+        """Test generation of SmactStructure from a pymatgen Structure using ICSD statistics to determine oxidation states."""
+        with open(TEST_PY_STRUCT) as f:
+            d = json.load(f)
+            py_structure = pymatgen.core.Structure.from_dict(d)
+
+        with ignore_warnings(smact.structure_prediction.logger):
+            s1 = SmactStructure.from_py_struct(
+                py_structure, determine_oxi="comp_ICSD"
+            )
+
+        s2 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
+
+        self.assertStructAlmostEqual(s1, s2)
+
     def test_has_species(self):
         """Test determining whether a species is in a `SmactStructure`."""
         s1 = SmactStructure(
-            *self._gen_empty_structure([("Ba", 2, 2), ("O", -2, 1), ("F", -1, 2)])
+            *self._gen_empty_structure(
+                [("Ba", 2, 2), ("O", -2, 1), ("F", -1, 2)]
+            )
         )
 
         self.assertTrue(s1.has_species(("Ba", 2)))
@@ -148,10 +165,14 @@ class StructureTest(unittest.TestCase):
     def test_smactStruc_comp_key(self):
         """Test generation of a composition key for `SmactStructure`s."""
         s1 = SmactStructure(
-            *self._gen_empty_structure([("Ba", 2, 2), ("O", -2, 1), ("F", -1, 2)])
+            *self._gen_empty_structure(
+                [("Ba", 2, 2), ("O", -2, 1), ("F", -1, 2)]
+            )
         )
         s2 = SmactStructure(
-            *self._gen_empty_structure([("Fe", 2, 1), ("Fe", 3, 2), ("O", -2, 4)])
+            *self._gen_empty_structure(
+                [("Fe", 2, 1), ("Fe", 3, 2), ("O", -2, 4)]
+            )
         )
 
         Ba = Species("Ba", 2)
@@ -160,8 +181,12 @@ class StructureTest(unittest.TestCase):
         Fe2 = Species("Fe", 2)
         Fe3 = Species("Fe", 3)
 
-        s3 = SmactStructure(*self._gen_empty_structure([(Ba, 2), (O, 1), (F, 2)]))
-        s4 = SmactStructure(*self._gen_empty_structure([(Fe2, 1), (Fe3, 2), (O, 4)]))
+        s3 = SmactStructure(
+            *self._gen_empty_structure([(Ba, 2), (O, 1), (F, 2)])
+        )
+        s4 = SmactStructure(
+            *self._gen_empty_structure([(Fe2, 1), (Fe3, 2), (O, 4)])
+        )
 
         Ba_2OF_2 = "Ba_2_2+F_2_1-O_1_2-"
         Fe_3O_4 = "Fe_2_3+Fe_1_2+O_4_2-"
@@ -181,7 +206,9 @@ class StructureTest(unittest.TestCase):
 
     def test_equality(self):
         """Test equality determination of `SmactStructure`."""
-        struct_files = [os.path.join(files_dir, f"{x}.txt") for x in ["CaTiO3", "NaCl"]]
+        struct_files = [
+            os.path.join(files_dir, f"{x}.txt") for x in ["CaTiO3", "NaCl"]
+        ]
         CaTiO3 = SmactStructure.from_file(struct_files[0])
         NaCl = SmactStructure.from_file(struct_files[1])
 
@@ -197,23 +224,32 @@ class StructureTest(unittest.TestCase):
     def test_ele_stoics(self):
         """Test acquiring element stoichiometries."""
         s1 = SmactStructure(
-            *self._gen_empty_structure([("Fe", 2, 1), ("Fe", 3, 2), ("O", -2, 4)])
+            *self._gen_empty_structure(
+                [("Fe", 2, 1), ("Fe", 3, 2), ("O", -2, 4)]
+            )
         )
         s1_stoics = {"Fe": 3, "O": 4}
         s2 = SmactStructure(
-            *self._gen_empty_structure([("Ba", 2, 2), ("O", -2, 1), ("F", -1, 2)])
+            *self._gen_empty_structure(
+                [("Ba", 2, 2), ("O", -2, 1), ("F", -1, 2)]
+            )
         )
         s2_stoics = {"Ba": 2, "O": 1, "F": 2}
 
         for test, expected in [(s1, s1_stoics), (s2, s2_stoics)]:
             with self.subTest(species=test.species):
-                self.assertEqual(SmactStructure._get_ele_stoics(test.species), expected)
+                self.assertEqual(
+                    SmactStructure._get_ele_stoics(test.species), expected
+                )
 
-    @unittest.skipUnless(os.environ.get("MPI_KEY"), "requires MPI key to be set.")
+    @unittest.skipUnless(
+        os.environ.get("MPI_KEY"), "requires MPI key to be set."
+    )
     def test_from_mp(self):
         """Test downloading structures from materialsproject.org."""
         # TODO Needs ensuring that the structure query gets the same
         # structure as we have downloaded.
+        # Need to modify the test for both legacy and next-gen queries
         api_key = os.environ.get("MPI_KEY")
 
         for comp, species in self.TEST_SPECIES.items():
@@ -258,11 +294,15 @@ class StructureDBTest(unittest.TestCase):
                 self.fail(e)
 
         with self.subTest(msg="Getting structure from table."):
-            struct_list = self.db.get_structs(struct.composition(), self.TEST_TABLE)
+            struct_list = self.db.get_structs(
+                struct.composition(), self.TEST_TABLE
+            )
             self.assertEqual(len(struct_list), 1)
             self.assertEqual(struct_list[0], struct)
 
-        struct_files = [os.path.join(files_dir, f"{x}.txt") for x in ["NaCl", "Fe"]]
+        struct_files = [
+            os.path.join(files_dir, f"{x}.txt") for x in ["NaCl", "Fe"]
+        ]
         structs = [SmactStructure.from_file(fname) for fname in struct_files]
 
         with self.subTest(msg="Adding multiple structures to table."):
@@ -293,7 +333,9 @@ class StructureDBTest(unittest.TestCase):
             [struct],
         ]
 
-        for spec, expected in zip(test_with_species_args, test_with_species_exp):
+        for spec, expected in zip(
+            test_with_species_args, test_with_species_exp
+        ):
             with self.subTest(msg=f"Retrieving species with {spec}"):
                 self.assertEqual(
                     self.db.get_with_species(spec, self.TEST_TABLE), expected
@@ -321,13 +363,15 @@ class CationMutatorTest(unittest.TestCase):
         """Set up the test initial structure and mutator."""
         cls.test_struct = SmactStructure.from_file(TEST_POSCAR)
 
-        cls.test_mutator = CationMutator.from_json(lambda_json=TEST_LAMBDA_JSON)
+        cls.test_mutator = CationMutator.from_json(
+            lambda_json=TEST_LAMBDA_JSON
+        )
         cls.test_pymatgen_mutator = CationMutator.from_json(
             lambda_json=None, alpha=lambda x, y: -5
         )
 
         # 5 random test species -> 5! test pairs
-        cls.test_species = sample(cls.test_pymatgen_mutator.specs, 5)
+        cls.test_species = sample(list(cls.test_pymatgen_mutator.specs), 5)
         cls.test_pairs = list(
             itertools.combinations_with_replacement(cls.test_species, 2)
         )
@@ -358,12 +402,15 @@ class CationMutatorTest(unittest.TestCase):
 
     def test_pymatgen_lambda_import(self):
         """Test importing pymatgen lambda table."""
-        self.assertIsInstance(self.test_pymatgen_mutator.lambda_tab, pd.DataFrame)
+        self.assertIsInstance(
+            self.test_pymatgen_mutator.lambda_tab, pd.DataFrame
+        )
 
     def test_lambda_interface(self):
         """Test getting lambda values."""
         test_cases = [
-            itertools.permutations(x) for x in [("A", "B"), ("A", "C"), ("B", "C")]
+            itertools.permutations(x)
+            for x in [("A", "B"), ("A", "C"), ("B", "C")]
         ]
 
         expected = [0.5, -5.0, 0.3]
@@ -372,7 +419,9 @@ class CationMutatorTest(unittest.TestCase):
             for spec_comb in test_case:
                 s1, s2 = spec_comb
                 with self.subTest(s1=s1, s2=s2):
-                    self.assertEqual(self.test_mutator.get_lambda(s1, s2), expectation)
+                    self.assertEqual(
+                        self.test_mutator.get_lambda(s1, s2), expectation
+                    )
 
     def test_ion_mutation(self):
         """Test mutating an ion of a SmactStructure."""
@@ -383,7 +432,9 @@ class CationMutatorTest(unittest.TestCase):
         BaTiO3 = SmactStructure.from_file(ba_file)
 
         with self.subTest(s1="CaTiO3", s2="BaTiO3"):
-            mutation = self.test_mutator._mutate_structure(CaTiO3, "Ca2+", "Ba2+")
+            mutation = self.test_mutator._mutate_structure(
+                CaTiO3, "Ca2+", "Ba2+"
+            )
             self.assertEqual(mutation, BaTiO3)
 
         na_file = os.path.join(files_dir, "NaCl.txt")
@@ -416,7 +467,9 @@ class CationMutatorTest(unittest.TestCase):
                 ]
 
                 test_df = pd.DataFrame(vals)
-                test_df: pd.DataFrame = test_df.pivot(index=0, columns=1, values=2)
+                test_df: pd.DataFrame = test_df.pivot(
+                    index=0, columns=1, values=2
+                )
 
                 # Slice to convert to series
                 assert_series_equal(cond_sub_probs_test, test_df.iloc[0])
@@ -534,7 +587,9 @@ class PredictorTest(unittest.TestCase):
         with self.subTest(msg="Acquiring predictions"):
             try:
                 predictions = list(
-                    sp.predict_structs(test_specs, thresh=0.02, include_same=False)
+                    sp.predict_structs(
+                        test_specs, thresh=0.02, include_same=False
+                    )
                 )
             except Exception as e:
                 self.fail(e)

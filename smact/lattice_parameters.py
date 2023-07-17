@@ -57,7 +57,8 @@ def wurtzite(shannon_radius):
         c = 2 * np.sqrt(2.0 / 3.0) * a
     else:
         # Scenario B: regular wurtzite, similar sizes
-        a = 2 * 0.817 * (shannon_radius[0] + shannon_radius[1])  # 0.817 is sin(109.6/2)
+        # 0.817 is sin(109.6/2)
+        a = 2 * 0.817 * (shannon_radius[0] + shannon_radius[1])
         b = a
         c = (shannon_radius[0] + shannon_radius[1]) * (
             2 + 2 * 0.335
@@ -247,9 +248,10 @@ def zincblende(shannon_radius):
     return a, b, c, alpha, beta, gamma
 
 
-## Zn-S-Zn angle is ~109.5 degrees (from a tetrahedron). It is exactly 2*invCos(-1/3).
-## The distance of that Zn-Zn (diagonally to half the face) is (using the cosine rule) is
+# Zn-S-Zn angle is ~109.5 degrees (from a tetrahedron). It is exactly 2*invCos(-1/3).
+# The distance of that Zn-Zn (diagonally to half the face) is (using the cosine rule) is
 # root[2(r1+r2)^2 - 2(r1+r2)^(2)cos(ZnSZn angle)].
+
 
 # B10
 def b10(shannon_radius):  # Litharge
@@ -266,7 +268,7 @@ def b10(shannon_radius):  # Litharge
     limiting_factors = [
         4 * (max(shannon_radius)) / np.sqrt(2),
         sum(shannon_radius) * 1.31,
-    ]  ## Explained below.
+    ]  # Explained below.
     a = max(limiting_factors)
     b = a
     c = a * 1.26  # Value taken for PbO http://www.mindat.org/min-2466.html#

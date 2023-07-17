@@ -81,13 +81,13 @@ class CationMutator:
 
         """
         if lambda_json is not None:
-            with open(lambda_json, "r") as f:
+            with open(lambda_json) as f:
                 lambda_dat = json.load(f)
         else:
             # Get pymatgen lambda table
             py_sp_dir = os.path.dirname(pymatgen_sp.__file__)
             pymatgen_lambda = os.path.join(py_sp_dir, "data", "lambda.json")
-            with open(pymatgen_lambda, "r") as f:
+            with open(pymatgen_lambda) as f:
                 lambda_dat = json.load(f)
 
             # Get rid of 'D1+' values to reflect pymatgen
@@ -237,8 +237,12 @@ class CationMutator:
         # Replace sites
         struct_buff.sites[final_species] = struct_buff.sites.pop(init_species)
         # And sort
-        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(" ")
-        struct_buff.sites = {spec: struct_buff.sites[spec] for spec in species_strs}
+        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(
+            " "
+        )
+        struct_buff.sites = {
+            spec: struct_buff.sites[spec] for spec in species_strs
+        }
 
         return struct_buff
 
@@ -264,7 +268,9 @@ class CationMutator:
         struct_buff = deepcopy(structure)
         init_spec_tup_list = [parse_spec(i) for i in init_species]
         struct_spec_tups = list(map(itemgetter(0, 1), struct_buff.species))
-        spec_loc = [struct_spec_tups.index(init_spec_tup_list[i]) for i in range(n)]
+        spec_loc = [
+            struct_spec_tups.index(init_spec_tup_list[i]) for i in range(n)
+        ]
 
         final_spec_tup_list = [parse_spec(i) for i in final_species]
 
@@ -285,11 +291,17 @@ class CationMutator:
 
         # Replace sites
         for i in range(n):
-            struct_buff.sites[final_species[i]] = struct_buff.sites.pop(init_species[i])
+            struct_buff.sites[final_species[i]] = struct_buff.sites.pop(
+                init_species[i]
+            )
 
         # And sort
-        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(" ")
-        struct_buff.sites = {spec: struct_buff.sites[spec] for spec in species_strs}
+        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(
+            " "
+        )
+        struct_buff.sites = {
+            spec: struct_buff.sites[spec] for spec in species_strs
+        }
 
         return struct_buff
 
@@ -327,7 +339,7 @@ class CationMutator:
         # Stack into matrix
         mat_sums = np.vstack([sums] * len(sums))
         # Make each element the product of (row_sum * col_sum)
-        mat_sums *= sums[:, None]
+        mat_sums *= sums.to_numpy()[:, None]
 
         corr /= mat_sums
 
@@ -360,7 +372,10 @@ class CationMutator:
 
     def cond_sub_prob(self, s1: str, s2: str) -> float:
         """Calculate the probability of substitution of one species with another."""
-        return np.exp(self.get_lambda(s1, s2)) / np.exp(self.get_lambdas(s2)).sum()
+        return (
+            np.exp(self.get_lambda(s1, s2))
+            / np.exp(self.get_lambdas(s2)).sum()
+        )
 
     def cond_sub_probs(self, s1: str) -> pd.Series:
         """Calculate the probabilities of substitution of a given species.
@@ -402,4 +417,7 @@ class CationMutator:
                     ]
                 ):
                     continue
-                yield (self._mutate_structure(structure, specie, new_spec), prob)
+                yield (
+                    self._mutate_structure(structure, specie, new_spec),
+                    prob,
+                )

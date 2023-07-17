@@ -1,15 +1,3 @@
-### This Jupyter notebook creates ntype ptype possiblie dopants for input species
-### using SMACT structure prediction
-### Working with Kieth from SCIML and Anthony
-
-###Doper ver 2
-
-# Now 'Doper' can generate possible n-type p-type dopants for multicomponent materials (i.e. Ternary, Quaternary etc).
-# Can plot the result of doping search within a single step
-# """ex) test= Doper(('Cu1+','Zn2+','Ge4+','S2-'))
-#         test.get_dopants(num_dopants = 10, plot_heatmap = True)"""
-
-
 from typing import List, Tuple
 
 from pymatgen.util import plotting
@@ -32,7 +20,9 @@ class Doper:
 
     """
 
-    def __init__(self, original_species: Tuple[str, ...], filepath: str = None):
+    def __init__(
+        self, original_species: Tuple[str, ...], filepath: str = None
+    ):
         """
         Intialise the `Doper` class with a tuple of species
 
@@ -42,7 +32,6 @@ class Doper:
         """
         self.original_species = original_species
         self._get_dopants(filepath)
-        
 
     def _get_cation_dopants(
         self, element_objects: List[smact.Element], cations: List[str]
@@ -87,7 +76,7 @@ class Doper:
                         if ele not in poss_p_type_an:
                             poss_p_type_an.append(ele)
         return poss_n_type_an, poss_p_type_an
-    
+
     def _get_dopants(self, filepath: str):
         cations = []
         anions = []
@@ -118,15 +107,23 @@ class Doper:
             for n_specie, p_specie in zip(poss_n_type_cat, poss_p_type_cat):
                 if cation == n_specie or cation == p_specie:
                     continue
-                n_type_cat.append((n_specie, cation, CM.sub_prob(cation, n_specie)))
-                p_type_cat.append((p_specie, cation, CM.sub_prob(cation, p_specie)))
+                n_type_cat.append(
+                    (n_specie, cation, CM.sub_prob(cation, n_specie))
+                )
+                p_type_cat.append(
+                    (p_specie, cation, CM.sub_prob(cation, p_specie))
+                )
 
         for anion in anions:
             for n_specie, p_specie in zip(poss_n_type_an, poss_p_type_an):
                 if anion == n_specie or cation == p_specie:
                     continue
-                n_type_an.append((n_specie, anion, CM.sub_prob(anion, n_specie)))
-                p_type_an.append((p_specie, anion, CM.sub_prob(anion, p_specie)))
+                n_type_an.append(
+                    (n_specie, anion, CM.sub_prob(anion, n_specie))
+                )
+                p_type_an.append(
+                    (p_specie, anion, CM.sub_prob(anion, p_specie))
+                )
 
         # [('B3+', 0.003), ('C4+', 0.001), (), (), ...] : list(tuple(str, float))
         # sort by probability
@@ -173,9 +170,10 @@ class Doper:
         # return the top (num_dopants) results for each case
         return results
 
-    def plot_dopants(self, 
-                     num_dopants: int = 5,
-        ) -> None:
+    def plot_dopants(
+        self,
+        num_dopants: int = 5,
+    ) -> None:
         """
         Uses pymatgen plotting utilities to plot the results of doping search
         Args:

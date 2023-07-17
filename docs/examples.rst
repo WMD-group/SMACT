@@ -108,6 +108,7 @@ We can look for neutral combos.
 .. code:: python
 
     import smact.screening
+    import pprint
 
     elements = ['Ti', 'Al', 'O']
     space = smact.element_dictionary(elements)
@@ -115,32 +116,50 @@ We can look for neutral combos.
     eles = [e[1] for e in space.items()]
     # We set a threshold for the stoichiometry of 4
     allowed_combinations = smact.screening.smact_filter(eles, threshold=4)
-    print(allowed_combinations)
+    pprint.pprint(allowed_combinations)
 
-    [(('Ti', 'Al', 'O'), (1, 3, 3)),
-     (('Ti', 'Al', 'O'), (2, 3, 4)),
-     (('Ti', 'Al', 'O'), (3, 1, 4)),
-     (('Ti', 'Al', 'O'), (1, 4, 4)),
-     (('Ti', 'Al', 'O'), (3, 1, 2)),
-     (('Ti', 'Al', 'O'), (3, 2, 4)),
-     (('Ti', 'Al', 'O'), (1, 2, 3)),
-     (('Ti', 'Al', 'O'), (1, 3, 4)),
-     (('Ti', 'Al', 'O'), (2, 4, 3)),
-     (('Ti', 'Al', 'O'), (2, 1, 3)),
-     (('Ti', 'Al', 'O'), (4, 2, 3)),
-     (('Ti', 'Al', 'O'), (1, 3, 2)),
-     (('Ti', 'Al', 'O'), (1, 2, 4)),
-     (('Ti', 'Al', 'O'), (1, 1, 2)),
-     (('Ti', 'Al', 'O'), (1, 2, 2)),
-     (('Ti', 'Al', 'O'), (1, 1, 4)),
-     (('Ti', 'Al', 'O'), (3, 1, 3)),
-     (('Ti', 'Al', 'O'), (2, 1, 4)),
-     (('Ti', 'Al', 'O'), (1, 1, 1)),
-     (('Ti', 'Al', 'O'), (2, 2, 3)),
-     (('Ti', 'Al', 'O'), (4, 1, 3)),
-     (('Ti', 'Al', 'O'), (1, 1, 3)),
-     (('Ti', 'Al', 'O'), (1, 4, 3)),
-     (('Ti', 'Al', 'O'), (2, 1, 2))]
+    [Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -2), stoichiometries=(1, 1, 1)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -2), stoichiometries=(1, 3, 2)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -2), stoichiometries=(2, 4, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -2), stoichiometries=(3, 1, 2)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -2), stoichiometries=(4, 2, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -1), stoichiometries=(1, 1, 2)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -1), stoichiometries=(1, 2, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -1), stoichiometries=(1, 3, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -1), stoichiometries=(2, 1, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 1, -1), stoichiometries=(3, 1, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 2, -2), stoichiometries=(2, 1, 2)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 2, -2), stoichiometries=(2, 2, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 2, -2), stoichiometries=(2, 3, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 2, -2), stoichiometries=(4, 1, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 2, -1), stoichiometries=(1, 1, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 2, -1), stoichiometries=(2, 1, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 3, -2), stoichiometries=(1, 1, 2)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 3, -2), stoichiometries=(3, 1, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(1, 3, -1), stoichiometries=(1, 1, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 1, -2), stoichiometries=(1, 2, 2)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 1, -2), stoichiometries=(1, 4, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 1, -2), stoichiometries=(2, 2, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 1, -2), stoichiometries=(3, 2, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 1, -1), stoichiometries=(1, 1, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 1, -1), stoichiometries=(1, 2, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 2, -2), stoichiometries=(1, 1, 2)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 2, -2), stoichiometries=(1, 2, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 2, -2), stoichiometries=(1, 3, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 2, -2), stoichiometries=(2, 1, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 2, -2), stoichiometries=(3, 1, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 2, -1), stoichiometries=(1, 1, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(2, 3, -2), stoichiometries=(1, 2, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(3, 1, -2), stoichiometries=(1, 1, 2)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(3, 1, -2), stoichiometries=(1, 3, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(3, 1, -1), stoichiometries=(1, 1, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(3, 2, -2), stoichiometries=(2, 1, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(3, 3, -2), stoichiometries=(1, 1, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(4, 1, -2), stoichiometries=(1, 2, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(4, 1, -2), stoichiometries=(1, 4, 4)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(4, 2, -2), stoichiometries=(1, 1, 3)),
+    Composition(element_symbols=('Ti', 'Al', 'O'), oxidation_states=(4, 2, -2), stoichiometries=(1, 2, 4))]
+
 
 There is `an example <https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb>`_
 of how this function can be combined with multiprocessing to rapidly explore large subsets of chemical space.

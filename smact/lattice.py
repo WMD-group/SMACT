@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-from builtins import object
 
 import numpy as np
 
 import smact
 
 
-class Lattice(object):
+class Lattice:
     """A unique set of Sites.
 
     Lattice objects define a general crystal structure, with a space group and
@@ -38,7 +37,7 @@ class Lattice(object):
         self.strukturbericht = strukturbericht
 
 
-class Site(object):
+class Site:
     """
     A single lattice site with a list of possible oxidation states.
 

@@ -4,23 +4,22 @@ Semiconducting Materials from Analogy and Chemical Theory
 A collection of fast screening tools from elemental data
 """
 
-# get correct path for datafiles when called from another directory
-from builtins import filter, map, object, range
+import itertools
+import warnings
+from math import gcd
+from operator import mul as multiply
 from os import path
+from typing import Iterable, List, Optional, Sequence, Tuple, Union
 
 import pandas as pd
 
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, "data")
-import itertools
-import warnings
-from math import gcd
-from operator import mul as multiply
-
+# get correct path for datafiles when called from another directory
 from smact import data_loader
 
 
-class Element(object):
+class Element:
     """Collection of standard elemental properties for given element.
 
     Data is drawn from "data/element.txt", part of the Open Babel
@@ -78,7 +77,7 @@ class Element(object):
 
     """
 
-    def __init__(self, symbol):
+    def __init__(self, symbol: str):
         """Initialise Element class
 
         Args:
@@ -89,7 +88,7 @@ class Element(object):
         dataset = data_loader.lookup_element_data(symbol, copy=False)
 
         if dataset == None:
-            raise NameError("Elemental data for {0} not found.".format(symbol))
+            raise NameError(f"Elemental data for {symbol} not found.")
 
         # Set coordination-environment data from the Shannon-radius data.
         # As above, it is safe to use copy = False with this Get* function.
@@ -132,7 +131,10 @@ class Element(object):
             ("mass", dataset["Mass"]),
             ("name", dataset["Name"]),
             ("number", dataset["Z"]),
-            ("oxidation_states", data_loader.lookup_element_oxidation_states(symbol)),
+            (
+                "oxidation_states",
+                data_loader.lookup_element_oxidation_states(symbol),
+            ),
             (
                 "oxidation_states_icsd",
                 data_loader.lookup_element_oxidation_states_icsd(symbol),
@@ -199,7 +201,13 @@ class Species(Element):
 
     """
 
-    def __init__(self, symbol, oxidation, coordination=4, radii_source="shannon"):
+    def __init__(
+        self,
+        symbol: str,
+        oxidation: int,
+        coordination: int = 4,
+        radii_source: str = "shannon",
+    ):
         Element.__init__(self, symbol)
 
         self.oxidation = oxidation
@@ -210,22 +218,28 @@ class Species(Element):
         self.shannon_radius = None
 
         if radii_source == "shannon":
-
-            shannon_data = data_loader.lookup_element_shannon_radius_data(symbol)
-
-        elif radii_source == "extended":
-            shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(
+            shannon_data = data_loader.lookup_element_shannon_radius_data(
                 symbol
             )
 
+        elif radii_source == "extended":
+            shannon_data = (
+                data_loader.lookup_element_shannon_radius_data_extendedML(
+                    symbol
+                )
+            )
+
         else:
-            print("Data source not recognised. Please select 'shannon' or 'extended'. ")
+            print(
+                "Data source not recognised. Please select 'shannon' or 'extended'. "
+            )
 
         if shannon_data:
             for dataset in shannon_data:
                 if (
                     dataset["charge"] == oxidation
-                    and str(coordination) == dataset["coordination"].split("_")[0]
+                    and str(coordination)
+                    == dataset["coordination"].split("_")[0]
                 ):
                     self.shannon_radius = dataset["crystal_radius"]
 
@@ -236,7 +250,8 @@ class Species(Element):
             for dataset in shannon_data:
                 if (
                     dataset["charge"] == oxidation
-                    and str(coordination) == dataset["coordination"].split("_")[0]
+                    and str(coordination)
+                    == dataset["coordination"].split("_")[0]
                 ):
                     self.ionic_radius = dataset["ionic_radius"]
 
@@ -249,7 +264,9 @@ class Species(Element):
             shannon_data_df = pd.DataFrame(shannon_data)
 
             # Get the rows corresponding to the oxidation state of the species
-            charge_rows = shannon_data_df.loc[shannon_data_df["charge"] == oxidation]
+            charge_rows = shannon_data_df.loc[
+                shannon_data_df["charge"] == oxidation
+            ]
 
             # Get the mean
             self.average_shannon_radius = charge_rows["crystal_radius"].mean()
@@ -268,7 +285,7 @@ class Species(Element):
             self.SSE_2015 = None
 
 
-def ordered_elements(x, y):
+def ordered_elements(x: int, y: int) -> List[str]:
     """
     Return a list of element symbols, ordered by proton number in the range x -> y
     Args:
@@ -276,7 +293,7 @@ def ordered_elements(x, y):
     Returns:
         list: Ordered list of element symbols
     """
-    with open(path.join(data_directory, "ordered_periodic.txt"), "r") as f:
+    with open(path.join(data_directory, "ordered_periodic.txt")) as f:
         data = f.readlines()
     elements = []
     for line in data:
@@ -290,7 +307,7 @@ def ordered_elements(x, y):
     return ordered_elements
 
 
-def element_dictionary(elements=None):
+def element_dictionary(elements: Optional[Iterable[str]] = None):
     """
     Create a dictionary of initialised smact.Element objects
 
@@ -309,8 +326,9 @@ def element_dictionary(elements=None):
     return {symbol: Element(symbol) for symbol in elements}
 
 
-def are_eq(A, B, tolerance=1e-4):
+def are_eq(A: list, B: list, tolerance: float = 1e-4):
     """Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
+
     Args:
         A, B (lists): 1-D list of values for approximate equality comparison
         tolerance: numerical precision for equality condition
@@ -350,7 +368,7 @@ def lattices_are_same(lattice1, lattice2, tolerance=1e-4):
     return lattices_are_same
 
 
-def _gcd_recursive(*args):
+def _gcd_recursive(*args: Iterable[int]):
     """
     Get the greatest common denominator among any number of ints
     """
@@ -360,7 +378,7 @@ def _gcd_recursive(*args):
         return gcd(args[0], _gcd_recursive(*args[1:]))
 
 
-def _isneutral(oxidations, stoichs):
+def _isneutral(oxidations: Tuple[int, ...], stoichs: Tuple[int, ...]):
     """
     Check if set of oxidation states is neutral in given stoichiometry
 
@@ -371,7 +389,11 @@ def _isneutral(oxidations, stoichs):
     return 0 == sum(map(multiply, oxidations, stoichs))
 
 
-def neutral_ratios_iter(oxidations, stoichs=False, threshold=5):
+def neutral_ratios_iter(
+    oxidations: List[int],
+    stoichs: Union[bool, List[List[int]]] = False,
+    threshold: Optional[int] = 5,
+):
     """
     Iterator for charge-neutral stoichiometries
 
@@ -401,7 +423,11 @@ def neutral_ratios_iter(oxidations, stoichs=False, threshold=5):
     )
 
 
-def neutral_ratios(oxidations, stoichs=False, threshold=5):
+def neutral_ratios(
+    oxidations: List[int],
+    stoichs: Union[bool, List[List[int]]] = False,
+    threshold=5,
+):
     """
     Get a list of charge-neutral compounds
 
@@ -433,7 +459,10 @@ def neutral_ratios(oxidations, stoichs=False, threshold=5):
             states which yield a charge-neutral structure
     """
     allowed_ratios = [
-        x for x in neutral_ratios_iter(oxidations, stoichs=stoichs, threshold=threshold)
+        x
+        for x in neutral_ratios_iter(
+            oxidations, stoichs=stoichs, threshold=threshold
+        )
     ]
     return (len(allowed_ratios) > 0, allowed_ratios)
 
