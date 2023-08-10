@@ -188,7 +188,7 @@ class Doper:
             "p-type anion substitutions": self.p_type_an[:num_dopants],
         }
         for key, val in results.items():
-            dict_results = {utilities.parse_spec(x)[0]: y for x, y in val}
+            dict_results = {utilities.parse_spec(x)[0]: y for x, _, y in val}
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
                 cmap="rainbow",
