@@ -5,10 +5,10 @@ __author_email__ = "d.w.davies@imperial.ac.uk"
 __copyright__ = (
     "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
 )
-__version__ = "2.5.1"
+__version__ = "2.5.3"
 __maintainer__ = "Anthony O. Onwuli"
 __maintaier_email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "May 2 2023"
+__date__ = "August 23 2023"
 
 import os
 import unittest
@@ -61,6 +61,7 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
             "Development Status :: 5 - Production/Stable",
             "Intended Audience :: Science/Research",
             "Operating System :: OS Independent",

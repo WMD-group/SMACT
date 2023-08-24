@@ -274,9 +274,12 @@ class SmactStructure:
                 )
                 struct = oxi_transform.apply_transformation(structure)
                 print("Oxidation states assigned based on ICSD statistics")
+        elif determine_oxi == "predecorated":
+            struct = structure
+
         else:
             raise ValueError(
-                f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either 'BV','comp_ICSD' or 'both'."
+                f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either 'BV','comp_ICSD','both' or 'predecorated'."
             )
 
         sites, species = SmactStructure.__parse_py_sites(struct)
