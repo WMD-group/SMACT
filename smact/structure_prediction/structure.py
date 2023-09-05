@@ -436,10 +436,7 @@ class SmactStructure:
         lattice_param = float(lines[1])
 
         lattice = np.array(
-            [
-                [float(point) for point in line.split(" ")]
-                for line in lines[2:5]
-            ]
+            [[float(point) for point in line.split(" ")] for line in lines[2:5]]
         )
 
         sites = defaultdict(list)

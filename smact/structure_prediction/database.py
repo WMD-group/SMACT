@@ -202,9 +202,7 @@ class StructureDB:
 
         return num
 
-    def get_structs(
-        self, composition: str, table: str
-    ) -> List[SmactStructure]:
+    def get_structs(self, composition: str, table: str) -> List[SmactStructure]:
         """Get SmactStructures for a given composition.
 
         Args:

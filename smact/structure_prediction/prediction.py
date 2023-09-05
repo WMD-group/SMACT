@@ -183,8 +183,7 @@ class StructurePredictor:
         sub_species = list(map(list, sub_species))
 
         potential_nary_parents: List[List[SmactStructure]] = list(
-            self.db.get_with_species(specs, self.table)
-            for specs in sub_species
+            self.db.get_with_species(specs, self.table) for specs in sub_species
         )
 
         for spec_idx, parents in enumerate(potential_nary_parents):

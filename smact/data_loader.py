@@ -420,9 +420,7 @@ def lookup_element_data(symbol, copy=True):
             # or, if not clearly a number, to None
             clean_items = items[0:2] + list(map(float_or_None, items[2:]))
 
-            _element_data.update(
-                {items[0]: dict(list(zip(keys, clean_items)))}
-            )
+            _element_data.update({items[0]: dict(list(zip(keys, clean_items)))})
 
     if symbol in _element_data:
         if copy:
@@ -437,9 +435,7 @@ def lookup_element_data(symbol, copy=True):
             return _element_data[symbol]
     else:
         if _print_warnings:
-            print(
-                "WARNING: Elemental data for {}" " not found.".format(symbol)
-            )
+            print("WARNING: Elemental data for {}" " not found.".format(symbol))
             print(_element_data)
         return None
 
@@ -524,9 +520,7 @@ def lookup_element_shannon_radius_data(symbol, copy=True):
             # function on each element.
             # The dictionary values are all Python "value types", so
             # nothing further is required to make a deep copy.
-            return [
-                item.copy() for item in _element_shannon_radii_data[symbol]
-            ]
+            return [item.copy() for item in _element_shannon_radii_data[symbol]]
         else:
             return _element_shannon_radii_data[symbol]
     else:

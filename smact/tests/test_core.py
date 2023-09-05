@@ -46,9 +46,7 @@ class TestSequenceFunctions(unittest.TestCase):
                 [1.00, 2.00, 3.00], [1.001, 1.999, 3.00], tolerance=1e-2
             )
         )
-        self.assertFalse(
-            smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00])
-        )
+        self.assertFalse(smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00]))
 
     def test_gcd_recursive(self):
         self.assertEqual(smact._gcd_recursive(4, 12, 10, 32), 2)

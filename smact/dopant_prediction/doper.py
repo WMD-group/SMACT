@@ -20,9 +20,7 @@ class Doper:
 
     """
 
-    def __init__(
-        self, original_species: Tuple[str, ...], filepath: str = None
-    ):
+    def __init__(self, original_species: Tuple[str, ...], filepath: str = None):
         """
         Intialise the `Doper` class with a tuple of species
 
