@@ -15,6 +15,9 @@ from smact import Species
 from smact.builder import wurtzite
 from smact.properties import band_gap_Harrison, compound_electroneg
 
+files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
+TEST_OX_STATES = os.path.join(files_dir, "test_oxidation_states.txt")
+
 
 class TestSequenceFunctions(unittest.TestCase):
     # ---------------- TOP-LEVEL ----------------
@@ -343,6 +346,12 @@ class TestSequenceFunctions(unittest.TestCase):
                 (("Na", "Fe", "Cl"), (1, -1, -1), (2, 1, 1)),
                 (("Na", "Fe", "Cl"), (1, 1, -1), (1, 1, 2)),
             ],
+        )
+        self.assertEqual(
+            result,
+            smact.screening.smact_filter(
+                [Na, Fe, Cl], threshold=2, oxidation_states_set=TEST_OX_STATES
+            ),
         )
         result_comp_tuple = smact.screening.smact_filter(
             [Na, Fe, Cl], threshold=2, comp_tuple=True
