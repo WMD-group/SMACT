@@ -1,10 +1,14 @@
 import itertools
+import os
 import warnings
 from collections import namedtuple
 from itertools import combinations
 from typing import Iterable, List, Optional, Tuple, Union
 
 from smact import Element, neutral_ratios
+from smact.data_loader import (
+    lookup_element_oxidation_states_custom as oxi_custom,
+)
 
 # Use named tuple to improve readability of smact_filter outputs
 _allowed_compositions = namedtuple(
@@ -371,10 +375,12 @@ def smact_filter(
     }
     if oxidation_states_set in oxi_set:
         ox_combos = oxi_set[oxidation_states_set]
+    elif os.path.exists(oxidation_states_set):
+        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
     else:
         raise (
             Exception(
-                f'{oxidation_states_set} is not valid. Enter either "default", "icsd", "pymatgen" or "wiki" for oxidation_states_set.'
+                f'{oxidation_states_set} is not valid. Enter either "default", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
             )
         )
     if oxidation_states_set == "wiki":
