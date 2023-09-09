@@ -5,6 +5,7 @@
 ![python version](https://img.shields.io/pypi/pyversions/smact)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPi](https://img.shields.io/pypi/v/smact)](https://pypi.org/project/SMACT/)
+[![Conda](https://anaconda.org/conda-forge/smact/badges/version.svg)](https://anaconda.org/conda-forge/smact)
 [![GitHub issues](https://img.shields.io/github/issues-raw/WMD-Group/SMACT)](https://github.com/WMD-group/SMACT/issues)
 ![dependencies](https://img.shields.io/librariesio/release/pypi/smact)
 [![CI Status](https://github.com/WMD-group/SMACT/actions/workflows/ci.yml/badge.svg)](https://github.com/WMD-group/SMACT/actions/workflows/ci.yml)
@@ -90,6 +91,12 @@ Installation
 The latest stable release of SMACT can be installed via pip which will automatically setup other Python packages as required:
 
     pip install smact  
+
+SMACT is also available via conda through the conda-forge channel on Anaconda Cloud:
+
+```
+conda install -c conda-forge smact
+```
 
 Alternatively, the very latest version can be installed using:
 
