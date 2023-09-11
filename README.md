@@ -60,7 +60,9 @@ Code features
 - The code also has some tools for manipulating common crystal lattice types: 
  - Common crystal structure types can be built using the [builder module](https://smact.readthedocs.io/en/latest/smact.builder.html)
  - Lattice parameters can be quickly estimated using ionic radii of the elements for various common crystal structure types using the [lattice_parameters module](https://smact.readthedocs.io/en/latest/smact.lattice_parameters.html).
- - The [lattice module](https://smact.readthedocs.io/en/latest/smact.lattice.html) and [distorter module](https://smact.readthedocs.io/en/latest/smact.distorter.html) rely on the [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase/) and can be used to generate unique atomic substitutions on a given crystal structure.  
+ - The [lattice module](https://smact.readthedocs.io/en/latest/smact.lattice.html) and [distorter module](https://smact.readthedocs.io/en/latest/smact.distorter.html) rely on the [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase/) and can be used to generate unique atomic substitutions on a given crystal structure.
+ - The [structure  prediction](https://smact.readthedocs.io/en/latest/smact.structure_prediction.html) module can be used to predict the structure of hypothetical compositions using species similarity measures.
+ - The [dopant prediction](https://smact.readthedocs.io/en/latest/smact.dopant_prediction.html) module can be used to facilitate high-throughput predictions of p-type and n-type dopants of multicomponent solids.
 
 List of modules
 -------
@@ -78,6 +80,9 @@ List of modules
   * **lattice_parameters.py** Estimation of lattice parameters for various lattice types using covalent/ionic radii.
   * **distorter.py** A collection of functions for enumerating and then
     substituting on inequivalent sites of a sub-lattice.
+  * **oxidation_states.py**: Used for predicting the likelihood of species coexisting in a compound based on a statistical model.
+  * **structure_prediction**: A submodule which contains a collection of tools for facilitating crystal structure predictions via ionic substitutions
+  * **dopant_prediction**: A submodule which contains a collections of tools for predicting n-type and p-type dopants.
 
 Requirements
 ------------
