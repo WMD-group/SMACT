@@ -37,7 +37,7 @@ class Doper:
     @property
     def original_species(self):
         return self._original_species
-    
+
     @original_species.setter
     def original_species(self, original_species):
         self._original_species = original_species
@@ -45,7 +45,7 @@ class Doper:
     @property
     def filepath(self):
         return self._filepath
-    
+
     @filepath.setter
     def filepath(self, filepath):
         self._filepath = filepath
@@ -199,7 +199,9 @@ class Doper:
         """
         try:
             for val in self.results.values():
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, y in val}
+                dict_results = {
+                    utilities.parse_spec(x)[0]: y for x, _, y in val
+                }
                 plotting.periodic_table_heatmap(
                     elemental_data=dict_results,
                     cmap="rainbow",
