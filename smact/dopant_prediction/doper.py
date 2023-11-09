@@ -12,7 +12,7 @@ class Doper:
     Methods: get_dopants, plot_dopants
 
     Attributes:
-        original_species: A tuple which describes the constituent species of a material. For example:
+        _original_species: A tuple which describes the constituent species of a material. For example:
 
             >>> test= Doper(("Zn2+","S2-"))
             >>> test.original_species
@@ -20,22 +20,42 @@ class Doper:
 
     """
 
-    def __init__(self, original_species: Tuple[str, ...], filepath: str = None):
+
+    def __init__(
+        self, _original_species: Tuple[str, ...], filepath: str = None
+    ):
         """
         Intialise the `Doper` class with a tuple of species
 
         Args:
-            original_species: See :class:`~.Doper`.
+            _original_species: See :class:`~.Doper`.
+            filepath (str): lambda table json file
 
         """
-        self.original_species = original_species
-        self._get_dopants(filepath)
+        self._original_species = _original_species
+        self._filepath = filepath
+
+    @property
+    def original_species(self):
+        return self._original_species
+
+    @original_species.setter
+    def original_species(self, original_species):
+        self._original_species = original_species
+
+    @property
+    def filepath(self):
+        return self._filepath
+
+    @filepath.setter
+    def filepath(self, filepath):
+        self._filepath = filepath
 
     def _get_cation_dopants(
         self, element_objects: List[smact.Element], cations: List[str]
     ):
-        poss_n_type_cat = []
-        poss_p_type_cat = []
+        poss_n_type_cat = set()
+        poss_p_type_cat = set()
 
         for element in element_objects:
             # [-2, -1, 0, +1, +2]
@@ -46,19 +66,17 @@ class Doper:
                     ele = utilities.unparse_spec((el_symbol, state))
                     _, charge = utilities.parse_spec(cation)
                     if state > charge:
-                        if ele not in poss_n_type_cat:
-                            poss_n_type_cat.append(ele)
+                        poss_n_type_cat.add(ele)
                     elif state < charge and state > 0:
-                        if ele not in poss_p_type_cat:
-                            poss_p_type_cat.append(ele)
+                        poss_p_type_cat.add(ele)
 
-        return poss_n_type_cat, poss_p_type_cat
+        return list(poss_n_type_cat), list(poss_p_type_cat)
 
     def _get_anion_dopants(
         self, element_objects: List[smact.Element], anions: List[str]
     ):
-        poss_n_type_an = []
-        poss_p_type_an = []
+        poss_n_type_an = set()
+        poss_p_type_an = set()
 
         for element in element_objects:
             oxi_state = element.oxidation_states
@@ -68,72 +86,10 @@ class Doper:
                     ele = utilities.unparse_spec((el_symbol, state))
                     _, charge = utilities.parse_spec(anion)
                     if state > charge and state < 0:
-                        if ele not in poss_n_type_an:
-                            poss_n_type_an.append(ele)
+                        poss_n_type_an.add(ele)
                     elif state < charge:
-                        if ele not in poss_p_type_an:
-                            poss_p_type_an.append(ele)
-        return poss_n_type_an, poss_p_type_an
-
-    def _get_dopants(self, filepath: str):
-        cations = []
-        anions = []
-        try:
-            for ion in self.original_species:
-                _, charge = utilities.parse_spec(ion)
-                if charge > 0:
-                    cations.append(ion)
-                elif charge < 0:
-                    anions.append(ion)
-        except Exception as e:
-            print(e, "charge is not defined")
-
-        CM = mutation.CationMutator.from_json(filepath)
-
-        # call all elements
-        element_objects = list(smact.element_dictionary().values())
-
-        poss_n_type_cat, poss_p_type_cat = self._get_cation_dopants(
-            element_objects, cations
-        )
-        poss_n_type_an, poss_p_type_an = self._get_anion_dopants(
-            element_objects, anions
-        )
-
-        n_type_cat, p_type_cat, n_type_an, p_type_an = [], [], [], []
-        for cation in cations:
-            for n_specie, p_specie in zip(poss_n_type_cat, poss_p_type_cat):
-                if cation == n_specie or cation == p_specie:
-                    continue
-                n_type_cat.append(
-                    (n_specie, cation, CM.sub_prob(cation, n_specie))
-                )
-                p_type_cat.append(
-                    (p_specie, cation, CM.sub_prob(cation, p_specie))
-                )
-
-        for anion in anions:
-            for n_specie, p_specie in zip(poss_n_type_an, poss_p_type_an):
-                if anion == n_specie or cation == p_specie:
-                    continue
-                n_type_an.append(
-                    (n_specie, anion, CM.sub_prob(anion, n_specie))
-                )
-                p_type_an.append(
-                    (p_specie, anion, CM.sub_prob(anion, p_specie))
-                )
-
-        # [('B3+', 0.003), ('C4+', 0.001), (), (), ...] : list(tuple(str, float))
-        # sort by probability
-        n_type_cat.sort(key=lambda x: x[-1], reverse=True)
-        p_type_cat.sort(key=lambda x: x[-1], reverse=True)
-        n_type_an.sort(key=lambda x: x[-1], reverse=True)
-        p_type_an.sort(key=lambda x: x[-1], reverse=True)
-
-        self.n_type_cat = n_type_cat
-        self.p_type_cat = p_type_cat
-        self.n_type_an = n_type_an
-        self.p_type_an = p_type_an
+                        poss_p_type_an.add(ele)
+        return list(poss_n_type_an), list(poss_p_type_an)
 
     def get_dopants(
         self,
@@ -159,38 +115,99 @@ class Doper:
                 ('C4-', 9.31310255126729e-08)]}
         """
 
-        results = {
-            "n-type cation substitutions": self.n_type_cat[:num_dopants],
-            "p-type cation substitutions": self.p_type_cat[:num_dopants],
-            "n-type anion substitutions": self.n_type_an[:num_dopants],
-            "p-type anion substitutions": self.p_type_an[:num_dopants],
+        cations = []
+        anions = []
+        try:
+            for ion in self._original_species:
+                _, charge = utilities.parse_spec(ion)
+                if charge > 0:
+                    cations.append(ion)
+                elif charge < 0:
+                    anions.append(ion)
+        except Exception as e:
+            print(f"{e}: charge is not defined for {ion}!")
+
+        CM = mutation.CationMutator.from_json(self._filepath)
+
+        # call all elements
+        element_objects = list(smact.element_dictionary().values())
+
+        poss_n_type_cat, poss_p_type_cat = self._get_cation_dopants(
+            element_objects, cations
+        )
+        poss_n_type_an, poss_p_type_an = self._get_anion_dopants(
+            element_objects, anions
+        )
+
+        n_type_cat, p_type_cat, n_type_an, p_type_an = [], [], [], []
+        for cation in cations:
+            cation_charge = utilities.parse_spec(cation)[1]
+            for n_specie in poss_n_type_cat:
+                n_specie_charge = utilities.parse_spec(n_specie)[1]
+                if cation_charge >= n_specie_charge:
+                    continue
+                n_type_cat.append(
+                    (n_specie, cation, CM.sub_prob(cation, n_specie))
+                )
+            for p_specie in poss_p_type_cat:
+                p_specie_charge = utilities.parse_spec(p_specie)[1]
+                if cation_charge <= p_specie_charge:
+                    continue
+                p_type_cat.append(
+                    (p_specie, cation, CM.sub_prob(cation, p_specie))
+                )
+
+        for anion in anions:
+            anion_charge = utilities.parse_spec(anion)[1]
+            for n_specie in poss_n_type_an:
+                n_specie_charge = utilities.parse_spec(n_specie)[1]
+                if anion == n_specie or anion_charge >= n_specie_charge:
+                    continue
+                n_type_an.append(
+                    (n_specie, anion, CM.sub_prob(anion, n_specie))
+                )
+            for p_specie in poss_p_type_an:
+                p_specie_charge = utilities.parse_spec(p_specie)[1]
+                if anion == p_specie or anion_charge <= p_specie_charge:
+                    continue
+                p_type_an.append(
+                    (p_specie, anion, CM.sub_prob(anion, p_specie))
+                )
+
+        # [('B3+', 0.003), ('C4+', 0.001), (), (), ...] : list(tuple(str, float))
+        # sort by probability
+        n_type_cat.sort(key=lambda x: x[-1], reverse=True)
+        p_type_cat.sort(key=lambda x: x[-1], reverse=True)
+        n_type_an.sort(key=lambda x: x[-1], reverse=True)
+        p_type_an.sort(key=lambda x: x[-1], reverse=True)
+
+        self.results = {
+            "n-type cation substitutions": n_type_cat[:num_dopants],
+            "p-type cation substitutions": p_type_cat[:num_dopants],
+            "n-type anion substitutions": n_type_an[:num_dopants],
+            "p-type anion substitutions": p_type_an[:num_dopants],
         }
         # return the top (num_dopants) results for each case
-        return results
+        return self.results
 
-    def plot_dopants(
-        self,
-        num_dopants: int = 5,
-    ) -> None:
+    def plot_dopants(self) -> None:
         """
         Uses pymatgen plotting utilities to plot the results of doping search
         Args:
-            num_dopants (int): The number of suggestions to return for n- and p-type dopants.
+            None
         Returns:
             None
         """
-        results = {
-            "n-type cation substitutions": self.n_type_cat[:num_dopants],
-            "p-type cation substitutions": self.p_type_cat[:num_dopants],
-            "n-type anion substitutions": self.n_type_an[:num_dopants],
-            "p-type anion substitutions": self.p_type_an[:num_dopants],
-        }
-        for key, val in results.items():
-            dict_results = {utilities.parse_spec(x)[0]: y for x, _, y in val}
-            plotting.periodic_table_heatmap(
-                elemental_data=dict_results,
-                cmap="rainbow",
-                blank_color="gainsboro",
-                edge_color="white",
-                show_plot=True,
-            )
+        try:
+            for val in self.results.values():
+                dict_results = {
+                    utilities.parse_spec(x)[0]: y for x, _, y in val
+                }
+                plotting.periodic_table_heatmap(
+                    elemental_data=dict_results,
+                    cmap="rainbow",
+                    blank_color="gainsboro",
+                    edge_color="white",
+                )
+        except AttributeError as e:
+            print(f"Dopants are not calculated. Run get_dopants first.")

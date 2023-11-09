@@ -1,13 +1,17 @@
 name: SMACT CI
 
-on: [push]
+on:
+  pull_request:
+  push:
+    branches:
+      - master
 
 jobs:
 
   qa:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: pre-commit/action@v3.0.0
 
   test:
@@ -20,7 +24,7 @@ jobs:
     
     runs-on: ${{matrix.os}}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -37,7 +41,7 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         #files: ./coverage.xml
-        fail_ci_if_error: true
+        fail_ci_if_error: False
         env_vars: OS,PYTHON
         verbose: true
 
