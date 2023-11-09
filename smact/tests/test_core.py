@@ -23,7 +23,9 @@ class TestSequenceFunctions(unittest.TestCase):
     # ---------------- TOP-LEVEL ----------------
 
     def test_Element_class_Pt(self):
-        Pt = smact.Element("Pt")
+        Pt = smact.Element(
+            "Pt",
+        )
         self.assertEqual(Pt.name, "Platinum")
         self.assertEqual(Pt.ionpot, 8.95883)
         self.assertEqual(Pt.number, 78)
@@ -37,9 +39,10 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_element_dictionary(self):
         newlist = ["O", "Rb", "W"]
-        dictionary = smact.element_dictionary(newlist)
+        dictionary = smact.element_dictionary(newlist, TEST_OX_STATES)
         self.assertEqual(dictionary["O"].crustal_abundance, 461000.0)
         self.assertEqual(dictionary["Rb"].oxidation_states, [-1, 1])
+        self.assertEqual(dictionary["Rb"].oxidation_states_custom, [-1, 1])
         self.assertEqual(dictionary["W"].name, "Tungsten")
         self.assertTrue("Rn" in smact.element_dictionary())
 
