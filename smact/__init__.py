@@ -59,6 +59,8 @@ class Element:
 
         Element.oxidation_states_wiki (list): List of oxidation states that appear wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) Data retrieved: 2022-09-22
 
+        Element.oxidation_states_custom (list | None ): List of oxidation states that appear in the custom data file supplied (if any)
+
         Element.coord_envs (list): The allowed coordination enviroments for the ion
 
         Element.covalent_radius (float) : Covalent radius of the element
@@ -77,15 +79,35 @@ class Element:
 
     """
 
-    def __init__(self, symbol: str):
+    def __init__(
+        self, symbol: str, oxi_states_custom_filepath: Optional[str] = None
+    ):
         """Initialise Element class
 
         Args:
             symbol (str): Chemical element symbol (e.g. 'Fe')
+            oxi_states_custom_filepath (str): Path to custom oxidation states file
 
         """
+        # Get the oxidation states from the custom file if it exists
+        if oxi_states_custom_filepath:
+            try:
+                self._oxidation_states_custom = (
+                    data_loader.lookup_element_oxidation_states_custom(
+                        symbol, oxi_states_custom_filepath
+                    )
+                )
+                self.oxidation_states_custom = self._oxidation_states_custom
+            except TypeError:
+                warnings.warn(
+                    "Custom oxidation states file not found. Please check the file path."
+                )
+                self.oxidation_states_custom = None
+        else:
+            self.oxidation_states_custom = None
+        self.symbol = symbol
 
-        dataset = data_loader.lookup_element_data(symbol, copy=False)
+        dataset = data_loader.lookup_element_data(self.symbol, copy=False)
 
         if dataset == None:
             raise NameError(f"Elemental data for {symbol} not found.")
@@ -307,7 +329,10 @@ def ordered_elements(x: int, y: int) -> List[str]:
     return ordered_elements
 
 
-def element_dictionary(elements: Optional[Iterable[str]] = None):
+def element_dictionary(
+    elements: Optional[Iterable[str]] = None,
+    oxi_states_custom_filepath: Optional[str] = None,
+):
     """
     Create a dictionary of initialised smact.Element objects
 
@@ -317,13 +342,22 @@ def element_dictionary(elements: Optional[Iterable[str]] = None):
     Args:
         elements (iterable of strings) : Elements to include. If None,
             use all elements up to 103.
+        oxi_states_custom_filepath (str): Path to custom oxidation states file
+
+
     Returns:
         dict: Dictionary with element symbols as keys and smact.Element
             objects as data
     """
     if elements == None:
         elements = ordered_elements(1, 103)
-    return {symbol: Element(symbol) for symbol in elements}
+    if oxi_states_custom_filepath:
+        return {
+            symbol: Element(symbol, oxi_states_custom_filepath)
+            for symbol in elements
+        }
+    else:
+        return {symbol: Element(symbol) for symbol in elements}
 
 
 def are_eq(A: list, B: list, tolerance: float = 1e-4):

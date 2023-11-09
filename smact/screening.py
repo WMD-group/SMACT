@@ -1,10 +1,14 @@
 import itertools
+import os
 import warnings
 from collections import namedtuple
 from itertools import combinations
 from typing import Iterable, List, Optional, Tuple, Union
 
 from smact import Element, neutral_ratios
+from smact.data_loader import (
+    lookup_element_oxidation_states_custom as oxi_custom,
+)
 
 # Use named tuple to improve readability of smact_filter outputs
 _allowed_compositions = namedtuple(
@@ -324,7 +328,7 @@ def smact_filter(
         threshold (int): Threshold for stoichiometry limit, default = 8
         stoichs (list[int]): A selection of valid stoichiometric ratios for each site.
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
-        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd', 'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
+        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd', 'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively. A filepath to an oxidation states text file can also be supplied as well.
         comp_tuple (bool): Whether or not to return the results as a named tuple of elements and stoichiometries (True) or as a normal tuple of elements and stoichiometries (False).
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
@@ -371,10 +375,12 @@ def smact_filter(
     }
     if oxidation_states_set in oxi_set:
         ox_combos = oxi_set[oxidation_states_set]
+    elif os.path.exists(oxidation_states_set):
+        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
     else:
         raise (
             Exception(
-                f'{oxidation_states_set} is not valid. Enter either "default", "icsd", "pymatgen" or "wiki" for oxidation_states_set.'
+                f'{oxidation_states_set} is not valid. Enter either "default", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
             )
         )
     if oxidation_states_set == "wiki":

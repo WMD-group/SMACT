@@ -15,12 +15,17 @@ from smact import Species
 from smact.builder import wurtzite
 from smact.properties import band_gap_Harrison, compound_electroneg
 
+files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
+TEST_OX_STATES = os.path.join(files_dir, "test_oxidation_states.txt")
+
 
 class TestSequenceFunctions(unittest.TestCase):
     # ---------------- TOP-LEVEL ----------------
 
     def test_Element_class_Pt(self):
-        Pt = smact.Element("Pt")
+        Pt = smact.Element(
+            "Pt",
+        )
         self.assertEqual(Pt.name, "Platinum")
         self.assertEqual(Pt.ionpot, 8.95883)
         self.assertEqual(Pt.number, 78)
@@ -34,9 +39,10 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_element_dictionary(self):
         newlist = ["O", "Rb", "W"]
-        dictionary = smact.element_dictionary(newlist)
+        dictionary = smact.element_dictionary(newlist, TEST_OX_STATES)
         self.assertEqual(dictionary["O"].crustal_abundance, 461000.0)
         self.assertEqual(dictionary["Rb"].oxidation_states, [-1, 1])
+        self.assertEqual(dictionary["Rb"].oxidation_states_custom, [-1, 1])
         self.assertEqual(dictionary["W"].name, "Tungsten")
         self.assertTrue("Rn" in smact.element_dictionary())
 
@@ -46,9 +52,7 @@ class TestSequenceFunctions(unittest.TestCase):
                 [1.00, 2.00, 3.00], [1.001, 1.999, 3.00], tolerance=1e-2
             )
         )
-        self.assertFalse(
-            smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00])
-        )
+        self.assertFalse(smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00]))
 
     def test_gcd_recursive(self):
         self.assertEqual(smact._gcd_recursive(4, 12, 10, 32), 2)
@@ -345,6 +349,12 @@ class TestSequenceFunctions(unittest.TestCase):
                 (("Na", "Fe", "Cl"), (1, -1, -1), (2, 1, 1)),
                 (("Na", "Fe", "Cl"), (1, 1, -1), (1, 1, 2)),
             ],
+        )
+        self.assertEqual(
+            result,
+            smact.screening.smact_filter(
+                [Na, Fe, Cl], threshold=2, oxidation_states_set=TEST_OX_STATES
+            ),
         )
         result_comp_tuple = smact.screening.smact_filter(
             [Na, Fe, Cl], threshold=2, comp_tuple=True
