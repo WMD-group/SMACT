@@ -20,7 +20,6 @@ class Doper:
 
     """
 
-
     def __init__(
         self, _original_species: Tuple[str, ...], filepath: str = None
     ):
