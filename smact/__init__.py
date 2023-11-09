@@ -59,7 +59,7 @@ class Element:
 
         Element.oxidation_states_wiki (list): List of oxidation states that appear wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) Data retrieved: 2022-09-22
 
-        Element.oxidation_states_custom (list): List of oxidation states that appear in the custom data file supplied
+        Element.oxidation_states_custom (list | None ): List of oxidation states that appear in the custom data file supplied (if any)
 
         Element.coord_envs (list): The allowed coordination enviroments for the ion
 
@@ -342,6 +342,7 @@ def element_dictionary(
     Args:
         elements (iterable of strings) : Elements to include. If None,
             use all elements up to 103.
+        oxi_states_custom_filepath (str): Path to custom oxidation states file
 
 
     Returns:
