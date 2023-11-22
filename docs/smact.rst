@@ -11,7 +11,7 @@ which returns a dictionary of :class:`smact.Element` objects indexed
 by their chemical symbols.
 Generating this dictionary once and then performing lookups is
 generally the fastest way of accessing element data while enumerating
-possibilities.
+possibilities in chemical space.
 
 .. automodule:: smact
     :members:

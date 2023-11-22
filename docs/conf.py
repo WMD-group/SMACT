@@ -52,8 +52,8 @@ master_doc = "index"
 
 # General information about the project.
 project = "Smact"
-copyright = "2016, Walsh Materials Design Group"
-author = "Walsh Materials Design Group"
+copyright = "2016, Materials Design Group"
+author = "Materials Design Group"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
