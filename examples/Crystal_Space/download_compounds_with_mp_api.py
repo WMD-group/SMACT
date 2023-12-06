@@ -1,13 +1,13 @@
-import json
-import time
-import string
 import itertools
-from pathlib import Path
+import json
+import string
+import time
 from collections import defaultdict
-from tqdm import tqdm
+from pathlib import Path
 
 from mp_api.client import MPRester
 from pymatgen.core.composition import Composition
+from tqdm import tqdm
 
 
 def download_mp_data(
@@ -53,9 +53,7 @@ def download_mp_data(
         range(1, max_stoich + 1), num_elements
     ):
         formula_dict = {symbols[i]: stoich for i, stoich in enumerate(stoichs)}
-        formula_anonymous_list.append(
-            Composition(formula_dict).reduced_formula
-        )
+        formula_anonymous_list.append(Composition(formula_dict).reduced_formula)
     formula_anonymous_list = sorted(set(formula_anonymous_list))
 
     e_hull_dict = defaultdict(lambda: float("inf"))

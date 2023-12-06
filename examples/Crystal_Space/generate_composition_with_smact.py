@@ -1,13 +1,12 @@
-import warnings
-from pathlib import Path
-
 import itertools
 import multiprocessing
+import warnings
 from functools import partial
+from pathlib import Path
 
-from tqdm import tqdm
 import pandas as pd
 from pymatgen.core.composition import Composition
+from tqdm import tqdm
 
 from smact import Element, ordered_elements
 from smact.screening import smact_filter
@@ -21,9 +20,7 @@ def convert_formula(combinations, num_elements, max_stoich):
     for counts in itertools.product(
         range(1, max_stoich + 1), repeat=num_elements
     ):
-        formula_dict = {
-            symbol: count for symbol, count in zip(symbols, counts)
-        }
+        formula_dict = {symbol: count for symbol, count in zip(symbols, counts)}
         formula = Composition(formula_dict).reduced_formula
         local_compounds.append(formula)
     return local_compounds

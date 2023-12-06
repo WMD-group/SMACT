@@ -1,10 +1,9 @@
-from typing import List
 from pathlib import Path
+from typing import List
 
 import pandas as pd
-
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 def update_layout(
