@@ -18,7 +18,7 @@ from smact.properties import band_gap_Harrison, compound_electroneg
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_OX_STATES = os.path.join(files_dir, "test_oxidation_states.txt")
-TEST_STRUCT = os.path.join(files_dir, "mp-540839_CsPbI3_oxi.cif")
+TEST_STRUCT = os.path.join(files_dir, "mp-540839_CsPbI3_oxi.json")
 
 
 class TestSequenceFunctions(unittest.TestCase):
