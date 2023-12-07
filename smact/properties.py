@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from numpy import product, sqrt
+import numpy as np
 
 import smact
 
@@ -70,10 +70,10 @@ def band_gap_Harrison(
     V1_bar = (V1_An + V1_Cat) / 2
     V2 = 2.16 * hbarsq_over_m / (d**2)
     V3 = (Cat.eig - An.eig) / 2
-    alpha_m = (1.11 * V1_bar) / sqrt(V2**2 + V3**2)
+    alpha_m = (1.11 * V1_bar) / np.sqrt(V2**2 + V3**2)
 
     # Calculate Band gap [(3-43) Harrison 1980 ]
-    Band_gap = (3.60 / 3.0) * (sqrt(V2**2 + V3**2)) * (1 - alpha_m)
+    Band_gap = (3.60 / 3.0) * (np.sqrt(V2**2 + V3**2)) * (1 - alpha_m)
     if verbose:
         print("V1_bar = ", V1_bar)
         print("V2 = ", V2)
@@ -150,7 +150,7 @@ def compound_electroneg(
         elementlist[i] = [elementlist[i] ** stoichslist[i]]
 
     # Calculate geometric mean (n-th root of product)
-    prod = product(elementlist)
+    prod = np.prod(elementlist)
     compelectroneg = (prod) ** (1.0 / (sum(stoichslist)))
 
     if verbose:
