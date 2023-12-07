@@ -6,25 +6,23 @@
 #
 ase==3.22.1
     # via SMACT (setup.py)
-certifi==2023.7.22
+certifi==2023.11.17
     # via requests
-charset-normalizer==3.2.0
+charset-normalizer==3.3.2
     # via requests
-contourpy==1.1.0
+contourpy==1.2.0
     # via matplotlib
-cycler==0.11.0
+cycler==0.12.1
     # via matplotlib
 dill==0.3.7
     # via
     #   multiprocess
     #   pathos
-emmet-core==0.66.0
-    # via mp-api
-fonttools==4.42.1
+fonttools==4.46.0
     # via matplotlib
 future==0.18.3
     # via uncertainties
-idna==3.4
+idna==3.6
     # via requests
 joblib==1.3.2
     # via pymatgen
@@ -32,26 +30,19 @@ kiwisolver==1.4.5
     # via matplotlib
 latexcodec==2.0.1
     # via pybtex
-matplotlib==3.7.2
+matplotlib==3.8.2
     # via
     #   ase
     #   pymatgen
-monty==2023.8.8
-    # via
-    #   emmet-core
-    #   mp-api
-    #   pymatgen
-mp-api==0.35.1
+monty==2023.11.3
     # via pymatgen
 mpmath==1.3.0
     # via sympy
-msgpack==1.0.5
-    # via mp-api
 multiprocess==0.70.15
     # via pathos
-networkx==3.1
+networkx==3.2.1
     # via pymatgen
-numpy==1.24.4
+numpy==1.26.2
     # via
     #   SMACT (setup.py)
     #   ase
@@ -61,58 +52,47 @@ numpy==1.24.4
     #   pymatgen
     #   scipy
     #   spglib
-packaging==23.1
+packaging==23.2
     # via
     #   matplotlib
     #   plotly
 palettable==3.3.3
     # via pymatgen
-pandas==2.0.3
+pandas==2.1.3
     # via
     #   SMACT (setup.py)
     #   pymatgen
 pathos==0.3.1
     # via SMACT (setup.py)
-pillow==10.0.1
+pillow==10.1.0
     # via matplotlib
-plotly==5.16.1
+plotly==5.18.0
     # via pymatgen
 pox==0.3.3
     # via pathos
 ppft==1.7.6.7
     # via pathos
 pybtex==0.24.0
-    # via
-    #   emmet-core
-    #   pymatgen
-pydantic==1.10.13
-    # via
-    #   emmet-core
-    #   pymatgen
-pymatgen==2023.7.20
-    # via
-    #   SMACT (setup.py)
-    #   emmet-core
-    #   mp-api
-pyparsing==3.0.9
+    # via pymatgen
+pymatgen==2023.11.12
+    # via SMACT (setup.py)
+pyparsing==3.1.1
     # via matplotlib
 python-dateutil==2.8.2
     # via
     #   matplotlib
     #   pandas
-pytz==2023.3
+pytz==2023.3.post1
     # via pandas
 pyyaml==6.0.1
     # via pybtex
 requests==2.31.0
-    # via
-    #   mp-api
-    #   pymatgen
-ruamel-yaml==0.17.32
     # via pymatgen
-ruamel-yaml-clib==0.2.7
+ruamel-yaml==0.18.5
+    # via pymatgen
+ruamel-yaml-clib==0.2.8
     # via ruamel-yaml
-scipy==1.10.1
+scipy==1.11.4
     # via
     #   SMACT (setup.py)
     #   ase
@@ -122,10 +102,9 @@ six==1.16.0
     #   latexcodec
     #   pybtex
     #   python-dateutil
-spglib==2.0.2
+spglib==2.1.0
     # via
     #   SMACT (setup.py)
-    #   emmet-core
     #   pymatgen
 sympy==1.12
     # via pymatgen
@@ -135,17 +114,9 @@ tenacity==8.2.3
     # via plotly
 tqdm==4.66.1
     # via pymatgen
-typing-extensions==4.7.1
-    # via
-    #   emmet-core
-    #   mp-api
-    #   pydantic
 tzdata==2023.3
     # via pandas
 uncertainties==3.1.7
     # via pymatgen
-urllib3==2.0.7
+urllib3==2.1.0
     # via requests
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
