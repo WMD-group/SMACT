@@ -1,10 +1,13 @@
+from typing import Callable, List, Tuple, Type, Union
+
 import numpy as np
-import smact
-from typing import Callable, List, Tuple, Union, Type
 from pymatgen.util import plotting
+
+import smact
+from smact import Element, element_dictionary
 from smact.structure_prediction import mutation, utilities
 from smact.structure_prediction.mutation import CationMutator
-from smact import Element, element_dictionary
+
 
 class Doper:
     """
@@ -12,9 +15,7 @@ class Doper:
     Methods: get_dopants, plot_dopants
     """
 
-    def __init__(
-        self, original_species: Tuple[str, ...], filepath: str = None
-    ):
+    def __init__(self, original_species: Tuple[str, ...], filepath: str = None):
         """
         Intialise the `Doper` class with a tuple of species
 
@@ -38,7 +39,7 @@ class Doper:
         """
         e_x = np.exp(x - np.max(x))
         return e_x / e_x.sum()
-    
+
     def _apply_softmax(self, data: List[smact.Element]) -> List[smact.Element]:
         """
         Apply the softmax function to the probabilities in a list of Element objects.
@@ -55,8 +56,14 @@ class Doper:
         for element, softmax_prob in zip(data, softmax_probabilities):
             element[2] = softmax_prob
         return data
-    
-    def _get_selectivity(self, data_list: List[smact.Element], cations: List[smact.Element], CM:Type[CationMutator], sub):
+
+    def _get_selectivity(
+        self,
+        data_list: List[smact.Element],
+        cations: List[smact.Element],
+        CM: Type[CationMutator],
+        sub,
+    ):
         data = data_list.copy()
         for dopants in data:
             if sub == "anion":
@@ -67,18 +74,18 @@ class Doper:
             for cation in cations:
                 if cation != original_specie:
                     sum_prob += CM.sub_prob(cation, selected_site)
-            
+
             selectivity = sub_prob / sum_prob
             selectivity = round(selectivity, 2)
             dopants.append(selectivity)
-        
+
         return data
 
     def _get_dopants(
-        self, 
-        element_objects: List[smact.Element], 
+        self,
+        element_objects: List[smact.Element],
         spicie_ions: List[str],
-        ion_type: str
+        ion_type: str,
     ):
         """
         Get possible dopants for a given list of elements and dopants.
@@ -117,16 +124,13 @@ class Doper:
         return list(poss_n_type), list(poss_p_type)
 
     def get_dopants(
-        self,
-        num_dopants: int = 5,
-        apply_softmax=False,
-        get_selectivity=True
+        self, num_dopants: int = 5, apply_softmax=False, get_selectivity=True
     ) -> dict:
         """
         Args:
             num_dopants (int): The number of suggestions to return for n- and p-type dopants.
             apply_softmax (bool): Whether to apply softmax to probabilities. (default = True)
-            get_selectivity (bool): Whether 
+            get_selectivity (bool): Whether
         Returns:
             (dict): Dopant suggestions, given as a dictionary with keys
             "n_type_cation", "p_type_cation", "n_type_anion", "p_type_anion".
@@ -145,7 +149,7 @@ class Doper:
         """
 
         cations, anions = [], []
-        
+
         for ion in self.original_species:
             try:
                 _, charge = utilities.parse_spec(ion)
@@ -198,7 +202,7 @@ class Doper:
                 n_type_an.append(
                     [n_specie, anion, CM.sub_prob(anion, n_specie)]
                 )
-                
+
             for p_specie in poss_p_type_an:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if anion_charge <= p_specie_charge:
@@ -212,22 +216,26 @@ class Doper:
         # sort by probability
         for dopants_list in dopants_lists:
             dopants_list.sort(key=lambda x: x[-1], reverse=True)
-        
+
         # select top n elements
-        dopants_lists = [dopants_list[:num_dopants] for dopants_list in dopants_lists]
+        dopants_lists = [
+            dopants_list[:num_dopants] for dopants_list in dopants_lists
+        ]
 
         if get_selectivity:
             for i in range(len(dopants_lists)):
                 sub = "cation"
                 if i > 1:
                     sub = "anion"
-                dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, CM, sub)
+                dopants_lists[i] = self._get_selectivity(
+                    dopants_lists[i], cations, CM, sub
+                )
 
         if apply_softmax:
             # apply a softmax function
             for i in range(len(dopants_lists)):
                 dopants_lists[i] = self._apply_softmax(dopants_lists[i])
-        
+
         keys = [
             "n-type cation substitutions",
             "p-type cation substitutions",
@@ -248,7 +256,9 @@ class Doper:
         Returns:
             None
         """
-        assert self.results, "Dopants are not calculated. Run get_dopants first."
+        assert (
+            self.results
+        ), "Dopants are not calculated. Run get_dopants first."
 
         for dopant_type, dopants in self.results.items():
             dict_results = {
