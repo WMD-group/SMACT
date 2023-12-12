@@ -373,8 +373,7 @@ class CationMutator:
     def cond_sub_prob(self, s1: str, s2: str) -> float:
         """Calculate the probability of substitution of one species with another."""
         return (
-            np.exp(self.get_lambda(s1, s2))
-            / np.exp(self.get_lambdas(s2)).sum()
+            np.exp(self.get_lambda(s1, s2)) / np.exp(self.get_lambdas(s2)).sum()
         )
 
     def cond_sub_probs(self, s1: str) -> pd.Series:

@@ -15,7 +15,7 @@ and `pymatgen <http://pymatgen.org>`_ are also required for many components.
 Installation
 ============
 
-The latest stable release of SMACT can be installed via pip which will automatically setup other Python packages as required:
+The latest stable release of SMACT can be installed via pip, which will automatically setup other Python packages as required:
 
 .. code::
 

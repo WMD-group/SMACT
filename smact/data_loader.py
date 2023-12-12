@@ -269,6 +269,59 @@ def lookup_element_oxidation_states_wiki(symbol, copy=True):
         return None
 
 
+_el_ox_states_custom = None
+
+
+def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
+    """
+    Retrieve a list of known oxidation states for an element.
+    The oxidation states list is specified by the user in a text file.
+
+    Args:
+        symbol (str) : the atomic symbol of the element to look up.
+        copy (Optional(bool)): if True (default), return a copy of the
+            oxidation-state list, rather than a reference to the cached
+            data -- only use copy=False in performance-sensitive code
+            and where the list will not be modified!
+
+    Returns:
+        list: List of known oxidation states for the element.
+
+            Return None if oxidation states for the Element were not
+            found in the external data.
+    """
+
+    global _el_ox_states_custom
+
+    if _el_ox_states_custom is None:
+        _el_ox_states_custom = {}
+
+        for items in _get_data_rows(filepath):
+            _el_ox_states_custom[items[0]] = [
+                int(oxidationState) for oxidationState in items[1:]
+            ]
+
+    if symbol in _el_ox_states_custom:
+        if copy:
+            # _el_ox_states_custom stores lists -> if copy is set, make an implicit
+            # deep copy.  The elements of the lists are integers, which are
+            # "value types" in Python.
+
+            return [
+                oxidationState
+                for oxidationState in _el_ox_states_custom[symbol]
+            ]
+        else:
+            return _el_ox_states_custom[symbol]
+    else:
+        if _print_warnings:
+            print(
+                "WARNING: Oxidation states for element {} "
+                "not found.".format(symbol)
+            )
+        return None
+
+
 # Loader and cache for the element HHI scores.
 
 _element_hhis = None
@@ -367,9 +420,7 @@ def lookup_element_data(symbol, copy=True):
             # or, if not clearly a number, to None
             clean_items = items[0:2] + list(map(float_or_None, items[2:]))
 
-            _element_data.update(
-                {items[0]: dict(list(zip(keys, clean_items)))}
-            )
+            _element_data.update({items[0]: dict(list(zip(keys, clean_items)))})
 
     if symbol in _element_data:
         if copy:
@@ -384,9 +435,7 @@ def lookup_element_data(symbol, copy=True):
             return _element_data[symbol]
     else:
         if _print_warnings:
-            print(
-                "WARNING: Elemental data for {}" " not found.".format(symbol)
-            )
+            print("WARNING: Elemental data for {}" " not found.".format(symbol))
             print(_element_data)
         return None
 
@@ -471,9 +520,7 @@ def lookup_element_shannon_radius_data(symbol, copy=True):
             # function on each element.
             # The dictionary values are all Python "value types", so
             # nothing further is required to make a deep copy.
-            return [
-                item.copy() for item in _element_shannon_radii_data[symbol]
-            ]
+            return [item.copy() for item in _element_shannon_radii_data[symbol]]
         else:
             return _element_shannon_radii_data[symbol]
     else:
