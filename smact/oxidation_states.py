@@ -12,7 +12,8 @@ from typing import Dict, Optional, Tuple
 
 from numpy import mean
 from pymatgen.core import Structure
-from pymatgen.core.periodic_table import Specie as pmgSpecies
+from pymatgen.core.periodic_table import Species as pmgSpecies
+from pymatgen.core.periodic_table import get_el_sp
 
 from smact import Element, Species, data_directory
 
@@ -146,7 +147,13 @@ class Oxidation_state_probability_finder:
             if not all(isinstance(i, pmgSpecies) for i in species):
                 raise TypeError("Structure must have oxidation states.")
             else:
-                structure = [Species(i.symbol, i.oxi_state) for i in structure]
+                structure = [
+                    Species(
+                        get_el_sp(i.species_string).symbol,
+                        get_el_sp(i.species_string).oxi_state,
+                    )
+                    for i in structure
+                ]
         else:
             raise TypeError(
                 "Input requires a list of SMACT or Pymatgen Species or a Structure."

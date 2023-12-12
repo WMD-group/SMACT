@@ -2,8 +2,8 @@
 Examples
 ========
 
-Here we will give a demonstration of how to use some of `smact`'s features. For a full set of
-work-through examples in Jupyter notebook form check out
+Here we will give a demonstration of how to use some `smact` features. For a full set of
+work-through examples in Jupyter Notebook form check out
 `the examples section of our GitHub repo <https://github.com/WMD-group/SMACT/tree/master/examples>`_.
 For workflows that have been used in real examples and in published work, visit our
 `separate repository <https://github.com/WMD-group/smact_workflows>`_.
@@ -12,7 +12,7 @@ For workflows that have been used in real examples and in published work, visit 
 Element and species classes
 ===========================
 
-The element and species classes are at the heart of :mod:`smact`'s functionality. Elements are the
+The element and species classes are at the heart of :mod:`smact` functionality. Elements are the
 elements of the periodic table. Species are elements, with some additional information; the
 oxidation state and the coordination environment (if known). So for example the element iron
 can have many oxidation states and those oxidation states can have many coordination
@@ -29,7 +29,7 @@ environments.
     The element Fe has 8 oxidation states. They are [-2, -1, 1, 2, 3, 4, 5, 6].
 
 When an element has an oxidation state and coordination environment then it has additional
-features. For example the Shannon radius [1]_ of the element, this is often useful for calculating
+features. For example, the Shannon radius [1]_ of the element is useful for calculating
 radius ratio rules [2]_, or for training neural networks [3]_ .
 
 .. code:: python
@@ -43,7 +43,7 @@ radius ratio rules [2]_, or for training neural networks [3]_ .
 List building
 =============
 
-Often when using :mod:`smact` the aim will to be to search over combinations of a set of elements. This
+Often when using :mod:`smact` the aim will be to search over combinations of a set of elements. This
 is most efficiently achieved by setting up a dictionary of the elements that you want to search
 over. The easiest way to achieve this in :mod:`smact` is to first create a list of the symbols of the elements
 that you want to include, then to build a dictionary of the corresponding element objects.
@@ -88,7 +88,7 @@ the search.
 Neutral combinations
 ====================
 
-One of the most basic tests for establishing sensible combinations of elements is that they should form charge neutral
+One of the most basic tests for establishing sensible combinations of elements is that they should form charge-neutral
 combinations. This is a straightforward combinatorial problem of comparing oxidation states and allowed stoichiometries.
 
 :math:`\Sigma_i Q_in_i = 0`
@@ -211,14 +211,14 @@ in function to calculate this property for a given composition.
 Interfacing to machine learning
 ===============================
 
-When preparing to do machine learning, we have to convert the compositions that we have into
+When preparing to build machine learning models, we have to convert the chemical compositions into
 something that can be fed into an algorithm. Many of the properties provided in :mod:`smact` are suitable for this,
-one can take properties like electronegativity, mass, electron affinity etc etc (for the full list see
+one can take properties like electronegativity, mass, electron affinity, etc. (for the full list see
 :ref:`smact_module`).
 
-One useful representation that is often used in machine learning is the one-hot-vector formulation. A similar
-construction to this can be used to encode a chemical formula. A vector of length of the periodic table is
-set up and each element set to be a number corresponding to the stoichiometric ratio of that element in the compound.
+One useful representation in machine learning is the one-hot-vector formulation. A similar
+construction to this can be used to encode a chemical formula. A vector of length covering the periodic table is
+constructed and each element is set to a number corresponding to the stoichiometric ratio of that element in the compound.
 For example we could convert :math:`Ba(OH)_2`
 
 .. code:: python
@@ -226,17 +226,15 @@ For example we could convert :math:`Ba(OH)_2`
    ml_vector = smact.screening.ml_rep_generator(['Ba', 'H', 'O'], stoichs=[1, 2, 2])
 
 There is also `an example <https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb>`_
-demonstrating the conversion of charge neutral compositions produced by `smact` to a list of formulas using Pymatgen,
+demonstrating the conversion of charge-neutral compositions produced by `smact` to a list of formulas using Pymatgen,
 or to a Pandas dataframe, both of which could then be used as input for a machine learning algorithm.
 For a full machine learning example that uses `smact`, there is a repository `here <https://github.com/WMD-group/Solar_oxides_data>`_ 
 which demonstrates a search for solar energy materials from the four-component (quaternary) oxide materials space.
 
-.. [1]  "Revised effective ionic radii and systematic studies of interatomic distances in halides and chalcogenides".
-         Acta Crystallogr A. 32: 751–767, 1976
+.. [1]  "Revised effective ionic radii and systematic studies of interatomic distances in halides and chalcogenides" Acta Cryst. A. **32**, 751–767 (1976).
 
-.. [2]  "Crystal Structure and Chemical Constitution" Trans. Faraday Soc. 25, 253-283, 1929.
+.. [2]  "Crystal structure and chemical constitution" Trans. Faraday Soc. **25**, 253-283 (1929).
 
-.. [3] "Deep neural networks for accurate predictions of crystal stability" Nat. Comms. 9, 3800, 2018.
+.. [3] "Deep neural networks for accurate predictions of crystal stability" Nat. Comms. **9**, 3800 (2018).
 
-.. [4] "Prediction of Flatband Potentials at Semiconductor‐Electrolyte Interfaces from Atomic Electronegativities"
-       J. Electrochem. Soc. 125, 228-32, 1975.
+.. [4] "Prediction of flatband potentials at semiconductor‐electrolyte interfaces from atomic electronegativities" J. Electrochem. Soc. **125**, 228-232 (1975).

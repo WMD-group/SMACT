@@ -165,8 +165,7 @@ def main():
         )
 
         print(
-            "Counting ({} element combinations)"
-            "...".format(combination_count)
+            "Counting ({} element combinations)" "...".format(combination_count)
         )
 
         # Combinations are counted in chunks set by count_progress_interval.
@@ -237,8 +236,7 @@ def main():
 
             time_elapsed = time.time() - start_time
             time_remaining = (
-                combination_count * (time_elapsed / data_pointer)
-                - time_elapsed
+                combination_count * (time_elapsed / data_pointer) - time_elapsed
             )
 
             print_status(
