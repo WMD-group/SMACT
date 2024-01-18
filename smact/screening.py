@@ -43,8 +43,8 @@ def pauling_test(
 
     Returns:
         bool:
-            True if positive ions have lower
-            electronegativity than negative ions
+            True if anions are more electronegative than
+            cations, otherwise False
     """
 
     if repeat_anions and repeat_cations and threshold == 0.0:
@@ -135,8 +135,8 @@ def pauling_test_old(
 
     Returns:
         (bool):
-            True if positive ions have lower
-            electronegativity than negative ions
+            True if anions are more electronegative than
+            cations, otherwise False
 
     """
     if None in paul:
@@ -192,8 +192,8 @@ def eneg_states_test(ox_states: List[int], enegs: List[float]):
             compound
 
     Returns:
-        bool : True if cations have higher electronegativity than
-            anions, otherwise False
+        bool : True if anions are more electronegative than
+               cations, otherwise False
 
     """
     for (ox1, eneg1), (ox2, eneg2) in combinations(
@@ -231,8 +231,8 @@ def eneg_states_test_threshold(
             the Pauling criterion
 
     Returns:
-        bool : True if cations have higher electronegativity than
-            anions, otherwise False
+        bool : True if anions are more electronegative than
+               cations, otherwise False
 
     """
     for (ox1, eneg1), (ox2, eneg2) in combinations(
@@ -259,8 +259,8 @@ def eneg_states_test_alternate(ox_states: List[int], enegs: List[float]):
             compound
 
     Returns:
-        bool : True if cations have higher electronegativity than
-            anions, otherwise False
+        bool : True if anions are more electronegative than
+               cations, otherwise False
 
     """
     min_cation_eneg, max_anion_eneg = 10, 0
