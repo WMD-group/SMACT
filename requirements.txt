@@ -20,7 +20,7 @@ dill==0.3.7
     #   pathos
 fonttools==4.47.0
     # via matplotlib
-future==0.18.3
+future==1.0.0
     # via uncertainties
 idna==3.6
     # via requests
@@ -78,7 +78,7 @@ pymatgen==2023.11.12
     # via SMACT (setup.py)
 pyparsing==3.1.1
     # via matplotlib
-python-dateutil==2.8.2
+python-dateutil==2.9.0
     # via
     #   matplotlib
     #   pandas
@@ -112,9 +112,9 @@ tabulate==0.9.0
     # via pymatgen
 tenacity==8.2.3
     # via plotly
-tqdm==4.66.1
+tqdm==4.66.2
     # via pymatgen
-tzdata==2023.4
+tzdata==2024.1
     # via pandas
 uncertainties==3.1.7
     # via pymatgen
