@@ -25,36 +25,6 @@ class Doper:
         self.original_species = original_species
         self.filepath = filepath
         self.results = None
-
-    def _softmax(self, x):
-        """
-        Compute the softmax function for an input array.
-
-        Args:
-            x (numpy.ndarray): Input array.
-
-        Returns:
-            numpy.ndarray: Array of softmax values.
-        """
-        e_x = np.exp(x - np.max(x))
-        return e_x / e_x.sum()
-    
-    def _apply_softmax(self, data_list: List[smact.Element]) -> List[smact.Element]:
-        """
-        Apply the softmax function to the probabilities in a list of Element objects.
-
-        Args:
-            data_list (List[smact.Element]): List of Element objects with probabilities.
-
-        Returns:
-            List[smact.Element]: List of Element objects with softmax-applied probabilities.
-        """
-        probabilities = [item[2] for item in data_list]
-        softmax_probabilities = self._softmax(probabilities)
-        data = data_list.copy()
-        for element, softmax_prob in zip(data, softmax_probabilities):
-            element[2] = softmax_prob
-        return data
     
     def _get_selectivity(self, data_list: List[smact.Element], cations: List[smact.Element], CM:Type[CationMutator], sub):
         data = data_list.copy()
@@ -119,7 +89,6 @@ class Doper:
     def get_dopants(
         self,
         num_dopants: int = 5,
-        apply_softmax=False,
         get_selectivity=True
     ) -> dict:
         """
@@ -222,11 +191,6 @@ class Doper:
                 if i > 1:
                     sub = "anion"
                 dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, CM, sub)
-
-        if apply_softmax:
-            # apply a softmax function
-            for i in range(len(dopants_lists)):
-                dopants_lists[i] = self._apply_softmax(dopants_lists[i])
         
         keys = [
             "n-type cation substitutions",
