@@ -1,3 +1,5 @@
+from itertools import groupby
+
 import numpy as np
 import smact
 from typing import Callable, List, Tuple, Union, Type
@@ -44,6 +46,16 @@ class Doper:
             assert len(dopants) == 4
         return data
 
+    def _merge_dicts(self, keys, dopants_list, groupby_list):
+        merged_dict = dict()
+        for k, dopants, groupby in zip(keys, dopants_list, groupby_list):
+            merged_values = dict()
+            merged_values["sorted"] = dopants
+            for key, value in groupby.items():
+                merged_values[key] = sorted(value, key=lambda x:x[2], reverse=True)
+            merged_dict[k] = merged_values
+        return merged_dict
+
     def _get_dopants(
         self, 
         element_objects: List[smact.Element], 
@@ -89,7 +101,8 @@ class Doper:
     def get_dopants(
         self,
         num_dopants: int = 5,
-        get_selectivity=True
+        get_selectivity=True,
+        group_by_charge=True
     ) -> dict:
         """
         Args:
@@ -182,6 +195,18 @@ class Doper:
         for dopants_list in dopants_lists:
             dopants_list.sort(key=lambda x: x[-1], reverse=True)
         
+        # if groupby
+        groupby_lists = [dict()] * 4 #create list of empty dict length of 4 (n-cat, p-cat, n-an, p-an)
+        # in case group_by_charge = False
+        if group_by_charge:
+            for i, dl in enumerate(dopants_lists):
+                # groupby first element charge
+                dl = sorted(dl, key=lambda x:utilities.parse_spec(x[0])[1])
+                grouped_data = groupby(dl, key=lambda x:utilities.parse_spec(x[0])[1]) 
+                grouped_top_data = {str(k): list(g)[:num_dopants] for k, g in grouped_data}
+                groupby_lists[i] = grouped_top_data
+                del grouped_data
+        
         # select top n elements
         dopants_lists = [dopants_list[:num_dopants] for dopants_list in dopants_lists]
 
@@ -199,7 +224,7 @@ class Doper:
             "p-type anion substitutions",
         ]
 
-        self.results = dict(zip(keys, dopants_lists))
+        self.results = self._merge_dicts(keys, dopants_lists, groupby_lists)
 
         # return the top (num_dopants) results for each case
         return self.results
