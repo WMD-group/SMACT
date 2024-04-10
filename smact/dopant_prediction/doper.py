@@ -197,7 +197,9 @@ class Doper:
         for dopants_list in dopants_lists:
             dopants_list.sort(key=lambda x: x[2], reverse=True)
         
+        self.len_list = 3
         if get_selectivity:
+            self.len_list = 4
             for i in range(len(dopants_lists)):
                 sub = "cation"
                 if i > 1:
@@ -242,9 +244,15 @@ class Doper:
         assert self.results, "Dopants are not calculated. Run get_dopants first."
 
         for dopant_type, dopants in self.results.items():
-            dict_results = {
-                utilities.parse_spec(x)[0]: y for x, _, y in dopants.get("sorted")
-            }
+            # due to selectivity option
+            if self.len_list == 3:
+                dict_results = {
+                    utilities.parse_spec(x)[0]: y for x, _, y in dopants.get("sorted")
+                }
+            else:
+                dict_results = {
+                    utilities.parse_spec(x)[0]: y for x, _, y, _ in dopants.get("sorted")
+                }
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
                 cmap="rainbow",
@@ -269,4 +277,4 @@ class Doper:
                 kind = k if k == "sorted" else self.format_number(k)
                 print("\033[96m" + str(kind) + "\033[0m")
                 enumerated_data = [[i+1] + sublist for i, sublist in enumerate(v)]
-                print(tabulate(enumerated_data, headers=headers[:len(v[0])+1], tablefmt="grid"), end="\n\n")
+                print(tabulate(enumerated_data, headers=headers[:self.len_list+1], tablefmt="grid"), end="\n\n")
