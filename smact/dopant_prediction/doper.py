@@ -193,7 +193,14 @@ class Doper:
 
         # sort by probability
         for dopants_list in dopants_lists:
-            dopants_list.sort(key=lambda x: x[-1], reverse=True)
+            dopants_list.sort(key=lambda x: x[2], reverse=True)
+        
+        if get_selectivity:
+            for i in range(len(dopants_lists)):
+                sub = "cation"
+                if i > 1:
+                    sub = "anion"
+                dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, CM, sub)
         
         # if groupby
         groupby_lists = [dict()] * 4 #create list of empty dict length of 4 (n-cat, p-cat, n-an, p-an)
@@ -209,13 +216,6 @@ class Doper:
         
         # select top n elements
         dopants_lists = [dopants_list[:num_dopants] for dopants_list in dopants_lists]
-
-        if get_selectivity:
-            for i in range(len(dopants_lists)):
-                sub = "cation"
-                if i > 1:
-                    sub = "anion"
-                dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, CM, sub)
         
         keys = [
             "n-type cation substitutions",
