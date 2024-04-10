@@ -1,8 +1,10 @@
 from itertools import groupby
+from typing import Callable, List, Tuple, Union, Type
 
 import numpy as np
+from tabulate import tabulate
+
 import smact
-from typing import Callable, List, Tuple, Union, Type
 from pymatgen.util import plotting
 from smact.structure_prediction import mutation, utilities
 from smact.structure_prediction.mutation import CationMutator
@@ -241,7 +243,7 @@ class Doper:
 
         for dopant_type, dopants in self.results.items():
             dict_results = {
-                utilities.parse_spec(x)[0]: y for x, _, y in dopants
+                utilities.parse_spec(x)[0]: y for x, _, y in dopants.get("sorted")
             }
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
@@ -249,3 +251,22 @@ class Doper:
                 blank_color="gainsboro",
                 edge_color="white",
             )
+    
+    def format_number(self, num_str):
+        num = int(num_str)
+        sign = "+"if num >= 0 else "-"
+        return f"{abs(num)}{sign}"
+    
+    @property
+    def to_table(self):
+        if not self.results:
+            print("No data available")
+            return
+        headers = ["Rank", "Dopant", "Host", "Probability", "Selectivity"]
+        for dopant_type, dopants in self.results.items():
+            print("\033[91m" + str(dopant_type) + "\033[0m")
+            for k, v in dopants.items():
+                kind = k if k == "sorted" else self.format_number(k)
+                print("\033[96m" + str(kind) + "\033[0m")
+                enumerated_data = [[i+1] + sublist for i, sublist in enumerate(v)]
+                print(tabulate(enumerated_data, headers=headers[:len(v[0])+1], tablefmt="grid"), end="\n\n")
