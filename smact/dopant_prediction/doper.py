@@ -1,8 +1,10 @@
 from itertools import groupby
+from typing import Callable, List, Tuple, Union, Type
 
 import numpy as np
+from tabulate import tabulate
+
 import smact
-from typing import Callable, List, Tuple, Union, Type
 from pymatgen.util import plotting
 from smact.structure_prediction import mutation, utilities
 from smact.structure_prediction.mutation import CationMutator
@@ -193,7 +195,16 @@ class Doper:
 
         # sort by probability
         for dopants_list in dopants_lists:
-            dopants_list.sort(key=lambda x: x[-1], reverse=True)
+            dopants_list.sort(key=lambda x: x[2], reverse=True)
+        
+        self.len_list = 3
+        if get_selectivity:
+            self.len_list = 4
+            for i in range(len(dopants_lists)):
+                sub = "cation"
+                if i > 1:
+                    sub = "anion"
+                dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, CM, sub)
         
         # if groupby
         groupby_lists = [dict()] * 4 #create list of empty dict length of 4 (n-cat, p-cat, n-an, p-an)
@@ -209,13 +220,6 @@ class Doper:
         
         # select top n elements
         dopants_lists = [dopants_list[:num_dopants] for dopants_list in dopants_lists]
-
-        if get_selectivity:
-            for i in range(len(dopants_lists)):
-                sub = "cation"
-                if i > 1:
-                    sub = "anion"
-                dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, CM, sub)
         
         keys = [
             "n-type cation substitutions",
@@ -240,12 +244,37 @@ class Doper:
         assert self.results, "Dopants are not calculated. Run get_dopants first."
 
         for dopant_type, dopants in self.results.items():
-            dict_results = {
-                utilities.parse_spec(x)[0]: y for x, _, y in dopants
-            }
+            # due to selectivity option
+            if self.len_list == 3:
+                dict_results = {
+                    utilities.parse_spec(x)[0]: y for x, _, y in dopants.get("sorted")
+                }
+            else:
+                dict_results = {
+                    utilities.parse_spec(x)[0]: y for x, _, y, _ in dopants.get("sorted")
+                }
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
                 cmap="rainbow",
                 blank_color="gainsboro",
                 edge_color="white",
             )
+    
+    def format_number(self, num_str):
+        num = int(num_str)
+        sign = "+"if num >= 0 else "-"
+        return f"{abs(num)}{sign}"
+    
+    @property
+    def to_table(self):
+        if not self.results:
+            print("No data available")
+            return
+        headers = ["Rank", "Dopant", "Host", "Probability", "Selectivity"]
+        for dopant_type, dopants in self.results.items():
+            print("\033[91m" + str(dopant_type) + "\033[0m")
+            for k, v in dopants.items():
+                kind = k if k == "sorted" else self.format_number(k)
+                print("\033[96m" + str(kind) + "\033[0m")
+                enumerated_data = [[i+1] + sublist for i, sublist in enumerate(v)]
+                print(tabulate(enumerated_data, headers=headers[:self.len_list+1], tablefmt="grid"), end="\n\n")

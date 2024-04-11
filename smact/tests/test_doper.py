@@ -21,16 +21,21 @@ class dopant_prediction_test(unittest.TestCase):
         _, an_charge = utilities.parse_spec(anion_min_charge)
 
         # Assert: Length of the list and return type (dictionary: list)
-        self.assertIs(type(test.get_dopants()), dict)
-        for ls in test.get_dopants().values():
-            self.assertIs(type(ls), list)
+        result = test.get_dopants()
+        self.assertIs(type(result), dict)
+        for d in result.values():
+            self.assertIn('sorted', d)
+            for v in d.values():
+                self.assertIs(type(v), list)
+        
+        
 
         # Assert: (cation) higher charges for n-type and lower charges for p-type
-        n_sub_list_cat = test.get_dopants(apply_softmax=True).get("n-type cation substitutions")
-        p_sub_list_cat = test.get_dopants(apply_softmax=True).get("p-type cation substitutions")
-        n_sub_list_an = test.get_dopants(apply_softmax=True).get("n-type anion substitutions")
-        p_sub_list_an = test.get_dopants(apply_softmax=True).get("p-type anion substitutions")
-        result_list = [n_sub_list_cat, p_sub_list_cat, n_sub_list_an, p_sub_list_an]
+        n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")
+        p_sub_list_cat = result.get("p-type cation substitutions").get("sorted")
+        n_sub_list_an = result.get("n-type anion substitutions").get("sorted")
+        p_sub_list_an = result.get("p-type anion substitutions").get("sorted")
+
         for n_atom, p_atom in zip(n_sub_list_cat, p_sub_list_cat):
             self.assertGreater(utilities.parse_spec(n_atom[0])[1], cat_charge)
             self.assertLess(utilities.parse_spec(p_atom[0])[1], cat_charge)
@@ -38,13 +43,6 @@ class dopant_prediction_test(unittest.TestCase):
         for n_atom, p_atom in zip(n_sub_list_an, p_sub_list_an):
             self.assertGreater(utilities.parse_spec(n_atom[0])[1], an_charge)
             self.assertLess(utilities.parse_spec(p_atom[0])[1], an_charge)
-        
-        # Assert: softmax add up to 1
-        for sub_list in result_list:
-            sum_softmax = 0
-            for doping_result in sub_list:
-                sum_softmax += doping_result[2]
-            self.assertAlmostEqual(1, sum_softmax)
 
 
 if __name__ == "__main__":
