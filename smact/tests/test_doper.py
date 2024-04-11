@@ -24,11 +24,9 @@ class dopant_prediction_test(unittest.TestCase):
         result = test.get_dopants()
         self.assertIs(type(result), dict)
         for d in result.values():
-            self.assertIn('sorted', d)
+            self.assertIn("sorted", d)
             for v in d.values():
                 self.assertIs(type(v), list)
-        
-        
 
         # Assert: (cation) higher charges for n-type and lower charges for p-type
         n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")

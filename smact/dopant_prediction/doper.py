@@ -1,14 +1,15 @@
 from itertools import groupby
-from typing import Callable, List, Tuple, Union, Type
+from typing import Callable, List, Tuple, Type, Union
 
 import numpy as np
+from pymatgen.util import plotting
 from tabulate import tabulate
 
 import smact
-from pymatgen.util import plotting
+from smact import Element, element_dictionary
 from smact.structure_prediction import mutation, utilities
 from smact.structure_prediction.mutation import CationMutator
-from smact import Element, element_dictionary
+
 
 class Doper:
     """
@@ -16,9 +17,7 @@ class Doper:
     Methods: get_dopants, plot_dopants
     """
 
-    def __init__(
-        self, original_species: Tuple[str, ...], filepath: str = None
-    ):
+    def __init__(self, original_species: Tuple[str, ...], filepath: str = None):
         """
         Intialise the `Doper` class with a tuple of species
 
@@ -29,8 +28,14 @@ class Doper:
         self.original_species = original_species
         self.filepath = filepath
         self.results = None
-    
-    def _get_selectivity(self, data_list: List[smact.Element], cations: List[smact.Element], CM:Type[CationMutator], sub):
+
+    def _get_selectivity(
+        self,
+        data_list: List[smact.Element],
+        cations: List[smact.Element],
+        CM: Type[CationMutator],
+        sub,
+    ):
         data = data_list.copy()
         for dopants in data:
             if sub == "anion":
@@ -41,7 +46,7 @@ class Doper:
             for cation in cations:
                 if cation != original_specie:
                     sum_prob += CM.sub_prob(cation, selected_site)
-            
+
             selectivity = sub_prob / sum_prob
             selectivity = round(selectivity, 2)
             dopants.append(selectivity)
@@ -54,15 +59,17 @@ class Doper:
             merged_values = dict()
             merged_values["sorted"] = dopants
             for key, value in groupby.items():
-                merged_values[key] = sorted(value, key=lambda x:x[2], reverse=True)
+                merged_values[key] = sorted(
+                    value, key=lambda x: x[2], reverse=True
+                )
             merged_dict[k] = merged_values
         return merged_dict
 
     def _get_dopants(
-        self, 
-        element_objects: List[smact.Element], 
+        self,
+        element_objects: List[smact.Element],
         spicie_ions: List[str],
-        ion_type: str
+        ion_type: str,
     ):
         """
         Get possible dopants for a given list of elements and dopants.
@@ -101,16 +108,13 @@ class Doper:
         return list(poss_n_type), list(poss_p_type)
 
     def get_dopants(
-        self,
-        num_dopants: int = 5,
-        get_selectivity=True,
-        group_by_charge=True
+        self, num_dopants: int = 5, get_selectivity=True, group_by_charge=True
     ) -> dict:
         """
         Args:
             num_dopants (int): The number of suggestions to return for n- and p-type dopants.
             apply_softmax (bool): Whether to apply softmax to probabilities. (default = True)
-            get_selectivity (bool): Whether 
+            get_selectivity (bool): Whether
         Returns:
             (dict): Dopant suggestions, given as a dictionary with keys
             "n_type_cation", "p_type_cation", "n_type_anion", "p_type_anion".
@@ -129,7 +133,7 @@ class Doper:
         """
 
         cations, anions = [], []
-        
+
         for ion in self.original_species:
             try:
                 _, charge = utilities.parse_spec(ion)
@@ -182,7 +186,7 @@ class Doper:
                 n_type_an.append(
                     [n_specie, anion, CM.sub_prob(anion, n_specie)]
                 )
-                
+
             for p_specie in poss_p_type_an:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if anion_charge <= p_specie_charge:
@@ -196,7 +200,7 @@ class Doper:
         # sort by probability
         for dopants_list in dopants_lists:
             dopants_list.sort(key=lambda x: x[2], reverse=True)
-        
+
         self.len_list = 3
         if get_selectivity:
             self.len_list = 4
@@ -204,23 +208,33 @@ class Doper:
                 sub = "cation"
                 if i > 1:
                     sub = "anion"
-                dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, CM, sub)
-        
+                dopants_lists[i] = self._get_selectivity(
+                    dopants_lists[i], cations, CM, sub
+                )
+
         # if groupby
-        groupby_lists = [dict()] * 4 #create list of empty dict length of 4 (n-cat, p-cat, n-an, p-an)
+        groupby_lists = [
+            dict()
+        ] * 4  # create list of empty dict length of 4 (n-cat, p-cat, n-an, p-an)
         # in case group_by_charge = False
         if group_by_charge:
             for i, dl in enumerate(dopants_lists):
                 # groupby first element charge
-                dl = sorted(dl, key=lambda x:utilities.parse_spec(x[0])[1])
-                grouped_data = groupby(dl, key=lambda x:utilities.parse_spec(x[0])[1]) 
-                grouped_top_data = {str(k): list(g)[:num_dopants] for k, g in grouped_data}
+                dl = sorted(dl, key=lambda x: utilities.parse_spec(x[0])[1])
+                grouped_data = groupby(
+                    dl, key=lambda x: utilities.parse_spec(x[0])[1]
+                )
+                grouped_top_data = {
+                    str(k): list(g)[:num_dopants] for k, g in grouped_data
+                }
                 groupby_lists[i] = grouped_top_data
                 del grouped_data
-        
+
         # select top n elements
-        dopants_lists = [dopants_list[:num_dopants] for dopants_list in dopants_lists]
-        
+        dopants_lists = [
+            dopants_list[:num_dopants] for dopants_list in dopants_lists
+        ]
+
         keys = [
             "n-type cation substitutions",
             "p-type cation substitutions",
@@ -241,17 +255,21 @@ class Doper:
         Returns:
             None
         """
-        assert self.results, "Dopants are not calculated. Run get_dopants first."
+        assert (
+            self.results
+        ), "Dopants are not calculated. Run get_dopants first."
 
         for dopant_type, dopants in self.results.items():
             # due to selectivity option
             if self.len_list == 3:
                 dict_results = {
-                    utilities.parse_spec(x)[0]: y for x, _, y in dopants.get("sorted")
+                    utilities.parse_spec(x)[0]: y
+                    for x, _, y in dopants.get("sorted")
                 }
             else:
                 dict_results = {
-                    utilities.parse_spec(x)[0]: y for x, _, y, _ in dopants.get("sorted")
+                    utilities.parse_spec(x)[0]: y
+                    for x, _, y, _ in dopants.get("sorted")
                 }
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
@@ -259,12 +277,12 @@ class Doper:
                 blank_color="gainsboro",
                 edge_color="white",
             )
-    
+
     def format_number(self, num_str):
         num = int(num_str)
-        sign = "+"if num >= 0 else "-"
+        sign = "+" if num >= 0 else "-"
         return f"{abs(num)}{sign}"
-    
+
     @property
     def to_table(self):
         if not self.results:
@@ -276,5 +294,14 @@ class Doper:
             for k, v in dopants.items():
                 kind = k if k == "sorted" else self.format_number(k)
                 print("\033[96m" + str(kind) + "\033[0m")
-                enumerated_data = [[i+1] + sublist for i, sublist in enumerate(v)]
-                print(tabulate(enumerated_data, headers=headers[:self.len_list+1], tablefmt="grid"), end="\n\n")
+                enumerated_data = [
+                    [i + 1] + sublist for i, sublist in enumerate(v)
+                ]
+                print(
+                    tabulate(
+                        enumerated_data,
+                        headers=headers[: self.len_list + 1],
+                        tablefmt="grid",
+                    ),
+                    end="\n\n",
+                )
