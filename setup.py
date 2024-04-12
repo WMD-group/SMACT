@@ -55,6 +55,7 @@ if __name__ == "__main__":
             "ase",
             "pandas",
             "pathos",
+            "typing-extensions",
         ],
         classifiers=[
             "Programming Language :: Python :: 3",
