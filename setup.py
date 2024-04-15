@@ -51,14 +51,14 @@ if __name__ == "__main__":
             "scipy",
             "numpy",
             "spglib",
-            "pymatgen<=2023.8.10",
+            "pymatgen>=2024.2.20",
             "ase",
             "pandas",
             "pathos",
+            "typing-extensions",
         ],
         classifiers=[
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
@@ -70,5 +70,5 @@ if __name__ == "__main__":
             "Topic :: Scientific/Engineering",
             "Topic :: Scientific/Engineering :: Chemistry",
         ],
-        python_requires=">=3.8",
+        python_requires=">=3.9",
     )
