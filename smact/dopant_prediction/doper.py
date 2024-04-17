@@ -27,6 +27,8 @@ class Doper:
         """
         self.original_species = original_species
         self.filepath = filepath
+        self.cation_mutator = mutation.CationMutator.from_json(filepath)
+        self.possible_species = list(self.cation_mutator.specs)
         self.results = None
 
     def _get_selectivity(
@@ -67,43 +69,36 @@ class Doper:
 
     def _get_dopants(
         self,
-        element_objects: List[smact.Element],
-        spicie_ions: List[str],
+        specie_ions: List[str],
         ion_type: str,
     ):
         """
         Get possible dopants for a given list of elements and dopants.
 
         Args:
-            element_objects (List[smact.Element]): List of Element objects.
-            spicie_ions (List[str]): List of original species (anions or cations) as strings.
-            ion_type (str): Identify which spicie to check.
+            specie_ions (List[str]): List of original species (anions or cations) as strings.
+            ion_type (str): Identify which species to check.
 
         Returns:
             List[str]: List of possible dopants.
         """
         poss_n_type = set()
         poss_p_type = set()
+        for spec in self.possible_species:
+            _, state = utilities.parse_spec(spec)
+            for ion in specie_ions:
+                _, charge = utilities.parse_spec(ion)
 
-        for element in element_objects:
-            # i.e. element: "Zn", [-2, -1, 0, +1, +2]
-            oxi_state = element.oxidation_states
-            el_symbol = element.symbol
-            for state in oxi_state:
-                for ion in spicie_ions:
-                    ele = utilities.unparse_spec((el_symbol, state))
-                    _, charge = utilities.parse_spec(ion)
-
-                    if ion_type == "anion":
-                        if state > charge and state < 0:
-                            poss_n_type.add(ele)
-                        elif state < charge:
-                            poss_p_type.add(ele)
-                    elif ion_type == "cation":
-                        if state > charge:
-                            poss_n_type.add(ele)
-                        elif state < charge and state > 0:
-                            poss_p_type.add(ele)
+                if ion_type == "anion":
+                    if state > charge and state < 0:
+                        poss_n_type.add(spec)
+                    elif state < charge:
+                        poss_p_type.add(spec)
+                elif ion_type == "cation":
+                    if state > charge:
+                        poss_n_type.add(spec)
+                    elif state < charge and state > 0:
+                        poss_p_type.add(spec)
 
         return list(poss_n_type), list(poss_p_type)
 
@@ -113,8 +108,8 @@ class Doper:
         """
         Args:
             num_dopants (int): The number of suggestions to return for n- and p-type dopants.
-            apply_softmax (bool): Whether to apply softmax to probabilities. (default = True)
-            get_selectivity (bool): Whether
+            get_selectivity (bool): Whether to calculate the selectivity of the dopants.
+            group_by_charge (bool): Whether to group the dopants by charge.
         Returns:
             (dict): Dopant suggestions, given as a dictionary with keys
             "n_type_cation", "p_type_cation", "n_type_anion", "p_type_anion".
@@ -144,17 +139,10 @@ class Doper:
             except Exception as e:
                 print(f"{e}: charge is not defined for {ion}!")
 
-        CM = mutation.CationMutator.from_json(self.filepath)
+        CM = self.cation_mutator
 
-        # call all elements
-        element_objects = list(element_dictionary().values())
-
-        poss_n_type_cat, poss_p_type_cat = self._get_dopants(
-            element_objects, cations, "cation"
-        )
-        poss_n_type_an, poss_p_type_an = self._get_dopants(
-            element_objects, anions, "anion"
-        )
+        poss_n_type_cat, poss_p_type_cat = self._get_dopants(cations, "cation")
+        poss_n_type_an, poss_p_type_an = self._get_dopants(anions, "anion")
 
         n_type_cat, p_type_cat, n_type_an, p_type_an = [], [], [], []
         for cation in cations:
