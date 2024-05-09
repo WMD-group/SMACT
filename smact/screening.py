@@ -199,11 +199,11 @@ def eneg_states_test(ox_states: List[int], enegs: List[float]):
     for (ox1, eneg1), (ox2, eneg2) in combinations(
         list(zip(ox_states, enegs)), 2
     ):
-        if (ox1 > 0) and (ox2 < 0) and (eneg1 >= eneg2):
+        if eneg1 is None or eneg2 is None:
+            return False
+        elif (ox1 > 0) and (ox2 < 0) and (eneg1 >= eneg2):
             return False
         elif (ox1 < 0) and (ox2 > 0) and (eneg1 <= eneg2):
-            return False
-        elif eneg1 is None or eneg2 is None:
             return False
     else:
         return True
