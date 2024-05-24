@@ -29,6 +29,11 @@ class Doper:
         self.filepath = filepath
         self.cation_mutator = mutation.CationMutator.from_json(filepath)
         self.possible_species = list(self.cation_mutator.specs)
+        self.threshold = (
+            1
+            / self.cation_mutator.Z
+            * np.exp(self.cation_mutator.alpha("X", "Y"))
+        )
         self.results = None
 
     def _get_selectivity(
@@ -152,17 +157,19 @@ class Doper:
                 n_specie_charge = utilities.parse_spec(n_specie)[1]
                 if cation_charge >= n_specie_charge:
                     continue
-                n_type_cat.append(
-                    [n_specie, cation, CM.sub_prob(cation, n_specie)]
-                )
+                if CM.sub_prob(cation, n_specie) > self.threshold:
+                    n_type_cat.append(
+                        [n_specie, cation, CM.sub_prob(cation, n_specie)]
+                    )
 
             for p_specie in poss_p_type_cat:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if cation_charge <= p_specie_charge:
                     continue
-                p_type_cat.append(
-                    [p_specie, cation, CM.sub_prob(cation, p_specie)]
-                )
+                if CM.sub_prob(cation, p_specie) > self.threshold:
+                    p_type_cat.append(
+                        [p_specie, cation, CM.sub_prob(cation, p_specie)]
+                    )
 
         for anion in anions:
             anion_charge = utilities.parse_spec(anion)[1]
@@ -171,17 +178,19 @@ class Doper:
                 n_specie_charge = utilities.parse_spec(n_specie)[1]
                 if anion_charge >= n_specie_charge:
                     continue
-                n_type_an.append(
-                    [n_specie, anion, CM.sub_prob(anion, n_specie)]
-                )
+                if CM.sub_prob(anion, n_specie) > self.threshold:
+                    n_type_an.append(
+                        [n_specie, anion, CM.sub_prob(anion, n_specie)]
+                    )
 
             for p_specie in poss_p_type_an:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if anion_charge <= p_specie_charge:
                     continue
-                p_type_an.append(
-                    [p_specie, anion, CM.sub_prob(anion, p_specie)]
-                )
+                if CM.sub_prob(anion, p_specie) > self.threshold:
+                    p_type_an.append(
+                        [p_specie, anion, CM.sub_prob(anion, p_specie)]
+                    )
 
         dopants_lists = [n_type_cat, p_type_cat, n_type_an, p_type_an]
 
