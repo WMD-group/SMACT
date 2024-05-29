@@ -5,7 +5,12 @@ from collections import namedtuple
 from itertools import combinations
 from typing import Iterable, List, Optional, Tuple, Union
 
-from smact import Element, neutral_ratios
+import numpy as np
+import pymatgen
+from pymatgen.core import Composition
+
+import smact
+from smact import Element, element_dictionary, neutral_ratios
 from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
 )
@@ -419,3 +424,69 @@ def smact_filter(
             compositions = [(i[0], i[2]) for i in compositions]
         compositions = list(set(compositions))
         return compositions
+
+
+def smact_validity(
+    composition: Union[pymatgen.core.Composition, str],
+    use_pauling_test: bool = True,
+    include_alloys: bool = True,
+) -> bool:
+    """Check if a composition is valid according to the SMACT rules.
+
+    Args:
+        composition (Union[pymatgen.core.Composition, str]): Composition/formula to check
+        use_pauling_test (bool): Whether to use the Pauling electronegativity test
+        include_alloys (bool): If True, compositions of metal elements will be considered valid
+
+    Returns:
+        bool: True if the composition is valid, False otherwise
+
+    """
+    if isinstance(composition, str):
+        composition = Composition(composition)
+    elem_symbols = tuple(composition.as_dict().keys())
+
+    if len(set(elem_symbols)) == 1:
+        return True
+    if include_alloys:
+        is_metal_list = [elem_s in smact.metals for elem_s in elem_symbols]
+        if all(is_metal_list):
+            return True
+
+    count = tuple(composition.as_dict().values())
+    count = [int(c) for c in count]
+    # Reduce stoichiometry to gcd
+    gcd = smact._gcd_recursive(*count)
+    count = [int(c / gcd) for c in count]
+
+    space = element_dictionary(elem_symbols)
+    smact_elems = [e[1] for e in space.items()]
+    electronegs = [e.pauling_eneg for e in smact_elems]
+    ox_combos = [e.oxidation_states for e in smact_elems]
+    threshold = np.max(count)
+    compositions = []
+    for ox_states in itertools.product(*ox_combos):
+        stoichs = [(c,) for c in count]
+        # Test for charge balance
+        cn_e, cn_r = smact.neutral_ratios(
+            ox_states, stoichs=stoichs, threshold=threshold
+        )
+        # Electronegativity test
+        if cn_e:
+            if use_pauling_test:
+                try:
+                    electroneg_OK = pauling_test(ox_states, electronegs)
+                except TypeError:
+                    # if no electronegativity data, assume it is okay
+                    electroneg_OK = True
+            else:
+                electroneg_OK = True
+            if electroneg_OK:
+                for ratio in cn_r:
+                    compositions.append(tuple([elem_symbols, ox_states, ratio]))
+    compositions = [(i[0], i[2]) for i in compositions]
+    compositions = list(set(compositions))
+    if len(compositions) > 0:
+        return True
+    else:
+        return False
