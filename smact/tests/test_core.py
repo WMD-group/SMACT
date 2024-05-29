@@ -399,6 +399,18 @@ class TestSequenceFunctions(unittest.TestCase):
             45,
         )
 
+    def test_smact_validity(self):
+        self.assertTrue(smact.screening.smact_validity("NaCl"))
+        self.assertTrue(smact.screening.smact_validity("Na10Cl10"))
+        self.assertFalse(
+            smact.screening.smact_validity("Al3Li", include_alloys=False)
+        )
+        self.assertTrue(
+            smact.screening.smact_validity("Al3Li", include_alloys=True)
+        )
+        # Test for single element
+        self.assertTrue(smact.screening.smact_validity("Al"))
+
     # ---------------- Lattice ----------------
     def test_Lattice_class(self):
         site_A = smact.lattice.Site([0, 0, 0], -1)
