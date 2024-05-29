@@ -3,7 +3,7 @@ import os
 import warnings
 from collections import namedtuple
 from itertools import combinations
-from typing import Iterable, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pymatgen
