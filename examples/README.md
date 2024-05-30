@@ -69,3 +69,6 @@ Contains an example of using the dopant prediction submodule.
 
 ### Oxidation states
 Contains an example of using the `smact.oxidation_states` submodule to predict the likelihood of metal cations coexisting with halide anions in ternary compounds based on a statistical analysis of oxidation states. Full details of the oxidation states model can be found in [this publication](https://pubs.rsc.org/en/content/articlelanding/2018/FD/C8FD00032H).
+
+### SMACT validity
+Contains an example of using `smact.screening.smact_validity` to screen through a list of compositions and check if they are valid according to the rules of SMACT.
