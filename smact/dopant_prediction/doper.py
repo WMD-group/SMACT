@@ -1,14 +1,20 @@
+import os
 from itertools import groupby
-from typing import Callable, List, Tuple, Type, Union
+from typing import Callable, List, Optional, Tuple, Type, Union
 
 import numpy as np
 from pymatgen.util import plotting
 from tabulate import tabulate
 
 import smact
-from smact import Element, element_dictionary
+from smact import Element, data_directory, element_dictionary
 from smact.structure_prediction import mutation, utilities
 from smact.structure_prediction.mutation import CationMutator
+
+SKIPSSPECIES_COSINE_SIM_PATH = os.path.join(
+    data_directory,
+    "species_rep/skipspecies_20221028_319ion_dim200_cosine_similarity.json",
+)
 
 
 class Doper:
@@ -17,23 +23,50 @@ class Doper:
     Methods: get_dopants, plot_dopants
     """
 
-    def __init__(self, original_species: Tuple[str, ...], filepath: str = None):
+    def __init__(
+        self,
+        original_species: Tuple[str, ...],
+        filepath: Optional[str] = None,
+        embedding: Optional[str] = None,
+        use_probability: bool = True,
+    ):
         """
-        Intialise the `Doper` class with a tuple of species
+        Initialise the `Doper` class with a tuple of species
 
         Args:
             original_species: See :class:`~.Doper`.
             filepath (str): Path to a JSON file containing lambda table data.
+            embedding (str): Name of the species embedding to use. Currently only 'skipspecies' is supported.
+            use_probability (bool): Whether to use the probability of substitution (calculated from `CationMutator`), or the raw similarity score.
+
         """
         self.original_species = original_species
         self.filepath = filepath
-        self.cation_mutator = mutation.CationMutator.from_json(filepath)
+        # filepath and embedding are mutually exclusive
+        # check if both are provided
+        if filepath and embedding:
+            raise ValueError(
+                "Only one of filepath or embedding should be provided"
+            )
+        if embedding and embedding != "skipspecies":
+            raise ValueError(f"Embedding {embedding} is not supported")
+        if embedding:
+            self.cation_mutator = CationMutator.from_json(
+                SKIPSSPECIES_COSINE_SIM_PATH
+            )
+        elif filepath:
+            self.cation_mutator = mutation.CationMutator.from_json(filepath)
+        else:
+            # Default to Hautier data-mined lambda values
+            self.cation_mutator = mutation.CationMutator.from_json(filepath)
         self.possible_species = list(self.cation_mutator.specs)
+        self.lambda_threshold = self.cation_mutator.alpha("X", "Y")
         self.threshold = (
             1
             / self.cation_mutator.Z
             * np.exp(self.cation_mutator.alpha("X", "Y"))
         )
+        self.use_probability = use_probability
         self.results = None
 
     def _get_selectivity(
@@ -52,7 +85,10 @@ class Doper:
             sum_prob = sub_prob
             for cation in cations:
                 if cation != original_specie:
-                    sum_prob += CM.sub_prob(cation, selected_site)
+                    if self.use_probability:
+                        sum_prob += CM.sub_prob(cation, selected_site)
+                    else:
+                        sum_prob += CM.get_lambda(cation, selected_site)
 
             selectivity = sub_prob / sum_prob
             selectivity = round(selectivity, 2)
@@ -158,18 +194,28 @@ class Doper:
                 if cation_charge >= n_specie_charge:
                     continue
                 if CM.sub_prob(cation, n_specie) > self.threshold:
-                    n_type_cat.append(
-                        [n_specie, cation, CM.sub_prob(cation, n_specie)]
-                    )
+                    if self.use_probability:
+                        n_type_cat.append(
+                            [n_specie, cation, CM.sub_prob(cation, n_specie)]
+                        )
+                    else:
+                        n_type_cat.append(
+                            [n_specie, cation, CM.get_lambda(cation, n_specie)]
+                        )
 
             for p_specie in poss_p_type_cat:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if cation_charge <= p_specie_charge:
                     continue
                 if CM.sub_prob(cation, p_specie) > self.threshold:
-                    p_type_cat.append(
-                        [p_specie, cation, CM.sub_prob(cation, p_specie)]
-                    )
+                    if self.use_probability:
+                        p_type_cat.append(
+                            [p_specie, cation, CM.sub_prob(cation, p_specie)]
+                        )
+                    else:
+                        p_type_cat.append(
+                            [p_specie, cation, CM.get_lambda(cation, p_specie)]
+                        )
 
         for anion in anions:
             anion_charge = utilities.parse_spec(anion)[1]
@@ -179,18 +225,28 @@ class Doper:
                 if anion_charge >= n_specie_charge:
                     continue
                 if CM.sub_prob(anion, n_specie) > self.threshold:
-                    n_type_an.append(
-                        [n_specie, anion, CM.sub_prob(anion, n_specie)]
-                    )
+                    if self.use_probability:
+                        n_type_an.append(
+                            [n_specie, anion, CM.sub_prob(anion, n_specie)]
+                        )
+                    else:
+                        n_type_an.append(
+                            [n_specie, anion, CM.get_lambda(anion, n_specie)]
+                        )
 
             for p_specie in poss_p_type_an:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if anion_charge <= p_specie_charge:
                     continue
                 if CM.sub_prob(anion, p_specie) > self.threshold:
-                    p_type_an.append(
-                        [p_specie, anion, CM.sub_prob(anion, p_specie)]
-                    )
+                    if self.use_probability:
+                        p_type_an.append(
+                            [p_specie, anion, CM.sub_prob(anion, p_specie)]
+                        )
+                    else:
+                        p_type_an.append(
+                            [p_specie, anion, CM.get_lambda(anion, p_specie)]
+                        )
 
         dopants_lists = [n_type_cat, p_type_cat, n_type_an, p_type_an]
 
@@ -285,7 +341,10 @@ class Doper:
         if not self.results:
             print("No data available")
             return
-        headers = ["Rank", "Dopant", "Host", "Probability", "Selectivity"]
+        if self.use_probability:
+            headers = ["Rank", "Dopant", "Host", "Probability", "Selectivity"]
+        else:
+            headers = ["Rank", "Dopant", "Host", "Similarity", "Selectivity"]
         for dopant_type, dopants in self.results.items():
             print("\033[91m" + str(dopant_type) + "\033[0m")
             for k, v in dopants.items():
