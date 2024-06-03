@@ -1,11 +1,15 @@
+import os
 import unittest
 
 import smact
 from smact.dopant_prediction import doper
 from smact.structure_prediction import mutation, utilities
 
+files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
+TEST_LAMBDA_JSON = os.path.join(files_dir, "test_lambda_tab.json")
 
-class dopant_prediction_test(unittest.TestCase):
+
+class DopantPredictionTest(unittest.TestCase):
     def test_dopant_prediction(self):
         num_dopants = 10
         test_specie = ("Cu+", "Ga3+", "S2-")
@@ -42,13 +46,32 @@ class dopant_prediction_test(unittest.TestCase):
             self.assertGreater(utilities.parse_spec(n_atom[0])[1], an_charge)
             self.assertLess(utilities.parse_spec(p_atom[0])[1], an_charge)
 
+    def test_dopant_prediction_skipspecies(self):
+        test_specie = ("Cu+", "Ga3+", "S2-")
+        with self.assertRaises(ValueError):
+            doper.Doper(
+                test_specie, filepath=TEST_LAMBDA_JSON, embedding="skipspecies"
+            )
+
+        with self.assertRaises(ValueError):
+            doper.Doper(test_specie, embedding="skip", use_probability=False)
+
+        test = doper.Doper(
+            test_specie, embedding="skipspecies", use_probability=False
+        )
+
+    def test_format_number(self):
+        test_specie = ("Cu+", "Ga3+", "S2-")
+        test = doper.Doper(test_specie)
+
+        self.assertEqual(test.format_number(2), "2+")
+        self.assertEqual(test.format_number(-2), "2-")
+
 
 if __name__ == "__main__":
     TestLoader = unittest.TestLoader()
     DoperTests = unittest.TestSuite()
-    DoperTests.addTests(
-        TestLoader.loadTestsFromTestCase(dopant_prediction_test)
-    )
+    DoperTests.addTests(TestLoader.loadTestsFromTestCase(DopantPredictionTest))
 
     runner = unittest.TextTestRunner()
     result = runner.run(DoperTests)
