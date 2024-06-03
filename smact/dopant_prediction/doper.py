@@ -85,10 +85,9 @@ class Doper:
             sum_prob = sub_prob
             for cation in cations:
                 if cation != original_specie:
-                    if self.use_probability:
-                        sum_prob += CM.sub_prob(cation, selected_site)
-                    else:
-                        sum_prob += CM.get_lambda(cation, selected_site)
+                    sum_prob += self._calculate_species_sim_prob(
+                        cation, selected_site
+                    )
 
             selectivity = sub_prob / sum_prob
             selectivity = round(selectivity, 2)
@@ -143,6 +142,22 @@ class Doper:
 
         return list(poss_n_type), list(poss_p_type)
 
+    def _calculate_species_sim_prob(self, species1, species2):
+        """
+        Calculate the similarity/probability between two species.
+
+        Args:
+            species1 (str): The first species.
+            species2 (str): The second species.
+
+        Returns:
+            float: The similarity between the two species.
+        """
+        if self.use_probability:
+            return self.cation_mutator.sub_prob(species1, species2)
+        else:
+            return self.cation_mutator.get_lambda(species1, species2)
+
     def get_dopants(
         self, num_dopants: int = 5, get_selectivity=True, group_by_charge=True
     ) -> dict:
@@ -194,29 +209,26 @@ class Doper:
                 if cation_charge >= n_specie_charge:
                     continue
                 if CM.sub_prob(cation, n_specie) > self.threshold:
-                    if self.use_probability:
-                        n_type_cat.append(
-                            [n_specie, cation, CM.sub_prob(cation, n_specie)]
-                        )
-                    else:
-                        n_type_cat.append(
-                            [n_specie, cation, CM.get_lambda(cation, n_specie)]
-                        )
+                    n_type_cat.append(
+                        [
+                            n_specie,
+                            cation,
+                            self._calculate_species_sim_prob(cation, n_specie),
+                        ]
+                    )
 
             for p_specie in poss_p_type_cat:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if cation_charge <= p_specie_charge:
                     continue
                 if CM.sub_prob(cation, p_specie) > self.threshold:
-                    if self.use_probability:
-                        p_type_cat.append(
-                            [p_specie, cation, CM.sub_prob(cation, p_specie)]
-                        )
-                    else:
-                        p_type_cat.append(
-                            [p_specie, cation, CM.get_lambda(cation, p_specie)]
-                        )
-
+                    p_type_cat.append(
+                        [
+                            p_specie,
+                            cation,
+                            self._calculate_species_sim_prob(cation, p_specie),
+                        ]
+                    )
         for anion in anions:
             anion_charge = utilities.parse_spec(anion)[1]
 
@@ -225,29 +237,25 @@ class Doper:
                 if anion_charge >= n_specie_charge:
                     continue
                 if CM.sub_prob(anion, n_specie) > self.threshold:
-                    if self.use_probability:
-                        n_type_an.append(
-                            [n_specie, anion, CM.sub_prob(anion, n_specie)]
-                        )
-                    else:
-                        n_type_an.append(
-                            [n_specie, anion, CM.get_lambda(anion, n_specie)]
-                        )
-
+                    n_type_an.append(
+                        [
+                            n_specie,
+                            anion,
+                            self._calculate_species_sim_prob(anion, n_specie),
+                        ]
+                    )
             for p_specie in poss_p_type_an:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if anion_charge <= p_specie_charge:
                     continue
                 if CM.sub_prob(anion, p_specie) > self.threshold:
-                    if self.use_probability:
-                        p_type_an.append(
-                            [p_specie, anion, CM.sub_prob(anion, p_specie)]
-                        )
-                    else:
-                        p_type_an.append(
-                            [p_specie, anion, CM.get_lambda(anion, p_specie)]
-                        )
-
+                    p_type_an.append(
+                        [
+                            p_specie,
+                            anion,
+                            self._calculate_species_sim_prob(anion, p_specie),
+                        ]
+                    )
         dopants_lists = [n_type_cat, p_type_cat, n_type_an, p_type_an]
 
         # sort by probability
