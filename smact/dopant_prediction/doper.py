@@ -1,13 +1,13 @@
 import os
 from itertools import groupby
-from typing import Callable, List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type
 
 import numpy as np
 from pymatgen.util import plotting
 from tabulate import tabulate
 
 import smact
-from smact import Element, data_directory, element_dictionary
+from smact import data_directory
 from smact.structure_prediction import mutation, utilities
 from smact.structure_prediction.mutation import CationMutator
 
