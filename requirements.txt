@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
-ase==3.22.1
+ase==3.23.0
     # via SMACT (setup.py)
 certifi==2024.2.2
     # via requests
@@ -24,7 +24,7 @@ future==1.0.0
     # via uncertainties
 idna==3.7
     # via requests
-joblib==1.3.2
+joblib==1.4.2
     # via pymatgen
 kiwisolver==1.4.5
     # via matplotlib
@@ -52,7 +52,7 @@ numpy==1.26.2
     #   pymatgen
     #   scipy
     #   spglib
-packaging==23.2
+packaging==24.0
     # via
     #   matplotlib
     #   plotly
@@ -66,7 +66,7 @@ pathos==0.3.2
     # via SMACT (setup.py)
 pillow==10.3.0
     # via matplotlib
-plotly==5.18.0
+plotly==5.22.0
     # via pymatgen
 pox==0.3.4
     # via pathos
