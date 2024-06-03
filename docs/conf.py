@@ -382,5 +382,6 @@ MOCK_MODULES = [
     "pymatgen.util.plotting",
     "pymatgen.analysis.structure_prediction",
     "pymatgen.transformations.standard_transformations",
+    "tabulate",
 ]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
