@@ -36,15 +36,7 @@ if __name__ == "__main__":
             "smact.structure_prediction",
             "smact.dopant_prediction",
         ],
-        package_data={
-            "smact": [
-                "data/*.txt",
-                "data/*.csv",
-                "data/*.data",
-                "data/*.xlsx",
-                "data/*.json",
-            ]
-        },
+        include_package_data=True,
         zip_safe=False,
         test_suite="smact.tests.test",
         install_requires=[
