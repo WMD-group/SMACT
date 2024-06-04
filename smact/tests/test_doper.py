@@ -64,8 +64,8 @@ class DopantPredictionTest(unittest.TestCase):
         test_specie = ("Cu+", "Ga3+", "S2-")
         test = doper.Doper(test_specie)
 
-        self.assertEqual(test.format_number(2), "2+")
-        self.assertEqual(test.format_number(-2), "2-")
+        self.assertEqual(test._format_number(2), "2+")
+        self.assertEqual(test._format_number(-2), "2-")
 
 
 if __name__ == "__main__":
