@@ -9,7 +9,6 @@ from tabulate import tabulate
 import smact
 from smact import data_directory
 from smact.structure_prediction import mutation, utilities
-from smact.structure_prediction.mutation import CationMutator
 
 SKIPSSPECIES_COSINE_SIM_PATH = os.path.join(
     data_directory,
@@ -37,7 +36,7 @@ class Doper:
             original_species: See :class:`~.Doper`.
             filepath (str): Path to a JSON file containing lambda table data.
             embedding (str): Name of the species embedding to use. Currently only 'skipspecies' is supported.
-            use_probability (bool): Whether to use the probability of substitution (calculated from `CationMutator`), or the raw similarity score.
+            use_probability (bool): Whether to use the probability of substitution (calculated from `CationMutator`), or the raw similarity score/lambda value.
 
         """
         self.original_species = original_species
@@ -51,7 +50,7 @@ class Doper:
         if embedding and embedding != "skipspecies":
             raise ValueError(f"Embedding {embedding} is not supported")
         if embedding:
-            self.cation_mutator = CationMutator.from_json(
+            self.cation_mutator = mutation.CationMutator.from_json(
                 SKIPSSPECIES_COSINE_SIM_PATH
             )
         elif filepath:
@@ -73,7 +72,6 @@ class Doper:
         self,
         data_list: List[smact.Element],
         cations: List[smact.Element],
-        CM: Type[CationMutator],
         sub,
     ):
         data = data_list.copy()
@@ -270,7 +268,7 @@ class Doper:
                 if i > 1:
                     sub = "anion"
                 dopants_lists[i] = self._get_selectivity(
-                    dopants_lists[i], cations, CM, sub
+                    dopants_lists[i], cations, sub
                 )
 
         # if groupby
