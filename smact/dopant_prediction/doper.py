@@ -97,10 +97,10 @@ class Doper:
 
     def _merge_dicts(self, keys, dopants_list, groupby_list):
         merged_dict = dict()
-        for k, dopants, groupby in zip(keys, dopants_list, groupby_list):
+        for k, dopants, group in zip(keys, dopants_list, groupby_list):
             merged_values = dict()
             merged_values["sorted"] = dopants
-            for key, value in groupby.items():
+            for key, value in group.items():
                 merged_values[key] = sorted(
                     value, key=lambda x: x[2], reverse=True
                 )
@@ -339,7 +339,7 @@ class Doper:
                 edge_color="white",
             )
 
-    def format_number(self, num_str):
+    def _format_number(self, num_str):
         num = int(num_str)
         sign = "+" if num >= 0 else "-"
         return f"{abs(num)}{sign}"
@@ -356,7 +356,7 @@ class Doper:
         for dopant_type, dopants in self.results.items():
             print("\033[91m" + str(dopant_type) + "\033[0m")
             for k, v in dopants.items():
-                kind = k if k == "sorted" else self.format_number(k)
+                kind = k if k == "sorted" else self._format_number(k)
                 print("\033[96m" + str(kind) + "\033[0m")
                 enumerated_data = [
                     [i + 1] + sublist for i, sublist in enumerate(v)
