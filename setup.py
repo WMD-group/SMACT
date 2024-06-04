@@ -37,7 +37,6 @@ if __name__ == "__main__":
             "smact.dopant_prediction",
         ],
         include_package_data=True,
-        package_dir={"": "smact"},
         zip_safe=False,
         test_suite="smact.tests.test",
         install_requires=[
