@@ -59,6 +59,20 @@ class DopantPredictionTest(unittest.TestCase):
         test = doper.Doper(
             test_specie, embedding="skipspecies", use_probability=False
         )
+        result = test.get_dopants()
+
+        n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")
+        p_sub_list_cat = result.get("p-type cation substitutions").get("sorted")
+        n_sub_list_an = result.get("n-type anion substitutions").get("sorted")
+        p_sub_list_an = result.get("p-type anion substitutions").get("sorted")
+
+        # Create a list of the results
+        results = [n_sub_list_cat, p_sub_list_cat, n_sub_list_an, p_sub_list_an]
+
+        # Assert that the similarity values are between 0 and 1
+        for r in results:
+            for dopant_result_list in r:
+                self.assertTrue(0 <= dopant_result_list[2] <= 1)
 
     def test_format_number(self):
         test_specie = ("Cu+", "Ga3+", "S2-")
@@ -66,12 +80,3 @@ class DopantPredictionTest(unittest.TestCase):
 
         self.assertEqual(test._format_number(2), "2+")
         self.assertEqual(test._format_number(-2), "2-")
-
-
-if __name__ == "__main__":
-    TestLoader = unittest.TestLoader()
-    DoperTests = unittest.TestSuite()
-    DoperTests.addTests(TestLoader.loadTestsFromTestCase(DopantPredictionTest))
-
-    runner = unittest.TextTestRunner()
-    result = runner.run(DoperTests)
