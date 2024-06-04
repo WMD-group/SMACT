@@ -43,6 +43,7 @@ if __name__ == "__main__":
                 "data/*.data",
                 "data/*.xlsx",
                 "data/*.json",
+                "data/species_rep/*.json",
             ]
         },
         zip_safe=False,
