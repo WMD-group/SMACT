@@ -289,11 +289,6 @@ class Doper:
                 groupby_lists[i] = grouped_top_data
                 del grouped_data
 
-        # select top n elements
-        dopants_lists = [
-            dopants_list[:num_dopants] for dopants_list in dopants_lists
-        ]
-
         keys = [
             "n-type cation substitutions",
             "p-type cation substitutions",
@@ -304,7 +299,7 @@ class Doper:
         self.results = self._merge_dicts(keys, dopants_lists, groupby_lists)
 
         # return the top (num_dopants) results for each case
-        return self.results
+        return {key: value.get("sorted")[:num_dopants] for key, value in self.results.items()}
 
     def plot_dopants(self) -> None:
         """
@@ -332,8 +327,9 @@ class Doper:
                 }
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
-                cmap="rainbow",
-                blank_color="gainsboro",
+                cmap="Reds",
+                cmap_range=(min(dict_results.values()), max(dict_results.values())),
+                blank_color="#D4D4D4",
                 edge_color="white",
             )
 
