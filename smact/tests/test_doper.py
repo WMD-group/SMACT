@@ -1,9 +1,8 @@
 import os
 import unittest
 
-import smact
 from smact.dopant_prediction import doper
-from smact.structure_prediction import mutation, utilities
+from smact.structure_prediction import utilities
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_LAMBDA_JSON = os.path.join(files_dir, "test_lambda_tab.json")
@@ -11,7 +10,6 @@ TEST_LAMBDA_JSON = os.path.join(files_dir, "test_lambda_tab.json")
 
 class DopantPredictionTest(unittest.TestCase):
     def test_dopant_prediction(self):
-        num_dopants = 10
         test_specie = ("Cu+", "Ga3+", "S2-")
         test = doper.Doper(test_specie)
 

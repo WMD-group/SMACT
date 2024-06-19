@@ -1,6 +1,6 @@
 import os
 from itertools import groupby
-from typing import List, Optional, Tuple, Type
+from typing import List, Optional, Tuple
 
 import numpy as np
 from pymatgen.util import plotting
