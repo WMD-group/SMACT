@@ -25,7 +25,8 @@ class DopantPredictionTest(unittest.TestCase):
         _, an_charge = utilities.parse_spec(anion_min_charge)
 
         # Assert: Length of the list and return type (dictionary: list)
-        result = test.get_dopants()
+        dopants = test.get_dopants()
+        result = test.results
         self.assertIs(type(result), dict)
         for d in result.values():
             self.assertIn("sorted", d)
@@ -59,7 +60,8 @@ class DopantPredictionTest(unittest.TestCase):
         test = doper.Doper(
             test_specie, embedding="skipspecies", use_probability=False
         )
-        result = test.get_dopants()
+        dopants = test.get_dopants()
+        result = test.results
 
         n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")
         p_sub_list_cat = result.get("p-type cation substitutions").get("sorted")
