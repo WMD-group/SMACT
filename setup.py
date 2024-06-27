@@ -50,7 +50,7 @@ if __name__ == "__main__":
         test_suite="smact.tests.test",
         install_requires=[
             "scipy",
-            "numpy",
+            "numpy<2",
             "spglib",
             "pymatgen>=2024.2.20",
             "ase",
