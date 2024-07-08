@@ -439,10 +439,10 @@ def smact_validity(
         use_pauling_test (bool): Whether to use the Pauling electronegativity test
         include_alloys (bool): If True, compositions of metal elements will be considered valid
         oxidation_states_set (Union[str, bytes, os.PathLike]): A string to choose which set of
-        oxidation states should be chosen for charge-balancing. Options are 'default', 'icsd',
-        'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia
-        (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
-        A filepath to an oxidation states text file can also be supplied.
+            oxidation states should be chosen for charge-balancing. Options are 'default', 'icsd',
+            'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia
+            (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
+            A filepath to an oxidation states text file can also be supplied.
 
     Returns:
         bool: True if the composition is valid, False otherwise
