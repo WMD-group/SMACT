@@ -430,6 +430,7 @@ def smact_validity(
     composition: Union[pymatgen.core.Composition, str],
     use_pauling_test: bool = True,
     include_alloys: bool = True,
+    oxidation_states_set: Union[str, bytes, os.PathLike] = "default",
 ) -> bool:
     """Check if a composition is valid according to the SMACT rules.
 
@@ -437,6 +438,11 @@ def smact_validity(
         composition (Union[pymatgen.core.Composition, str]): Composition/formula to check
         use_pauling_test (bool): Whether to use the Pauling electronegativity test
         include_alloys (bool): If True, compositions of metal elements will be considered valid
+        oxidation_states_set (Union[str, bytes, os.PathLike]): A string to choose which set of
+        oxidation states should be chosen for charge-balancing. Options are 'default', 'icsd',
+        'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia
+        (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
+        A filepath to an oxidation states text file can also be supplied.
 
     Returns:
         bool: True if the composition is valid, False otherwise
@@ -462,7 +468,31 @@ def smact_validity(
     space = element_dictionary(elem_symbols)
     smact_elems = [e[1] for e in space.items()]
     electronegs = [e.pauling_eneg for e in smact_elems]
-    ox_combos = [e.oxidation_states for e in smact_elems]
+
+    if oxidation_states_set == "default" or oxidation_states_set is None:
+        ox_combos = [e.oxidation_states for e in smact_elems]
+    elif oxidation_states_set == "icsd":
+        ox_combos = [e.oxidation_states_icsd for e in smact_elems]
+    elif oxidation_states_set == "pymatgen":
+        ox_combos = [e.oxidation_states_sp for e in smact_elems]
+    elif os.path.exists(oxidation_states_set):
+        ox_combos = [
+            oxi_custom(e.symbol, oxidation_states_set) for e in smact_elems
+        ]
+    elif oxidation_states_set == "wiki":
+        warnings.warn(
+            "This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.",
+            stacklevel=2,
+        )
+        ox_combos = [e.oxidation_states_wiki for e in smact_elems]
+
+    else:
+        raise (
+            Exception(
+                f'{oxidation_states_set} is not valid. Enter either "default", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
+            )
+        )
+
     threshold = np.max(count)
     compositions = []
     for ox_states in itertools.product(*ox_combos):
