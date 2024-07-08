@@ -98,7 +98,7 @@ conda install -c conda-forge smact
 
 Alternatively, the very latest version can be installed using:
 
-    pip install git+git://github.com/WMD-group/SMACT.git
+    pip install git+https://github.com/WMD-group/SMACT.git
 
 For developer installation SMACT can be installed from a copy of the source
 repository (https://github.com/wmd-group/smact); this will be preferred if using experimental code branches.
