@@ -432,8 +432,9 @@ def smact_validity(
     include_alloys: bool = True,
     oxidation_states_set: Union[str, bytes, os.PathLike] = "default",
 ) -> bool:
-    """Check if a composition is valid according to the SMACT rules. Composition is considered valid if it
-        passes the charge neutrality test and the Pauling electronegativity test.
+    """Check if a composition is valid according to the SMACT rules.
+
+    Composition is considered valid if it passes the charge neutrality test and the Pauling electronegativity test.
 
     Args:
         composition (Union[pymatgen.core.Composition, str]): Composition/formula to check. This can be a pymatgen Composition object or a string.
