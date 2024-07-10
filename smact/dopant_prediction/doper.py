@@ -166,19 +166,86 @@ class Doper:
             group_by_charge (bool): Whether to group the dopants by charge.
         Returns:
             (dict): Dopant suggestions, given as a dictionary with keys
-            "n_type_cation", "p_type_cation", "n_type_anion", "p_type_anion".
+            "n-type cation substitutions", "p-type cation substitutions", "n-type anion substitutions", "p-type anion substitutions".
 
         Examples:
             >>> test = Doper(('Ti4+','O2-'))
             >>> print(test.get_dopants(num_dopants=2))
-                {'n-type cation substitutions': [('Ta5+', 8.790371775858281e-05),
-                ('Nb5+', 7.830035204694342e-05)],
-                'p-type cation substitutions': [('Na1+', 0.00010060400812977031),
-                ('Zn2+', 8.56373996146833e-05)],
-                'n-type anion substitutions': [('F1-', 0.01508116810515677),
-                ('Cl1-', 0.004737202729901607)],
-                'p-type anion substitutions': [('N3-', 0.0014663800608945628),
-                ('C4-', 9.31310255126729e-08)]}
+                {'n-type anion substitutions': {'-1': [['F1-', 'O2-', 0.01508116810515677, 1.0],
+                                       ['Cl1-','O2-', 0.004737202729901607, 1.0]],
+                                'sorted': [['F1-',
+                                            'O2-',
+                                            0.01508116810515677,
+                                            1.0],
+                                           ['Cl1-',
+                                            'O2-',
+                                            0.004737202729901607,
+                                            1.0]]},
+                'n-type cation substitutions': {'5': [['Ta5+',
+                                        'Ti4+',
+                                        8.790371775858281e-05,
+                                        1.0],
+                                       ['Nb5+',
+                                        'Ti4+',
+                                        7.830035204694342e-05,
+                                        1.0]],
+                                 '6': [['W6+',
+                                        'Ti4+',
+                                        3.4638026110457894e-05,
+                                        1.0],
+                                       ['Mo6+',
+                                        'Ti4+',
+                                        1.6924395455176864e-05,
+                                        1.0]],
+                                 'sorted': [['Ta5+',
+                                             'Ti4+',
+                                             8.790371775858281e-05,
+                                             1.0],
+                                            ['Nb5+',
+                                             'Ti4+',
+                                             7.830035204694342e-05,
+                                             1.0]]},
+                'p-type anion substitutions': {'-3': [['N3-',
+                                        'O2-',
+                                        0.0014663800608945628,
+                                        1.0]],
+                                'sorted': [['N3-',
+                                            'O2-',
+                                            0.0014663800608945628,
+                                            1.0]]},
+                'p-type cation substitutions': {'1': [['Na1+',
+                                        'Ti4+',
+                                        0.00010060400812977031,
+                                        1.0],
+                                       ['Li1+',
+                                        'Ti4+',
+                                        4.90559802023167e-05,
+                                        1.0]],
+                                 '2': [['Zn2+',
+                                        'Ti4+',
+                                        8.56373996146833e-05,
+                                        1.0],
+                                       ['Mn2+',
+                                        'Ti4+',
+                                        8.563568688381837e-05,
+                                        1.0]],
+                                 '3': [['Fe3+',
+                                        'Ti4+',
+                                        6.259479321178562e-05,
+                                        1.0],
+                                       ['V3+',
+                                        'Ti4+',
+                                        5.312098771970144e-05,
+                                        1.0]],
+                                 'sorted': [['Na1+',
+                                             'Ti4+',
+                                             0.00010060400812977031,
+                                             1.0],
+                                            ['Zn2+',
+                                             'Ti4+',
+                                             8.56373996146833e-05,
+                                             1.0]]}}
+
         """
 
         cations, anions = [], []
@@ -306,11 +373,11 @@ class Doper:
         # return the top (num_dopants) results for each case
         return self.results
 
-    def plot_dopants(self) -> None:
+    def plot_dopants(self, cmap: str = "YlOrRd") -> None:
         """
         Plot the dopant suggestions using the periodic table heatmap.
         Args:
-            None
+            cmap (str): The colormap to use for the heatmap.
         Returns:
             None
         """
@@ -332,7 +399,7 @@ class Doper:
                 }
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
-                cmap="rainbow",
+                cmap=cmap,
                 blank_color="gainsboro",
                 edge_color="white",
             )
