@@ -68,7 +68,7 @@ List of modules
   *  **properties.py** A collection of tools for estimating useful properties based on composition.
   * **lattice.py** Given the sites, multiplicities and possible oxidation states
     at those sites, this reads from the database and generates all possible
-    stoichiometeries.
+    stoichiometries.
   * **builder.py** Builds some common lattice structures, given the chemical
     composition.
   * **lattice_parameters.py** Estimation of lattice parameters for various lattice types using covalent/ionic radii.
@@ -82,11 +82,11 @@ Requirements
 ------------
 The main language is Python 3 and has been tested using Python 3.9+.
 Basic requirements are Numpy and Scipy.
-The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](www.pymatgen.org) are also required for many components.
+The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](https://pymatgen.org) are also required for many components.
 
 Installation
 ------------
-The latest stable release can be installed via pip which will automatically setup other Python packages as required:
+The latest stable release can be installed via pip which will automatically set up other Python packages as required:
 
     pip install smact  
 
@@ -98,12 +98,12 @@ conda install -c conda-forge smact
 
 Alternatively, the very latest version can be installed using:
 
-    pip install git+git://github.com/WMD-group/SMACT.git
+    pip install git+https://github.com/WMD-group/SMACT.git
 
 For developer installation SMACT can be installed from a copy of the source
 repository (https://github.com/wmd-group/smact); this will be preferred if using experimental code branches.
 
-To clone the project from Github and make a local installation:
+To clone the project from GitHub and make a local installation:
 
     git clone https://github.com/wmd-group/smact.git
     cd smact
@@ -136,21 +136,21 @@ Testing modules should be pass/fail and wrapped into **tests/test_core.py** or a
 Run the tests using `python -m pytest -v`.
 (The final `-v` is optional and adds more detail to the output.)
 
-We also use integrated testing on Github via [GitHub Actions](hhttps://github.com/features/actions).
+We also use integrated testing on GitHub via [GitHub Actions](hhttps://github.com/features/actions).
 
 References
 ----------
 
-[H. Park et al,
+[H. Park et al.,
 "Mapping inorganic crystal chemical space" *Faraday Discuss.* (2024)](https://pubs.rsc.org/en/content/articlelanding/2024/fd/d4fd00063c)
 
-[D. W. Davies et al,
+[D. W. Davies et al.,
 "SMACT: Semiconducting Materials by Analogy and Chemical Theory" *JOSS* **4**, 1361 (2019)](https://joss.theoj.org/papers/7efd2f2ad60d25bdccee3fbd3fc11448)
 
-[D. W. Davies et al,
+[D. W. Davies et al.,
 "Materials discovery by chemical analogy: role of oxidation states in structure prediction" *Faraday Discuss.* **211**, 553 (2018)](https://pubs.rsc.org/en/Content/ArticleLanding/2018/FD/C8FD00032H)
 
-[D. W. Davies et al,
+[D. W. Davies et al.,
 "Computational screening of all stoichiometric inorganic materials" *Chem* **1**, 617 (2016)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
 
 [B. R. Pamplin, "A systematic method of deriving new semiconducting

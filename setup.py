@@ -5,10 +5,10 @@ __author_email__ = "d.w.davies@imperial.ac.uk"
 __copyright__ = (
     "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
 )
-__version__ = "2.5.5"
+__version__ = "2.6"
 __maintainer__ = "Anthony O. Onwuli"
 __maintaier_email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "December 7 2023"
+__date__ = "July 10 2024"
 
 import os
 import unittest
@@ -43,6 +43,7 @@ if __name__ == "__main__":
                 "data/*.data",
                 "data/*.xlsx",
                 "data/*.json",
+                "data/species_rep/*.json",
             ]
         },
         zip_safe=False,

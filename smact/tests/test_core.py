@@ -411,6 +411,25 @@ class TestSequenceFunctions(unittest.TestCase):
         # Test for single element
         self.assertTrue(smact.screening.smact_validity("Al"))
 
+        # Test for MgB2 which is invalid for the default oxi states but valid for the icsd states
+        self.assertFalse(smact.screening.smact_validity("MgB2"))
+        self.assertTrue(
+            smact.screening.smact_validity("MgB2", oxidation_states_set="icsd")
+        )
+        self.assertFalse(
+            smact.screening.smact_validity(
+                "MgB2", oxidation_states_set="pymatgen"
+            )
+        )
+        self.assertTrue(
+            smact.screening.smact_validity("MgB2", oxidation_states_set="wiki")
+        )
+        self.assertFalse(
+            smact.screening.smact_validity(
+                "MgB2", oxidation_states_set=TEST_OX_STATES
+            )
+        )
+
     # ---------------- Lattice ----------------
     def test_Lattice_class(self):
         site_A = smact.lattice.Site([0, 0, 0], -1)
