@@ -166,7 +166,7 @@ class Doper:
             group_by_charge (bool): Whether to group the dopants by charge.
         Returns:
             (dict): Dopant suggestions, given as a dictionary with keys
-            "n_type_cation", "p_type_cation", "n_type_anion", "p_type_anion".
+            "n-type cation substitutions", "p-type cation substitutions", "n-type anion substitutions", "p-type anion substitutions".
 
         Examples:
             >>> test = Doper(('Ti4+','O2-'))
@@ -373,11 +373,11 @@ class Doper:
         # return the top (num_dopants) results for each case
         return self.results
 
-    def plot_dopants(self, cmap="YlOrRd") -> None:
+    def plot_dopants(self, cmap: str = "YlOrRd") -> None:
         """
         Plot the dopant suggestions using the periodic table heatmap.
         Args:
-            None
+            cmap (str): The colormap to use for the heatmap.
         Returns:
             None
         """
