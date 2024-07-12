@@ -73,6 +73,16 @@ class Element:
 
         Element.HHI_r (float) : Hirfindahl-Hirschman Index for elemental reserves
 
+        Element.mendeleev (int): Mendeleev number
+
+        Element.AtomicWeight (float): Atomic weight
+
+        Element.MeltingT (float): Melting temperature in K
+
+        Element.num_valence (int): Number of valence electrons
+
+
+
     Raises:
         NameError: Element not found in element.txt
         Warning: Element not found in Eigenvalues.csv
@@ -140,6 +150,18 @@ class Element:
         else:
             sse_Pauling = None
 
+        magpie_data = data_loader.lookup_element_magpie_data(symbol)
+        if magpie_data:
+            mendeleev = magpie_data["MendeleevNumber"]
+            AtomicWeight = magpie_data["AtomicWeight"]
+            MeltingT = magpie_data["MeltingT"]
+            num_valence = magpie_data["NValence"]
+        else:
+            mendeleev = None
+            AtomicWeight = None
+            MeltingT = None
+            num_valence = None
+
         for attribute, value in (
             ("coord_envs", coord_envs),
             ("covalent_radius", dataset["r_cov"]),
@@ -174,6 +196,10 @@ class Element:
             ("SSE", sse),
             ("SSEPauling", sse_Pauling),
             ("symbol", symbol),
+            ("mendeleev", mendeleev),
+            ("AtomicWeight", AtomicWeight),
+            ("MeltingT", MeltingT),
+            ("num_valence", num_valence),
             # ('vdw_radius', dataset['RVdW']),
         ):
             setattr(self, attribute, value)
