@@ -865,7 +865,7 @@ def lookup_element_magpie_data(symbol: str, copy: bool = True):
         _element_magpie_data = {}
 
         df = pd.read_csv(os.path.join(data_directory, "magpie.csv"))
-        for index, row in df.iterrows():
+        for _index, row in df.iterrows():
             key = row.iloc[0]
 
             dataset = {
