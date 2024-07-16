@@ -81,6 +81,8 @@ class Element:
 
         Element.num_valence (int): Number of valence electrons
 
+        Element.num_valence_modified (int): Number of valence electrons based on a modified definition
+
 
 
     Raises:
@@ -162,6 +164,12 @@ class Element:
             MeltingT = None
             num_valence = None
 
+        valence_data = data_loader.lookup_element_valence_data(symbol)
+        if valence_data:
+            num_valence_modified = valence_data["NValence"]
+        else:
+            num_valence_modified = None
+
         for attribute, value in (
             ("coord_envs", coord_envs),
             ("covalent_radius", dataset["r_cov"]),
@@ -200,6 +208,7 @@ class Element:
             ("AtomicWeight", AtomicWeight),
             ("MeltingT", MeltingT),
             ("num_valence", num_valence),
+            ("num_valence_modified", num_valence_modified),
             # ('vdw_radius', dataset['RVdW']),
         ):
             setattr(self, attribute, value)
