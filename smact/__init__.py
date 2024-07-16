@@ -167,6 +167,8 @@ class Element:
         valence_data = data_loader.lookup_element_valence_data(symbol)
         if valence_data:
             num_valence_modified = valence_data["NValence"]
+        else:
+            num_valence_modified = None
 
         for attribute, value in (
             ("coord_envs", coord_envs),
