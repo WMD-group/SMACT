@@ -346,7 +346,7 @@ def lookup_element_hhis(symbol):
     if _element_hhis is None:
         _element_hhis = {}
 
-        with open(os.path.join(data_directory, "HHIs.txt")) as file:
+        with open(os.path.join(data_directory, "hhi.txt")) as file:
             for line in file:
                 line = line.strip()
 
