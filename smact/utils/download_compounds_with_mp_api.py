@@ -53,12 +53,15 @@ def download_mp_data(
         range(1, max_stoich + 1), num_elements
     ):
         formula_dict = {symbols[i]: stoich for i, stoich in enumerate(stoichs)}
-        formula_anonymous_list.append(Composition(formula_dict).reduced_formula)
+        formula_anonymous_list.append(
+            Composition(formula_dict).reduced_formula
+        )
     formula_anonymous_list = sorted(set(formula_anonymous_list))
 
     e_hull_dict = defaultdict(lambda: float("inf"))
 
     for formula_anonymous in tqdm(formula_anonymous_list):
+        print(f"Downloading data for {formula_anonymous}...")
         # donwload data from MP
         with MPRester(mp_api_key) as mpr:
             docs = mpr.materials.summary.search(
