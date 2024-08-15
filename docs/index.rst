@@ -16,6 +16,7 @@ Contents:
    introduction
    getting_started
    examples
+   tutorials
    smact
 
 

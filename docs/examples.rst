@@ -84,6 +84,12 @@ the search.
      'Ti': <smact.Element at 0x10ecc5dd0>,
      'V': <smact.Element at 0x10ecc5e50>}
 
+.. toctree::
+   :maxdepth: 2
+
+   examples/filter
+   examples/validity
+
 ====================
 Neutral combinations
 ====================
@@ -230,6 +236,12 @@ demonstrating the conversion of charge-neutral compositions produced by `smact` 
 or to a Pandas dataframe, both of which could then be used as input for a machine learning algorithm.
 For a full machine learning example that uses `smact`, there is a repository `here <https://github.com/WMD-group/Solar_oxides_data>`_ 
 which demonstrates a search for solar energy materials from the four-component (quaternary) oxide materials space.
+
+.. toctree::
+   :maxdepth: 2
+
+   examples/doper
+   examples/distorter
 
 .. [1]  "Revised effective ionic radii and systematic studies of interatomic distances in halides and chalcogenides" Acta Cryst. A. **32**, 751–767 (1976).
 
