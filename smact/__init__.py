@@ -3,13 +3,12 @@ Semiconducting Materials from Analogy and Chemical Theory
 
 A collection of fast screening tools from elemental data
 """
-
 import itertools
 import warnings
 from math import gcd
 from operator import mul as multiply
 from os import path
-from typing import Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -55,11 +54,13 @@ class Element:
 
         Element.oxidation_states_sp (list) : List of oxdation states recognised by the Pymatgen Structure Predictor
 
-        Element.oxidation_states_icsd (list) : List of oxidation states that appear in the ICSD
+        Element.oxidation_states_icsd (list) : List of oxidation states that appear in the 2016 version of the ICSD
 
         Element.oxidation_states_wiki (list): List of oxidation states that appear wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) Data retrieved: 2022-09-22
 
         Element.oxidation_states_custom (list | None ): List of oxidation states that appear in the custom data file supplied (if any)
+
+        Element.oxidation_states_icsd24 (list): List of oxidation states that appear in the 2024 version of the ICSD
 
         Element.coord_envs (list): The allowed coordination enviroments for the ion
 
@@ -168,6 +169,10 @@ class Element:
             (
                 "oxidation_states_wiki",
                 data_loader.lookup_element_oxidation_states_wiki(symbol),
+            ),
+            (
+                "oxidation_states_icsd24",
+                data_loader.lookup_element_oxidation_states_icsd24(symbol),
             ),
             ("dipol", dataset["dipol"]),
             ("pauling_eneg", dataset["el_neg"]),
