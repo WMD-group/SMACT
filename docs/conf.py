@@ -159,6 +159,28 @@ html_static_path = ["_static"]
 # typographically correct entities.
 # html_use_smartypants = True
 
+html_theme_options = {
+    "repository_url": "https://github.com/WMD-Group/SMACT",
+    "repository_branch": "docs_updates",
+    "path_to_docs": "docs",
+    "use_repository_button": True,
+    # "home_page_in_toc": True,
+    "launch_buttons": {
+        "binderhub_url": "https://mybinder.org",
+        "colab_url": "https://colab.research.google.com",
+    },
+}
+
+
+# Adding “Edit Source” links on your Sphinx theme
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "WMD-Group",  # Username
+    "github_repo": "SMACT",  # Repo name
+    "github_version": "master",  # Version
+    "conf_py_path": "/docs/",  # Path in the checkout to the docs root
+}
+
 # Custom sidebar templates, maps document names to template names.
 # html_sidebars = {}
 
