@@ -1,18 +1,23 @@
 """Utility functions for handling oxidation states."""
-import json
 import os
 from os import path
 
 import pandas as pd
 
-# get correct path for datafiles when called from another directory
-from smact import data_directory, data_loader, ordered_elements
+from smact import data_directory, ordered_elements
 
 
 class ICSD24OxStatesFilter:
-    """Class to handle filtering the ICSD 24 oxidation states list."""
+    """Class to handle filtering the ICSD 24 oxidation states list.
+
+    The ICSD 24 oxidation states list is a list of oxidation states for each element in the ICSD 24 database.
+
+    Attributes:
+        ox_states_df (pd.DataFrame): The ICSD 24 oxidation states list as a DataFrame.
+    """
 
     def __init__(self):
+        """Initialise the ICSD 24 oxidation states list."""
         self.ox_states_df = pd.read_json(
             path.join(data_directory, "oxidation_states_icsd24_counts.json")
         )
@@ -36,7 +41,9 @@ class ICSD24OxStatesFilter:
         summary_df = (
             filtered_df[(filtered_df["results_count"] > 0)]
             .groupby("element")
-            .apply(self._filter_oxidation_states, threshold)
+            .apply(
+                self._filter_oxidation_states, threshold, include_groups=False
+            )
             .reset_index()
         )
         summary_df.columns = ["element", "oxidation_state"]
@@ -81,7 +88,9 @@ class ICSD24OxStatesFilter:
                 f"#\n# Oxidation state set\n# Source: ICSD (2024), filtered for > {threshold} reports\n#\n"
             )
             if comment:
-                f.write(f"# {comment}\n")
+                f.write(f"# {comment}\n#\n")
+            if include_zero:
+                f.write("# Includes oxidation state 0\n#\n")
             for line in final_summary:
                 f.write(line + "\n")
 
