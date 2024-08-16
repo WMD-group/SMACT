@@ -26,15 +26,15 @@ SMACT
 
 Statement of need
 --------
-There is a strong demand for functional materials across a wide range of technologies. The motivation can include cost reduction, performance enhancement, or to enable a new application. We have developed low-cost procedures for screening hypothetical materials. This framework can be used for simple calculations on your own computer. SMACT follows a top-down approach where a set of element combinations is generated and then screened using rapid chemical filters. It can be used as part of a multi-technique workflow or to feed machine learning models for materials.
+There is a strong demand for functional materials across a wide range of technologies. The motivation can include cost reduction, performance enhancement, or to enable a new application. We have developed low-cost procedures for screening hypothetical materials. This framework can be used for simple calculations on your own computer. SMACT follows a top-down approach where a set of element combinations is generated and then screened using rapid chemical filters. It can be used as part of a multi-technique workflow or to feed artificial intelligence models for materials.
 
 ![](smact_simple.gif)
 
 Getting started
 -----
 Features are accessed through Python scripts, importing classes and functions as needed.
-The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be used.
-Extended examples are available in [our examples folder](https://github.com/WMD-group/SMACT/tree/master/examples).
+The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be usede
+Use cases are available in our [examples](https://github.com/WMD-group/SMACT/tree/master/examples) and [tutorials](https://github.com/WMD-group/SMACT/tree/master/tutorials) folders.
 
 Code features
 --------
@@ -45,7 +45,7 @@ Code features
 - Element compositions can be screened through based on the heuristic filters of charge neutrality and electronegativity order. This is handled using the [screening module](https://smact.readthedocs.io/en/latest/smact.screening.html) and [this publication](https://www.cell.com/chem/fulltext/S2451-9294(16)30155-3) describes the underlying theory. An example procedure is [outlined in the docs](https://smact.readthedocs.io/en/latest/examples.html#neutral-combinations) and more examples can be found in the [counting examples subfolder](https://github.com/WMD-group/SMACT/tree/master/examples/Counting).
 
 - Further filters can be applied to generated lists of compositions in order to screen for particular properties. These properties are either intrinsic properties of elements or are calculated for compositions using the [properties module](https://smact.readthedocs.io/en/latest/smact.properties.html). For example: 
-  - A use case is shown in [this publication](https://pubs.rsc.org/en/content/articlehtml/2018/sc/c7sc03961a), in which 160,000 chemical compositions are screened based on optical band gap calculated using the [solid-state energy scale](https://www.sciencedirect.com/science/article/pii/S0022459615300888).
+  - An application is shown in [this publication](https://pubs.rsc.org/en/content/articlehtml/2018/sc/c7sc03961a), in which 160,000 chemical compositions are screened based on optical band gap calculated using the [solid-state energy scale](https://www.sciencedirect.com/science/article/pii/S0022459615300888).
   - The [oxidation_states module](https://smact.readthedocs.io/en/latest/smact.oxidation_states.html) can be used to filter out compositions containing metals in unlikely oxidation states according to [a data-driven model](https://pubs.rsc.org/en/content/articlelanding/2018/fd/c8fd00032h#!divAbstract).
 
 - Compositions can also be filtered based on sustainability via the abundance of elements in the Earth's crust or via the [HHI scale](https://pubs.acs.org/doi/10.1021/cm400893e). 
@@ -82,7 +82,7 @@ Requirements
 ------------
 The main language is Python 3 and has been tested using Python 3.9+.
 Basic requirements are Numpy and Scipy.
-The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE),  [spglib](http://atztogo.github.io/spglib), and [pymatgen](https://pymatgen.org) are also required for many components.
+The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE), [spglib](http://atztogo.github.io/spglib), and [pymatgen](https://pymatgen.org) are also required for many components.
 
 Installation
 ------------
@@ -122,9 +122,11 @@ Development notes
 -----------------
 
 ### Bugs, features and questions
-Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact either Dan Davies (author) or Anthony Onwuli (maintainer) by e-mail: d.w.davies@imperial.ac.uk or anthony.onwuli16@imperial.ac.uk respectively.
+
+Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact Anthony Onwuli (maintainer) by [e-mail](mailto:anthony.onwuli16@imperial.ac.uk).
 
 ### Code contributions
+
 We are always looking for ways to make SMACT better and more useful to the wider community; contributions are welcome. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following:
 
 - Code style should comply with [PEP8](http://www.python.org/dev/peps/pep-0008) where possible. [Google's house style](https://google.github.io/styleguide/pyguide.html) is also helpful, including a good model for docstrings.
@@ -132,11 +134,10 @@ We are always looking for ways to make SMACT better and more useful to the wider
 - Add tests wherever possible, and use the test suite to check if you broke anything.
 
 ### Tests
-Testing modules should be pass/fail and wrapped into **tests/test_core.py** or another **tests/test_something.py** file added, if appropriate. 
-Run the tests using `python -m pytest -v`.
-(The final `-v` is optional and adds more detail to the output.)
 
-We also use integrated testing on GitHub via [GitHub Actions](hhttps://github.com/features/actions).
+We use integrated testing on GitHub via [GitHub Actions](hhttps://github.com/features/actions). Testing modules should be pass/fail and wrapped into **tests/test_core.py** or another **tests/test_something.py** file added, if appropriate. 
+Run the tests using `python -m pytest -v`.(The final `-v` is optional and adds more detail to the output.)
+
 
 References
 ----------
@@ -153,6 +154,5 @@ References
 [D. W. Davies et al.,
 "Computational screening of all stoichiometric inorganic materials" *Chem* **1**, 617 (2016)](http://www.cell.com/chem/abstract/S2451-9294(16)30155-3)
 
-[B. R. Pamplin, "A systematic method of deriving new semiconducting
-compounds by structural analogy", *J. Phys. Chem. Solids*
+[B. R. Pamplin, "A systematic method of deriving new semiconducting compounds by structural analogy", *J. Phys. Chem. Solids*
 **25**, 675 (1964)](http://www.sciencedirect.com/science/article/pii/0022369764901763)

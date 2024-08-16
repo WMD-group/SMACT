@@ -3,10 +3,10 @@
 from smact.properties import band_gap_Harrison
 
 # python band_gap_simple.py --h
-   # usage: band_gap_simple.py [-h] [-a ANION] [-c CATION] [-d DISTANCE] [-v]
+# usage: band_gap_simple.py [-h] [-a ANION] [-c CATION] [-d DISTANCE] [-v]
 
-#python band_gap_simple.py -c Mg -a Cl -d 2.38
-   # 3.8944137939094166
+# python band_gap_simple.py -c Mg -a Cl -d 2.38
+# 3.8944137939094166
 
 if __name__ == "__main__":
     import argparse
