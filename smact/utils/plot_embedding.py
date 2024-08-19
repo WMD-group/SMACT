@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -60,8 +59,8 @@ def update_layout(
 
 def plot_reducers_embeddings(
     df_label: pd.DataFrame,
-    reducers: List[str],
-    embedding_names: List[str],
+    reducers: list[str],
+    embedding_names: list[str],
     embedding_dir: Path,
     save_path: Path,
     symbol: str = "circle",
@@ -70,11 +69,7 @@ def plot_reducers_embeddings(
     fig = make_subplots(
         rows=6,
         cols=3,
-        subplot_titles=[
-            f"{reducer} - {embedding_name}"
-            for embedding_name in embedding_names
-            for reducer in reducers
-        ],
+        subplot_titles=[f"{reducer} - {embedding_name}" for embedding_name in embedding_names for reducer in reducers],
         vertical_spacing=0.02,
         horizontal_spacing=0.02,
     )
@@ -121,7 +116,7 @@ def plot_reducers_embeddings(
             )
 
     # add legend
-    for label, _ in legend_colors.items():
+    for label in legend_colors:
         fig.add_trace(
             go.Scatter(
                 x=[None],

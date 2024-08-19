@@ -4,6 +4,7 @@ import string
 import time
 from collections import defaultdict
 from pathlib import Path
+from typing import Optional
 
 from mp_api.client import MPRester
 from pymatgen.core.composition import Composition
@@ -11,7 +12,7 @@ from tqdm import tqdm
 
 
 def download_mp_data(
-    mp_api_key: str = None,
+    mp_api_key: Optional[str] = None,
     num_elements: int = 2,
     max_stoich: int = 8,
     save_dir: str = "data/binary/mp_api",
@@ -24,6 +25,7 @@ def download_mp_data(
     The data is saved to a specified directory.
 
     Args:
+    ----
         mp_api_key (str, optional): the API key for Materials Project.
         num_elements (int, optional): the number of elements in each compound to consider.
             Defaults to 2.
@@ -35,13 +37,13 @@ def download_mp_data(
             Defaults to 1.
 
     Returns:
+    -------
         None
+
     """
     # check if MP_API_KEY is set
     if mp_api_key is None:
-        raise ValueError(
-            "Please set your MP_API_KEY in the environment variable."
-        )
+        raise ValueError("Please set your MP_API_KEY in the environment variable.")
     # set save directory
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
@@ -49,9 +51,7 @@ def download_mp_data(
     # make a list for all possible combinartions of formula anonymous
     symbols = string.ascii_uppercase
     formula_anonymous_list = []
-    for stoichs in itertools.combinations_with_replacement(
-        range(1, max_stoich + 1), num_elements
-    ):
+    for stoichs in itertools.combinations_with_replacement(range(1, max_stoich + 1), num_elements):
         formula_dict = {symbols[i]: stoich for i, stoich in enumerate(stoichs)}
         formula_anonymous_list.append(Composition(formula_dict).reduced_formula)
     formula_anonymous_list = sorted(set(formula_anonymous_list))
@@ -89,7 +89,5 @@ def download_mp_data(
             if (energy_above_hull) < e_hull_dict[formula_pretty]:
                 e_hull_dict[formula_pretty] = energy_above_hull
 
-                json.dump(
-                    doc.dict(), open(save_dir / f"{formula_pretty}.json", "w")
-                )
+                json.dump(doc.dict(), open(save_dir / f"{formula_pretty}.json", "w"))
         time.sleep(request_interval)
