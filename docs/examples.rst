@@ -9,13 +9,14 @@ For workflows that have been used in real examples and in published work, visit 
 `separate repository <https://github.com/WMD-group/smact_workflows>`_.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    examples/elements_and_species
    examples/filter
    examples/validity
    examples/lists
    examples/neutral_combos
+   examples/oxidation_states
    examples/compound_electroneg
    examples/doper
    examples/distorter

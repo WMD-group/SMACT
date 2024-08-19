@@ -54,9 +54,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "Smact"
-copyright = "2024, Materials Design Group"
-author = "Materials Design Group"
+project = "SMACT"
+copyright = "2024, The SMACT Developers"
+author = "The SMACT Developers"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -116,6 +116,8 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = "sphinx_book_theme"
+html_logo = "smact_toc.jpg"
+html_title = "smact"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

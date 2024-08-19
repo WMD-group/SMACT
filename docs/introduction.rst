@@ -9,7 +9,37 @@ rules.
 :mod:`smact` uses a combination of heuristics and models derived from data to
 rapidly search large areas of chemical space. This combination of methods
 allows :mod:`smact` to identify new materials for applications such as photovoltaics,
-water splitting and thermoelectrics. Read more about :mod:`smact` in our publications:
+water splitting and thermoelectrics. 
+
+Features of :mod:`smact` include:
+
+- Chemical elements with associated properties
+- Filters for oxidation states and charge balancing
+- Structure predcition from chemical composition
+- Composition probability prediction
+
+Install
+=======
+
+The package is available *via* :code:`pip install smact`.
+
+License and citation
+====================
+
+:mod:`smact` is distributed under an MIT license.
+
+To cite the theory of :mod:`smact` please use:
+
+- `Computational screening of all stoichiometric inorganic materials <https://www.sciencedirect.com/science/article/pii/S2451929416301553>`_
+
+To cite the code of :mod:`smact` please use:
+
+- `SMACT: Semiconducting Materials by Analogy and Chemical Theory <https://joss.theoj.org/papers/10.21105/joss.01361.pdf>`_
+
+Studies using smact
+===================
+
+Read more about :mod:`smact` in our publications:
 
 - `Computational screening of all stoichiometric inorganic materials <https://www.sciencedirect.com/science/article/pii/S2451929416301553>`_
 - `Computer-aided design of metal chalcohalide semiconductors: from chemical composition to crystal structure <http://pubs.rsc.org/en/content/articlehtml/2017/sc/c7sc03961a>`_
@@ -18,7 +48,6 @@ water splitting and thermoelectrics. Read more about :mod:`smact` in our publica
 This approach is inspired by the work of Harrison [1]_ and
 Pamplin [2]_. The work is an active project in the `Materials Design Group <http://wmd-group.github.io>`_.
 
-The package is available *via* :code:`pip install smact`.
 
 We are also developing a set of Jupyter Notebook examples `here <https://github.com/WMD-group/SMACT/tree/master/examples>`_.
 
