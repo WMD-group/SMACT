@@ -9,7 +9,7 @@ rules.
 :mod:`smact` uses a combination of heuristics and models derived from data to
 rapidly search large areas of chemical space. This combination of methods
 allows :mod:`smact` to identify new materials for applications such as photovoltaics,
-water splitting and thermoelectrics. 
+water splitting and thermoelectrics.
 
 Features of :mod:`smact` include:
 

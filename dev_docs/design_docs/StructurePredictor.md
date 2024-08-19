@@ -2,7 +2,7 @@
 ---
 
 ## Motivation
-The `PYMATGEN` structure predictor [based on [this paper](https://pubs.acs.org/doi/10.1021/ic102031h)] is a useful tool for going from chemical composition to a reasonable crystal structure, based on a similarity index of ions. 
+The `PYMATGEN` structure predictor [based on [this paper](https://pubs.acs.org/doi/10.1021/ic102031h)] is a useful tool for going from chemical composition to a reasonable crystal structure, based on a similarity index of ions.
 This tool works particularly well with the `SMACT` methods for generating reasonable compositions. However, there are two major reasons for building our own structure predictor: (i) relying on `PYMATGEN` as a dependancy is less than ideal; (ii) the `PYMATGEN` method is not as fast as it could be, in terms of interfacing with `SMACT`. Therefore we propose implement a similar method in `SMACT`.
 
 ## Required features
@@ -44,15 +44,15 @@ This tool works particularly well with the `SMACT` methods for generating reason
 * Prettify the resulting structure object
 
 
-## Suggested development plan 
+## Suggested development plan
 
 * A method to convert a composition to a unique key
 * A method to generate our structure objects from MP entries
-* A database of all MP structures - in our structure format and with keys in our key format 
+* A database of all MP structures - in our structure format and with keys in our key format
 * A method to perform all possible substitutions between the target composition and the elements in the $\lambda$-table
 * A method to evaluate the probability of the result
 * A method to mutate the structure object - by replacing species with those in the target compound
-* A method to prettify the resulting compound structure so that it follows convention	
+* A method to prettify the resulting compound structure so that it follows convention
 
 ### Description of elements
 
@@ -72,7 +72,7 @@ These are some more fleshed out prototypes of objects/methods that are described
 	.
 	.
 	END
-	
+
 * Ordering consistent with Database key (see below)
 
 #### Database
@@ -91,22 +91,16 @@ These are some more fleshed out prototypes of objects/methods that are described
 * The elements must be ordered by alphabet.
 * The species ordered by charge highest to lowest.
 
-E.g. 
+E.g.
 * Ba$_2$OF$_2$ -> `Ba_2_2+F_2_1-O_1_2-`
 * Fe$_3$O$_4$ -> `Fe_1_2+Fe_2_3+O_3_2-`
 
 #### Substitution list
 
-[[[targetA],["subs1A","subs2A",...]],[[targetB],["subs1B"],...] 
+[[[targetA],["subs1A","subs2A",...]],[[targetB],["subs1B"],...]
 
-* target is a list, the target composition - this is generated rather than stored. After each generation 
+* target is a list, the target composition - this is generated rather than stored. After each generation
 * subs are keys, for the potential compositions to substitute into
 
 	Example of [[targetX],[subsNX],...] structure
 	[[[Ba2+, O2-, F1-], ["Ca_2_2+O_1_2-F_2_1-", "Mg_2_2+O_1_2-F_2_1-"]]...]
-	
-
-
-
-   
-		           

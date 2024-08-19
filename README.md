@@ -38,21 +38,21 @@ Use cases are available in our [examples](https://github.com/WMD-group/SMACT/tre
 
 Code features
 --------
-- At the core of SMACT are [Element](https://smact.readthedocs.io/en/latest/smact.html#smact.Element) and [Species](https://smact.readthedocs.io/en/latest/smact.html#smact.Species) (element in a given oxidation state) classes that have various properties associated with them. 
+- At the core of SMACT are [Element](https://smact.readthedocs.io/en/latest/smact.html#smact.Element) and [Species](https://smact.readthedocs.io/en/latest/smact.html#smact.Species) (element in a given oxidation state) classes that have various properties associated with them.
 
 - Oxidation states that are accessible to each element are included in their properties.
 
 - Element compositions can be screened through based on the heuristic filters of charge neutrality and electronegativity order. This is handled using the [screening module](https://smact.readthedocs.io/en/latest/smact.screening.html) and [this publication](https://www.cell.com/chem/fulltext/S2451-9294(16)30155-3) describes the underlying theory. An example procedure is [outlined in the docs](https://smact.readthedocs.io/en/latest/examples.html#neutral-combinations) and more examples can be found in the [counting examples subfolder](https://github.com/WMD-group/SMACT/tree/master/examples/Counting).
 
-- Further filters can be applied to generated lists of compositions in order to screen for particular properties. These properties are either intrinsic properties of elements or are calculated for compositions using the [properties module](https://smact.readthedocs.io/en/latest/smact.properties.html). For example: 
+- Further filters can be applied to generated lists of compositions in order to screen for particular properties. These properties are either intrinsic properties of elements or are calculated for compositions using the [properties module](https://smact.readthedocs.io/en/latest/smact.properties.html). For example:
   - An application is shown in [this publication](https://pubs.rsc.org/en/content/articlehtml/2018/sc/c7sc03961a), in which 160,000 chemical compositions are screened based on optical band gap calculated using the [solid-state energy scale](https://www.sciencedirect.com/science/article/pii/S0022459615300888).
   - The [oxidation_states module](https://smact.readthedocs.io/en/latest/smact.oxidation_states.html) can be used to filter out compositions containing metals in unlikely oxidation states according to [a data-driven model](https://pubs.rsc.org/en/content/articlelanding/2018/fd/c8fd00032h#!divAbstract).
 
-- Compositions can also be filtered based on sustainability via the abundance of elements in the Earth's crust or via the [HHI scale](https://pubs.acs.org/doi/10.1021/cm400893e). 
+- Compositions can also be filtered based on sustainability via the abundance of elements in the Earth's crust or via the [HHI scale](https://pubs.acs.org/doi/10.1021/cm400893e).
 
 - Compositions can be converted for use in Pymatgen or for representation to machine learning algorithms ([see "next steps" in this example](https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb)) and the related [ElementEmbeddings](https://github.com/WMD-group/ElementEmbeddings) package.
 
-- The code also has tools for manipulating common crystal lattice types: 
+- The code also has tools for manipulating common crystal lattice types:
   - Certain structure types can be built using the [builder module](https://smact.readthedocs.io/en/latest/smact.builder.html)
   - Lattice parameters can be estimated using ionic radii of the elements for various common crystal structure types using the [lattice_parameters module](https://smact.readthedocs.io/en/latest/smact.lattice_parameters.html).
   - The [lattice module](https://smact.readthedocs.io/en/latest/smact.lattice.html) and [distorter module](https://smact.readthedocs.io/en/latest/smact.distorter.html) rely on the [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase/) and can be used to generate unique atomic substitutions on a given crystal structure.
@@ -88,7 +88,7 @@ Installation
 ------------
 The latest stable release can be installed via pip which will automatically set up other Python packages as required:
 
-    pip install smact  
+    pip install smact
 
 SMACT is also available via conda through the conda-forge channel on Anaconda Cloud:
 
@@ -135,7 +135,7 @@ We are always looking for ways to make SMACT better and more useful to the wider
 
 ### Tests
 
-We use integrated testing on GitHub via [GitHub Actions](hhttps://github.com/features/actions). Testing modules should be pass/fail and wrapped into **tests/test_core.py** or another **tests/test_something.py** file added, if appropriate. 
+We use integrated testing on GitHub via [GitHub Actions](hhttps://github.com/features/actions). Testing modules should be pass/fail and wrapped into **tests/test_core.py** or another **tests/test_something.py** file added, if appropriate.
 Run the tests using `python -m pytest -v`.(The final `-v` is optional and adds more detail to the output.)
 
 

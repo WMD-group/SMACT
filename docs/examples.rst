@@ -20,4 +20,3 @@ For workflows that have been used in real examples and in published work, visit 
    examples/compound_electroneg
    examples/doper
    examples/distorter
-

@@ -13,5 +13,3 @@ Tutorials are intended as a more complete example of `smact` being applied in re
    tutorials/smact_generation_of_solar_oxides
    tutorials/oxidation_states
    tutorials/crystal_space_visualisation
-
-   
