@@ -1,35 +1,38 @@
-from typing import List, Optional, Union
+"""A collection of tools for estimating physical properties based on chemical composition."""
+
+from __future__ import annotations
 
 import numpy as np
 
 import smact
 
 
-def eneg_mulliken(element: Union[smact.Element, str]) -> float:
-    """Get Mulliken electronegativity from the IE and EA.
+def eneg_mulliken(element: smact.Element | str) -> float:
+    """
+    Get Mulliken electronegativity from the IE and EA.
 
     Arguments:
-        symbol (smact.Element or str): Element object or symbol
+    ---------
+        element (smact.Element or str): Element object or symbol
 
     Returns:
+    -------
         mulliken (float): Mulliken electronegativity
 
     """
-    if type(element) == str:
+    if isinstance(element, str):
         element = smact.Element(element)
-    elif type(element) != smact.Element:
-        raise Exception(f"Unexpected type: {type(element)}")
+    elif not isinstance(element, smact.Element):
+        raise TypeError(f"Unexpected type: {type(element)}")
 
-    mulliken = (element.ionpot + element.e_affinity) / 2.0
-
-    return mulliken
+    return (element.ionpot + element.e_affinity) / 2.0
 
 
 def band_gap_Harrison(
     anion: str,
     cation: str,
     verbose: bool = False,
-    distance: Optional[Union[float, str]] = None,
+    distance: float | str | None = None,
 ) -> float:
     """
     Estimates the band gap from elemental data.
@@ -39,19 +42,19 @@ def band_gap_Harrison(
     Solids: The Physics of the Chemical Bond".
 
     Args:
-        Anion (str): Element symbol of the dominant anion in the system
-
-        Cation (str): Element symbol of the the dominant cation in the system
-        Distance (float or str): Nuclear separation between anion and cation
+    ----
+        anion (str): Element symbol of the dominant anion in the system
+        cation (str): Element symbol of the the dominant cation in the system
+        distance (float or str): Nuclear separation between anion and cation
                 i.e. sum of ionic radii
         verbose (bool) : An optional True/False flag. If True, additional
-        information is printed to the standard output. [Defult: False]
+            information is printed to the standard output. [Default: False]
 
-    Returns :
+    Returns:
+    -------
         Band_gap (float): Band gap in eV
 
     """
-
     # Set constants
     hbarsq_over_m = 7.62
 
@@ -85,11 +88,12 @@ def band_gap_Harrison(
 
 def compound_electroneg(
     verbose: bool = False,
-    elements: List[Union[str, smact.Element]] = None,
-    stoichs: List[Union[int, float]] = None,
+    elements: list[str | smact.Element] | None = None,
+    stoichs: list[int | float] | None = None,
     source: str = "Mulliken",
 ) -> float:
-    """Estimate electronegativity of compound from elemental data.
+    """
+    Estimate electronegativity of compound from elemental data.
 
     Uses Mulliken electronegativity by default, which uses elemental
     ionisation potentials and electron affinities. Alternatively, can
@@ -102,6 +106,7 @@ def compound_electroneg(
     X_Cu2S = (X_Cu * X_Cu * C_S)^(1/3)
 
     Args:
+    ----
         elements (list) : Elements given as standard elemental symbols.
         stoichs (list) : Stoichiometries, given as integers or floats.
         verbose (bool) : An optional True/False flag. If True, additional information
@@ -111,17 +116,16 @@ def compound_electroneg(
             rescaled to a Mulliken-like scale.
 
     Returns:
+    -------
         Electronegativity (float) : Estimated electronegativity (no units).
 
     """
-    if type(elements[0]) == str:
+    if isinstance(elements[0], str):
         elementlist = [smact.Element(i) for i in elements]
-    elif type(elements[0]) == smact.Element:
+    elif isinstance(elements[0], smact.Element):
         elementlist = elements
     else:
-        raise Exception(
-            "Please supply a list of element symbols or SMACT Element objects"
-        )
+        raise TypeError("Please supply a list of element symbols or SMACT Element objects")
 
     stoichslist = stoichs
     # Convert stoichslist from string to float
@@ -135,9 +139,7 @@ def compound_electroneg(
     elif source == "Pauling":
         elementlist = [(2.86 * el.pauling_eneg) for el in elementlist]
     else:
-        raise Exception(
-            f"Electronegativity type '{source}'", "is not recognised"
-        )
+        raise Exception(f"Electronegativity type '{source}'", "is not recognised")
 
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.
@@ -146,7 +148,7 @@ def compound_electroneg(
 
     # Raise each electronegativity to its appropriate power
     # to account for stoichiometry.
-    for i in range(0, len(elementlist)):
+    for i in range(len(elementlist)):
         elementlist[i] = [elementlist[i] ** stoichslist[i]]
 
     # Calculate geometric mean (n-th root of product)

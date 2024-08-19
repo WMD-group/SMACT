@@ -1,26 +1,32 @@
 """
-Semiconducting Materials from Analogy and Chemical Theory
+Semiconducting Materials from Analogy and Chemical Theory.
 
 A collection of fast screening tools from elemental data
 """
+
+from __future__ import annotations
 
 import itertools
 import warnings
 from math import gcd
 from operator import mul as multiply
 from os import path
-from typing import Iterable, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, "data")
 # get correct path for datafiles when called from another directory
-from smact import data_loader
+from smact import data_loader  # noqa: E402
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class Element:
-    """Collection of standard elemental properties for given element.
+    """
+    Collection of standard elemental properties for given element.
 
     Data is drawn from "data/element.txt", part of the Open Babel
     package.
@@ -29,6 +35,7 @@ class Element:
     "Species" class.
 
     Attributes:
+    ----------
         Element.symbol (string) : Elemental symbol used to retrieve data
 
         Element.name (string) : Full name of element
@@ -74,17 +81,18 @@ class Element:
         Element.HHI_r (float) : Hirfindahl-Hirschman Index for elemental reserves
 
     Raises:
+    ------
         NameError: Element not found in element.txt
         Warning: Element not found in Eigenvalues.csv
 
     """
 
-    def __init__(
-        self, symbol: str, oxi_states_custom_filepath: Optional[str] = None
-    ):
-        """Initialise Element class
+    def __init__(self, symbol: str, oxi_states_custom_filepath: str | None = None):
+        """
+        Initialise Element class.
 
         Args:
+        ----
             symbol (str): Chemical element symbol (e.g. 'Fe')
             oxi_states_custom_filepath (str): Path to custom oxidation states file
 
@@ -92,16 +100,12 @@ class Element:
         # Get the oxidation states from the custom file if it exists
         if oxi_states_custom_filepath:
             try:
-                self._oxidation_states_custom = (
-                    data_loader.lookup_element_oxidation_states_custom(
-                        symbol, oxi_states_custom_filepath
-                    )
+                self._oxidation_states_custom = data_loader.lookup_element_oxidation_states_custom(
+                    symbol, oxi_states_custom_filepath
                 )
                 self.oxidation_states_custom = self._oxidation_states_custom
             except TypeError:
-                warnings.warn(
-                    "Custom oxidation states file not found. Please check the file path."
-                )
+                warnings.warn("Custom oxidation states file not found. Please check the file path.")
                 self.oxidation_states_custom = None
         else:
             self.oxidation_states_custom = None
@@ -109,36 +113,25 @@ class Element:
 
         dataset = data_loader.lookup_element_data(self.symbol, copy=False)
 
-        if dataset == None:
+        if dataset is None:
             raise NameError(f"Elemental data for {symbol} not found.")
 
         # Set coordination-environment data from the Shannon-radius data.
         # As above, it is safe to use copy = False with this Get* function.
 
-        shannon_data = data_loader.lookup_element_shannon_radius_data(
-            symbol, copy=False
-        )
+        shannon_data = data_loader.lookup_element_shannon_radius_data(symbol, copy=False)
 
-        if shannon_data != None:
-            coord_envs = [row["coordination"] for row in shannon_data]
-        else:
-            coord_envs = None
+        coord_envs = [row["coordination"] for row in shannon_data] if shannon_data is not None else None
 
         HHI_scores = data_loader.lookup_element_hhis(symbol)
-        if HHI_scores == None:
+        if HHI_scores is None:
             HHI_scores = (None, None)
 
         sse_data = data_loader.lookup_element_sse_data(symbol)
-        if sse_data:
-            sse = sse_data["SolidStateEnergy"]
-        else:
-            sse = None
+        sse = sse_data["SolidStateEnergy"] if sse_data else None
 
         sse_Pauling_data = data_loader.lookup_element_sse_pauling_data(symbol)
-        if sse_Pauling_data:
-            sse_Pauling = sse_Pauling_data["SolidStateEnergyPauling"]
-        else:
-            sse_Pauling = None
+        sse_Pauling = sse_Pauling_data["SolidStateEnergyPauling"] if sse_Pauling_data else None
 
         for attribute, value in (
             ("coord_envs", coord_envs),
@@ -181,7 +174,7 @@ class Element:
 
 class Species(Element):
     """
-    Class providing data for elements in a given chemical environment
+    Class providing data for elements in a given chemical environment.
 
     In addition to the standard properties from the periodic table
     (inherited from the  Element class), Species objects use the
@@ -192,6 +185,7 @@ class Species(Element):
     Baloch, A.A., Alqahtani, S.M., Mumtaz, F., Muqaibel, A.H., Rashkeev, S.N. and Alharbi, F.H., 2021. Extending Shannon's ionic radii database using machine learning. Physical Review Materials, 5(4), p.043804.
 
     Attributes:
+    ----------
         Species.symbol: Elemental symbol used to retrieve data
 
         Species.name: Full name of element
@@ -218,6 +212,7 @@ class Species(Element):
         Species.average_ionic_radius: An average ionic radius for the species. The average is taken over all coordination environments.
 
     Raises:
+    ------
         NameError: Element not found in element.txt
         Warning: Element not found in Eigenvalues.csv
 
@@ -230,6 +225,18 @@ class Species(Element):
         coordination: int = 4,
         radii_source: str = "shannon",
     ):
+        """
+        Initialise Species class.
+
+        Args:
+        ----
+        symbol (str): Chemical element symbol (e.g. 'Fe')
+        oxidation (int): Oxidation state of species
+        coordination (int): Coordination number of species
+        radii_source (str): Source of shannon radii data. Choose 'shannon' for
+            the default shannon radii set or 'extended' for the machine-learnt shannon radii set
+
+        """
         Element.__init__(self, symbol)
 
         self.oxidation = oxidation
@@ -240,29 +247,17 @@ class Species(Element):
         self.shannon_radius = None
 
         if radii_source == "shannon":
-            shannon_data = data_loader.lookup_element_shannon_radius_data(
-                symbol
-            )
+            shannon_data = data_loader.lookup_element_shannon_radius_data(symbol)
 
         elif radii_source == "extended":
-            shannon_data = (
-                data_loader.lookup_element_shannon_radius_data_extendedML(
-                    symbol
-                )
-            )
+            shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(symbol)
 
         else:
-            print(
-                "Data source not recognised. Please select 'shannon' or 'extended'. "
-            )
+            print("Data source not recognised. Please select 'shannon' or 'extended'. ")
 
         if shannon_data:
             for dataset in shannon_data:
-                if (
-                    dataset["charge"] == oxidation
-                    and str(coordination)
-                    == dataset["coordination"].split("_")[0]
-                ):
+                if dataset["charge"] == oxidation and str(coordination) == dataset["coordination"].split("_")[0]:
                     self.shannon_radius = dataset["crystal_radius"]
 
         # Get ionic radius
@@ -270,11 +265,7 @@ class Species(Element):
 
         if shannon_data:
             for dataset in shannon_data:
-                if (
-                    dataset["charge"] == oxidation
-                    and str(coordination)
-                    == dataset["coordination"].split("_")[0]
-                ):
+                if dataset["charge"] == oxidation and str(coordination) == dataset["coordination"].split("_")[0]:
                     self.ionic_radius = dataset["ionic_radius"]
 
         # Get the average shannon and ionic radii
@@ -286,9 +277,7 @@ class Species(Element):
             shannon_data_df = pd.DataFrame(shannon_data)
 
             # Get the rows corresponding to the oxidation state of the species
-            charge_rows = shannon_data_df.loc[
-                shannon_data_df["charge"] == oxidation
-            ]
+            charge_rows = shannon_data_df.loc[shannon_data_df["charge"] == oxidation]
 
             # Get the mean
             self.average_shannon_radius = charge_rows["crystal_radius"].mean()
@@ -307,13 +296,13 @@ class Species(Element):
             self.SSE_2015 = None
 
 
-def ordered_elements(x: int, y: int) -> List[str]:
+def ordered_elements(x: int, y: int) -> list[str]:
     """
     Return a list of element symbols, ordered by proton number in the range x -> y
     Args:
         x,y : integers
     Returns:
-        list: Ordered list of element symbols
+        list: Ordered list of element symbols.
     """
     with open(path.join(data_directory, "ordered_periodic.txt")) as f:
         data = f.readlines()
@@ -330,45 +319,50 @@ def ordered_elements(x: int, y: int) -> List[str]:
 
 
 def element_dictionary(
-    elements: Optional[Iterable[str]] = None,
-    oxi_states_custom_filepath: Optional[str] = None,
+    elements: Iterable[str] | None = None,
+    oxi_states_custom_filepath: str | None = None,
 ):
     """
-    Create a dictionary of initialised smact.Element objects
+    Create a dictionary of initialised smact.Element objects.
 
     Accessing an Element from a dict is significantly faster than
     repeadedly initialising them on-demand within nested loops.
 
     Args:
+    ----
         elements (iterable of strings) : Elements to include. If None,
             use all elements up to 103.
         oxi_states_custom_filepath (str): Path to custom oxidation states file
 
 
     Returns:
+    -------
         dict: Dictionary with element symbols as keys and smact.Element
             objects as data
+
     """
-    if elements == None:
+    if elements is None:
         elements = ordered_elements(1, 103)
     if oxi_states_custom_filepath:
-        return {
-            symbol: Element(symbol, oxi_states_custom_filepath)
-            for symbol in elements
-        }
+        return {symbol: Element(symbol, oxi_states_custom_filepath) for symbol in elements}
     else:
         return {symbol: Element(symbol) for symbol in elements}
 
 
 def are_eq(A: list, B: list, tolerance: float = 1e-4):
-    """Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3]
+    """
+    Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3].
 
     Args:
-        A, B (lists): 1-D list of values for approximate equality comparison
-        tolerance: numerical precision for equality condition
+    ----
+        A (list): 1-D list of values for approximate equality comparison
+        B (list): 1-D list of values for approximate equality comparison
+        tolerance (float): numerical precision for equality condition
 
     Returns:
+    -------
         boolean
+
     """
     are_eq = True
     if len(A) != len(B):
@@ -382,54 +376,60 @@ def are_eq(A: list, B: list, tolerance: float = 1e-4):
     return are_eq
 
 
-def lattices_are_same(lattice1, lattice2, tolerance=1e-4):
-    """Checks for the equivalence of two lattices
+def lattices_are_same(lattice1, lattice2, tolerance: float = 1e-4):
+    """
+    Checks for the equivalence of two lattices.
 
     Args:
-        lattice1,lattice2 : ASE crystal class
+    ----
+        lattice1: ASE crystal class
+        lattice2: ASE crystal class
+        tolerance (float): numerical precision for equality condition
+
     Returns:
+    -------
         boolean
+
     """
     lattices_are_same = False
     i = 0
     for site1 in lattice1:
         for site2 in lattice2:
-            if site1.symbol == site2.symbol:
-                if are_eq(site1.position, site2.position, tolerance=tolerance):
-                    i += 1
+            if site1.symbol == site2.symbol and are_eq(site1.position, site2.position, tolerance=tolerance):
+                i += 1
     if i == len(lattice1):
         lattices_are_same = True
     return lattices_are_same
 
 
 def _gcd_recursive(*args: Iterable[int]):
-    """
-    Get the greatest common denominator among any number of ints
-    """
+    """Get the greatest common denominator among any number of ints."""
     if len(args) == 2:
         return gcd(*args)
     else:
         return gcd(args[0], _gcd_recursive(*args[1:]))
 
 
-def _isneutral(oxidations: Tuple[int, ...], stoichs: Tuple[int, ...]):
+def _isneutral(oxidations: tuple[int, ...], stoichs: tuple[int, ...]):
     """
-    Check if set of oxidation states is neutral in given stoichiometry
+    Check if set of oxidation states is neutral in given stoichiometry.
 
     Args:
+    ----
         oxidations (tuple): Oxidation states of a set of oxidised elements
         stoichs (tuple): Stoichiometry values corresponding to `oxidations`
+
     """
-    return 0 == sum(map(multiply, oxidations, stoichs))
+    return sum(map(multiply, oxidations, stoichs)) == 0
 
 
 def neutral_ratios_iter(
-    oxidations: List[int],
-    stoichs: Union[bool, List[List[int]]] = False,
-    threshold: Optional[int] = 5,
+    oxidations: list[int],
+    stoichs: bool | list[list[int]] = False,
+    threshold: int | None = 5,
 ):
     """
-    Iterator for charge-neutral stoichiometries
+    Iterator for charge-neutral stoichiometries.
 
     Given a list of oxidation states of arbitrary length, yield ratios in which
     these form a charge-neutral compound. Stoichiometries may be provided as a
@@ -437,12 +437,15 @@ def neutral_ratios_iter(
     otherwise all unique ratios are tried up to a threshold coefficient.
 
     Args:
+    ----
         oxidations : list of integers
         stoichs : stoichiometric ratios for each site (if provided)
         threshold : single threshold to go up to if stoichs are not provided
 
     Yields:
+    ------
         tuple: ratio that gives neutrality
+
     """
     if not stoichs:
         stoichs = [list(range(1, threshold + 1))] * len(oxidations)
@@ -458,12 +461,12 @@ def neutral_ratios_iter(
 
 
 def neutral_ratios(
-    oxidations: List[int],
-    stoichs: Union[bool, List[List[int]]] = False,
+    oxidations: list[int],
+    stoichs: bool | list[list[int]] = False,
     threshold=5,
 ):
     """
-    Get a list of charge-neutral compounds
+    Get a list of charge-neutral compounds.
 
     Given a list of oxidation states of arbitrary length, yield ratios in which
     these form a charge-neutral compound. Stoichiometries may be provided as a
@@ -475,6 +478,7 @@ def neutral_ratios(
     threshold.
 
     Args:
+    ----
         oxidations (list of ints): Oxidation state of each site
         stoichs (list of positive ints): A selection of valid stoichiometric
             ratios for each site
@@ -483,6 +487,7 @@ def neutral_ratios(
             to this value will be tried.
 
     Returns:
+    -------
         (exists, allowed_ratios) (tuple):
 
         exists *bool*:
@@ -491,13 +496,9 @@ def neutral_ratios(
         allowed_ratios *list of tuples*:
             Ratios of atoms in given oxidation
             states which yield a charge-neutral structure
+
     """
-    allowed_ratios = [
-        x
-        for x in neutral_ratios_iter(
-            oxidations, stoichs=stoichs, threshold=threshold
-        )
-    ]
+    allowed_ratios = list(neutral_ratios_iter(oxidations, stoichs=stoichs, threshold=threshold))
     return (len(allowed_ratios) > 0, allowed_ratios)
 
 

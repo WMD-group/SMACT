@@ -1,6 +1,8 @@
-"""Structure prediction implementation.
+"""
+Structure prediction implementation.
 
 Todo:
+----
     * Test with a fully populated database.
     * Implement n-ary substitution probabilities;
       at the moment, only zero- and single-species
@@ -8,19 +10,26 @@ Todo:
 
 """
 
+from __future__ import annotations
+
 import itertools
-from typing import Generator, List, Optional, Tuple
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .database import StructureDB
-from .mutation import CationMutator
-from .structure import SmactStructure
 from .utilities import parse_spec, unparse_spec
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from .database import StructureDB
+    from .mutation import CationMutator
+    from .structure import SmactStructure
 
 
 class StructurePredictor:
-    """Provides structure prediction functionality.
+    """
+    Provides structure prediction functionality.
 
     Implements a statistically-based model for determining
     likely structures of a given composition, based on a
@@ -35,12 +44,12 @@ class StructurePredictor:
 
     """
 
-    def __init__(
-        self, mutator: CationMutator, struct_db: StructureDB, table: str
-    ):
-        """Initialize class.
+    def __init__(self, mutator: CationMutator, struct_db: StructureDB, table: str):
+        """
+        Initialize class.
 
         Args:
+        ----
             mutator: A :class:`CationMutator` for probability calculations.
             struct_db: A :class:`StructureDB` from which to read strucutures
                 to attempt to mutate.
@@ -53,13 +62,15 @@ class StructurePredictor:
 
     def predict_structs(
         self,
-        species: List[Tuple[str, int]],
-        thresh: Optional[float] = 1e-3,
-        include_same: Optional[bool] = True,
-    ) -> Generator[Tuple[SmactStructure, float, SmactStructure], None, None]:
-        """Predict structures for a combination of species.
+        species: list[tuple[str, int]],
+        thresh: float | None = 1e-3,
+        include_same: bool | None = True,
+    ) -> Generator[tuple[SmactStructure, float, SmactStructure], None, None]:
+        """
+        Predict structures for a combination of species.
 
         Args:
+        ----
             species: A list of (element, charge). The constituent species
                 of the target compound.
             thresh: The probability threshold, below which to discard
@@ -69,6 +80,7 @@ class StructurePredictor:
                 same species. Defaults to True.
 
         Yields:
+        ------
             Potential structures, as tuples of (structure, probability, parent).
 
         """
@@ -82,9 +94,9 @@ class StructurePredictor:
         sub_spec = itertools.combinations(species, len(species) - 1)
         sub_spec = list(map(list, sub_spec))
 
-        potential_unary_parents: List[List[SmactStructure]] = list(
+        potential_unary_parents: list[list[SmactStructure]] = [
             self.db.get_with_species(specs, self.table) for specs in sub_spec
-        )
+        ]
 
         for spec_idx, parents in enumerate(potential_unary_parents):
             # Get missing ion
@@ -110,20 +122,9 @@ class StructurePredictor:
                 # Determine probability
                 # Get species to be substituted
                 # Ensure only 1 species is obtained
-                if (
-                    len(
-                        set(parent.get_spec_strs())
-                        - set(map(unparse_spec, species))
-                        - {diff_spec_str}
-                    )
-                    > 1
-                ):
+                if len(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - {diff_spec_str}) > 1:
                     continue
-                (alt_spec,) = (
-                    set(parent.get_spec_strs())
-                    - set(map(unparse_spec, species))
-                    - {diff_spec_str}
-                )
+                (alt_spec,) = set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - {diff_spec_str}
 
                 if parse_spec(alt_spec)[1] != diff_spec[1]:
                     # Different charge
@@ -137,30 +138,28 @@ class StructurePredictor:
 
                 if p > thresh:
                     try:
-                        mutated = self.cm._mutate_structure(
-                            parent, alt_spec, diff_spec_str
-                        )
+                        self.cm._mutate_structure(parent, alt_spec, diff_spec_str)
                     except ValueError:
                         # Poorly decorated
                         continue
                     yield (
-                        self.cm._mutate_structure(
-                            parent, alt_spec, diff_spec_str
-                        ),
+                        self.cm._mutate_structure(parent, alt_spec, diff_spec_str),
                         p,
                         parent,
                     )
 
     def nary_predict_structs(
         self,
-        species: List[Tuple[str, int]],
-        n_ary: Optional[int] = 2,
-        thresh: Optional[float] = 1e-3,
-        include_same: Optional[bool] = True,
-    ) -> Generator[Tuple[SmactStructure, float, SmactStructure], None, None]:
-        """Predicts structures for a combination of species.
+        species: list[tuple[str, int]],
+        n_ary: int | None = 2,
+        thresh: float | None = 1e-3,
+        include_same: bool | None = True,
+    ) -> Generator[tuple[SmactStructure, float, SmactStructure], None, None]:
+        """
+        Predicts structures for a combination of species.
 
         Args:
+        ----
             species: A list of (element, charge). The constituent species
              of the target compound.
             thresh: The probability threshold, below which to discard predictions.
@@ -169,9 +168,10 @@ class StructurePredictor:
              i.e. structures containing all the same species.
 
         Yields:
+        ------
             Potential structures, as tuples of (structure, probability, parent).
-        """
 
+        """
         if include_same:
             for identical in self.db.get_with_species(species, self.table):
                 yield (identical, 1.0, identical)
@@ -182,9 +182,9 @@ class StructurePredictor:
         sub_species = itertools.combinations(species, len(species) - n_ary)
         sub_species = list(map(list, sub_species))
 
-        potential_nary_parents: List[List[SmactStructure]] = list(
+        potential_nary_parents: list[list[SmactStructure]] = [
             self.db.get_with_species(specs, self.table) for specs in sub_species
-        )
+        ]
 
         for spec_idx, parents in enumerate(potential_nary_parents):
             # Get missing ions
@@ -197,76 +197,58 @@ class StructurePredictor:
 
             diff_sub_probs = [self.cm.cond_sub_probs(i) for i in diff_spec_str]
 
-        for parent in parents:
-            # print("testing parent")
-            # Filter out any structures with identical species
-            if n_ary == 1:
-                if parent.has_species(diff_species[0]):
-                    continue
-            elif n_ary == 2:
-                if parent.has_species(diff_species[0]) and parent.has_species(
-                    diff_species[1]
-                ):
-                    continue
-            elif n_ary == 3:
-                if (
+            for parent in parents:
+                # print("testing parent")
+                # Filter out any structures with identical species
+                if n_ary == 1:
+                    if parent.has_species(diff_species[0]):
+                        continue
+                elif n_ary == 2:
+                    if parent.has_species(diff_species[0]) and parent.has_species(diff_species[1]):
+                        continue
+                elif n_ary == 3 and (
                     parent.has_species(diff_species[0])
                     and parent.has_species(diff_species[1])
                     and parent.has_species(diff_species[2])
                 ):
                     continue
 
-            # Ensure parent has as many species as target
-            if len(parent.species) != len(species):
-                continue
-
-            # Determine probability
-            # Get species to be substituted
-            # Ensure n species are obtained
-
-            if (
-                len(
-                    set(parent.get_spec_strs())
-                    - set(map(unparse_spec, species))
-                    - set(diff_species)
-                )
-                != n_ary
-            ):
-                continue
-            alt_spec = list(
-                set(parent.get_spec_strs())
-                - set(map(unparse_spec, species))
-                - set(diff_species)
-            )
-
-            # Need to consider p(A,X)p(B,Y) and p(A,Y)p(B,X)
-            # if utilities.parse_spec(alt_spec_1)[1] != diff_species_1[1] and utilities.parse_spec(alt_spec_2)[1] != diff_species_2[1] :
-            # Different charge
-            # continue
-
-            try:
-                p = []
-                for i in range(n_ary):
-                    p.append(diff_sub_probs[i].loc[alt_spec[i]])
-            except:
-                # Not in the Series
-                continue
-
-            p = np.prod(p)
-
-            if p > thresh:
-                try:
-                    mutated = self.cm._nary_mutate_structure(
-                        parent, alt_spec, diff_spec_str
-                    )
-
-                except ValueError:
-                    # Poorly decorated
+                # Ensure parent has as many species as target
+                if len(parent.species) != len(species):
                     continue
-                yield (
-                    self.cm._nary_mutate_structure(
-                        parent, alt_spec, diff_spec_str
-                    ),
-                    p,
-                    parent,
-                )
+
+                # Determine probability
+                # Get species to be substituted
+                # Ensure n species are obtained
+
+                if len(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species)) != n_ary:
+                    continue
+                alt_spec = list(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species))
+
+                # Need to consider p(A,X)p(B,Y) and p(A,Y)p(B,X)
+                # if utilities.parse_spec(alt_spec_1)[1] != diff_species_1[1] and utilities.parse_spec(alt_spec_2)[1] != diff_species_2[1] :
+                # Different charge
+                # continue
+
+                try:
+                    p = []
+                    for i in range(n_ary):
+                        p.append(diff_sub_probs[i].loc[alt_spec[i]])
+                except:
+                    # Not in the Series
+                    continue
+
+                p = np.prod(p)
+
+                if p > thresh:
+                    try:
+                        self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str)
+
+                    except ValueError:
+                        # Poorly decorated
+                        continue
+                    yield (
+                        self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str),
+                        p,
+                        parent,
+                    )

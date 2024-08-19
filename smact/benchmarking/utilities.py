@@ -1,5 +1,7 @@
 """Benchmarking utilities."""
 
+from __future__ import annotations
+
 import functools
 import logging
 from statistics import mean
@@ -25,9 +27,7 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
                 value = func(*args, **kwargs)
                 times.append(time() - t0)
 
-            logging.info(
-                f"{func.__name__} -- Average over {n} repeats = {mean(times)}s"
-            )
+            logging.info(f"{func.__name__} -- Average over {n} repeats = {mean(times)}s")
 
             if delim:
                 logging.info("-" * DELIM_LENGTH)
@@ -35,7 +35,7 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
 
         return wrapper_timeit
 
-    fname = "benchmark.log" if not fname else fname
+    fname = fname if fname else "benchmark.log"
     logging.basicConfig(filename=fname)
 
     if _func is None:
