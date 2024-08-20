@@ -48,3 +48,11 @@ repos:
     hooks:
       - id: nbstripout
         args: [--drop-empty-cells, --keep-output]
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        stages: [commit, commit-msg]
+        args: [--toml, pyproject.toml]
+        additional_dependencies:
+          - tomli
