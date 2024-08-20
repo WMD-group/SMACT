@@ -90,6 +90,11 @@ docstring-code-format = true
 "smact/utils/*" = ["D"]
 "smact/tests/*" = ["D"]
 
+[tool.pyright]
+typeCheckingMode = "off"
+reportPossiblyUnboundVariable = true
+reportUnboundVariable = true
+
 [tool.codespell]
 skip = "*.csv,*/site/*,*/docs/_build/*,paper.md,*dev_docs/*,paper.bib,*.txt,*examples/Structure_Prediction/Li-Garnets_SP-Pym-new.ipynb"
 check-filenames = true

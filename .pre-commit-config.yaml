@@ -56,3 +56,8 @@ repos:
         args: [--toml, pyproject.toml]
         additional_dependencies:
           - tomli
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.376
+    hooks:
+      - id: pyright
+        args: [--level, error]
