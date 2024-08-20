@@ -43,3 +43,8 @@ repos:
         args: [--write] # edit files in-place
         additional_dependencies:
           - prettier
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
+      - id: nbstripout
+        args: [--drop-empty-cells, --keep-output]
