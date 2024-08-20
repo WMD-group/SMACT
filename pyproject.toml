@@ -1,7 +1,52 @@
 [build-system]
 # Minimum requirements for the build system to execute.
-requires = ["setuptools"]  # PEP 508 specifications.
+requires = ["setuptools>=65.0.0"]  # PEP 508 specifications.
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "SMACT"
+version = "2.6"
+description = "Semiconducting Materials by Analogy and Chemical Theory"
+readme = "README.md"
+authors = [
+    {name = "The SMACT Developers", email = "a.walsh@imperial.ac.uk"},
+]
+maintainers = [
+    {name = "Anthony O. Onwuli", email = "anthony.onwuli16@imperial.ac.uk"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "ase",
+    "numpy<2",
+    "pandas",
+    "pathos",
+    "pymatgen>=2024.2.20",
+    "scipy",
+    "spglib",
+    "typing-extensions",
+]
+license = {text = "MIT"}
+
+[project.urls]
+Homepage = "https://github.com/WMD-group/SMACT"
+Documentation = "https://smact.readthedocs.io/en/latest/"
+Repository = "https://github.com/WMD-group/SMACT"
+Issues = "https://github.com/WMD-group/SMACT/issues"
+Pypi = "https://pypi.org/project/SMACT/"
+
 
 [tool.semantic_release]
 version_variable = "setup.py:__version__"
