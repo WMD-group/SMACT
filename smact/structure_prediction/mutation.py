@@ -357,7 +357,7 @@ class CationMutator:
         return corr
 
     def same_spec_probs(self) -> pd.Series:
-        """Calculate the same species substiution probabilities."""
+        """Calculate the same species substitution probabilities."""
         return (
             np.exp(
                 pd.Series(
@@ -369,7 +369,7 @@ class CationMutator:
         )
 
     def same_spec_cond_probs(self) -> pd.Series:
-        """Calculate the same species conditional substiution probabilities."""
+        """Calculate the same species conditional substitution probabilities."""
         return np.exp(self.lambda_tab.to_numpy().diagonal()) / np.exp(self.lambda_tab).sum(axis=0)
 
     def pair_corr(self, s1: str, s2: str) -> float:

@@ -68,7 +68,7 @@ class Element:
 
         Element.oxidation_states_custom (list | None ): List of oxidation states that appear in the custom data file supplied (if any)
 
-        Element.coord_envs (list): The allowed coordination enviroments for the ion
+        Element.coord_envs (list): The allowed coordination environments for the ion
 
         Element.covalent_radius (float) : Covalent radius of the element
 

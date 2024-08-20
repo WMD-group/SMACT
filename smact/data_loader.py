@@ -6,7 +6,7 @@ core smact.Element and smact.Species classes.  It implements a
 transparent data-caching system to avoid a large amount of I/O when
 naively constructing several of these objects.  It also implements a
 switchable system to print verbose warning messages about possible
-missing data (mainly for debugging purposes). In general these fuctions
+missing data (mainly for debugging purposes). In general these functions
 are used in the background and it is not necessary to use them directly.
 """
 

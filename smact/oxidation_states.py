@@ -120,7 +120,7 @@ class Oxidation_state_probability_finder:
             structure (pymatgen.Structure): Compound for which the probability score will be generated.
                 Can also be a list of pymatgen or SMACT Species.
             ignore_stoichiometry (bool): Whether to weight probabilities by stoichiometry.
-                Defaults to false as decribed in the original paper.
+                Defaults to false as described in the original paper.
 
         Returns:
         -------

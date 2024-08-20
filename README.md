@@ -130,7 +130,7 @@ We are always looking for ways to make SMACT better and more useful to the wider
 
 ### Tests
 
-We use integrated testing on GitHub via [GitHub Actions](hhttps://github.com/features/actions). Testing modules should be pass/fail and wrapped into **tests/test_core.py** or another **tests/test_something.py** file added, if appropriate.
+We use integrated testing on GitHub via [GitHub Actions](https://github.com/features/actions). Testing modules should be pass/fail and wrapped into **tests/test_core.py** or another **tests/test_something.py** file added, if appropriate.
 Run the tests using `python -m pytest -v`.(The final `-v` is optional and adds more detail to the output.)
 
 ## References

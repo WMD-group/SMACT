@@ -51,7 +51,7 @@ class StructurePredictor:
         Args:
         ----
             mutator: A :class:`CationMutator` for probability calculations.
-            struct_db: A :class:`StructureDB` from which to read strucutures
+            struct_db: A :class:`StructureDB` from which to read structures
                 to attempt to mutate.
             table: The table to reference within the database
 

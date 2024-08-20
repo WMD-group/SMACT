@@ -470,7 +470,7 @@ class SmactStructure:
                 stoichiometry, `charge` for the absolute value
                 of oxidation state and `sign` for the
                 oxidation state's sign.
-            delim: The delimeter between species' templates.
+            delim: The delimiter between species' templates.
             include_ground: Whether to include the charge and sign
                 of neutral species.
 
