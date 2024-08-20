@@ -28,6 +28,16 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Chemistry",
 ]
 requires-python = ">=3.9"
+keywords = [
+    "python",
+    "machine-learning",
+    "computational-chemistry",
+    "materials-science",
+    "materials-informatics",
+    "materials-screening",
+    "materials-design",
+    "materials"
+]
 dependencies = [
     "ase",
     "numpy<2",
