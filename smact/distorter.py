@@ -68,11 +68,11 @@ def get_inequivalent_sites(sub_lattice, lattice):
             for inequiv_site in inequivalent_sites:
                 if smact.are_eq(site, inequiv_site) is True:
                     new_site = False
-            # Check against symmetry related members of the list of inequivalent sites
-            equiv_inequiv_sites, _ = sg.equivalent_sites(inequiv_site)
-            for equiv_inequiv_site in equiv_inequiv_sites:
-                if smact.are_eq(site, equiv_inequiv_site) is True:
-                    new_site = False
+                # Check against symmetry related members of the list of inequivalent sites
+                equiv_inequiv_sites, _ = sg.equivalent_sites(inequiv_site)
+                for equiv_inequiv_site in equiv_inequiv_sites:
+                    if smact.are_eq(site, equiv_inequiv_site) is True:
+                        new_site = False
 
         if new_site is True:
             inequivalent_sites.append(site)

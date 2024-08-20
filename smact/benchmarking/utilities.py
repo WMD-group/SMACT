@@ -22,6 +22,7 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
                 logging.info("-" * DELIM_LENGTH)
 
             times = []
+            value = None
             for _ in range(n):
                 t0 = time()
                 value = func(*args, **kwargs)

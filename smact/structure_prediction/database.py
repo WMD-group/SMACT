@@ -9,8 +9,10 @@ try:
     from pathos.pools import ParallelPool
 
     pathos_available = True
+
 except ImportError:
     pathos_available = False
+    ParallelPool = None
 
 import sqlite3
 from typing import TYPE_CHECKING

@@ -253,6 +253,7 @@ class Species(Element):
             shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(symbol)
 
         else:
+            shannon_data = None
             print("Data source not recognised. Please select 'shannon' or 'extended'. ")
 
         if shannon_data:
