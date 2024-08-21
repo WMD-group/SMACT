@@ -1,9 +1,9 @@
 """Miscellaneous tools for data parsing."""
 
 import re
-from typing import Dict, Optional, Tuple, Union
+from typing import Tuple
 
-import pymatgen
+from pymatgen.core.structure import Structure
 
 from . import logger
 
@@ -36,13 +36,14 @@ def parse_spec(species: str) -> Tuple[str, int]:
     return ele, charge
 
 
-def unparse_spec(species: Tuple[str, int]) -> str:
+def unparse_spec(species: Tuple[str, int], include_one: bool = True) -> str:
     """Unparse a species into a string representation.
 
     The analogue of :func:`parse_spec`.
 
     Args:
-        A tuple of (element, signed_charge).
+        species (tuple[str,int]): A tuple of (element, signed_charge).
+        include_one (bool): If True, include charge of 1 in the output if charge is 1 or -1.
 
     Returns:
         String of {element}{absolute_charge}{sign}.
@@ -54,7 +55,10 @@ def unparse_spec(species: Tuple[str, int]) -> str:
         'O2-'
 
     """
-    return f"{species[0]}{abs(species[1])}{get_sign(species[1])}"
+    if include_one or abs(species[1]) != 1:
+        return f"{species[0]}{abs(species[1])}{get_sign(species[1])}"
+    else:
+        return f"{species[0]}{get_sign(species[1])}"
 
 
 def get_sign(charge: int) -> str:
@@ -77,7 +81,7 @@ def get_sign(charge: int) -> str:
 
 def convert_next_gen_mprest_data(
     doc,
-) -> Dict[str, Union[pymatgen.core.Structure, Optional[str]]]:
+) -> dict[str, Structure | str | None]:
     """Converts the `MPDataDoc` object returned by a next-gen MP query to a dictionary
 
     Args:
