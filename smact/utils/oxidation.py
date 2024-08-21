@@ -5,6 +5,7 @@ from os import path
 import pandas as pd
 
 from smact import Element, data_directory, ordered_elements
+from smact.structure_prediction.utilities import unparse_spec
 
 
 class ICSD24OxStatesFilter:
@@ -57,6 +58,38 @@ class ICSD24OxStatesFilter:
             .reset_index(drop=True)
         )
         return summary_df
+
+    def get_species_list(
+        self,
+        threshold: int,
+        include_zero: bool = False,
+        include_one_oxidation_state: bool = False,
+    ):
+        """Get the filtered ICSD 24 oxidation states list as a list of species.
+
+        Args:
+            threshold (int): The threshold for filtering the oxidation states list.
+            include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
+            include_one_oxidation_state (bool): Include oxidation states +1 and -1 in the filtered list or include as + and - signs. Default is False.
+
+        Returns:
+            list: The filtered oxidation states list as a list of species.
+        """
+        filtered_df = self.filter(threshold, include_zero)
+        species_list = []
+        for _, row in filtered_df.iterrows():
+            ox_states = row["oxidation_state"].split(" ")
+            for ox_state in ox_states:
+                try:
+                    species_list.append(
+                        unparse_spec(
+                            (row["element"], int(ox_state)),
+                            include_one=include_one_oxidation_state,
+                        )
+                    )
+                except ValueError:
+                    continue
+        return species_list
 
     def write(
         self,
