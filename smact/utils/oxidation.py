@@ -4,7 +4,7 @@ from os import path
 
 import pandas as pd
 
-from smact import data_directory, ordered_elements
+from smact import Element, data_directory, ordered_elements
 
 
 class ICSD24OxStatesFilter:
@@ -47,6 +47,15 @@ class ICSD24OxStatesFilter:
             .reset_index()
         )
         summary_df.columns = ["element", "oxidation_state"]
+        # Sort the elements by atomic number
+        summary_df["atomic_number"] = summary_df["element"].apply(
+            lambda x: Element(x).number
+        )
+        summary_df = (
+            summary_df.sort_values("atomic_number")
+            .drop(columns="atomic_number")
+            .reset_index(drop=True)
+        )
         return summary_df
 
     def write(
