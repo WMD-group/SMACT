@@ -2,6 +2,7 @@ import os
 import unittest
 
 import pandas as pd
+import pytest
 
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
@@ -34,13 +35,12 @@ class OxidationStatesTest(unittest.TestCase):
         # self.assertEqual(filtered_df.loc[""])
 
     def test_oxidation_states_write(self):
-        ox_filter = ICSD24OxStatesFilter()
         threshold = 1000
         filename = "test_ox_states"
         filename_w_zero = "test_ox_states_w_zero"
         comment = "Testing writing of ICSD 24 oxidation states list."
-        ox_filter.write(filename, threshold, comment=comment)
-        ox_filter.write(
+        self.ox_filter.write(filename, threshold, comment=comment)
+        self.ox_filter.write(
             filename_w_zero, threshold, include_zero=True, comment=comment
         )
         self.assertTrue(os.path.exists(f"{filename}.txt"))
@@ -51,3 +51,12 @@ class OxidationStatesTest(unittest.TestCase):
         assert [line for line in open(f"{filename}_w_zero.txt")] == [
             line for line in open(TEST_ICSD_OX_STATES_W_ZERO)
         ]
+        # Clean up
+        os.remove(f"{filename}.txt")
+        os.remove(f"{filename}_w_zero.txt")
+
+    def test_oxidation_states_filter_species_list(self):
+        for threshold, length in [(0, 460), (5, 337), (50, 214)]:
+            species_list = self.ox_filter.get_species_list(threshold)
+            self.assertIsInstance(species_list, list)
+            self.assertEqual(len(species_list), length)
