@@ -1,3 +1,6 @@
+import csv
+import re
+from collections import defaultdict
 from typing import List, Optional, Union
 
 import numpy as np
@@ -157,3 +160,58 @@ def compound_electroneg(
         print("Geometric mean = Compound 'electronegativity'=", compelectroneg)
 
     return compelectroneg
+
+
+def valence_electron_count(compound: str) -> float:
+    """
+    Calculate the Valence Electron Count (VEC) for a given compound.
+
+    This function parses the input compound, extracts the elements and their
+    stoichiometries, and calculates the VEC using the valence electron data
+    from SMACT's Element class.
+
+    Args:
+        compound (str): Chemical formula of the compound (e.g., "Fe2O3").
+
+    Returns:
+        float: Valence Electron Count (VEC) for the compound.
+
+    Raises:
+        ValueError: If an element in the compound is not found in the valence data.
+    """
+    from typing import Dict
+
+    def parse_formula(formula: str) -> Dict[str, int]:
+        pattern = re.compile(r"([A-Z][a-z]*)(\d*)")
+        elements = pattern.findall(formula)
+        element_stoich: Dict[str, int] = defaultdict(int)
+        for element, count in elements:
+            count = int(count) if count else 1
+            element_stoich[element] += count
+        return element_stoich
+
+    def get_element_valence(element: str) -> int:
+        try:
+            return smact.Element(element).num_valence_modified
+        except NameError:
+            raise ValueError(
+                f"Valence data not found for element: {element}"
+            ) from None
+
+    element_stoich = parse_formula(compound)
+
+    total_valence = 0
+    total_stoich = 0
+    for element, stoich in element_stoich.items():
+        try:
+            valence = get_element_valence(element)
+            total_valence += stoich * valence
+            total_stoich += stoich
+        except TypeError:
+            raise ValueError(f"No valence information for element {element}")
+
+    if total_stoich == 0:
+        return 0.0
+
+    vec = total_valence / total_stoich
+    return vec
