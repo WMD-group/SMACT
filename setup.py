@@ -38,6 +38,7 @@ if __name__ == "__main__":
             "smact.tests",
             "smact.structure_prediction",
             "smact.dopant_prediction",
+            "smact.utils",
         ],
         package_data={
             "smact": [
