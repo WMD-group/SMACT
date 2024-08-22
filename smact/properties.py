@@ -1,7 +1,7 @@
-from typing import List, Optional, Union
+import csv
 import re
 from collections import defaultdict
-import csv
+from typing import List, Optional, Union
 
 import numpy as np
 
@@ -161,47 +161,39 @@ def compound_electroneg(
 
     return compelectroneg
 
-
-def valence_electron_count(compound: str, valence_file: str) -> float:
+def valence_electron_count(compound: str) -> float:
     """
     Calculate the Valence Electron Count (VEC) for a given compound.
 
     This function parses the input compound, extracts the elements and their
-    stoichiometries, and calculates the VEC by referencing a CSV file containing
-    valence electron data for each element.
+    stoichiometries, and calculates the VEC using the valence electron data
+    from SMACT's Element class.
 
     Args:
         compound (str): Chemical formula of the compound (e.g., "Fe2O3").
-        valence_file (str): Path to the CSV file containing valence electron data.
 
     Returns:
         float: Valence Electron Count (VEC) for the compound.
 
     Raises:
-        FileNotFoundError: If the valence_file is not found.
         ValueError: If an element in the compound is not found in the valence data.
     """
-    def parse_formula(formula):
-        pattern = re.compile(r'([A-Z][a-z]*)(\d*)')
+    from typing import Dict
+
+    def parse_formula(formula: str) -> Dict[str, int]:
+        pattern = re.compile(r"([A-Z][a-z]*)(\d*)")
         elements = pattern.findall(formula)
-        element_stoich = defaultdict(int)
-        for (element, count) in elements:
+        element_stoich: Dict[str, int] = defaultdict(int)
+        for element, count in elements:
             count = int(count) if count else 1
             element_stoich[element] += count
         return element_stoich
 
-    def get_element_valence(element, valence_data):
-        for row in valence_data:
-            if row['element'] == element:
-                return int(row['NValence'])
-        raise ValueError(f"Valence data not found for element: {element}")
-
-    try:
-        with open(valence_file, 'r') as file:
-            reader = csv.DictReader(file)
-            valence_data = list(reader)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Valence data file not found: {valence_file}")
+    def get_element_valence(element: str) -> int:
+        try:
+            return smact.Element(element).num_valence_modified
+        except AttributeError:
+            raise ValueError(f"Valence data not found for element: {element}")
 
     element_stoich = parse_formula(compound)
 
@@ -209,14 +201,12 @@ def valence_electron_count(compound: str, valence_file: str) -> float:
     total_stoich = 0
 
     for element, stoich in element_stoich.items():
-        valence = get_element_valence(element, valence_data)
+        valence = get_element_valence(element)
         total_valence += stoich * valence
         total_stoich += stoich
 
     if total_stoich == 0:
-        return 0
+        return 0.0
 
     vec = total_valence / total_stoich
     return vec
-
-
