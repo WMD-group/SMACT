@@ -161,6 +161,7 @@ def compound_electroneg(
 
     return compelectroneg
 
+
 def valence_electron_count(compound: str) -> float:
     """
     Calculate the Valence Electron Count (VEC) for a given compound.

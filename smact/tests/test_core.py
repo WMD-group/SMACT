@@ -14,7 +14,11 @@ import smact.oxidation_states
 import smact.screening
 from smact import Species
 from smact.builder import wurtzite
-from smact.properties import band_gap_Harrison, compound_electroneg, valence_electron_count
+from smact.properties import (
+    band_gap_Harrison,
+    compound_electroneg,
+    valence_electron_count,
+)
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_OX_STATES = os.path.join(files_dir, "test_oxidation_states.txt")
@@ -88,16 +92,8 @@ class TestSequenceFunctions(unittest.TestCase):
         )
 
     def test_valence_electron_count(self):
-        self.assertAlmostEqual(
-            valence_electron_count("Fe2O3"),
-            8.0,
-            places=2
-        )
-        self.assertAlmostEqual(
-            valence_electron_count("CuZn"),
-            11.5,
-            places=2
-        )
+        self.assertAlmostEqual(valence_electron_count("Fe2O3"), 8.0, places=2)
+        self.assertAlmostEqual(valence_electron_count("CuZn"), 11.5, places=2)
         with self.assertRaises(ValueError):
             valence_electron_count("Xx2O3")  # Xx is not a real element
 
