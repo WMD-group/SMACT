@@ -208,9 +208,7 @@ def valence_electron_count(compound: str) -> float:
             total_valence += stoich * valence
             total_stoich += stoich
         except TypeError:
-            print(
-                f"Calculation failed: No valence information for element {element}"
-            )
+            raise ValueError(f"No valence information for element {element}")
 
     if total_stoich == 0:
         return 0.0

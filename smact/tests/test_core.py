@@ -106,7 +106,7 @@ class TestSequenceFunctions(unittest.TestCase):
         with self.assertRaises(ValueError):
             valence_electron_count("Xx2O3")  # Xx is not a real element
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             valence_electron_count("LrO")
 
     # ---------------- BUILDER ----------------
