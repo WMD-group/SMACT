@@ -193,7 +193,7 @@ def valence_electron_count(compound: str) -> float:
     def get_element_valence(element: str) -> int:
         try:
             return smact.Element(element).num_valence_modified
-        except AttributeError:
+        except NameError:
             raise ValueError(
                 f"Valence data not found for element: {element}"
             ) from None
@@ -202,11 +202,15 @@ def valence_electron_count(compound: str) -> float:
 
     total_valence = 0
     total_stoich = 0
-
     for element, stoich in element_stoich.items():
-        valence = get_element_valence(element)
-        total_valence += stoich * valence
-        total_stoich += stoich
+        try:
+            valence = get_element_valence(element)
+            total_valence += stoich * valence
+            total_stoich += stoich
+        except TypeError:
+            print(
+                f"Calculation failed: No valence information for element {element}"
+            )
 
     if total_stoich == 0:
         return 0.0

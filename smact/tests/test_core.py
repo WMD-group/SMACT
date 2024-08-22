@@ -92,10 +92,22 @@ class TestSequenceFunctions(unittest.TestCase):
         )
 
     def test_valence_electron_count(self):
+        # Test valid compounds
         self.assertAlmostEqual(valence_electron_count("Fe2O3"), 6.8, places=2)
         self.assertAlmostEqual(valence_electron_count("CuZn"), 11.5, places=2)
-        with self.assertRaises(ValueError):
+
+        # Test single element
+        self.assertEqual(valence_electron_count("Fe"), 8)
+
+        # Test empty string
+        self.assertEqual(valence_electron_count(""), 0.0)
+
+        # Test invalid elements and formats
+        with self.assertRaises(NameError):
             valence_electron_count("Xx2O3")  # Xx is not a real element
+
+        with self.assertRaises(TypeError):
+            valence_electron_count("LrO")
 
     # ---------------- BUILDER ----------------
 
