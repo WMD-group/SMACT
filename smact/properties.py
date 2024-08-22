@@ -194,7 +194,7 @@ def valence_electron_count(compound: str) -> float:
         try:
             return smact.Element(element).num_valence_modified
         except AttributeError:
-            raise ValueError(f"Valence data not found for element: {element}")
+            raise ValueError(f"Valence data not found for element: {element}") from None
 
     element_stoich = parse_formula(compound)
 
