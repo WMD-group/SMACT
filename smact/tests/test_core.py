@@ -103,7 +103,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(valence_electron_count(""), 0.0)
 
         # Test invalid elements and formats
-        with self.assertRaises(NameError):
+        with self.assertRaises(ValueError):
             valence_electron_count("Xx2O3")  # Xx is not a real element
 
         with self.assertRaises(TypeError):
