@@ -92,7 +92,7 @@ class TestSequenceFunctions(unittest.TestCase):
         )
 
     def test_valence_electron_count(self):
-        self.assertAlmostEqual(valence_electron_count("Fe2O3"), 8.0, places=2)
+        self.assertAlmostEqual(valence_electron_count("Fe2O3"), 6.8, places=2)
         self.assertAlmostEqual(valence_electron_count("CuZn"), 11.5, places=2)
         with self.assertRaises(ValueError):
             valence_electron_count("Xx2O3")  # Xx is not a real element
