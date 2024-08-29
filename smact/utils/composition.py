@@ -10,7 +10,7 @@ from smact.structure_prediction.utilities import unparse_spec
 
 
 # Adapted from ElementEmbeddings and Pymatgen
-def parse_formula(formula: str) -> dict[str, int]:
+def parse_formula(formula: str) -> dict[str, float]:
     """Parse a formula into a dict of el:amt
 
     Args:
