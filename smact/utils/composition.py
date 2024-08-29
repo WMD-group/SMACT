@@ -1,4 +1,6 @@
 """Utility functioms for handling elements, species, formulas and composition"""
+from __future__ import annotations
+
 import re
 from collections import defaultdict
 
