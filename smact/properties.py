@@ -6,6 +6,7 @@ from typing import List, Optional, Union
 import numpy as np
 
 import smact
+from smact.utils.composition import parse_formula
 
 
 def eneg_mulliken(element: Union[smact.Element, str]) -> float:
@@ -179,16 +180,6 @@ def valence_electron_count(compound: str) -> float:
     Raises:
         ValueError: If an element in the compound is not found in the valence data.
     """
-    from typing import Dict
-
-    def parse_formula(formula: str) -> Dict[str, int]:
-        pattern = re.compile(r"([A-Z][a-z]*)(\d*)")
-        elements = pattern.findall(formula)
-        element_stoich: Dict[str, int] = defaultdict(int)
-        for element, count in elements:
-            count = int(count) if count else 1
-            element_stoich[element] += count
-        return element_stoich
 
     def get_element_valence(element: str) -> int:
         try:
