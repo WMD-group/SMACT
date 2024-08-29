@@ -32,6 +32,7 @@ if __name__ == "__main__":
         license="MIT",
         packages=[
             "smact",
+            "smact.utils",
             "smact.tests",
             "smact.structure_prediction",
             "smact.dopant_prediction",
