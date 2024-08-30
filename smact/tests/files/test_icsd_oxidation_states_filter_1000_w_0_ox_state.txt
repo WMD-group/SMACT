@@ -9,7 +9,7 @@
 H -1 0 1
 He
 Li 0 1
-Be
+Be 2
 B 0 3
 C -2 0 2 3 4
 N -3 0 5
@@ -28,7 +28,7 @@ K 1
 Ca 0 2
 Sc 0 3
 Ti 0 4
-V 0 4 5
+V 0 3 4 5
 Cr 0 3
 Mn 0 2 3 4
 Fe 0 2 3
@@ -38,7 +38,7 @@ Cu 0 1 2
 Zn 0 2
 Ga 0 3
 Ge 0 4
-As -3 3 5
+As -3 0 3 5
 Se -2 0 4
 Br -1
 Kr
@@ -52,7 +52,7 @@ Tc
 Ru 0
 Rh 0
 Pd 0
-Ag 1
+Ag 0 1
 Cd 0 2
 In 0 3
 Sn 0 2 4
@@ -82,13 +82,13 @@ Ta 0 5
 W 6
 Re
 Os
-Ir
+Ir 0
 Pt 0
 Au 0
 Hg 2
 Tl 1
 Pb 2
-Bi 3
+Bi 0 3
 Po
 At
 Rn
