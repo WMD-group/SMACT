@@ -165,7 +165,7 @@ def compound_electroneg(
 
 def valence_electron_count(compound: str) -> float:
     """
-    Calculate the Valence Electron Count (VEC) for a given compound.
+    Calculate the Valence Electron Count (VEC) for a given chemical compound.
 
     This function parses the input compound, extracts the elements and their
     stoichiometries, and calculates the VEC using the valence electron data
