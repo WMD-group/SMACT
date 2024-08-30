@@ -10,7 +10,8 @@ __copyright__ = "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2
 __version__ = "2.6"
 __maintainer__ = "Anthony O. Onwuli"
 __maintainer_email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "July 10 2024"
+__date__ = "August 30 2024"
+
 
 import os
 
@@ -32,9 +33,11 @@ if __name__ == "__main__":
         author_email=__author_email__,
         maintainer=__maintainer__,
         maintainer_email=__maintainer_email__,
+        maintainer_email=__maintainer_email__,
         license="MIT",
         packages=[
             "smact",
+            "smact.utils",
             "smact.tests",
             "smact.structure_prediction",
             "smact.dopant_prediction",
@@ -56,7 +59,7 @@ if __name__ == "__main__":
             "scipy",
             "numpy<2",
             "spglib",
-            "pymatgen>=2024.2.20",
+            "pymatgen>=2024.2.20,<2024.8.8",
             "ase",
             "pandas",
             "pathos",

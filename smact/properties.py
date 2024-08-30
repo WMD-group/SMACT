@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 import smact
+from smact.utils.composition import parse_formula
 
 
 def eneg_mulliken(element: smact.Element | str) -> float:
@@ -159,3 +160,48 @@ def compound_electroneg(
         print("Geometric mean = Compound 'electronegativity'=", compelectroneg)
 
     return compelectroneg
+
+
+def valence_electron_count(compound: str) -> float:
+    """
+    Calculate the Valence Electron Count (VEC) for a given chemical compound.
+
+    This function parses the input compound, extracts the elements and their
+    stoichiometries, and calculates the VEC using the valence electron data
+    from SMACT's Element class.
+
+    Args:
+        compound (str): Chemical formula of the compound (e.g., "Fe2O3").
+
+    Returns:
+        float: Valence Electron Count (VEC) for the compound.
+
+    Raises:
+        ValueError: If an element in the compound is not found in the valence data.
+    """
+
+    def get_element_valence(element: str) -> int:
+        try:
+            return smact.Element(element).num_valence_modified
+        except NameError:
+            raise ValueError(
+                f"Valence data not found for element: {element}"
+            ) from None
+
+    element_stoich = parse_formula(compound)
+
+    total_valence = 0
+    total_stoich = 0
+    for element, stoich in element_stoich.items():
+        try:
+            valence = get_element_valence(element)
+            total_valence += stoich * valence
+            total_stoich += stoich
+        except TypeError:
+            raise ValueError(f"No valence information for element {element}")
+
+    if total_stoich == 0:
+        return 0.0
+
+    vec = total_valence / total_stoich
+    return vec

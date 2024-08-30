@@ -25,6 +25,7 @@ Submodules
 
   smact.structure_prediction
   smact.dopant_prediction
+  smact.utils
   smact.properties
   smact.screening
   smact.oxidation_states
