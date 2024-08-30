@@ -56,7 +56,20 @@ class OxidationStatesTest(unittest.TestCase):
         os.remove(f"{filename}_w_zero.txt")
 
     def test_oxidation_states_filter_species_list(self):
-        for threshold, length in [(0, 460), (5, 337), (50, 214)]:
+        for threshold, length in [(0, 490), (5, 358), (50, 227)]:
             species_list = self.ox_filter.get_species_list(threshold)
             self.assertIsInstance(species_list, list)
             self.assertEqual(len(species_list), length)
+
+    def test_oxidation_states_filter_species_occurrences(self):
+        species_occurrences_df = self.ox_filter.get_species_occurrences_df()
+        self.assertIsInstance(species_occurrences_df, pd.DataFrame)
+        self.assertEqual(
+            species_occurrences_df.columns.tolist(),
+            ["species", "results_count"],
+        )
+        self.assertEqual(species_occurrences_df.shape, (490, 2))
+        self.assertEqual(species_occurrences_df.iloc[0]["species"], "O2-")
+        self.assertEqual(
+            species_occurrences_df.iloc[0]["results_count"], 116910
+        )
