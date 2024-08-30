@@ -85,7 +85,7 @@ def comp_maker(
 def formula_maker(
     smact_filter_output: tuple[str, int, int] | tuple[str, int]
 ) -> str:
-    """Convert an output of smact.screening.smact_filter into a formula.
+    """Convert an item in the output of smact.screening.smact_filter into a chemical formula.
 
     Args:
         smact_filter_output (tuple[str, int, int]|tuple[str, int]): An item in the list returned from smact_filter
