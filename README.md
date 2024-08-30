@@ -122,7 +122,7 @@ Development notes
 -----------------
 
 ### Bugs, features and questions
-Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact either Dan Davies (author) or Anthony Onwuli (maintainer) by e-mail: d.w.davies@imperial.ac.uk or anthony.onwuli16@imperial.ac.uk respectively.
+Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they help us improve the docs! For other queries about any aspect of the code, please contact either Aron Walsh on behalf of The SMACT Developers (author) or Anthony Onwuli (maintainer) by e-mail: a.walsh@imperial.ac.uk or anthony.onwuli16@imperial.ac.uk respectively.
 
 ### Code contributions
 We are always looking for ways to make SMACT better and more useful to the wider community; contributions are welcome. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following:
@@ -130,6 +130,7 @@ We are always looking for ways to make SMACT better and more useful to the wider
 - Code style should comply with [PEP8](http://www.python.org/dev/peps/pep-0008) where possible. [Google's house style](https://google.github.io/styleguide/pyguide.html) is also helpful, including a good model for docstrings.
 - Please use comments liberally when adding nontrivial features, and take the chance to clean up other people's code while looking at it.
 - Add tests wherever possible, and use the test suite to check if you broke anything.
+- Look at the [contributing guide](CONTRIBUTING.md) for more information.
 
 ### Tests
 Testing modules should be pass/fail and wrapped into **tests/test_core.py** or another **tests/test_something.py** file added, if appropriate. 

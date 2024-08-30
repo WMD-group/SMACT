@@ -13,6 +13,8 @@ are used in the background and it is not necessary to use them directly.
 import csv
 import os
 
+import pandas as pd
+
 from smact import data_directory
 
 # Module-level switch: print "verbose" warning messages
@@ -819,6 +821,137 @@ def lookup_element_sse_pauling_data(symbol):
                 "WARNING: Solid-state energy data from Pauling "
                 " electronegativity regression fit for "
                 " element {} not found.".format(symbol)
+            )
+
+        return None
+
+
+_element_magpie_data = None
+
+
+def lookup_element_magpie_data(symbol: str, copy: bool = True):
+    """
+    Retrieve element data contained in the Magpie representation.
+
+    Taken from Ward, L., Agrawal, A., Choudhary, A. et al.
+    A general-purpose machine learning framework for
+    predicting properties of inorganic materials.
+    npj Comput Mater 2, 16028 (2016).
+    https://doi.org/10.1038/npjcompumats.2016.28
+
+    Args:
+        symbol : the atomic symbol of the element to look up.
+        copy: if True (default), return a copy of the data dictionary,
+        rather than a reference to a cached object -- only use
+        copy=False in performance-sensitive code and where you are
+        certain the dictionary will not be modified!
+
+    Returns:
+        list:
+            Magpie features.
+        Returns None if the element was not found among the external
+        data.
+
+        Magpie features are dictionaries with the keys:
+
+
+
+
+    """
+
+    global _element_magpie_data
+
+    if _element_magpie_data is None:
+        _element_magpie_data = {}
+
+        df = pd.read_csv(os.path.join(data_directory, "magpie.csv"))
+        for _index, row in df.iterrows():
+            key = row.iloc[0]
+
+            dataset = {
+                "Number": int(row.iloc[1]),
+                "MendeleevNumber": int(row.iloc[2]),
+                "AtomicWeight": float(row.iloc[3]),
+                "MeltingT": float(row.iloc[4]),
+                "Column": int(row.iloc[5]),
+                "Row": int(row.iloc[6]),
+                "CovalentRadius": float(row.iloc[7]),
+                "Electronegativity": float(row.iloc[8]),
+                "NsValence": int(row.iloc[9]),
+                "NpValence": int(row.iloc[10]),
+                "NdValence": int(row.iloc[11]),
+                "NfValence": int(row.iloc[12]),
+                "NValence": int(row.iloc[13]),
+                "NsUnfilled": int(row.iloc[14]),
+                "NpUnfilled": int(row.iloc[15]),
+                "NdUnfilled": int(row.iloc[16]),
+                "NfUnfilled": int(row.iloc[17]),
+                "NUnfilled": int(row.iloc[18]),
+                "GSvolume_pa": float(row.iloc[19]),
+                "GSbandgap": float(row.iloc[20]),
+                "GSmagmom": float(row.iloc[21]),
+                "SpaceGroupNumber": int(row.iloc[22]),
+            }
+            _element_magpie_data[key] = dataset
+
+    if symbol in _element_magpie_data:
+        return _element_magpie_data[symbol]
+    else:
+        if _print_warnings:
+            print(
+                "WARNING: Magpie data for element {} not "
+                "found.".format(symbol)
+            )
+
+        return None
+
+
+_element_valence_data = None
+
+
+def lookup_element_valence_data(symbol: str, copy: bool = True):
+    """
+    Retrieve valence electron data.
+
+    For d-block elements, the s and d electrons contribute to NValence.
+    For p-block elements, the s and p electrons contribute to NValence.
+    For s- and f-block elements, NValence is calculated from the Noble Gas electron configuration
+        i.e.
+
+    Args:
+        symbol : the atomic symbol of the element to look up.
+        copy: if True (default), return a copy of the data dictionary,
+        rather than a reference to a cached object -- only use
+        copy=False in performance-sensitive code and where you are
+        certain the dictionary will not be modified!
+
+    Returns:
+        NValence (int): the number of valence electrons
+        Returns None if the element was not found among the external
+        data.
+    """
+
+    global _element_valence_data
+
+    if _element_valence_data is None:
+        _element_valence_data = {}
+
+        df = pd.read_csv(
+            os.path.join(data_directory, "element_valence_modified.csv")
+        )
+        for _index, row in df.iterrows():
+            key = row.iloc[0]
+
+            dataset = {"NValence": int(row.iloc[1])}
+            _element_valence_data[key] = dataset
+
+    if symbol in _element_valence_data:
+        return _element_valence_data[symbol]
+    else:
+        if _print_warnings:
+            print(
+                "WARNING: Valence data for element {} not "
+                "found.".format(symbol)
             )
 
         return None
