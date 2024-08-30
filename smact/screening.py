@@ -337,13 +337,13 @@ def smact_filter(
     species_unique: bool = True,
     oxidation_states_set: str = "smact14",
     comp_tuple: bool = False,
-) -> Union[List[Tuple[str, int, int]], List[Tuple[str, int]]]:
+) -> list[tuple[str, int, int]] | list[tuple[str, int]]:
     """Function that applies the charge neutrality and electronegativity
     tests in one go for simple application in external scripts that
     wish to apply the general 'smact test'.
 
      .. warning::
-        For backwards compatability in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
+        For backwards compatibility in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
         In SMACT 3.0, the smact_filter function will be set to use a new default oxidation states set.
 
     Args:
@@ -354,6 +354,7 @@ def smact_filter(
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
         oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'smact14', 'icsd', 'pymatgen' and 'wiki' for the  2014 SMACT default, 2016 ICSD, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively. A filepath to an oxidation states text file can also be supplied as well.
         comp_tuple (bool): Whether or not to return the results as a named tuple of elements and stoichiometries (True) or as a normal tuple of elements and stoichiometries (False).
+
     Returns:
     -------
         allowed_comps (list): Allowed compositions for that chemical system
@@ -436,7 +437,7 @@ def smact_validity(
     composition: pymatgen.core.Composition | str,
     use_pauling_test: bool = True,
     include_alloys: bool = True,
-    oxidation_states_set: Union[str, bytes, os.PathLike] = "smact14",
+    oxidation_states_set: str | bytes | os.PathLike = "smact14",
 ) -> bool:
     """
     Check if a composition is valid according to the SMACT rules.
@@ -444,7 +445,7 @@ def smact_validity(
     Composition is considered valid if it passes the charge neutrality test and the Pauling electronegativity test.
 
      .. warning::
-        For backwards compatability in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
+        For backwards compatibility in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
         In SMACT 3.0, the smact_filter function will be set to use a new default oxidation states set.
 
     Args:

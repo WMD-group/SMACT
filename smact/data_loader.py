@@ -825,7 +825,6 @@ def lookup_element_magpie_data(symbol: str, copy: bool = True):
 
 
     """
-
     global _element_magpie_data
 
     if _element_magpie_data is None:
@@ -865,10 +864,7 @@ def lookup_element_magpie_data(symbol: str, copy: bool = True):
         return _element_magpie_data[symbol]
     else:
         if _print_warnings:
-            print(
-                "WARNING: Magpie data for element {} not "
-                "found.".format(symbol)
-            )
+            print(f"WARNING: Magpie data for element {symbol} not " "found.")
 
         return None
 
@@ -897,15 +893,12 @@ def lookup_element_valence_data(symbol: str, copy: bool = True):
         Returns None if the element was not found among the external
         data.
     """
-
     global _element_valence_data
 
     if _element_valence_data is None:
         _element_valence_data = {}
 
-        df = pd.read_csv(
-            os.path.join(data_directory, "element_valence_modified.csv")
-        )
+        df = pd.read_csv(os.path.join(data_directory, "element_valence_modified.csv"))
         for _index, row in df.iterrows():
             key = row.iloc[0]
 
@@ -916,9 +909,6 @@ def lookup_element_valence_data(symbol: str, copy: bool = True):
         return _element_valence_data[symbol]
     else:
         if _print_warnings:
-            print(
-                "WARNING: Valence data for element {} not "
-                "found.".format(symbol)
-            )
+            print(f"WARNING: Valence data for element {symbol} not " "found.")
 
         return None

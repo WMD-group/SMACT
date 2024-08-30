@@ -1,4 +1,5 @@
 """Utility functioms for handling elements, species, formulas and composition"""
+
 from __future__ import annotations
 
 import re
@@ -27,9 +28,7 @@ def parse_formula(formula: str) -> dict[str, float]:
         if m.group(2) != "":
             factor = float(m.group(2))
         unit_sym_dict = _get_sym_dict(m.group(1), factor)
-        expanded_sym = "".join(
-            [f"{el}{amt}" for el, amt in unit_sym_dict.items()]
-        )
+        expanded_sym = "".join([f"{el}{amt}" for el, amt in unit_sym_dict.items()])
         expanded_formula = formula.replace(m.group(), expanded_sym)
         return parse_formula(expanded_formula)
     return _get_sym_dict(formula, 1)
@@ -53,9 +52,7 @@ def _get_sym_dict(formula: str, factor: float) -> dict[str, float]:
     return sym_dict
 
 
-def comp_maker(
-    smact_filter_output: tuple[str, int, int] | tuple[str, int]
-) -> Composition:
+def comp_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -> Composition:
     """Convert an item in the output of smact.screening.smact_filer into a Pymatgen Composition.
 
     Args:
@@ -82,9 +79,7 @@ def comp_maker(
     return Composition(form)
 
 
-def formula_maker(
-    smact_filter_output: tuple[str, int, int] | tuple[str, int]
-) -> str:
+def formula_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -> str:
     """Convert an item in the output of smact.screening.smact_filter into a chemical formula.
 
     Args:

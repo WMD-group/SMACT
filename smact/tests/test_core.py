@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import unittest
 
+import pytest
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
 
@@ -96,10 +97,10 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(valence_electron_count(""), 0.0)
 
         # Test invalid elements and formats
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             valence_electron_count("Xx2O3")  # Xx is not a real element
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             valence_electron_count("LrO")
 
     # ---------------- BUILDER ----------------

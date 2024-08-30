@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import unittest
 
 from pymatgen.core import Composition
@@ -59,9 +61,7 @@ class TestComposition(unittest.TestCase):
         self.assertEqual(Composition("FeO"), comp2)
         self.assertEqual(Composition({"Fe2+": 1, "O2-": 1}), comp1)
         self.assertEqual(Composition({"Fe2+": 1, "Fe3+": 2, "O2-": 4}), comp3)
-        self.assertEqual(
-            Composition({"Li+": 10, "Ge4+": 1, "P5+": 2, "S2-": 12}), comp4
-        )
+        self.assertEqual(Composition({"Li+": 10, "Ge4+": 1, "P5+": 2, "S2-": 12}), comp4)
 
     def test_formula_maker(self):
         """Test the formula_maker function"""
