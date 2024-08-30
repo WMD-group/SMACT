@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-__author__ = "Daniel W. Davies"
-__author_email__ = "d.w.davies@imperial.ac.uk"
+__author__ = "The SMACT Developers"
+__author_email__ = "a.walsh@imperial.ac.uk"
 __copyright__ = (
     "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
 )
-__version__ = "2.6"
+__version__ = "2.7"
 __maintainer__ = "Anthony O. Onwuli"
-__maintaier_email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "July 10 2024"
+__maintainer_email__ = "anthony.onwuli16@imperial.ac.uk"
+__date__ = "August 30 2024"
+
 
 import os
 import unittest
@@ -28,7 +29,7 @@ if __name__ == "__main__":
         author=__author__,
         author_email=__author_email__,
         maintainer=__maintainer__,
-        maintainer_email=__maintaier_email__,
+        maintainer_email=__maintainer_email__,
         license="MIT",
         packages=[
             "smact",

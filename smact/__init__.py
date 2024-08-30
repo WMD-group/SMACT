@@ -53,9 +53,11 @@ class Element:
 
         Element.oxidation_states (list) : Default list of allowed oxidation states for use in SMACT
 
-        Element.oxidation_states_sp (list) : List of oxdation states recognised by the Pymatgen Structure Predictor
+        Element.oxidation_states_smact14 (list): Original list of oxidation states that were manually compiled for SMACT in 2014 (default in SMACT < 3.0)
 
-        Element.oxidation_states_icsd (list) : List of oxidation states that appear in the ICSD
+        Element.oxidation_states_sp (list) : List of oxidation states recognised by the Pymatgen Structure Predictor
+
+        Element.oxidation_states_icsd (list) : List of oxidation states that appear in the 2016 version of ICSD
 
         Element.oxidation_states_wiki (list): List of oxidation states that appear wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) Data retrieved: 2022-09-22
 
@@ -165,10 +167,9 @@ class Element:
             num_valence = None
 
         valence_data = data_loader.lookup_element_valence_data(symbol)
-        if valence_data:
-            num_valence_modified = valence_data["NValence"]
-        else:
-            num_valence_modified = None
+        num_valence_modified = (
+            valence_data["NValence"] if valence_data else None
+        )
 
         for attribute, value in (
             ("coord_envs", coord_envs),
@@ -185,6 +186,10 @@ class Element:
             ("number", dataset["Z"]),
             (
                 "oxidation_states",
+                data_loader.lookup_element_oxidation_states(symbol),
+            ),
+            (
+                "oxidation_states_smact14",
                 data_loader.lookup_element_oxidation_states(symbol),
             ),
             (

@@ -321,19 +321,23 @@ def smact_filter(
     threshold: Optional[int] = 8,
     stoichs: Optional[List[List[int]]] = None,
     species_unique: bool = True,
-    oxidation_states_set: str = "default",
+    oxidation_states_set: str = "smact14",
     comp_tuple: bool = False,
 ) -> Union[List[Tuple[str, int, int]], List[Tuple[str, int]]]:
     """Function that applies the charge neutrality and electronegativity
     tests in one go for simple application in external scripts that
     wish to apply the general 'smact test'.
 
+     .. warning::
+        For backwards compatability in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
+        In SMACT 3.0, the smact_filter function will be set to use a new default oxidation states set.
+
     Args:
         els (tuple/list): A list of smact.Element objects
         threshold (int): Threshold for stoichiometry limit, default = 8
         stoichs (list[int]): A selection of valid stoichiometric ratios for each site.
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
-        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'default', 'icsd', 'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively. A filepath to an oxidation states text file can also be supplied as well.
+        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'smact14', 'icsd', 'pymatgen' and 'wiki' for the  2014 SMACT default, 2016 ICSD, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively. A filepath to an oxidation states text file can also be supplied as well.
         comp_tuple (bool): Whether or not to return the results as a named tuple of elements and stoichiometries (True) or as a normal tuple of elements and stoichiometries (False).
     Returns:
         allowed_comps (list): Allowed compositions for that chemical system
@@ -373,7 +377,7 @@ def smact_filter(
 
     # Select the specified oxidation states set:
     oxi_set = {
-        "default": [e.oxidation_states for e in els],
+        "smact14": [e.oxidation_states_smact14 for e in els],
         "icsd": [e.oxidation_states_icsd for e in els],
         "pymatgen": [e.oxidation_states_sp for e in els],
         "wiki": [e.oxidation_states_wiki for e in els],
@@ -385,7 +389,7 @@ def smact_filter(
     else:
         raise (
             Exception(
-                f'{oxidation_states_set} is not valid. Enter either "default", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
+                f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
             )
         )
     if oxidation_states_set == "wiki":
@@ -430,19 +434,23 @@ def smact_validity(
     composition: Union[pymatgen.core.Composition, str],
     use_pauling_test: bool = True,
     include_alloys: bool = True,
-    oxidation_states_set: Union[str, bytes, os.PathLike] = "default",
+    oxidation_states_set: Union[str, bytes, os.PathLike] = "smact14",
 ) -> bool:
     """Check if a composition is valid according to the SMACT rules.
 
     Composition is considered valid if it passes the charge neutrality test and the Pauling electronegativity test.
+
+     .. warning::
+        For backwards compatability in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
+        In SMACT 3.0, the smact_filter function will be set to use a new default oxidation states set.
 
     Args:
         composition (Union[pymatgen.core.Composition, str]): Composition/formula to check. This can be a pymatgen Composition object or a string.
         use_pauling_test (bool): Whether to use the Pauling electronegativity test
         include_alloys (bool): If True, compositions which only contain metal elements will be considered valid without further checks.
         oxidation_states_set (Union[str, bytes, os.PathLike]): A string to choose which set of
-            oxidation states should be chosen for charge-balancing. Options are 'default', 'icsd',
-            'pymatgen' and 'wiki' for the default, icsd, pymatgen structure predictor and Wikipedia
+            oxidation states should be chosen for charge-balancing. Options are 'smact14', 'icsd',
+            'pymatgen' and 'wiki' for the 2014 SMACT default, 2016 ICSD, pymatgen structure predictor and Wikipedia
             (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
             A filepath to an oxidation states text file can also be supplied.
 
@@ -471,8 +479,8 @@ def smact_validity(
     smact_elems = [e[1] for e in space.items()]
     electronegs = [e.pauling_eneg for e in smact_elems]
 
-    if oxidation_states_set == "default" or oxidation_states_set is None:
-        ox_combos = [e.oxidation_states for e in smact_elems]
+    if oxidation_states_set == "smact14" or oxidation_states_set is None:
+        ox_combos = [e.oxidation_states_smact14 for e in smact_elems]
     elif oxidation_states_set == "icsd":
         ox_combos = [e.oxidation_states_icsd for e in smact_elems]
     elif oxidation_states_set == "pymatgen":
@@ -491,7 +499,7 @@ def smact_validity(
     else:
         raise (
             Exception(
-                f'{oxidation_states_set} is not valid. Enter either "default", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
+                f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
             )
         )
 

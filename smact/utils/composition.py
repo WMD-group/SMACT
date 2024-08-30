@@ -11,7 +11,7 @@ from smact.structure_prediction.utilities import unparse_spec
 
 # Adapted from ElementEmbeddings and Pymatgen
 def parse_formula(formula: str) -> dict[str, float]:
-    """Parse a formula into a dict of el:amt
+    """Parse a chemical formula into a dictionary of elements and their amounts.
 
     Args:
         formula (str): Chemical formula
@@ -56,7 +56,7 @@ def _get_sym_dict(formula: str, factor: float) -> dict[str, float]:
 def comp_maker(
     smact_filter_output: tuple[str, int, int] | tuple[str, int]
 ) -> Composition:
-    """Convert an output of smact.screening.smact_filer into a Pymatgen Compositions
+    """Convert an item in the output of smact.screening.smact_filer into a Pymatgen Composition.
 
     Args:
         smact_filter_output (tuple[str, int, int]|tuple[str, int]): An item in the list returned from smact_filter
@@ -71,21 +71,21 @@ def comp_maker(
             form.append(ammt)
         form = "".join(str(e) for e in form)
     else:
-        form = {}
-        for el, ox, ammt in zip(
-            smact_filter_output[0],
-            smact_filter_output[1],
-            smact_filter_output[2],
-        ):
-            sp = unparse_spec((el, ox))
-            form[sp] = ammt
+        form = {
+            unparse_spec((el, ox)): ammt
+            for el, ox, ammt in zip(
+                smact_filter_output[0],
+                smact_filter_output[1],
+                smact_filter_output[2],
+            )
+        }
     return Composition(form)
 
 
 def formula_maker(
     smact_filter_output: tuple[str, int, int] | tuple[str, int]
 ) -> str:
-    """Convert an output of smact.screening.smact_filter into a formula.
+    """Convert an item in the output of smact.screening.smact_filter into a chemical formula.
 
     Args:
         smact_filter_output (tuple[str, int, int]|tuple[str, int]): An item in the list returned from smact_filter
