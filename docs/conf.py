@@ -37,6 +37,7 @@ extensions = [
     "myst_nb",
 ]
 
+myst_enable_extensions = ["amsmath"]
 jupyter_execute_notebooks = "off"
 
 # Add any paths that contain templates here, relative to this directory.
