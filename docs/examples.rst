@@ -18,5 +18,6 @@ For workflows that have been used in real examples and in published work, visit 
    examples/neutral_combos
    examples/oxidation_states
    examples/compound_electroneg
+   examples/valence_electron_count
    examples/doper
    examples/distorter

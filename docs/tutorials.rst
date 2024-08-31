@@ -9,7 +9,7 @@ Tutorials are intended as a more complete example of `smact` being applied in re
    :maxdepth: 1
 
    tutorials/crystal_space
+   tutorials/crystal_space_visualisation
    tutorials/smact_validity_of_GNoMe
    tutorials/smact_generation_of_solar_oxides
    tutorials/oxidation_states
-   tutorials/crystal_space_visualisation
