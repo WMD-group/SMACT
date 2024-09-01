@@ -54,7 +54,7 @@ if __name__ == "__main__":
             "scipy",
             "numpy<2",
             "spglib",
-            "pymatgen>=2024.2.20,<2024.8.8",
+            "pymatgen>=2024.2.20,<2024.8.10",
             "ase",
             "pandas",
             "pathos",
