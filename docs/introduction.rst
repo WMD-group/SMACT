@@ -15,7 +15,7 @@ Features of :mod:`smact` include:
 
 - Chemical elements with associated properties
 - Filters for oxidation states and charge balancing
-- Structure predcition from chemical composition
+- Structure prediction from chemical composition
 - Composition probability prediction
 
 Install
