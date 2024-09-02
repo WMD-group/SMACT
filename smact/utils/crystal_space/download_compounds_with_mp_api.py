@@ -1,10 +1,13 @@
+"""Utility functions for downloading compounds from the Materials Project."""
+
+from __future__ import annotations
+
 import itertools
 import json
 import string
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional
 
 from mp_api.client import MPRester
 from pymatgen.core.composition import Composition
@@ -12,7 +15,7 @@ from tqdm import tqdm
 
 
 def download_mp_data(
-    mp_api_key: Optional[str] = None,
+    mp_api_key: str | None = None,
     num_elements: int = 2,
     max_stoich: int = 8,
     save_dir: str = "data/binary/mp_api",
@@ -88,6 +91,6 @@ def download_mp_data(
 
             if (energy_above_hull) < e_hull_dict[formula_pretty]:
                 e_hull_dict[formula_pretty] = energy_above_hull
-
-                json.dump(doc.dict(), open(save_dir / f"{formula_pretty}.json", "w"))
+                with open(save_dir / f"{formula_pretty}.json", "w") as f:
+                    json.dump(doc.dict(), f)
         time.sleep(request_interval)

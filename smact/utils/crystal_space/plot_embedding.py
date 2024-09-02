@@ -1,8 +1,15 @@
-from pathlib import Path
+"""Utility functions for plotting dimension reduced embeddings using plotly."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def update_layout(
@@ -13,6 +20,7 @@ def update_layout(
     width: float = 1200,
     height: float = 1800,
 ):
+    """Update layout of a plotly figure."""
     # set axis
     for i in range(1, num_row + 1):
         for j in range(1, num_col + 1):
@@ -66,6 +74,7 @@ def plot_reducers_embeddings(
     symbol: str = "circle",
     title: str = "Embedding Visualization",
 ):
+    """Plot dimension reduction plots."""
     fig = make_subplots(
         rows=6,
         cols=3,

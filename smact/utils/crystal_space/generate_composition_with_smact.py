@@ -1,9 +1,12 @@
+"""Utility functions for SMACT generation of compositions."""
+
+from __future__ import annotations
+
 import itertools
 import multiprocessing
 import warnings
 from functools import partial
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 from pymatgen.core.composition import Composition
@@ -15,7 +18,17 @@ from smact.screening import smact_filter
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 
-def convert_formula(combinations, num_elements, max_stoich):
+def convert_formula(combinations: list, num_elements: int, max_stoich: int):
+    """Convert combinations into chemical formula.
+
+    Args:
+        combinations (list): list of lists of smact.Element objects.
+        num_elements (int): the number of elements in a compound.
+        max_stoich (int): the maximum stoichiometric coefficient.
+
+    Returns:
+        local_compounds (list): A list of chemical formula.
+    """
     symbols = [element.symbol for element in combinations]
     local_compounds = []
     for counts in itertools.product(range(1, max_stoich + 1), repeat=num_elements):
@@ -29,8 +42,8 @@ def generate_composition_with_smact(
     num_elements: int = 2,
     max_stoich: int = 8,
     max_atomic_num: int = 103,
-    num_processes: Optional[int] = None,
-    save_path: Optional[str] = None,
+    num_processes: int | None = None,
+    save_path: str | None = None,
 ):
     """
     Generate all possible compositions of a given number of elements and
