@@ -1,4 +1,4 @@
-"""Utility functioms for handling elements, species, formulas and composition"""
+"""Utility functioms for handling elements, species, formulas and composition."""
 
 from __future__ import annotations
 
@@ -85,7 +85,7 @@ def formula_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -
     Args:
         smact_filter_output (tuple[str, int, int]|tuple[str, int]): An item in the list returned from smact_filter
 
-        Returns:
+    Returns:
             formula (str): A formula
 
     """
