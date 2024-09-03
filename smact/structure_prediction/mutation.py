@@ -1,23 +1,29 @@
 """Tools for handling ion mutation."""
 
+from __future__ import annotations
+
 import itertools
 import json
 import os
-import re
 from copy import deepcopy
 from operator import itemgetter
-from typing import Callable, Generator, Optional, Tuple
+from typing import TYPE_CHECKING, Callable
 
 import numpy as np
 import pandas as pd
 import pymatgen.analysis.structure_prediction as pymatgen_sp
 
-from .structure import SmactStructure
 from .utilities import parse_spec
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from .structure import SmactStructure
 
 
 class CationMutator:
-    """Handles cation mutation of SmactStructures based on substitution probability.
+    """
+    Handles cation mutation of SmactStructures based on substitution probability.
 
     Based on the algorithm presented in:
         Hautier, G., Fischer, C., Ehrlacher, V., Jain, A., and Ceder, G. (2011)
@@ -30,11 +36,13 @@ class CationMutator:
     def __init__(
         self,
         lambda_df: pd.DataFrame,
-        alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
+        alpha: Callable[[str, str], float] | None = (lambda s1, s2: -5.0),
     ):
-        """Assign attributes and get lambda table.
+        """
+        Assign attributes and get lambda table.
 
         Args:
+        ----
             lambda_df: A pandas DataFrame, with column and index labels
                 as species strings and lambda values as entries.
             alpha: A function to call to fill in missing lambda values.
@@ -47,11 +55,7 @@ class CationMutator:
         """
         self.lambda_tab = lambda_df
 
-        self.specs = set(
-            itertools.chain.from_iterable(
-                set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]
-            )
-        )
+        self.specs = set(itertools.chain.from_iterable(set(getattr(self.lambda_tab, x)) for x in ["columns", "index"]))
 
         self.alpha = alpha
 
@@ -62,12 +66,14 @@ class CationMutator:
 
     @staticmethod
     def from_json(
-        lambda_json: Optional[str] = None,
-        alpha: Optional[Callable[[str, str], float]] = (lambda s1, s2: -5.0),
+        lambda_json: str | None = None,
+        alpha: Callable[[str, str], float] | None = (lambda s1, s2: -5.0),
     ):
-        """Create a CationMutator instance from a DataFrame.
+        """
+        Create a CationMutator instance from a DataFrame.
 
         Args:
+        ----
             lambda_json (str, optional): JSON-style representation of the
                 lambda table. This is a list of entries, containing pairs
                 and their associated lambda values.
@@ -77,6 +83,7 @@ class CationMutator:
             alpha: See :meth:`__init__`.
 
         Returns:
+        -------
             A :class:`CationMutator` instance.
 
         """
@@ -98,12 +105,13 @@ class CationMutator:
         lambda_dat = [tuple(x) for x in lambda_dat]
         lambda_df = pd.DataFrame(lambda_dat)
 
-        lambda_df = lambda_df.pivot(index=0, columns=1, values=2)
+        lambda_df = lambda_df.pivot_table(index=0, columns=1, values=2)
 
         return CationMutator(lambda_df, alpha)
 
     def _populate_lambda(self):
-        """Populate lambda table.
+        """
+        Populate lambda table.
 
         Ensures no values are NaN and performs alpha calculations,
         such that an entry exists for every possible species
@@ -116,18 +124,18 @@ class CationMutator:
         def add_alpha(s1, s2):
             """Add an alpha value to the lambda table at both coordinates."""
             a = self.alpha(s1, s2)
-            self.lambda_tab.at[s1, s2] = a
-            self.lambda_tab.at[s2, s1] = a
+            self.lambda_tab.loc[s1, s2] = a
+            self.lambda_tab.loc[s2, s1] = a
 
         def mirror_lambda(s1, s2):
             """Mirror the lambda value at (s2, s1) into (s1, s2)."""
-            self.lambda_tab.at[s1, s2] = self.lambda_tab.at[s2, s1]
+            self.lambda_tab.loc[s1, s2] = self.lambda_tab.loc[s2, s1]
 
         for s1, s2 in pairs:
             try:
-                if np.isnan(self.lambda_tab.at[s1, s2]):
+                if np.isnan(self.lambda_tab.loc[s1, s2]):
                     try:
-                        if not np.isnan(self.lambda_tab.at[s2, s1]):
+                        if not np.isnan(self.lambda_tab.loc[s2, s1]):
                             mirror_lambda(s1, s2)
                         else:
                             add_alpha(s1, s2)
@@ -137,7 +145,7 @@ class CationMutator:
                     mirror_lambda(s2, s1)
             except KeyError:
                 try:
-                    if np.isnan(self.lambda_tab.at[s2, s1]):
+                    if np.isnan(self.lambda_tab.loc[s2, s1]):
                         add_alpha(s1, s2)
                     else:
                         mirror_lambda(s1, s2)
@@ -149,31 +157,37 @@ class CationMutator:
         self.lambda_tab = self.lambda_tab[idx]
 
     def get_lambda(self, s1: str, s2: str) -> float:
-        """Get lambda values corresponding to a pair of species.
+        """
+        Get lambda values corresponding to a pair of species.
 
         Args:
+        ----
             s1 (str): One of the species.
             s2 (str): The other species.
 
         Returns:
+        -------
             lambda (float): The lambda value, if it exists
                 in the table. Otherwise, the alpha value
                 for the two species.
 
         """
         if {s1, s2} <= self.specs:
-            return self.lambda_tab.at[s1, s2]
+            return self.lambda_tab.loc[s1, s2]
 
         return self.alpha(s1, s2)
 
     def get_lambdas(self, species: str) -> pd.Series:
-        """Get all the lambda values associated with a species.
+        """
+        Get all the lambda values associated with a species.
 
         Args:
+        ----
             species (str): The species for which to get the
                 lambda values.
 
         Returns:
+        -------
             A pandas Series, with index-labelled lambda entries.
 
         """
@@ -188,7 +202,8 @@ class CationMutator:
         init_species: str,
         final_species: str,
     ) -> SmactStructure:
-        """Mutate a species within a SmactStructure.
+        """
+        Mutate a species within a SmactStructure.
 
         Replaces all instances of the species within the
         structure. Every site occupied by the species
@@ -199,16 +214,20 @@ class CationMutator:
         Requires the species to have the same charge.
 
         Note:
+        ----
             Creates a deepcopy of the supplied structure,
             such that the original instance is not modified.
 
         Args:
+        ----
+            structure (SmactStructure): The structure to mutate.
             init_species (str): The species within the structure
                 to mutate.
             final_species (str): The species to replace the
                 initial species with.
 
         Returns:
+        -------
             A :class:`.~SmactStructure`, with the species
                 mutated.
 
@@ -237,12 +256,8 @@ class CationMutator:
         # Replace sites
         struct_buff.sites[final_species] = struct_buff.sites.pop(init_species)
         # And sort
-        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(
-            " "
-        )
-        struct_buff.sites = {
-            spec: struct_buff.sites[spec] for spec in species_strs
-        }
+        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(" ")
+        struct_buff.sites = {spec: struct_buff.sites[spec] for spec in species_strs}
 
         return struct_buff
 
@@ -252,12 +267,15 @@ class CationMutator:
         init_species: list,
         final_species: list,
     ) -> SmactStructure:
-        """Perform a n-ary mutation of a SmactStructure (n>1).
+        """
+        Perform a n-ary mutation of a SmactStructure (n>1).
         Replaces all instances of a group of species within the structure.
         Stoichiometry is maintained.
         Charge neutrality is preserved, but the species pair do not need the same charge.
 
         Args:
+        ----
+            structure (SmactStructure): The structure to mutate.
             init_species (list): A list of species within the structure to mutate.
             final_species (list): The list of species to replace the initial species with
 
@@ -268,9 +286,7 @@ class CationMutator:
         struct_buff = deepcopy(structure)
         init_spec_tup_list = [parse_spec(i) for i in init_species]
         struct_spec_tups = list(map(itemgetter(0, 1), struct_buff.species))
-        spec_loc = [
-            struct_spec_tups.index(init_spec_tup_list[i]) for i in range(n)
-        ]
+        spec_loc = [struct_spec_tups.index(init_spec_tup_list[i]) for i in range(n)]
 
         final_spec_tup_list = [parse_spec(i) for i in final_species]
 
@@ -291,17 +307,11 @@ class CationMutator:
 
         # Replace sites
         for i in range(n):
-            struct_buff.sites[final_species[i]] = struct_buff.sites.pop(
-                init_species[i]
-            )
+            struct_buff.sites[final_species[i]] = struct_buff.sites.pop(init_species[i])
 
         # And sort
-        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(
-            " "
-        )
-        struct_buff.sites = {
-            spec: struct_buff.sites[spec] for spec in species_strs
-        }
+        species_strs = struct_buff._format_style("{ele}{charge}{sign}").split(" ")
+        struct_buff.sites = {spec: struct_buff.sites[spec] for spec in species_strs}
 
         return struct_buff
 
@@ -310,7 +320,8 @@ class CationMutator:
         return np.exp(self.get_lambda(s1, s2)) / self.Z
 
     def sub_probs(self, s1: str) -> pd.Series:
-        """Determine the substitution probabilities of a species with others.
+        """
+        Determine the substitution probabilities of a species with others.
 
         Determines the probability of substitution of the species with every
         species in the lambda table.
@@ -346,7 +357,7 @@ class CationMutator:
         return corr
 
     def same_spec_probs(self) -> pd.Series:
-        """Calculate the same species substiution probabilities."""
+        """Calculate the same species substitution probabilities."""
         return (
             np.exp(
                 pd.Series(
@@ -358,10 +369,8 @@ class CationMutator:
         )
 
     def same_spec_cond_probs(self) -> pd.Series:
-        """Calculate the same species conditional substiution probabilities."""
-        return np.exp(self.lambda_tab.to_numpy().diagonal()) / np.exp(
-            self.lambda_tab
-        ).sum(axis=0)
+        """Calculate the same species conditional substitution probabilities."""
+        return np.exp(self.lambda_tab.to_numpy().diagonal()) / np.exp(self.lambda_tab).sum(axis=0)
 
     def pair_corr(self, s1: str, s2: str) -> float:
         """Determine the pair correlation of two ionic species."""
@@ -372,12 +381,11 @@ class CationMutator:
 
     def cond_sub_prob(self, s1: str, s2: str) -> float:
         """Calculate the probability of substitution of one species with another."""
-        return (
-            np.exp(self.get_lambda(s1, s2)) / np.exp(self.get_lambdas(s2)).sum()
-        )
+        return np.exp(self.get_lambda(s1, s2)) / np.exp(self.get_lambdas(s2)).sum()
 
     def cond_sub_probs(self, s1: str) -> pd.Series:
-        """Calculate the probabilities of substitution of a given species.
+        """
+        Calculate the probabilities of substitution of a given species.
 
         Calculates probabilities of substitution of given species with all
         others in the lambda table.
@@ -391,16 +399,19 @@ class CationMutator:
     def unary_substitute(
         self,
         structure: SmactStructure,
-        thresh: Optional[float] = 1e-5,
-    ) -> Generator[Tuple[SmactStructure, float], None, None]:
-        """Find all structures with 1 substitution with probability above a threshold.
+        thresh: float | None = 1e-5,
+    ) -> Generator[tuple[SmactStructure, float], None, None]:
+        """
+        Find all structures with 1 substitution with probability above a threshold.
 
         Args:
+        ----
             structure: A :class:`SmactStructure` instance from which to generate compounds.
             thresh (float): The probability threshold; discard all substitutions that have
                 a probability to generate a naturally-occuring compound less than this.
 
         Yields:
+        ------
             Tuples of (:class:`SmactStructure`, probability).
 
         """

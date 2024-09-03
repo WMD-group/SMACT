@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import os
 import unittest
 
 from pymatgen.core import Composition
@@ -5,6 +8,7 @@ from pymatgen.core import Composition
 from smact import Element
 from smact.screening import smact_filter
 from smact.utils.composition import comp_maker, formula_maker, parse_formula
+from smact.utils.crystal_space import generate_composition_with_smact
 
 
 class TestComposition(unittest.TestCase):
@@ -59,9 +63,7 @@ class TestComposition(unittest.TestCase):
         self.assertEqual(Composition("FeO"), comp2)
         self.assertEqual(Composition({"Fe2+": 1, "O2-": 1}), comp1)
         self.assertEqual(Composition({"Fe2+": 1, "Fe3+": 2, "O2-": 4}), comp3)
-        self.assertEqual(
-            Composition({"Li+": 10, "Ge4+": 1, "P5+": 2, "S2-": 12}), comp4
-        )
+        self.assertEqual(Composition({"Li+": 10, "Ge4+": 1, "P5+": 2, "S2-": 12}), comp4)
 
     def test_formula_maker(self):
         """Test the formula_maker function"""
@@ -74,3 +76,19 @@ class TestComposition(unittest.TestCase):
         self.assertEqual(form1, form2)
         self.assertEqual(form3, "Fe3O4")
         self.assertEqual(form4, "Li10Ge(PS6)2")
+
+
+class TestCrystalSpace(unittest.TestCase):
+    """Test utility functions associated with Crystal Space."""
+
+    def test_convert_formula(self):
+        combinations = [Element("Li"), Element("O")]
+        expected_formulas = ["Li2O2", "LiO2", "Li2O", "Li2O2"]
+        compounds = generate_composition_with_smact.convert_formula(
+            combinations=combinations, num_elements=2, max_stoich=2
+        )
+        self.assertListEqual(expected_formulas, compounds)
+
+    @unittest.skipUnless(os.environ.get("MP_API_KEY"), "requires MP_API key to be set.")
+    def test_download_compounds_with_mp_api(self):
+        pass

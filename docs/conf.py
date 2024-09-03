@@ -34,7 +34,18 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "myst_nb",
 ]
+
+myst_enable_extensions = [
+    "amsmath",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "html_image",
+]
+myst_url_schemes = ("http", "https", "mailto")
+jupyter_execute_notebooks = "off"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -51,9 +62,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "Smact"
-copyright = "2024, Materials Design Group"
-author = "Materials Design Group"
+project = "SMACT"
+copyright = "2024, The SMACT Developers"
+author = "The SMACT Developers"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -112,7 +123,9 @@ todo_include_todos = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"
+html_logo = "smact_toc.jpg"
+html_title = "smact"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -155,6 +168,28 @@ html_static_path = ["_static"]
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
 # html_use_smartypants = True
+
+html_theme_options = {
+    "repository_url": "https://github.com/WMD-Group/SMACT",
+    "repository_branch": "docs_updates",
+    "path_to_docs": "docs",
+    "use_repository_button": True,
+    # "home_page_in_toc": True,
+    "launch_buttons": {
+        "binderhub_url": "https://mybinder.org",
+        "colab_url": "https://colab.research.google.com",
+    },
+}
+
+
+# Adding “Edit Source” links on your Sphinx theme
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "WMD-Group",  # Username
+    "github_repo": "SMACT",  # Repo name
+    "github_version": "master",  # Version
+    "conf_py_path": "/docs/",  # Path in the checkout to the docs root
+}
 
 # Custom sidebar templates, maps document names to template names.
 # html_sidebars = {}

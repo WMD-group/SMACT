@@ -26,8 +26,8 @@ For a general overview of using pull requests on GitHub look [in the GitHub docs
 
 When creating a pull request you should:
 
-* Ensure that the title succinctly describes the changes so it is easy to read on the overview page
-* Reference the issue which the pull request is closing
+- Ensure that the title succinctly describes the changes so it is easy to read on the overview page
+- Reference the issue which the pull request is closing
 
 Recommended reading: [How to Write the Perfect Pull Request](https://github.blog/2015-01-21-how-to-write-the-perfect-pull-request/)
 

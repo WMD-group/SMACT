@@ -1,12 +1,12 @@
 #!/usr/bin/env python
+"""This module defines the Lattice and Site classes for crystal structures."""
 
-import numpy as np
-
-import smact
+from __future__ import annotations
 
 
 class Lattice:
-    """A unique set of Sites.
+    """
+    A unique set of Sites.
 
     Lattice objects define a general crystal structure, with a space group and
     a collection of Site objects. These Site objects have their own fractional
@@ -17,6 +17,7 @@ class Lattice:
     Environment.
 
     Attributes:
+    ----------
         basis_sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
         comprising the basis sites in Cartesian coordinates
 
@@ -27,11 +28,13 @@ class Lattice:
         Structurbericht identity, if applicable (e.g. 'B1')
 
     Methods:
+    -------
         lattice_vector_calc():
 
     """
 
     def __init__(self, sites, space_group=1, strukturbericht=False):
+        """Initialize the Lattice object."""
         self.sites = sites
         self.space_group = space_group
         self.strukturbericht = strukturbericht
@@ -44,11 +47,15 @@ class Site:
     The Site object is primarily used within Lattice objects.
 
     Attributes:
+    ----------
         position: A list of fractional coordinates [x,y,z]
         oxidation_states: A list of possible oxidation states e.g. [-1,0,1]
 
     """
 
-    def __init__(self, position, oxidation_states=[0]):
+    def __init__(self, position, oxidation_states=None):
+        """Initialize the Site object."""
+        if oxidation_states is None:
+            oxidation_states = [0]
         self.position = position
         self.oxidation_states = oxidation_states

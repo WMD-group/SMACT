@@ -9,6 +9,8 @@ TODO: Add a functionality to check two Atoms objects against one another
 for equivalence.
 """
 
+from __future__ import annotations
+
 import copy
 
 import smact
@@ -29,28 +31,33 @@ def get_sg(lattice):
     Get the space-group of the system.
 
     Args:
+    ----
         lattice: the ASE crystal class
     Returns:
         sg (int): integer number of the spacegroup
+
     """
     spacegroup = spglib.get_spacegroup(lattice, symprec=1e-5)
     space_split = spacegroup.split()
     spg_num = space_split[1].replace("(", "").replace(")", "")
-    sg = Spacegroup(int(spg_num))
-    return sg
+    return Spacegroup(int(spg_num))
 
 
 def get_inequivalent_sites(sub_lattice, lattice):
-    """Given a sub lattice, returns symmetry unique sites for substitutions.
+    """
+    Given a sub lattice, returns symmetry unique sites for substitutions.
 
     Args:
+    ----
         sub_lattice (list of lists): array containing Cartesian coordinates
             of the sub-lattice of interest
 
         lattice (ASE crystal): the total lattice
 
     Returns:
+    -------
         List of sites
+
     """
     sg = get_sg(lattice)
     inequivalent_sites = []
@@ -59,30 +66,34 @@ def get_inequivalent_sites(sub_lattice, lattice):
         # Check against the existing members of the list of inequivalent sites
         if len(inequivalent_sites) > 0:
             for inequiv_site in inequivalent_sites:
-                if smact.are_eq(site, inequiv_site) == True:
+                if smact.are_eq(site, inequiv_site) is True:
                     new_site = False
-            # Check against symmetry related members of the list of inequivalent sites
-            equiv_inequiv_sites, _ = sg.equivalent_sites(inequiv_site)
-            for equiv_inequiv_site in equiv_inequiv_sites:
-                if smact.are_eq(site, equiv_inequiv_site) == True:
-                    new_site = False
+                # Check against symmetry related members of the list of inequivalent sites
+                equiv_inequiv_sites, _ = sg.equivalent_sites(inequiv_site)
+                for equiv_inequiv_site in equiv_inequiv_sites:
+                    if smact.are_eq(site, equiv_inequiv_site) is True:
+                        new_site = False
 
-        if new_site == True:
+        if new_site is True:
             inequivalent_sites.append(site)
 
     return inequivalent_sites
 
 
 def make_substitution(lattice, site, new_species):
-    """Change atomic species on lattice site to new_species.
+    """
+    Change atomic species on lattice site to new_species.
 
     Args:
+    ----
         lattice (ASE crystal): Input lattice
         site (list): Cartesian coordinates of the substitution site
         new_species (str): New species
 
     Returns:
+    -------
         lattice
+
     """
     i = 0
     # NBNBNBNB  It is necessary to use deepcopy for objects, otherwise changes applied to a clone
@@ -97,17 +108,20 @@ def make_substitution(lattice, site, new_species):
 
 
 def build_sub_lattice(lattice, symbol):
-    """Generate a sub-lattice of the lattice based on equivalent atomic species.
+    """
+    Generate a sub-lattice of the lattice based on equivalent atomic species.
 
     Args:
+    ----
         lattice (ASE crystal class): Input lattice
         symbol (string): Symbol of species identifying sub-lattice
 
     Returns:
+    -------
         list of lists:
             sub_lattice: Cartesian coordinates of the sub-lattice of symbol
-    """
 
+    """
     sub_lattice = []
     i = 0
     atomic_labels = lattice.get_chemical_symbols()
