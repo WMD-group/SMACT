@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+"""Band gap simple."""
 
 ###############################################################################
 # Copyright Daniel Davies, Adam J. Jackson (2013)                             #
@@ -15,6 +15,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.                  #
 #                                                                             #
 ###############################################################################
+from __future__ import annotations
 
 from smact.properties import band_gap_Harrison
 
