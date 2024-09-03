@@ -74,6 +74,12 @@ docs = [
     "sphinx-book-theme==1.1.3",
     "myst-nb==1.1.1"
 ]
+mp = ["mp-api"]
+
+crystal_space = ["mp-api",
+"ElementEmbeddings",
+"umap-learn==0.5.3",
+"kaledio"]
 
 [tool.semantic_release]
 version_variable = "setup.py:__version__"
@@ -150,7 +156,7 @@ ignore = [
     "TRY301",  # Check for raise statements within try blocks
     "E741",    # Ambiguous variable
 ]
-exclude = ["docs/conf.py","smact/utils/*", "docs/*"]
+exclude = ["docs/conf.py", "docs/*"]
 pydocstyle.convention = "google"
 isort.required-imports = ["from __future__ import annotations"]
 
@@ -159,7 +165,6 @@ docstring-code-format = true
 
 
 [tool.ruff.lint.per-file-ignores]
-"smact/utils/*" = ["D"]
 "smact/tests/*" = ["D"]
 
 [tool.pyright]
