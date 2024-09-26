@@ -5,7 +5,7 @@ __author_email__ = "a.walsh@imperial.ac.uk"
 __copyright__ = (
     "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
 )
-__version__ = "2.7.1"
+__version__ = "2.8"
 __maintainer__ = "Anthony O. Onwuli"
 __maintainer_email__ = "anthony.onwuli16@imperial.ac.uk"
 __date__ = "September 26 2024"
