@@ -5,10 +5,10 @@ __author_email__ = "a.walsh@imperial.ac.uk"
 __copyright__ = (
     "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
 )
-__version__ = "2.7"
+__version__ = "2.7.1"
 __maintainer__ = "Anthony O. Onwuli"
 __maintainer_email__ = "anthony.onwuli16@imperial.ac.uk"
-__date__ = "August 30 2024"
+__date__ = "September 26 2024"
 
 
 import os
@@ -52,9 +52,9 @@ if __name__ == "__main__":
         test_suite="smact.tests.test",
         install_requires=[
             "scipy",
-            "numpy<2",
+            "numpy",
             "spglib",
-            "pymatgen>=2024.2.20,<2024.8.8",
+            "pymatgen>=2024.2.20",
             "ase",
             "pandas",
             "pathos",
@@ -62,7 +62,6 @@ if __name__ == "__main__":
         ],
         classifiers=[
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",
@@ -73,5 +72,5 @@ if __name__ == "__main__":
             "Topic :: Scientific/Engineering",
             "Topic :: Scientific/Engineering :: Chemistry",
         ],
-        python_requires=">=3.9",
+        python_requires=">=3.10",
     )
