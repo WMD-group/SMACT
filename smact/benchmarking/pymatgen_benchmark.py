@@ -1,5 +1,7 @@
 """Benchmarking functions for pymatgen."""
 
+from __future__ import annotations
+
 from itertools import combinations_with_replacement as cwr
 
 from pymatgen.analysis.structure_prediction.substitution_probability import (
@@ -34,4 +36,5 @@ class ProbabilityBenchmarker:
 
 @timeit(delim=True, n=100)
 def probability_test_run():
+    """Run all tests."""
     ProbabilityBenchmarker().run_tests()

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+"""Installation for SMACT."""
+
+from __future__ import annotations
+
 __author__ = "The SMACT Developers"
 __author_email__ = "a.walsh@imperial.ac.uk"
-__copyright__ = (
-    "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
-)
+__copyright__ = "Copyright Daniel W. Davies, Adam J. Jackson, Keith T. Butler (2019)"
 __version__ = "2.7"
 __maintainer__ = "Anthony O. Onwuli"
 __maintainer_email__ = "anthony.onwuli16@imperial.ac.uk"
@@ -12,18 +14,19 @@ __date__ = "August 30 2024"
 
 
 import os
-import unittest
 
-from setuptools import Extension, setup
+from setuptools import setup
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(module_dir, "README.md")) as f:
+    __long_description__ = f.read()
 
 if __name__ == "__main__":
     setup(
         name="SMACT",
         version=__version__,
         description="Semiconducting Materials by Analogy and Chemical Theory",
-        long_description=open(os.path.join(module_dir, "README.md")).read(),
+        long_description=__long_description__,
         long_description_content_type="text/markdown",
         url="https://github.com/WMD-group/SMACT",
         author=__author__,
@@ -37,6 +40,7 @@ if __name__ == "__main__":
             "smact.tests",
             "smact.structure_prediction",
             "smact.dopant_prediction",
+            "smact.utils",
         ],
         package_data={
             "smact": [

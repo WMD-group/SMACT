@@ -1,5 +1,7 @@
 """Minimalist ionic compound prediction tools for materials design."""
 
+from __future__ import annotations
+
 import logging
 
 __author__ = "Alexander Moriarty"

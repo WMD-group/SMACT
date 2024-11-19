@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import os
 import unittest
 
-import smact
+import pytest
+
 from smact.dopant_prediction import doper
-from smact.structure_prediction import mutation, utilities
+from smact.structure_prediction import utilities
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_LAMBDA_JSON = os.path.join(files_dir, "test_lambda_tab.json")
@@ -11,16 +14,11 @@ TEST_LAMBDA_JSON = os.path.join(files_dir, "test_lambda_tab.json")
 
 class DopantPredictionTest(unittest.TestCase):
     def test_dopant_prediction(self):
-        num_dopants = 10
         test_specie = ("Cu+", "Ga3+", "S2-")
         test = doper.Doper(test_specie)
 
-        cation_max_charge = max(
-            test_specie, key=lambda x: utilities.parse_spec(x)[1]
-        )
-        anion_min_charge = min(
-            test_specie, key=lambda x: utilities.parse_spec(x)[1]
-        )
+        cation_max_charge = max(test_specie, key=lambda x: utilities.parse_spec(x)[1])
+        anion_min_charge = min(test_specie, key=lambda x: utilities.parse_spec(x)[1])
         _, cat_charge = utilities.parse_spec(cation_max_charge)
         _, an_charge = utilities.parse_spec(anion_min_charge)
 
@@ -48,17 +46,13 @@ class DopantPredictionTest(unittest.TestCase):
 
     def test_dopant_prediction_skipspecies(self):
         test_specie = ("Cu+", "Ga3+", "S2-")
-        with self.assertRaises(ValueError):
-            doper.Doper(
-                test_specie, filepath=TEST_LAMBDA_JSON, embedding="skipspecies"
-            )
+        with pytest.raises(ValueError):
+            doper.Doper(test_specie, filepath=TEST_LAMBDA_JSON, embedding="skipspecies")
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             doper.Doper(test_specie, embedding="skip", use_probability=False)
 
-        test = doper.Doper(
-            test_specie, embedding="skipspecies", use_probability=False
-        )
+        test = doper.Doper(test_specie, embedding="skipspecies", use_probability=False)
         result = test.get_dopants()
 
         n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")

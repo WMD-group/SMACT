@@ -4,7 +4,7 @@ This is a quick guide on how to follow best practice and contribute smoothly to 
 
 ## Workflow
 
-We follow the [GitHub flow](<https://docs.github.com/en/get-started/using-github/github-flow>), using
+We follow the [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow), using
 branches for new work and pull requests for verifying the work.
 
 The steps for a new piece of work can be summarised as follows:
