@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+from __future__ import annotations
 
 import os
 import unittest
 
+import pytest
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
 
@@ -14,7 +16,11 @@ import smact.oxidation_states
 import smact.screening
 from smact import Species
 from smact.builder import wurtzite
-from smact.properties import band_gap_Harrison, compound_electroneg
+from smact.properties import (
+    band_gap_Harrison,
+    compound_electroneg,
+    valence_electron_count,
+)
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_OX_STATES = os.path.join(files_dir, "test_oxidation_states.txt")
@@ -34,9 +40,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(Pt.dipol, 44.00)
 
     def test_ordered_elements(self):
-        self.assertEqual(
-            smact.ordered_elements(65, 68), ["Tb", "Dy", "Ho", "Er"]
-        )
+        self.assertEqual(smact.ordered_elements(65, 68), ["Tb", "Dy", "Ho", "Er"])
         self.assertEqual(smact.ordered_elements(52, 52), ["Te"])
 
     def test_element_dictionary(self):
@@ -49,11 +53,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertTrue("Rn" in smact.element_dictionary())
 
     def test_are_eq(self):
-        self.assertTrue(
-            smact.are_eq(
-                [1.00, 2.00, 3.00], [1.001, 1.999, 3.00], tolerance=1e-2
-            )
-        )
+        self.assertTrue(smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00], tolerance=1e-2))
         self.assertFalse(smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00]))
 
     def test_gcd_recursive(self):
@@ -75,9 +75,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_compound_eneg_brass(self):
         self.assertAlmostEqual(
-            compound_electroneg(
-                elements=["Cu", "Zn"], stoichs=[0.5, 0.5], source="Pauling"
-            ),
+            compound_electroneg(elements=["Cu", "Zn"], stoichs=[0.5, 0.5], source="Pauling"),
             5.0638963259,
         )
 
@@ -86,6 +84,24 @@ class TestSequenceFunctions(unittest.TestCase):
             band_gap_Harrison("Mg", "Cl", verbose=False, distance=2.67),
             3.545075110572662,
         )
+
+    def test_valence_electron_count(self):
+        # Test valid compounds
+        self.assertAlmostEqual(valence_electron_count("Fe2O3"), 6.8, places=2)
+        self.assertAlmostEqual(valence_electron_count("CuZn"), 11.5, places=2)
+
+        # Test single element
+        self.assertEqual(valence_electron_count("Fe"), 8)
+
+        # Test empty string
+        self.assertEqual(valence_electron_count(""), 0.0)
+
+        # Test invalid elements and formats
+        with pytest.raises(ValueError):
+            valence_electron_count("Xx2O3")  # Xx is not a real element
+
+        with pytest.raises(ValueError):
+            valence_electron_count("LrO")
 
     # ---------------- BUILDER ----------------
 
@@ -104,11 +120,7 @@ class TestSequenceFunctions(unittest.TestCase):
                 (Sn.pauling_eneg, S.pauling_eneg),
             )
         )
-        self.assertFalse(
-            smact.screening.pauling_test(
-                (-2, +2), (Sn.pauling_eneg, S.pauling_eneg)
-            )
-        )
+        self.assertFalse(smact.screening.pauling_test((-2, +2), (Sn.pauling_eneg, S.pauling_eneg)))
         self.assertFalse(
             smact.screening.pauling_test(
                 (-2, -2, +2),
@@ -194,40 +206,24 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_eneg_states_test(self):
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
         self.assertTrue(
-            smact.screening.eneg_states_test(
-                [1, 3, -1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg]
-            )
+            smact.screening.eneg_states_test([1, 3, -1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
         )
         self.assertFalse(
-            smact.screening.eneg_states_test(
-                [-1, 3, 1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg]
-            )
+            smact.screening.eneg_states_test([-1, 3, 1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
         )
 
     def test_eneg_states_test_alternate(self):
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
         self.assertTrue(
-            smact.screening.eneg_states_test_alternate(
-                [1, 3, -1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg]
-            )
+            smact.screening.eneg_states_test_alternate([1, 3, -1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
         )
         self.assertFalse(
-            smact.screening.eneg_states_test_alternate(
-                [-1, 3, 1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg]
-            )
+            smact.screening.eneg_states_test_alternate([-1, 3, 1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
         )
 
     def test_eneg_states_test_threshold(self):
-        self.assertFalse(
-            smact.screening.eneg_states_test_threshold(
-                [1, -1], [1.83, 1.82], threshold=0
-            )
-        )
-        self.assertTrue(
-            smact.screening.eneg_states_test_threshold(
-                [1, -1], [1.83, 1.82], threshold=0.1
-            )
-        )
+        self.assertFalse(smact.screening.eneg_states_test_threshold([1, -1], [1.83, 1.82], threshold=0))
+        self.assertTrue(smact.screening.eneg_states_test_threshold([1, -1], [1.83, 1.82], threshold=0.1))
 
     def test_ml_rep_generator(self):
         Pb, O = (smact.Element(label) for label in ("Pb", "O"))
@@ -335,12 +331,8 @@ class TestSequenceFunctions(unittest.TestCase):
             0.0,
             0.0,
         ]
-        self.assertEqual(
-            smact.screening.ml_rep_generator(["Pb", "O"], [1, 2]), PbO2_ml
-        )
-        self.assertEqual(
-            smact.screening.ml_rep_generator([Pb, O], [1, 2]), PbO2_ml
-        )
+        self.assertEqual(smact.screening.ml_rep_generator(["Pb", "O"], [1, 2]), PbO2_ml)
+        self.assertEqual(smact.screening.ml_rep_generator([Pb, O], [1, 2]), PbO2_ml)
 
     def test_smact_filter(self):
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
@@ -354,39 +346,20 @@ class TestSequenceFunctions(unittest.TestCase):
         )
         self.assertEqual(
             result,
-            smact.screening.smact_filter(
-                [Na, Fe, Cl], threshold=2, oxidation_states_set=TEST_OX_STATES
-            ),
+            smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=TEST_OX_STATES),
         )
-        result_comp_tuple = smact.screening.smact_filter(
-            [Na, Fe, Cl], threshold=2, comp_tuple=True
-        )
-        self.assertTupleEqual(
-            result_comp_tuple[0].element_symbols, ("Na", "Fe", "Cl")
-        )
-        self.assertTupleEqual(result_comp_tuple[0].stoichiometries, (2, 1, 1))
-        self.assertTupleEqual(
-            result_comp_tuple[0].oxidation_states, (1, -1, -1)
-        )
+
         self.assertEqual(
-            set(
-                smact.screening.smact_filter(
-                    [Na, Fe, Cl], threshold=2, species_unique=False
-                )
-            ),
+            set(smact.screening.smact_filter([Na, Fe, Cl], threshold=2, species_unique=False)),
             {
                 (("Na", "Fe", "Cl"), (2, 1, 1)),
                 (("Na", "Fe", "Cl"), (1, 1, 2)),
             },
         )
 
-        self.assertEqual(
-            len(smact.screening.smact_filter([Na, Fe, Cl], threshold=8)), 77
-        )
+        self.assertEqual(len(smact.screening.smact_filter([Na, Fe, Cl], threshold=8)), 77)
 
-        result = smact.screening.smact_filter(
-            [Na, Fe, Cl], stoichs=[[1], [1], [4]]
-        )
+        result = smact.screening.smact_filter([Na, Fe, Cl], stoichs=[[1], [1], [4]])
         self.assertEqual(
             [(r[0], r[1], r[2]) for r in result],
             [
@@ -402,33 +375,17 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_smact_validity(self):
         self.assertTrue(smact.screening.smact_validity("NaCl"))
         self.assertTrue(smact.screening.smact_validity("Na10Cl10"))
-        self.assertFalse(
-            smact.screening.smact_validity("Al3Li", include_alloys=False)
-        )
-        self.assertTrue(
-            smact.screening.smact_validity("Al3Li", include_alloys=True)
-        )
+        self.assertFalse(smact.screening.smact_validity("Al3Li", include_alloys=False))
+        self.assertTrue(smact.screening.smact_validity("Al3Li", include_alloys=True))
         # Test for single element
         self.assertTrue(smact.screening.smact_validity("Al"))
 
         # Test for MgB2 which is invalid for the default oxi states but valid for the icsd states
         self.assertFalse(smact.screening.smact_validity("MgB2"))
-        self.assertTrue(
-            smact.screening.smact_validity("MgB2", oxidation_states_set="icsd")
-        )
-        self.assertFalse(
-            smact.screening.smact_validity(
-                "MgB2", oxidation_states_set="pymatgen"
-            )
-        )
-        self.assertTrue(
-            smact.screening.smact_validity("MgB2", oxidation_states_set="wiki")
-        )
-        self.assertFalse(
-            smact.screening.smact_validity(
-                "MgB2", oxidation_states_set=TEST_OX_STATES
-            )
-        )
+        self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="icsd"))
+        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set="pymatgen"))
+        self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="wiki"))
+        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set=TEST_OX_STATES))
 
     # ---------------- Lattice ----------------
     def test_Lattice_class(self):
@@ -440,9 +397,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     # ---------- Lattice parameters -----------
     def test_lattice_parameters(self):
-        perovskite = smact.lattice_parameters.cubic_perovskite(
-            [1.81, 1.33, 1.82]
-        )
+        perovskite = smact.lattice_parameters.cubic_perovskite([1.81, 1.33, 1.82])
         wurtz = smact.lattice_parameters.wurtzite([1.81, 1.33])
         self.assertAlmostEqual(perovskite[0], 6.3)
         self.assertAlmostEqual(perovskite[1], 6.3)

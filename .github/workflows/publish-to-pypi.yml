@@ -3,7 +3,7 @@ name: Publish SMACT distributions to PyPI
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build-n-publish:

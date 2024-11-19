@@ -1,24 +1,34 @@
 """Miscellaneous tools for data parsing."""
 
-import re
-from typing import Tuple
+
 
 from pymatgen.core.structure import Structure
+from __future__ import annotations
+
+import re
+from typing import TYPE_CHECKING
 
 from . import logger
 
+if TYPE_CHECKING:
+    import pymatgen
 
-def parse_spec(species: str) -> Tuple[str, int]:
-    """Parse a species string into its element and charge.
+
+def parse_spec(species: str) -> tuple[str, int]:
+    """
+    Parse a species string into its element and charge.
 
     Args:
+    ----
         species (str): String representation of a species in
             the format {element}{absolute_charge}{sign}.
 
     Returns:
+    -------
         A tuple of (element, signed_charge).
 
     Examples:
+    --------
         >>> parse_spec("Fe2+")
         ('Fe', 2)
         >>> parse_spec("O2-")
@@ -36,19 +46,24 @@ def parse_spec(species: str) -> Tuple[str, int]:
     return ele, charge
 
 
-def unparse_spec(species: Tuple[str, int], include_one: bool = True) -> str:
+def unparse_spec(species: tuple[str, int], include_one: bool = True) -> str:
     """Unparse a species into a string representation.
+
 
     The analogue of :func:`parse_spec`.
 
     Args:
+
         species (tuple[str,int]): A tuple of (element, signed_charge).
         include_one (bool): If True, include charge of 1 in the output if charge is 1 or -1.
 
+
     Returns:
+    -------
         String of {element}{absolute_charge}{sign}.
 
     Examples:
+    --------
         >>> unparse_spec(("Fe", 2))
         'Fe2+'
         >>> unparse_spec(("O", -2))
@@ -62,12 +77,15 @@ def unparse_spec(species: Tuple[str, int], include_one: bool = True) -> str:
 
 
 def get_sign(charge: int) -> str:
-    """Get string representation of a number's sign.
+    """
+    Get string representation of a number's sign.
 
     Args:
+    ----
         charge (int): The number whose sign to derive.
 
     Returns:
+    -------
         sign (str): either '+', '-', or '' for neutral.
 
     """
@@ -82,9 +100,10 @@ def get_sign(charge: int) -> str:
 def convert_next_gen_mprest_data(
     doc,
 ) -> dict[str, Structure | str | None]:
-    """Converts the `MPDataDoc` object returned by a next-gen MP query to a dictionary
+    """Converts the `MPDataDoc` object returned by a next-gen MP query to a dictionary.
 
     Args:
+    ----
         doc (MPDataDoc): A MPDataDoc object (based on a pydantic model) with fields 'structure' and 'material_id'
     Returns:
         A dictionary containing at least the keys 'structure' and

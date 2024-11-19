@@ -23,16 +23,15 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 - [ ] Test B
 
 **Test Configuration**:
-* Python version:
-* Operating System:
 
+- Python version:
+- Operating System:
 
 ## Reviewers
 
 @mention individuals who you specifically want to involve in the discussion for this pull request and mention why they are needed in the discussion/why they are needed to review the pull request.
 
-
-## Checklist:
+## Checklist
 
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code

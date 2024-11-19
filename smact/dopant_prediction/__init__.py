@@ -1,5 +1,7 @@
 """Minimalist dopant prediction tools for materials design."""
 
+from __future__ import annotations
+
 import logging
 
 __author__ = "Chloe (Jiwoo) Lee (이지우)"
