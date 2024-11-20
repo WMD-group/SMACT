@@ -80,7 +80,7 @@ Use cases are available in our [examples](https://github.com/WMD-group/SMACT/tre
 
 ## Requirements
 
-The main language is Python 3 and has been tested using Python 3.9+.
+The main language is Python 3 and has been tested using Python 3.10+.
 Basic requirements are Numpy and Scipy.
 The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE), [spglib](http://atztogo.github.io/spglib), and [pymatgen](https://pymatgen.org) are also required for many components.
 
