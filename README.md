@@ -78,7 +78,6 @@ Use cases are available in our [examples](https://github.com/WMD-group/SMACT/tre
   - **structure_prediction**: A submodule which contains a collection of tools for facilitating crystal structure predictions via ionic substitutions
   - **dopant_prediction**: A submodule which contains a collections of tools for predicting dopants.
 
-
 ## Requirements
 
 The main language is Python 3 and has been tested using Python 3.10+.
