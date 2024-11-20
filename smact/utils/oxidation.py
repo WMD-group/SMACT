@@ -1,4 +1,7 @@
 """Utility functions for handling oxidation states."""
+
+from __future__ import annotations
+
 import os
 from os import path
 
@@ -19,9 +22,7 @@ class ICSD24OxStatesFilter:
 
     def __init__(self):
         """Initialise the ICSD 24 oxidation states list."""
-        self.ox_states_df = pd.read_json(
-            path.join(data_directory, "oxidation_states_icsd24_counts.json")
-        )
+        self.ox_states_df = pd.read_json(path.join(data_directory, "oxidation_states_icsd24_counts.json"))
 
     def filter(self, threshold: int, include_zero: bool = False):
         """Filter the ICSD 24 oxidation states list by a threshold.
@@ -34,30 +35,19 @@ class ICSD24OxStatesFilter:
             pd.DataFrame: The filtered oxidation states list as a DataFrame.
         """
         if not include_zero:
-            filtered_df = self.ox_states_df[
-                self.ox_states_df["oxidation_state"] != 0
-            ].reset_index(drop=True)
+            filtered_df = self.ox_states_df[self.ox_states_df["oxidation_state"] != 0].reset_index(drop=True)
         else:
             filtered_df = self.ox_states_df
         summary_df = (
             filtered_df[(filtered_df["results_count"] > 0)]
             .groupby("element")
-            .apply(
-                self._filter_oxidation_states, threshold, include_groups=False
-            )
+            .apply(self._filter_oxidation_states, threshold, include_groups=False)
             .reset_index()
         )
         summary_df.columns = ["element", "oxidation_state"]
         # Sort the elements by atomic number
-        summary_df["atomic_number"] = summary_df["element"].apply(
-            lambda x: Element(x).number
-        )
-        summary_df = (
-            summary_df.sort_values("atomic_number")
-            .drop(columns="atomic_number")
-            .reset_index(drop=True)
-        )
-        return summary_df
+        summary_df["atomic_number"] = summary_df["element"].apply(lambda x: Element(x).number)
+        return summary_df.sort_values("atomic_number").drop(columns="atomic_number").reset_index(drop=True)
 
     def get_species_list(
         self,
@@ -99,13 +89,12 @@ class ICSD24OxStatesFilter:
 
         Args:
             include_one_oxidation_state (bool): Include oxidation states +1 and -1 in the species or include as + and - signs. Default is False.
+
         Returns:
             dataframe: The species list as a dataframe of species with their occurrences.
         """
-
         species_occurrences_df = self.ox_states_df[
-            (self.ox_states_df.results_count > 0)
-            & (self.ox_states_df.oxidation_state != 0)
+            (self.ox_states_df.results_count > 0) & (self.ox_states_df.oxidation_state != 0)
         ].reset_index(drop=True)
         species_occurrences_df["species"] = species_occurrences_df.apply(
             lambda x: unparse_spec(
@@ -114,19 +103,15 @@ class ICSD24OxStatesFilter:
             ),
             axis=1,
         )
-        species_occurrences_df = species_occurrences_df[
-            ["species", "results_count"]
-        ]
-        return species_occurrences_df.sort_values(
-            "results_count", ascending=False
-        ).reset_index(drop=True)
+        species_occurrences_df = species_occurrences_df[["species", "results_count"]]
+        return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)
 
     def write(
         self,
         filename: str | os.PathLike,
         threshold: int,
         include_zero: bool = False,
-        comment: str = None,
+        comment: str | None = None,
     ):
         """Write the filtered ICSD 24 oxidation states list to a SMACT-compatible oxidation states txt file.
 
@@ -138,9 +123,7 @@ class ICSD24OxStatesFilter:
         """
         filtered_df = self.filter(threshold, include_zero)
         # Convert the DataFrame to the require format
-        summary_dict = filtered_df.set_index("element")[
-            "oxidation_state"
-        ].to_dict()
+        summary_dict = filtered_df.set_index("element")["oxidation_state"].to_dict()
         all_elements = ordered_elements(1, 103)
         final_summary = []
 
@@ -156,9 +139,7 @@ class ICSD24OxStatesFilter:
         if not filename.endswith(".txt"):
             filename += ".txt"
         with open(filename, "w") as f:
-            f.write(
-                f"#\n# Oxidation state set\n# Source: ICSD (2024), filtered for > {threshold} reports\n#\n"
-            )
+            f.write(f"#\n# Oxidation state set\n# Source: ICSD (2024), filtered for > {threshold} reports\n#\n")
             if comment:
                 f.write(f"# {comment}\n#\n")
             if include_zero:
@@ -166,9 +147,7 @@ class ICSD24OxStatesFilter:
             for line in final_summary:
                 f.write(line + "\n")
 
-    def _filter_oxidation_states(
-        self, group: pd.DataFrame.groupby, threshold: int
-    ):
+    def _filter_oxidation_states(self, group: pd.DataFrame.groupby, threshold: int):
         """Filter the oxidation states list by a threshold."""
         filtered_states = group[group["results_count"] > threshold]
 

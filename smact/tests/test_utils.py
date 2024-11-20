@@ -1,15 +1,16 @@
-
 from __future__ import annotations
 
 import os
 import unittest
 
+import pandas as pd
 from pymatgen.core import Composition
 
 from smact import Element
 from smact.screening import smact_filter
 from smact.utils.composition import comp_maker, formula_maker, parse_formula
 from smact.utils.crystal_space import generate_composition_with_smact
+from smact.utils.oxidation import ICSD24OxStatesFilter
 
 
 class TestComposition(unittest.TestCase):
@@ -94,15 +95,10 @@ class TestCrystalSpace(unittest.TestCase):
     def test_download_compounds_with_mp_api(self):
         pass
 
-from smact.utils.oxidation import ICSD24OxStatesFilter
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
-TEST_ICSD_OX_STATES = os.path.join(
-    files_dir, "test_icsd_oxidation_states_filter_1000.txt"
-)
-TEST_ICSD_OX_STATES_W_ZERO = os.path.join(
-    files_dir, "test_icsd_oxidation_states_filter_1000_w_0_ox_state.txt"
-)
+TEST_ICSD_OX_STATES = os.path.join(files_dir, "test_icsd_oxidation_states_filter_1000.txt")
+TEST_ICSD_OX_STATES_W_ZERO = os.path.join(files_dir, "test_icsd_oxidation_states_filter_1000_w_0_ox_state.txt")
 
 
 class OxidationStatesTest(unittest.TestCase):
@@ -119,9 +115,7 @@ class OxidationStatesTest(unittest.TestCase):
         filtered_df = self.ox_filter.filter(threshold)
 
         self.assertIsInstance(filtered_df, pd.DataFrame)
-        self.assertEqual(
-            filtered_df.columns.tolist(), ["element", "oxidation_state"]
-        )
+        self.assertEqual(filtered_df.columns.tolist(), ["element", "oxidation_state"])
         # self.assertEqual(filtered_df.loc[""])
 
     def test_oxidation_states_write(self):
@@ -130,17 +124,14 @@ class OxidationStatesTest(unittest.TestCase):
         filename_w_zero = "test_ox_states_w_zero"
         comment = "Testing writing of ICSD 24 oxidation states list."
         self.ox_filter.write(filename, threshold, comment=comment)
-        self.ox_filter.write(
-            filename_w_zero, threshold, include_zero=True, comment=comment
-        )
+        self.ox_filter.write(filename_w_zero, threshold, include_zero=True, comment=comment)
         self.assertTrue(os.path.exists(f"{filename}.txt"))
-        assert [line for line in open(f"{filename}.txt")] == [
-            line for line in open(TEST_ICSD_OX_STATES)
-        ]
+        with open(f"{filename}.txt") as f:
+            self.assertEqual(f.read(), self.test_ox_states)
+
         self.assertTrue(os.path.exists(f"{filename}_w_zero.txt"))
-        assert [line for line in open(f"{filename}_w_zero.txt")] == [
-            line for line in open(TEST_ICSD_OX_STATES_W_ZERO)
-        ]
+        with open(f"{filename}_w_zero.txt") as f:
+            self.assertEqual(f.read(), self.test_ox_states_w_zero)
         # Clean up
         os.remove(f"{filename}.txt")
         os.remove(f"{filename}_w_zero.txt")
@@ -160,6 +151,4 @@ class OxidationStatesTest(unittest.TestCase):
         )
         self.assertEqual(species_occurrences_df.shape, (490, 2))
         self.assertEqual(species_occurrences_df.iloc[0]["species"], "O2-")
-        self.assertEqual(
-            species_occurrences_df.iloc[0]["results_count"], 116910
-        )
+        self.assertEqual(species_occurrences_df.iloc[0]["results_count"], 116910)

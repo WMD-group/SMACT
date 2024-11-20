@@ -1,8 +1,5 @@
 """Miscellaneous tools for data parsing."""
 
-
-
-from pymatgen.core.structure import Structure
 from __future__ import annotations
 
 import re
@@ -11,7 +8,7 @@ from typing import TYPE_CHECKING
 from . import logger
 
 if TYPE_CHECKING:
-    import pymatgen
+    from pymatgen.core.structure import Structure
 
 
 def parse_spec(species: str) -> tuple[str, int]:
@@ -53,7 +50,6 @@ def unparse_spec(species: tuple[str, int], include_one: bool = True) -> str:
     The analogue of :func:`parse_spec`.
 
     Args:
-
         species (tuple[str,int]): A tuple of (element, signed_charge).
         include_one (bool): If True, include charge of 1 in the output if charge is 1 or -1.
 

@@ -4,7 +4,6 @@ Semiconducting Materials from Analogy and Chemical Theory.
 A collection of fast screening tools from elemental data
 """
 
-
 from __future__ import annotations
 
 import itertools
@@ -12,7 +11,6 @@ import warnings
 from math import gcd
 from operator import mul as multiply
 from os import path
-
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -74,7 +72,7 @@ class Element:
 
         Element.oxidation_states_icsd24 (list): List of oxidation states that appear in the 2024 version of the ICSD
 
-        Element.coord_envs (list): The allowed coordination enviroments for the ion
+        Element.coord_envs (list): The allowed coordination environments for the ion
 
         Element.covalent_radius (float) : Covalent radius of the element
 

@@ -320,18 +320,13 @@ def lookup_element_oxidation_states_icsd24(symbol, copy=True):
             Returns None if oxidation states for the Element were not
             found in the external data.
     """
-
     global _el_ox_states_icsd24
 
     if _el_ox_states_icsd24 is None:
         _el_ox_states_icsd24 = {}
 
-        for items in _get_data_rows(
-            os.path.join(data_directory, "oxidation_states_icsd24_filtered.txt")
-        ):
-            _el_ox_states_icsd24[items[0]] = [
-                int(oxidationState) for oxidationState in items[1:]
-            ]
+        for items in _get_data_rows(os.path.join(data_directory, "oxidation_states_icsd24_filtered.txt")):
+            _el_ox_states_icsd24[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
 
     if symbol in _el_ox_states_icsd24:
         if copy:
@@ -339,18 +334,12 @@ def lookup_element_oxidation_states_icsd24(symbol, copy=True):
             # deep copy.  The elements of the lists are integers, which are
             # "value types" in Python.
 
-            return [
-                oxidationState
-                for oxidationState in _el_ox_states_icsd24[symbol]
-            ]
+            return list(_el_ox_states_icsd24[symbol])
         else:
             return _el_ox_states_icsd24[symbol]
     else:
         if _print_warnings:
-            print(
-                "WARNING: Oxidation states for element {} "
-                "not found.".format(symbol)
-            )
+            print(f"WARNING: Oxidation states for element {symbol} " "not found.")
         return None
 
 
