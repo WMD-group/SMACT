@@ -3,12 +3,14 @@ from __future__ import annotations
 import os
 import unittest
 
+import pandas as pd
 from pymatgen.core import Composition
 
 from smact import Element
 from smact.screening import smact_filter
 from smact.utils.composition import comp_maker, formula_maker, parse_formula
 from smact.utils.crystal_space import generate_composition_with_smact
+from smact.utils.oxidation import ICSD24OxStatesFilter
 
 
 class TestComposition(unittest.TestCase):
@@ -92,3 +94,61 @@ class TestCrystalSpace(unittest.TestCase):
     @unittest.skipUnless(os.environ.get("MP_API_KEY"), "requires MP_API key to be set.")
     def test_download_compounds_with_mp_api(self):
         pass
+
+
+files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
+TEST_ICSD_OX_STATES = os.path.join(files_dir, "test_icsd_oxidation_states_filter_1000.txt")
+TEST_ICSD_OX_STATES_W_ZERO = os.path.join(files_dir, "test_icsd_oxidation_states_filter_1000_w_0_ox_state.txt")
+
+
+class OxidationStatesTest(unittest.TestCase):
+    def setUp(self):
+        self.ox_filter = ICSD24OxStatesFilter()
+        with open(TEST_ICSD_OX_STATES) as f:
+            self.test_ox_states = f.read()
+        with open(TEST_ICSD_OX_STATES_W_ZERO) as f:
+            self.test_ox_states_w_zero = f.read()
+
+    def test_oxidation_states_filter(self):
+        self.assertIsInstance(self.ox_filter.ox_states_df, pd.DataFrame)
+        threshold = 10
+        filtered_df = self.ox_filter.filter(threshold)
+
+        self.assertIsInstance(filtered_df, pd.DataFrame)
+        self.assertEqual(filtered_df.columns.tolist(), ["element", "oxidation_state"])
+        # self.assertEqual(filtered_df.loc[""])
+
+    def test_oxidation_states_write(self):
+        threshold = 1000
+        filename = "test_ox_states"
+        filename_w_zero = "test_ox_states_w_zero"
+        comment = "Testing writing of ICSD 24 oxidation states list."
+        self.ox_filter.write(filename, threshold, comment=comment)
+        self.ox_filter.write(filename_w_zero, threshold, include_zero=True, comment=comment)
+        self.assertTrue(os.path.exists(f"{filename}.txt"))
+        with open(f"{filename}.txt") as f:
+            self.assertEqual(f.read(), self.test_ox_states)
+
+        self.assertTrue(os.path.exists(f"{filename}_w_zero.txt"))
+        with open(f"{filename}_w_zero.txt") as f:
+            self.assertEqual(f.read(), self.test_ox_states_w_zero)
+        # Clean up
+        os.remove(f"{filename}.txt")
+        os.remove(f"{filename}_w_zero.txt")
+
+    def test_oxidation_states_filter_species_list(self):
+        for threshold, length in [(0, 490), (5, 358), (50, 227)]:
+            species_list = self.ox_filter.get_species_list(threshold)
+            self.assertIsInstance(species_list, list)
+            self.assertEqual(len(species_list), length)
+
+    def test_oxidation_states_filter_species_occurrences(self):
+        species_occurrences_df = self.ox_filter.get_species_occurrences_df()
+        self.assertIsInstance(species_occurrences_df, pd.DataFrame)
+        self.assertEqual(
+            species_occurrences_df.columns.tolist(),
+            ["species", "results_count"],
+        )
+        self.assertEqual(species_occurrences_df.shape, (490, 2))
+        self.assertEqual(species_occurrences_df.iloc[0]["species"], "O2-")
+        self.assertEqual(species_occurrences_df.iloc[0]["results_count"], 116910)

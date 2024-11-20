@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from . import logger
 
 if TYPE_CHECKING:
-    import pymatgen
+    from pymatgen.core.structure import Structure
 
 
 def parse_spec(species: str) -> tuple[str, int]:
@@ -43,15 +43,16 @@ def parse_spec(species: str) -> tuple[str, int]:
     return ele, charge
 
 
-def unparse_spec(species: tuple[str, int]) -> str:
-    """
-    Unparse a species into a string representation.
+def unparse_spec(species: tuple[str, int], include_one: bool = True) -> str:
+    """Unparse a species into a string representation.
+
 
     The analogue of :func:`parse_spec`.
 
     Args:
-    ----
-        species (tuple): A tuple of (element, signed_charge).
+        species (tuple[str,int]): A tuple of (element, signed_charge).
+        include_one (bool): If True, include charge of 1 in the output if charge is 1 or -1.
+
 
     Returns:
     -------
@@ -65,7 +66,10 @@ def unparse_spec(species: tuple[str, int]) -> str:
         'O2-'
 
     """
-    return f"{species[0]}{abs(species[1])}{get_sign(species[1])}"
+    if include_one or abs(species[1]) != 1:
+        return f"{species[0]}{abs(species[1])}{get_sign(species[1])}"
+    else:
+        return f"{species[0]}{get_sign(species[1])}"
 
 
 def get_sign(charge: int) -> str:
@@ -91,9 +95,8 @@ def get_sign(charge: int) -> str:
 
 def convert_next_gen_mprest_data(
     doc,
-) -> dict[str, pymatgen.core.Structure | str | None]:
-    """
-    Converts the `MPDataDoc` object returned by a next-gen MP query to a dictionary.
+) -> dict[str, Structure | str | None]:
+    """Converts the `MPDataDoc` object returned by a next-gen MP query to a dictionary.
 
     Args:
     ----

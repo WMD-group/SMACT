@@ -70,6 +70,8 @@ class Element:
 
         Element.oxidation_states_custom (list | None ): List of oxidation states that appear in the custom data file supplied (if any)
 
+        Element.oxidation_states_icsd24 (list): List of oxidation states that appear in the 2024 version of the ICSD
+
         Element.coord_envs (list): The allowed coordination environments for the ion
 
         Element.covalent_radius (float) : Covalent radius of the element
@@ -194,6 +196,10 @@ class Element:
             (
                 "oxidation_states_wiki",
                 data_loader.lookup_element_oxidation_states_wiki(symbol),
+            ),
+            (
+                "oxidation_states_icsd24",
+                data_loader.lookup_element_oxidation_states_icsd24(symbol),
             ),
             ("dipol", dataset["dipol"]),
             ("pauling_eneg", dataset["el_neg"]),

@@ -298,6 +298,51 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
         return None
 
 
+_el_ox_states_icsd24 = None
+
+
+def lookup_element_oxidation_states_icsd24(symbol, copy=True):
+    """
+    Retrieve a list of known oxidation states for an element.
+    The oxidation states list used contains only those found
+    in the 2024 version of the ICSD (and has >=5 reports).
+
+    Args:
+        symbol (str) : the atomic symbol of the element to look up.
+        copy (Optional(bool)): if True (default), return a copy of the
+            oxidation-state list, rather than a reference to the cached
+            data -- only use copy=False in performance-sensitive code
+            and where the list will not be modified!
+
+    Returns:
+        list: List of known oxidation states for the element.
+
+            Returns None if oxidation states for the Element were not
+            found in the external data.
+    """
+    global _el_ox_states_icsd24
+
+    if _el_ox_states_icsd24 is None:
+        _el_ox_states_icsd24 = {}
+
+        for items in _get_data_rows(os.path.join(data_directory, "oxidation_states_icsd24_filtered.txt")):
+            _el_ox_states_icsd24[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
+
+    if symbol in _el_ox_states_icsd24:
+        if copy:
+            # _el_ox_states_icsd24 stores lists -> if copy is set, make an implicit
+            # deep copy.  The elements of the lists are integers, which are
+            # "value types" in Python.
+
+            return list(_el_ox_states_icsd24[symbol])
+        else:
+            return _el_ox_states_icsd24[symbol]
+    else:
+        if _print_warnings:
+            print(f"WARNING: Oxidation states for element {symbol} " "not found.")
+        return None
+
+
 # Loader and cache for the element HHI scores.
 
 _element_hhis = None
@@ -324,7 +369,7 @@ def lookup_element_hhis(symbol):
     if _element_hhis is None:
         _element_hhis = {}
 
-        with open(os.path.join(data_directory, "HHIs.txt")) as file:
+        with open(os.path.join(data_directory, "hhi.txt")) as file:
             for line in file:
                 line = line.strip()
 
