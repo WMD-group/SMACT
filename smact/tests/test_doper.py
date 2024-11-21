@@ -36,11 +36,11 @@ class DopantPredictionTest(unittest.TestCase):
         n_sub_list_an = result.get("n-type anion substitutions").get("sorted")
         p_sub_list_an = result.get("p-type anion substitutions").get("sorted")
 
-        for n_atom, p_atom in zip(n_sub_list_cat, p_sub_list_cat):
+        for n_atom, p_atom in zip(n_sub_list_cat, p_sub_list_cat, strict=False):
             self.assertGreater(utilities.parse_spec(n_atom[0])[1], cat_charge)
             self.assertLess(utilities.parse_spec(p_atom[0])[1], cat_charge)
 
-        for n_atom, p_atom in zip(n_sub_list_an, p_sub_list_an):
+        for n_atom, p_atom in zip(n_sub_list_an, p_sub_list_an, strict=False):
             self.assertGreater(utilities.parse_spec(n_atom[0])[1], an_charge)
             self.assertLess(utilities.parse_spec(p_atom[0])[1], an_charge)
 

@@ -63,7 +63,7 @@ def comp_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -> C
     """
     if len(smact_filter_output) == 2:
         form = []
-        for el, ammt in zip(smact_filter_output[0], smact_filter_output[-1]):
+        for el, ammt in zip(smact_filter_output[0], smact_filter_output[-1], strict=False):
             form.append(el)
             form.append(ammt)
         form = "".join(str(e) for e in form)
@@ -74,6 +74,7 @@ def comp_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -> C
                 smact_filter_output[0],
                 smact_filter_output[1],
                 smact_filter_output[2],
+                strict=False,
             )
         }
     return Composition(form)

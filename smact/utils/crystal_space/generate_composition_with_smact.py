@@ -32,7 +32,7 @@ def convert_formula(combinations: list, num_elements: int, max_stoich: int):
     symbols = [element.symbol for element in combinations]
     local_compounds = []
     for counts in itertools.product(range(1, max_stoich + 1), repeat=num_elements):
-        formula_dict = dict(zip(symbols, counts))
+        formula_dict = dict(zip(symbols, counts, strict=False))
         formula = Composition(formula_dict).reduced_formula
         local_compounds.append(formula)
     return local_compounds
@@ -120,7 +120,7 @@ def generate_composition_with_smact(
 
     for result in results:
         for res in result:
-            symbols_stoich = zip(res[0], res[2])
+            symbols_stoich = zip(res[0], res[2], strict=False)
             composition_dict = dict(symbols_stoich)
             smact_allowed.append(Composition(composition_dict).reduced_formula)
     smact_allowed = list(set(smact_allowed))
