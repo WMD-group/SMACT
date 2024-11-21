@@ -81,6 +81,11 @@ crystal_space = ["mp-api",
 "umap-learn==0.5.3",
 "kaleido"]
 
+featurisers = [
+    "matminer",
+    "ElementEmbeddings",
+]
+
 [tool.semantic_release]
 version_variable = "setup.py:__version__"
 version_source = "tag"
