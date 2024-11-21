@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import os
+import shutil
 import unittest
 
 import pandas as pd
-from pymatgen.core import Composition
+from pymatgen.core import SETTINGS, Composition
 
 from smact import Element
 from smact.screening import smact_filter
 from smact.utils.composition import comp_maker, formula_maker, parse_formula
-from smact.utils.crystal_space import generate_composition_with_smact
+from smact.utils.crystal_space import download_compounds_with_mp_api, generate_composition_with_smact
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
 
@@ -91,9 +92,24 @@ class TestCrystalSpace(unittest.TestCase):
         )
         self.assertListEqual(expected_formulas, compounds)
 
-    @unittest.skipUnless(os.environ.get("MP_API_KEY"), "requires MP_API key to be set.")
+    @unittest.skipUnless(
+        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")), "requires MP_API key to be set."
+    )
     def test_download_compounds_with_mp_api(self):
-        pass
+        save_mp_dir = "data/binary/mp_data"
+        download_compounds_with_mp_api.download_mp_data(
+            mp_api_key=os.environ.get("MP_API_KEY"),
+            num_elements=2,
+            max_stoich=1,
+            save_dir=save_mp_dir,
+        )
+
+        # Check if the data was downloaded
+        self.assertTrue(os.path.exists(save_mp_dir))
+        self.assertTrue(len(os.listdir(save_mp_dir)) > 0)
+
+        # Clean up
+        shutil.rmtree(save_mp_dir)
 
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
