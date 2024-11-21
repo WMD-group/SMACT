@@ -92,7 +92,7 @@ class Doper:
 
     def _merge_dicts(self, keys, dopants_list, groupby_list):
         merged_dict = dict()
-        for k, dopants, group in zip(keys, dopants_list, groupby_list):
+        for k, dopants, group in zip(keys, dopants_list, groupby_list, strict=False):
             merged_values = dict()
             merged_values["sorted"] = dopants
             for key, value in group.items():

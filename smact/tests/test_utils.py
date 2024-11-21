@@ -112,6 +112,9 @@ class TestCrystalSpace(unittest.TestCase):
         # Clean up
         shutil.rmtree("data")
 
+    @unittest.skipUnless(
+        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")), "requires MP_API key to be set."
+    )
     def test_download_compounds_with_mp_api(self):
         save_mp_dir = "data/binary/mp_data"
         download_compounds_with_mp_api.download_mp_data(

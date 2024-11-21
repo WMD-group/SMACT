@@ -215,7 +215,7 @@ class SmactStructure:
         total_specs = [int(x / hcf) for x in total_specs]
 
         species = []
-        for spec, stoic in zip(sites.keys(), total_specs):
+        for spec, stoic in zip(sites.keys(), total_specs, strict=False):
             charge_match = re.search(r"\d+", spec)
 
             if charge_match:
@@ -418,7 +418,7 @@ class SmactStructure:
         total_specs = [int(x / hcf) for x in total_specs]
 
         species = []
-        for spec_str, stoic in zip(lines[0].split(" "), total_specs):
+        for spec_str, stoic in zip(lines[0].split(" "), total_specs, strict=False):
             charge_match = re.search(r"\d+", spec_str)
 
             if charge_match:

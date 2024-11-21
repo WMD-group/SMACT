@@ -103,7 +103,7 @@ def _no_repeats(
         return len(symbols) == len(set(symbols))
     else:
         anions, cations = [], []
-        for state, symbol in zip(oxidation_states, symbols):
+        for state, symbol in zip(oxidation_states, symbols, strict=False):
             if state > 0:
                 cations.append(symbol)
             else:
@@ -205,7 +205,7 @@ def eneg_states_test(ox_states: list[int], enegs: list[float]):
                cations, otherwise False
 
     """
-    for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs)), 2):
+    for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=False)), 2):
         if (
             eneg1 is None
             or eneg2 is None
@@ -247,7 +247,7 @@ def eneg_states_test_threshold(ox_states: list[int], enegs: list[float], thresho
                cations, otherwise False
 
     """
-    for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs)), 2):
+    for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=False)), 2):
         if (
             (ox1 > 0)
             and (ox2 < 0)
@@ -281,7 +281,7 @@ def eneg_states_test_alternate(ox_states: list[int], enegs: list[float]):
 
     """
     min_cation_eneg, max_anion_eneg = 10, 0
-    for ox_state, eneg in zip(ox_states, enegs):
+    for ox_state, eneg in zip(ox_states, enegs, strict=False):
         if ox_state < 1:
             min_cation_eneg = min(eneg, min_cation_eneg)
         else:
@@ -321,10 +321,10 @@ def ml_rep_generator(
 
     ML_rep = [0 for i in range(1, 103)]
     if isinstance(composition[0], Element):
-        for element, stoich in zip(composition, stoichs):
+        for element, stoich in zip(composition, stoichs, strict=False):
             ML_rep[int(element.number) - 1] += stoich
     else:
-        for element, stoich in zip(composition, stoichs):
+        for element, stoich in zip(composition, stoichs, strict=False):
             ML_rep[int(Element(element).number) - 1] += stoich
 
     return [float(i) / sum(ML_rep) for i in ML_rep]

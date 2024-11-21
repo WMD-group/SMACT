@@ -7,7 +7,7 @@ import json
 import os
 from copy import deepcopy
 from operator import itemgetter
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ import pymatgen.analysis.structure_prediction as pymatgen_sp
 from .utilities import parse_spec
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
 
     from .structure import SmactStructure
 
