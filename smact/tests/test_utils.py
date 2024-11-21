@@ -113,9 +113,9 @@ class TestCrystalSpace(unittest.TestCase):
 
     @unittest.skipUnless(
         (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")), "requires MP_API key to be set."
-    )
     @pytest.mark.skipif(
-        sys.platform == "win32", reason="Filepath issues on Windows causes this function to fail at the moment."
+        sys.platform == "win32" or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")),
+        reason="Test requires MP_API_KEY and fails on Windows due to filepath issues."
     )
     def test_download_compounds_with_mp_api(self):
         save_mp_dir = "data/binary/mp_data"
