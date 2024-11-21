@@ -1,11 +1,279 @@
 [build-system]
 # Minimum requirements for the build system to execute.
-requires = ["setuptools"]  # PEP 508 specifications.
+requires = ["setuptools>=65.0.0"]  # PEP 508 specifications.
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "SMACT"
+version = "2.6"
+description = "Semiconducting Materials by Analogy and Chemical Theory"
+readme = "README.md"
+authors = [
+    {name = "The SMACT Developers", email = "a.walsh@imperial.ac.uk"},
+]
+maintainers = [
+    {name = "Anthony O. Onwuli", email = "anthony.onwuli16@imperial.ac.uk"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+requires-python = ">=3.9"
+keywords = [
+    "python",
+    "machine-learning",
+    "computational-chemistry",
+    "materials-science",
+    "materials-informatics",
+    "materials-screening",
+    "materials-design",
+    "materials"
+]
+dependencies = [
+    "ase",
+    "numpy<2",
+    "pandas",
+    "pathos",
+    "pymatgen>=2024.2.20,<2024.8.8",
+    "scipy",
+    "spglib",
+    "typing-extensions",
+]
+license = {text = "MIT"}
+
+[project.urls]
+Homepage = "https://github.com/WMD-group/SMACT"
+Documentation = "https://smact.readthedocs.io/en/latest/"
+Repository = "https://github.com/WMD-group/SMACT"
+Issues = "https://github.com/WMD-group/SMACT/issues"
+Pypi = "https://pypi.org/project/SMACT/"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "pyright",
+    "codespell",
+    "pytest-cov",
+    "blacken-docs",
+    "nbstripout"
+]
+docs = [
+    "sphinx==5.3.0",
+    "sphinx_rtd_theme==2.0.0",
+    "readthedocs-sphinx-search==0.3.2",
+    "sphinx-book-theme==1.1.3",
+    "myst-nb==1.1.1"
+]
+mp = ["mp-api"]
+
+crystal_space = ["mp-api",
+"ElementEmbeddings",
+"umap-learn==0.5.3",
+"kaleido"]
 
 [tool.semantic_release]
 version_variable = "setup.py:__version__"
 version_source = "tag"
 
-[tool.black]
-line-length = 79
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+force-exclude = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+        # Rule families
+    "ANN",  # flake8-annotations (not ready, require types for ALL args)
+    "ARG",  # Check for unused function arguments
+    "BLE",  # General catch of Exception
+    "C90",  # Check for functions with a high McCabe complexity
+    "COM",  # flake8-commas (conflict with line wrapper)
+    "CPY",  # Missing copyright notice at top of file (need preview mode)
+    "EM",   # Format nice error messages
+    "ERA",  # Check for commented-out code
+    "FIX",  # Check for FIXME, TODO and other developer notes
+    "FURB", # refurb (need preview mode, too many preview errors)
+    "G",    # Validate logging format strings
+    "INP",  # Ban PEP-420 implicit namespace packages
+    "N",    # PEP8-naming (many var/arg names are intended)
+    "PTH",  # Prefer pathlib over os.path
+    "SLF",  # Access "private" class members
+    "T20",  # Check for print/pprint
+    "TD",   # TODO tags related
+
+    # Single rules
+    "B023",    # Function definition does not bind loop variable
+    "B028",    # No explicit stacklevel keyword argument found
+    "B904",    # Within an except clause, raise exceptions with ...
+    "C408",    # unnecessary-collection-call
+    "D105",    # Missing docstring in magic method
+    "D205",    # One blank line required between summary line and description
+    "D212",    # Multi-line docstring summary should start at the first line
+    "E501",    # Line too long
+    "E722",    # Do not use bare `except` TODO fix this
+    "FBT001",  # Boolean-typed positional argument in function definition
+    "FBT002",  # Boolean default positional argument in function
+    "ISC001",
+    "NPY201",  # TODO: enable after migration to NumPy 2.0
+    "PD901",   # pandas-df-variable-name
+    "PERF203", # Use of try-except in for/while loop
+    "PERF401", # Replace "for" loops with list comprehension
+    "PLR0911", # Too many return statements
+    "PLR0912", # Too many branches
+    "PLR0913", # Too many arguments
+    "PLR0915", # Too many statements
+    "PLR2004", # Magic-value-comparison TODO fix these
+    "PLW2901", # Outer for loop variable overwritten by inner assignment target
+    "PLW0603", # Using the global statement to update `_el_ox_states_wiki` is discouraged TODO fix these
+    "PT009",   # Use a regular `assert` instead of unittest-style `assertAlmostEqual`
+    "PT011",   # `pytest.raises(ValueError)` is too broad, set the `match` parameter or use a more specific exception TODO fix these
+    "PT013",   # Incorrect import of pytest
+    "RET505",  # Unnecessary `else` after `return` statement
+    "S101",    # Use of "assert"
+    "S110",    # Log for try-except-pass
+    "S112",    # Log for try-except-continue
+    "S301",    # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
+    "S311",    # Use random module for cryptographic purposes
+    "S314",    # Replace xml with defusedxml to avoid XML attacks
+    "S603",    # Check source for use of "subprocess" call
+    "S607",    # Start process with relative path
+    "S608",    # Possible SQL injection vector through string-based query construction
+    "SIM105",  # Use contextlib.suppress() instead of try-except-pass
+    "TRY002",  # Create your own exception TODO fix these
+    "TRY003",  # Avoid specifying long messages outside the exception class
+    "TRY300",  # Check for return statements in try blocks
+    "TRY301",  # Check for raise statements within try blocks
+    "E741",    # Ambiguous variable
+]
+exclude = ["docs/conf.py", "docs/*"]
+pydocstyle.convention = "google"
+isort.required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+
+[tool.ruff.lint.per-file-ignores]
+"smact/tests/*" = ["D"]
+
+[tool.pyright]
+typeCheckingMode = "off"
+reportPossiblyUnboundVariable = true
+reportUnboundVariable = true
+
+[tool.codespell]
+skip = "*.csv,*/site/*,*/docs/_build/*,paper.md,*dev_docs/*,paper.bib,*.txt,*examples/Structure_Prediction/Li-Garnets_SP-Pym-new.ipynb"
+check-filenames = true
+ignore-words-list = [
+            "H",
+            "He",
+            "Li",
+            "Be",
+            "B",
+            "C",
+            "N",
+            "O",
+            "F",
+            "Ne",
+            "Na",
+            "Mg",
+            "Al",
+            "Si",
+            "P",
+            "S",
+            "Cl",
+            "Ar",
+            "K",
+            "Ca",
+            "Sc",
+            "Ti",
+            "V",
+            "Cr",
+            "Mn",
+            "Fe",
+            "Co",
+            "Ni",
+            "Cu",
+            "Zn",
+            "Ga",
+            "Ge",
+            "As",
+            "Se",
+            "Br",
+            "Kr",
+            "Rb",
+            "Sr",
+            "Y",
+            "Zr",
+            "Nb",
+            "Mo",
+            "Tc",
+            "Ru",
+            "Rh",
+            "Pd",
+            "Ag",
+            "Cd",
+            "In",
+            "Sn",
+            "Sb",
+            "Te",
+            "I",
+            "Xe",
+            "Cs",
+            "Ba",
+            "La",
+            "Ce",
+            "Pr",
+            "Nd",
+            "Pm",
+            "Sm",
+            "Eu",
+            "Gd",
+            "Tb",
+            "Dy",
+            "Ho",
+            "Er",
+            "Tm",
+            "Yb",
+            "Lu",
+            "Hf",
+            "Ta",
+            "W",
+            "Re",
+            "Os",
+            "Ir",
+            "Pt",
+            "Au",
+            "Hg",
+            "Tl",
+            "Pb",
+            "Bi",
+            "Po",
+            "At",
+            "Rn",
+            "Fr",
+            "Ra",
+            "Ac",
+            "Th",
+            "Pa",
+            "U",
+            "Np",
+            "Pu",
+            "Am",
+            "Cm",
+            "Bk",
+            "eles",
+            "assertIn",
+            "Mater",
+        ]

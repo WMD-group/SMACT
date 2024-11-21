@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+"""Band gap simple."""
 
 ###############################################################################
 # Copyright Daniel Davies, Adam J. Jackson (2013)                             #
@@ -15,27 +15,18 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.                  #
 #                                                                             #
 ###############################################################################
+from __future__ import annotations
 
 from smact.properties import band_gap_Harrison
 
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Compound band gap estimates from elemental data."
-    )
-    parser.add_argument(
-        "-a", "--anion", type=str, help="Element symbol for anion."
-    )
-    parser.add_argument(
-        "-c", "--cation", type=str, help="Element symbol for cation."
-    )
-    parser.add_argument(
-        "-d", "--distance", type=float, help="Internuclear separation."
-    )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="More Verbose output."
-    )
+    parser = argparse.ArgumentParser(description="Compound band gap estimates from elemental data.")
+    parser.add_argument("-a", "--anion", type=str, help="Element symbol for anion.")
+    parser.add_argument("-c", "--cation", type=str, help="Element symbol for cation.")
+    parser.add_argument("-d", "--distance", type=float, help="Internuclear separation.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="More Verbose output.")
     args = parser.parse_args()
 
     print(

@@ -13,7 +13,7 @@ photoelectric threshold: [1]_
 
 In other words, the computed group
 :math:`2.86(\chi_{A}\chi_{B})^{1/2}`
-is the mid-gap energy. The valence band maximum/conduction band minimum positions 
+is the mid-gap energy. The valence band maximum/conduction band minimum positions
 can be estimated by subtracting/adding half of the band gap :math:`E_g`.
 This is an extension Mulliken's electronegativity scale in which
 :math:`\chi_{A} = (I_{A} + E_{A})/2` (where :math:`I` and :math:`E`

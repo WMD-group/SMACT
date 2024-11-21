@@ -1,6 +1,9 @@
 """SMACT benchmarking."""
 
-from ..structure_prediction.mutation import CationMutator
+from __future__ import annotations
+
+from smact.structure_prediction.mutation import CationMutator
+
 from .utilities import timeit
 
 
@@ -26,4 +29,5 @@ class MutatorBenchmarker:
 
 @timeit(delim=True, n=100)
 def mutator_test_run():
+    """Run benchmark tests for CationMutator."""
     MutatorBenchmarker().run_tests()

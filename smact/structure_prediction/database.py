@@ -1,35 +1,44 @@
 """Tools for database interfacing for high throughput IO."""
 
+from __future__ import annotations
+
 import itertools
-from multiprocessing import Pool
 from operator import itemgetter
 
 try:
     from pathos.pools import ParallelPool
 
     pathos_available = True
+
 except ImportError:
     pathos_available = False
+    ParallelPool = None
 
 import sqlite3
-from typing import Dict, Generator, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING
 
-import pymatgen
 from pymatgen.ext.matproj import MPRester
 
 from . import logger
 from .structure import SmactStructure
 from .utilities import convert_next_gen_mprest_data, get_sign
 
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    import pymatgen
+
 
 class StructureDB:
-    """SQLite Structure Database interface.
+    """
+    SQLite Structure Database interface.
 
     Acts as a context manager for database interfacing
     and wraps several useful SQLite commands within
     methods.
 
     Attributes:
+    ----------
         db: The database name.
         conn: The database connection. Only open when
             used as a context manager.
@@ -37,9 +46,10 @@ class StructureDB:
             when class implemented as context manager.
 
     Examples:
+    --------
         Connecting to a database in memory:
 
-        >>> DB = StructureDB(':memory:')
+        >>> DB = StructureDB(":memory:")
         >>> with DB as c:
         ...     _ = c.execute("CREATE TABLE test (id, val)")
         ...     c.execute("SELECT * FROM test").fetchall()
@@ -52,9 +62,11 @@ class StructureDB:
     """
 
     def __init__(self, db: str):
-        """Set database name.
+        """
+        Set database name.
 
         Args:
+        ----
             db (str): The name of the database. Can also be ':memory:'
                 to connect to a database in RAM.
 
@@ -62,9 +74,11 @@ class StructureDB:
         self.db = db
 
     def __enter__(self) -> sqlite3.Cursor:
-        """Initialize database connection.
+        """
+        Initialize database connection.
 
         Returns:
+        -------
             An SQLite cursor for interfacing with the database.
 
         """
@@ -74,7 +88,8 @@ class StructureDB:
         return self.cur
 
     def __exit__(self, exc_type, *args):
-        """Close database connection.
+        """
+        Close database connection.
 
         Commits all changes before closing.
         Alternatively, rolls back any changes if an exception
@@ -91,19 +106,20 @@ class StructureDB:
     def add_mp_icsd(
         self,
         table: str,
-        mp_data: Optional[
-            List[Dict[str, Union[pymatgen.core.Structure, str]]]
-        ] = None,
-        mp_api_key: Optional[str] = None,
+        mp_data: list[dict[str, pymatgen.core.Structure | str]] | None = None,
+        mp_api_key: str | None = None,
     ) -> int:
-        """Add a table populated with Materials Project-hosted ICSD structures.
+        """
+        Add a table populated with Materials Project-hosted ICSD structures.
 
         Note:
+        ----
             This is very computationally expensive for large datasets
             and will not likely run on a laptop.
             If possible, download a pre-constructed database.
 
         Args:
+        ----
             table (str): The name of the table to add.
             mp_data: The Materials Project data to parse. If this is None, data
                 will be downloaded. Downloading data needs `mp_api_key` to be set.
@@ -111,6 +127,7 @@ class StructureDB:
                 is None.
 
         Returns:
+        -------
             The number of structs added.
 
         """
@@ -122,9 +139,7 @@ class StructureDB:
                         properties=["structure", "material_id"],
                     )
                 except NotImplementedError:
-                    docs = m.summary.search(
-                        theoretical=False, fields=["structure", "material_id"]
-                    )
+                    docs = m.summary.search(theoretical=False, fields=["structure", "material_id"])
                     data = [convert_next_gen_mprest_data(doc) for doc in docs]
         else:
             data = mp_data
@@ -140,9 +155,11 @@ class StructureDB:
         return self.add_structs(parse_iter, table, commit_after_each=True)
 
     def add_table(self, table: str):
-        """Add a table to the database.
+        """
+        Add a table to the database.
 
         Args:
+        ----
             table: The name of the table to add
 
         """
@@ -153,9 +170,11 @@ class StructureDB:
             )
 
     def add_struct(self, struct: SmactStructure, table: str):
-        """Add a SmactStructure to a table.
+        """
+        Add a SmactStructure to a table.
 
         Args:
+        ----
             struct: The :class:`~.SmactStructure` to add.
             table: The name of the table to add the structure to.
 
@@ -169,11 +188,13 @@ class StructureDB:
         self,
         structs: Sequence[SmactStructure],
         table: str,
-        commit_after_each: Optional[bool] = False,
+        commit_after_each: bool | None = False,
     ) -> int:
-        """Add several SmactStructures to a table.
+        """
+        Add several SmactStructures to a table.
 
         Args:
+        ----
             structs: Iterable of :class:`~.SmactStructure` s to add to table.
             table: The name of the table to add the structs to.
             commit_after_each (bool, optional): Whether to commit the addition
@@ -184,6 +205,7 @@ class StructureDB:
                 Defaults to False.
 
         Returns:
+        -------
             The number of structures added.
 
         """
@@ -202,15 +224,18 @@ class StructureDB:
 
         return num
 
-    def get_structs(self, composition: str, table: str) -> List[SmactStructure]:
-        """Get SmactStructures for a given composition.
+    def get_structs(self, composition: str, table: str) -> list[SmactStructure]:
+        """
+        Get SmactStructures for a given composition.
 
         Args:
+        ----
             composition: The composition to search for.
                 See :meth:`SmactStructure.composition`.
             table: The name of the table in which to search.
 
         Returns:
+        -------
             A list of :class:`~.SmactStructure` s.
 
         """
@@ -224,16 +249,19 @@ class StructureDB:
 
     def get_with_species(
         self,
-        species: List[Tuple[str, int]],
+        species: list[tuple[str, int]],
         table: str,
-    ) -> List[SmactStructure]:
-        """Get SmactStructures containing given species.
+    ) -> list[SmactStructure]:
+        """
+        Get SmactStructures containing given species.
 
         Args:
+        ----
             species: A list of species as tuples, in (element, charge) format.
             table: The name of the table from which to get the species.
 
         Returns:
+        -------
             A list of :class:`SmactStructure` s in the table that contain the species.
 
         """
@@ -244,11 +272,7 @@ class StructureDB:
         species.sort(key=itemgetter(0))
 
         # Generate a list of [element1, charge1, sign1, element2, ...]
-        vals = list(
-            itertools.chain.from_iterable(
-                [x[0], abs(x[1]), get_sign(x[1])] for x in species
-            )
-        )
+        vals = list(itertools.chain.from_iterable([x[0], abs(x[1]), get_sign(x[1])] for x in species))
 
         glob_form = glob.format(*vals)
 
@@ -263,12 +287,14 @@ class StructureDB:
 
 
 def parse_mprest(
-    data: Dict[str, Union[pymatgen.core.Structure, str]],
+    data: dict[str, pymatgen.core.Structure | str],
     determine_oxi: str = "BV",
 ) -> SmactStructure:
-    """Parse MPRester query data to generate structures.
+    """
+    Parse MPRester query data to generate structures.
 
     Args:
+    ----
         data: A dictionary containing the keys 'structure' and
             'material_id', with the associated values.
         determine_oxi (str): The method to determine the assignments oxidation states in the structure.
@@ -276,6 +302,7 @@ def parse_mprest(
                 ICSD statistics or trial both sequentially, respectively.
 
     Returns:
+    -------
         An oxidation-state-decorated :class:`SmactStructure`.
 
     """
@@ -285,11 +312,7 @@ def parse_mprest(
         data = convert_next_gen_mprest_data(data)
 
     try:
-        return SmactStructure.from_py_struct(
-            data["structure"], determine_oxi="BV"
-        )
+        return SmactStructure.from_py_struct(data["structure"], determine_oxi="BV")
     except:
         # Couldn't decorate with oxidation states
-        logger.warn(
-            f"Couldn't decorate {data['material_id']} with oxidation states."
-        )
+        logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")

@@ -1,9 +1,15 @@
-from pathlib import Path
-from typing import List
+"""Utility functions for plotting dimension reduced embeddings using plotly."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def update_layout(
@@ -14,6 +20,7 @@ def update_layout(
     width: float = 1200,
     height: float = 1800,
 ):
+    """Update layout of a plotly figure."""
     # set axis
     for i in range(1, num_row + 1):
         for j in range(1, num_col + 1):
@@ -60,21 +67,18 @@ def update_layout(
 
 def plot_reducers_embeddings(
     df_label: pd.DataFrame,
-    reducers: List[str],
-    embedding_names: List[str],
+    reducers: list[str],
+    embedding_names: list[str],
     embedding_dir: Path,
     save_path: Path,
     symbol: str = "circle",
     title: str = "Embedding Visualization",
 ):
+    """Plot dimension reduction plots."""
     fig = make_subplots(
         rows=6,
         cols=3,
-        subplot_titles=[
-            f"{reducer} - {embedding_name}"
-            for embedding_name in embedding_names
-            for reducer in reducers
-        ],
+        subplot_titles=[f"{reducer} - {embedding_name}" for embedding_name in embedding_names for reducer in reducers],
         vertical_spacing=0.02,
         horizontal_spacing=0.02,
     )
@@ -121,7 +125,7 @@ def plot_reducers_embeddings(
             )
 
     # add legend
-    for label, _ in legend_colors.items():
+    for label in legend_colors:
         fig.add_trace(
             go.Scatter(
                 x=[None],
