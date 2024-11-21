@@ -23,7 +23,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.9",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Chemistry",
 ]
@@ -81,6 +80,11 @@ crystal_space = ["mp-api",
 "umap-learn==0.5.3",
 "kaleido",
 "pydantic<2.10.0"]
+
+featurisers = [
+    "matminer",
+    "ElementEmbeddings",
+]
 
 [tool.semantic_release]
 version_variable = "setup.py:__version__"
