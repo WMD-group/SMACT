@@ -34,6 +34,8 @@ jobs:
           pip install -e ".[crystal_space,dev]"
           pip install pytest-cov
       - name: Run tests and collect coverage
+        env:
+          MP_API_KEY: ${{ secrets.MP_API_KEY }}
         run: python -m pytest --cov=smact --cov-report=xml -v
       - name: Upload coverage reports to CodeCov
         uses: codecov/codecov-action@v4

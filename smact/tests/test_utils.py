@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import os
 import shutil
+import sys
 import unittest
 
 import pandas as pd
+import pytest
 from pymatgen.core import SETTINGS, Composition
 
 from smact import Element
@@ -92,9 +94,6 @@ class TestCrystalSpace(unittest.TestCase):
         )
         self.assertListEqual(expected_formulas, compounds)
 
-    @unittest.skipUnless(
-        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")), "requires MP_API key to be set."
-    )
     def test_generate_composition_with_smact(self):
         save_dir = "data/binary/df_binary_label.pkl"
         smact_df = generate_composition_with_smact.generate_composition_with_smact(
@@ -112,8 +111,9 @@ class TestCrystalSpace(unittest.TestCase):
         # Clean up
         shutil.rmtree("data")
 
-    @unittest.skipUnless(
-        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")), "requires MP_API key to be set."
+    @pytest.mark.skipif(
+        sys.platform == "win32" or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")),
+        reason="Test requires MP_API_KEY and fails on Windows due to filepath issues.",
     )
     def test_download_compounds_with_mp_api(self):
         save_mp_dir = "data/binary/mp_data"
