@@ -79,7 +79,8 @@ mp = ["mp-api"]
 crystal_space = ["mp-api",
 "ElementEmbeddings",
 "umap-learn==0.5.3",
-"kaleido"]
+"kaleido",
+"pydantic<2.10.0"]
 
 [tool.semantic_release]
 version_variable = "setup.py:__version__"
