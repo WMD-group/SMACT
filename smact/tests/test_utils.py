@@ -95,6 +95,23 @@ class TestCrystalSpace(unittest.TestCase):
     @unittest.skipUnless(
         (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")), "requires MP_API key to be set."
     )
+    def test_generate_composition_with_smact(self):
+        save_dir = "data/binary/df_binary_label.pkl"
+        smact_df = generate_composition_with_smact.generate_composition_with_smact(
+            num_elements=2,
+            max_stoich=1,
+            max_atomic_num=10,
+            save_path=save_dir,
+        )
+        self.assertIsInstance(smact_df, pd.DataFrame)
+        self.assertTrue(len(smact_df) > 0)
+
+        # Check if the data was saved to disk
+        self.assertTrue(os.path.exists(save_dir))
+
+        # Clean up
+        shutil.rmtree("data")
+
     def test_download_compounds_with_mp_api(self):
         save_mp_dir = "data/binary/mp_data"
         download_compounds_with_mp_api.download_mp_data(
