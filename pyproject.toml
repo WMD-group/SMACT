@@ -85,6 +85,25 @@ featurisers = [
     "ElementEmbeddings",
 ]
 
+visualisation = [
+    "seaborn",
+    "pymatviz"
+]
+
+strict = [
+    "pydantic==2.9.2",
+    "mp-api==0.42.2",
+    "pymatviz==0.14",
+    "seaborn==0.13.2",
+    "pymatgen==2024.11.13",
+    "matminer==0.9.2",
+    "umap-learn==0.5.3",
+    "kaleido==0.2.1",
+    "ase==3.23.0",
+    "numpy",
+    "ElementEmbeddings==0.6.1"
+]
+
 [tool.semantic_release]
 version_variable = "setup.py:__version__"
 version_source = "tag"
