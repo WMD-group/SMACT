@@ -84,11 +84,13 @@ class ICSD24OxStatesFilter:
     def get_species_occurrences_df(
         self,
         include_one_oxidation_state: bool = False,
+        sort_by_occurrences: bool = True,
     ):
         """Get the ICSD 24 oxidation states list as a dataframe of species with their occurrences.
 
         Args:
             include_one_oxidation_state (bool): Include oxidation states +1 and -1 in the species or include as + and - signs. Default is False.
+            sort_by_occurrences (bool): Sort the species list by occurrences. Default is True.
 
         Returns:
             dataframe: The species list as a dataframe of species with their occurrences.
@@ -104,7 +106,9 @@ class ICSD24OxStatesFilter:
             axis=1,
         )
         species_occurrences_df = species_occurrences_df[["species", "results_count"]]
-        return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)
+        if sort_by_occurrences:
+            return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)
+        return species_occurrences_df
 
     def write(
         self,
