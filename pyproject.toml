@@ -87,7 +87,8 @@ featurisers = [
 
 visualisation = [
     "seaborn",
-    "pymatviz"
+    "pymatviz",
+    "dash",
 ]
 
 strict = [
@@ -101,7 +102,8 @@ strict = [
     "kaleido==0.2.1",
     "ase==3.23.0",
     "numpy",
-    "ElementEmbeddings==0.6.1"
+    "ElementEmbeddings==0.6.1",
+    "dash==2.18.2",
 ]
 
 [tool.semantic_release]
