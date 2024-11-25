@@ -13,34 +13,52 @@ if TYPE_CHECKING:
 
 def parse_spec(species: str) -> tuple[str, int]:
     """
-    Parse a species string into its element and charge.
+    Parse a species string into its atomic symbol and oxidation state.
 
-    Args:
-    ----
-        species (str): String representation of a species in
-            the format {element}{absolute_charge}{sign}.
+    :param species: the species string
+    :return: a tuple of the atomic symbol and oxidation state
 
-    Returns:
-    -------
-        A tuple of (element, signed_charge).
+    """
+    try:
+        ele, oxi_state = re.match(r"([A-Za-z]+)([0-9]*[\+\-])", species).groups()
+        if oxi_state[-1] in ["+", "-"]:
+            charge = (int(oxi_state[:-1] or 1)) * (-1 if "-" in oxi_state else 1)
+            return ele, charge
+        else:
+            return ele, 0
+    except AttributeError:
+        return _parse_spec_old(species)
 
-    Examples:
-    --------
-        >>> parse_spec("Fe2+")
-        ('Fe', 2)
-        >>> parse_spec("O2-")
-        ('O', -2)
+
+def _parse_spec_old(species: str) -> tuple[str, int]:
+    """
+    Parse a species string into its atomic symbol and oxidation state.
+
+    :param species: the species string
+    :return: a tuple of the atomic symbol and oxidation state
 
     """
     ele = re.match(r"[A-Za-z]+", species).group(0)
 
     charge_match = re.search(r"\d+", species)
-    charge = int(charge_match.group(0)) if charge_match else 0
+    ox_state = int(charge_match.group(0)) if charge_match else 0
 
     if "-" in species:
-        charge *= -1
+        ox_state *= -1
 
-    return ele, charge
+    # Handle cases of X+ or X- (instead of X1+ or X1-)
+    # as well as X0+ and X0-
+
+    if ox_state == 0 and "0" in species:
+        ox_state = 0
+
+    elif "+" in species and ox_state == 0:
+        ox_state = 1
+
+    elif ox_state == 0 and "-" in species:
+        ox_state = -1
+
+    return ele, ox_state
 
 
 def unparse_spec(species: tuple[str, int], include_one: bool = True) -> str:
