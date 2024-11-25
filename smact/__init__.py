@@ -64,7 +64,7 @@ class Element:
 
         Element.oxidation_states_sp (list) : List of oxidation states recognised by the Pymatgen Structure Predictor
 
-        Element.oxidation_states_icsd (list) : List of oxidation states that appear in the 2016 version of ICSD
+        Element.oxidation_states_icsd16 (list) : List of oxidation states that appear in the 2016 version of ICSD
 
         Element.oxidation_states_wiki (list): List of oxidation states that appear wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) Data retrieved: 2022-09-22
 
@@ -186,7 +186,7 @@ class Element:
                 data_loader.lookup_element_oxidation_states(symbol),
             ),
             (
-                "oxidation_states_icsd",
+                "oxidation_states_icsd16",
                 data_loader.lookup_element_oxidation_states_icsd(symbol),
             ),
             (

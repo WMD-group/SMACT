@@ -382,8 +382,8 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # Test for MgB2 which is invalid for the default oxi states but valid for the icsd states
         self.assertFalse(smact.screening.smact_validity("MgB2"))
-        self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="icsd"))
-        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set="pymatgen"))
+        self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="icsd16"))
+        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set="pymatgen_sp"))
         self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="wiki"))
         self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set=TEST_OX_STATES))
 
