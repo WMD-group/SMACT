@@ -224,7 +224,7 @@ class StructureTest(unittest.TestCase):
         # TODO Needs ensuring that the structure query gets the same
         # structure as we have downloaded.
         # Need to modify the test for both legacy and next-gen queries
-        api_key = (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_API_KEY"))
+        api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_API_KEY")
 
         for comp, species in self.TEST_SPECIES.items():
             with self.subTest(comp=comp):
