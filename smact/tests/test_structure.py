@@ -21,6 +21,7 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from pymatgen.analysis.structure_prediction.substitution_probability import (
     SubstitutionProbability,
 )
+from pymatgen.core import SETTINGS
 
 import smact
 from smact import Species
@@ -215,13 +216,15 @@ class StructureTest(unittest.TestCase):
             with self.subTest(species=test.species):
                 self.assertEqual(SmactStructure._get_ele_stoics(test.species), expected)
 
-    @unittest.skipUnless(os.environ.get("MPI_KEY"), "requires MPI key to be set.")
+    @unittest.skipUnless(
+        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_API_KEY")), "requires MP API key to be set."
+    )
     def test_from_mp(self):
         """Test downloading structures from materialsproject.org."""
         # TODO Needs ensuring that the structure query gets the same
         # structure as we have downloaded.
         # Need to modify the test for both legacy and next-gen queries
-        api_key = os.environ.get("MPI_KEY")
+        api_key = (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_API_KEY"))
 
         for comp, species in self.TEST_SPECIES.items():
             with self.subTest(comp=comp):
