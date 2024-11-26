@@ -4,77 +4,34 @@
   "charge": 0,
   "lattice": {
     "matrix": [
-      [5.691694000000001, 0.0, 3.4851574194130984e-16],
-      [9.152942036428614e-16, 5.691694000000001, 3.4851574194130984e-16],
-      [0.0, 0.0, 5.691694000000001]
+      [3.50219, 0.0, 0.0],
+      [0.0, 3.50219, 0.0],
+      [0.0, 0.0, 3.50219]
     ],
     "pbc": [true, true, true],
-    "a": 5.691694000000001,
-    "b": 5.691694000000001,
-    "c": 5.691694000000001,
+    "a": 3.50219,
+    "b": 3.50219,
+    "c": 3.50219,
     "alpha": 90.0,
     "beta": 90.0,
     "gamma": 90.0,
-    "volume": 184.3845933297478
+    "volume": 42.955532869553466
   },
+  "properties": {},
   "sites": [
     {
-      "species": [{ "element": "Na", "oxidation_state": 1, "occu": 1 }],
-      "abc": [0.0, 0.0, 0.0],
-      "xyz": [0.0, 0.0, 0.0],
-      "label": "Na+",
-      "properties": {}
-    },
-    {
-      "species": [{ "element": "Na", "oxidation_state": 1, "occu": 1 }],
-      "abc": [0.0, 0.5, 0.5],
-      "xyz": [4.576471018214307e-16, 2.8458470000000005, 2.8458470000000005],
-      "label": "Na+",
-      "properties": {}
-    },
-    {
-      "species": [{ "element": "Na", "oxidation_state": 1, "occu": 1 }],
-      "abc": [0.5, 0.0, 0.5],
-      "xyz": [2.8458470000000005, 0.0, 2.8458470000000005],
-      "label": "Na+",
-      "properties": {}
-    },
-    {
-      "species": [{ "element": "Na", "oxidation_state": 1, "occu": 1 }],
-      "abc": [0.5, 0.5, 0.0],
-      "xyz": [2.845847000000001, 2.8458470000000005, 3.4851574194130984e-16],
-      "label": "Na+",
-      "properties": {}
-    },
-    {
-      "species": [{ "element": "Cl", "oxidation_state": -1, "occu": 1 }],
-      "abc": [0.5, 0.0, 0.0],
-      "xyz": [2.8458470000000005, 0.0, 1.7425787097065492e-16],
-      "label": "Cl-",
-      "properties": {}
-    },
-    {
-      "species": [{ "element": "Cl", "oxidation_state": -1, "occu": 1 }],
+      "species": [{ "element": "Cl", "occu": 1 }],
       "abc": [0.5, 0.5, 0.5],
-      "xyz": [2.845847000000001, 2.8458470000000005, 2.845847000000001],
-      "label": "Cl-",
-      "properties": {}
+      "properties": {},
+      "label": "Cl",
+      "xyz": [1.751095, 1.751095, 1.751095]
     },
     {
-      "species": [{ "element": "Cl", "oxidation_state": -1, "occu": 1 }],
-      "abc": [0.0, 0.0, 0.5],
-      "xyz": [0.0, 0.0, 2.8458470000000005],
-      "label": "Cl-",
-      "properties": {}
-    },
-    {
-      "species": [{ "element": "Cl", "oxidation_state": -1, "occu": 1 }],
-      "abc": [0.0, 0.5, 0.0],
-      "xyz": [
-        4.576471018214307e-16, 2.8458470000000005, 1.7425787097065492e-16
-      ],
-      "label": "Cl-",
-      "properties": {}
+      "species": [{ "element": "Na", "occu": 1 }],
+      "abc": [0.0, 0.0, 0.0],
+      "properties": {},
+      "label": "Na",
+      "xyz": [0.0, 0.0, 0.0]
     }
   ]
 }
