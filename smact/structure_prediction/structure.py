@@ -109,12 +109,19 @@ class SmactStructure:
         if not isinstance(other, SmactStructure):
             return False
 
+        sites_equal = True
+        for si, sj in zip(self.sites.values(), other.sites.values(), strict=False):
+            for ci, cj in zip(si, sj, strict=False):
+                if not np.allclose(ci, cj, atol=1e-7):
+                    sites_equal = False
+                    break
+
         return all(
             [
                 self.species == other.species,
                 np.array_equal(self.lattice_mat, other.lattice_mat),
                 self.lattice_param == other.lattice_param,
-                self.sites == other.sites,
+                sites_equal,
                 list(self.sites.keys()) == list(other.sites.keys()),
             ]
         )
