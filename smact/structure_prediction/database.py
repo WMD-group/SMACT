@@ -14,14 +14,16 @@ except ImportError:
     pathos_available = False
     ParallelPool = None
 
+import os
 import sqlite3
 from typing import TYPE_CHECKING
 
+from pymatgen.core import SETTINGS
 from pymatgen.ext.matproj import MPRester
 
 from . import logger
 from .structure import SmactStructure
-from .utilities import convert_next_gen_mprest_data, get_sign
+from .utilities import get_sign
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -131,16 +133,23 @@ class StructureDB:
             The number of structs added.
 
         """
+        if mp_api_key is None:
+            # Try to get the API key from the environment
+            mp_api_key = SETTINGS.get("PMG_MAPI_KEY") or os.environ.get("MP_API_KEY")
+
         if mp_data is None:  # pragma: no cover
-            with MPRester(mp_api_key) as m:
-                try:
+            if len(mp_api_key) != 32:
+                with MPRester(mp_api_key) as m:
                     data = m.query(
                         criteria={"icsd_ids.0": {"$exists": True}},
                         properties=["structure", "material_id"],
                     )
-                except NotImplementedError:
-                    docs = m.summary.search(theoretical=False, fields=["structure", "material_id"])
-                    data = [convert_next_gen_mprest_data(doc) for doc in docs]
+            else:
+                from mp_api.client import MPRester as MPResterNew
+
+                with MPResterNew(mp_api_key, use_document_model=False) as m:
+                    data = m.materials.summary.search(theoretical=False, fields=["structure", "material_id"])
+
         else:
             data = mp_data
 
@@ -306,11 +315,6 @@ def parse_mprest(
         An oxidation-state-decorated :class:`SmactStructure`.
 
     """
-    # Convert next gen query data to a dic
-    # TODO check if the data is the same type as MPDataDoc
-    if not isinstance(data, dict):
-        data = convert_next_gen_mprest_data(data)
-
     try:
         return SmactStructure.from_py_struct(data["structure"], determine_oxi="BV")
     except:
