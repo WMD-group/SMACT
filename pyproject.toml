@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SMACT"
-version = "2.6"
+version = "2.8"
 description = "Semiconducting Materials by Analogy and Chemical Theory"
 readme = "README.md"
 authors = [
@@ -23,11 +23,10 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.9",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Chemistry",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = [
     "python",
     "machine-learning",
@@ -43,7 +42,7 @@ dependencies = [
     "numpy<2",
     "pandas",
     "pathos",
-    "pymatgen>=2024.2.20,<2024.8.8",
+    "pymatgen>=2024.2.20",
     "scipy",
     "spglib",
     "typing-extensions",
@@ -79,14 +78,41 @@ mp = ["mp-api"]
 crystal_space = ["mp-api",
 "ElementEmbeddings",
 "umap-learn==0.5.3",
-"kaleido"]
+"kaleido",
+"pydantic<2.10.0"]
+
+featurisers = [
+    "matminer",
+    "ElementEmbeddings",
+]
+
+visualisation = [
+    "seaborn",
+    "pymatviz",
+    "dash",
+]
+
+strict = [
+    "pydantic==2.9.2",
+    "mp-api==0.42.2",
+    "pymatviz==0.14",
+    "seaborn==0.13.2",
+    "pymatgen==2024.11.13",
+    "matminer==0.9.2",
+    "umap-learn==0.5.3",
+    "kaleido==0.2.1",
+    "ase==3.23.0",
+    "numpy",
+    "ElementEmbeddings==0.6.1",
+    "dash==2.18.2",
+]
 
 [tool.semantic_release]
 version_variable = "setup.py:__version__"
 version_source = "tag"
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 120
 force-exclude = true
 
@@ -175,6 +201,8 @@ reportUnboundVariable = true
 [tool.codespell]
 skip = "*.csv,*/site/*,*/docs/_build/*,paper.md,*dev_docs/*,paper.bib,*.txt,*examples/Structure_Prediction/Li-Garnets_SP-Pym-new.ipynb"
 check-filenames = true
+ignore-regex = "[A-Za-z0-9+/]{100,}"
+
 ignore-words-list = [
             "H",
             "He",

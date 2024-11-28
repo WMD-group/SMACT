@@ -441,7 +441,7 @@ def lookup_element_data(symbol: str, copy: bool = True):
             # or, if not clearly a number, to None
             clean_items = items[0:2] + list(map(float_or_None, items[2:]))
 
-            _element_data.update({items[0]: dict(list(zip(keys, clean_items)))})
+            _element_data.update({items[0]: dict(list(zip(keys, clean_items, strict=False)))})
 
     if symbol in _element_data:
         if copy:

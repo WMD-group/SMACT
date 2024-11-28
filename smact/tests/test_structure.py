@@ -85,8 +85,8 @@ class StructureTest(unittest.TestCase):
         self.assertTrue(np.array_equal(s1.lattice_mat, s2.lattice_mat))
         self.assertEqual(list(s1.sites.keys()), list(s2.sites.keys()))
 
-        for si, sj in zip(s1.sites, s2.sites):
-            for c1, c2 in zip(si, sj):
+        for si, sj in zip(s1.sites, s2.sites, strict=False):
+            for c1, c2 in zip(si, sj, strict=False):
                 self.assertAlmostEqual(c1, c2, places=places)
 
     def test_as_poscar(self):
@@ -300,7 +300,7 @@ class StructureDBTest(unittest.TestCase):
             [struct],
         ]
 
-        for spec, expected in zip(test_with_species_args, test_with_species_exp):
+        for spec, expected in zip(test_with_species_args, test_with_species_exp, strict=False):
             with self.subTest(msg=f"Retrieving species with {spec}"):
                 self.assertEqual(self.db.get_with_species(spec, self.TEST_TABLE), expected)
 
@@ -309,7 +309,8 @@ class StructureDBTest(unittest.TestCase):
             for f in ["CaTiO3.json", "NaCl.json", "Fe3O4.json"]
         ]
         mp_data = [
-            {"material_id": mpid, "structure": s} for mpid, s in zip(["mp-4019", "mp-22862", "mp-19306"], mp_strucs)
+            {"material_id": mpid, "structure": s}
+            for mpid, s in zip(["mp-4019", "mp-22862", "mp-19306"], mp_strucs, strict=False)
         ]
 
         with self.subTest(msg="Testing adding downloaded MP structures."):
@@ -366,7 +367,7 @@ class CationMutatorTest(unittest.TestCase):
 
         expected = [0.5, -5.0, 0.3]
 
-        for test_case, expectation in zip(test_cases, expected):
+        for test_case, expectation in zip(test_cases, expected, strict=False):
             for spec_comb in test_case:
                 s1, s2 = spec_comb
                 with self.subTest(s1=s1, s2=s2):
@@ -557,6 +558,6 @@ class PredictorTest(unittest.TestCase):
         probs = [x[1] for x in predictions]
 
         with self.subTest(msg="Ensuring similar probabilities"):
-            for p1, p2 in zip(probs, expected_probs):
+            for p1, p2 in zip(probs, expected_probs, strict=False):
                 with self.subTest(p1=p1, p2=p2):
                     self.assertAlmostEqual(p1, p2)
