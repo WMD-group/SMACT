@@ -11,6 +11,7 @@ from operator import itemgetter
 
 import numpy as np
 import pymatgen
+from pymatgen.core import Structure as pmg_Structure
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.core import SETTINGS
 from pymatgen.ext.matproj import MPRester
@@ -314,10 +315,8 @@ class SmactStructure:
         Args:
         ----
             species: See :meth:`~.__init__`.
-            determine_oxi (str): The method to determine the assignments oxidation states in the structure.
-                Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence,
-                ICSD statistics or trial both sequentially, respectively.
-            api_key: A www.materialsproject.org API key.
+            determine_oxi (str): The method to determine the assignments oxidation states in the structure. Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence, ICSD statistics or trial both sequentially, respectively.
+            api_key (str| None): A www.materialsproject.org API key.
 
         Returns:
         -------
@@ -363,7 +362,7 @@ class SmactStructure:
 
             elif determine_oxi == "comp_ICSD":
                 comp = struct.composition
-                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
+                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])
                 struct = oxi_transform.apply_transformation(struct)
                 print("Charge assigned based on ICSD statistics")
 
@@ -374,7 +373,7 @@ class SmactStructure:
                     print("Oxidation states assigned using bond valence")
                 except ValueError:
                     comp = struct.composition
-                    oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
+                    oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])
                     struct = oxi_transform.apply_transformation(struct)
                     print("Oxidation states assigned based on ICSD statistics")
             else:
@@ -639,3 +638,14 @@ class SmactStructure:
                 poscar += f" {spec}\n"
 
         return poscar
+    
+    def as_py_struct(self) -> pymatgen.core.Structure:
+        """
+        Represent the structure as a pymatgen Structure object.
+
+        Returns:
+        -------
+            pymatgen.core.Structure: pymatgen Structure object.
+
+        """
+        return pmg_Structure.from_str(self.as_poscar(), fmt="poscar")
