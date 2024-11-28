@@ -11,9 +11,9 @@ from operator import itemgetter
 
 import numpy as np
 import pymatgen
-from pymatgen.core import Structure as pmg_Structure
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.core import SETTINGS
+from pymatgen.core import Structure as pmg_Structure
 from pymatgen.ext.matproj import MPRester
 from pymatgen.transformations.standard_transformations import (
     OxidationStateDecorationTransformation,
@@ -638,7 +638,7 @@ class SmactStructure:
                 poscar += f" {spec}\n"
 
         return poscar
-    
+
     def as_py_struct(self) -> pymatgen.core.Structure:
         """
         Represent the structure as a pymatgen Structure object.
