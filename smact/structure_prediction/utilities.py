@@ -3,12 +3,6 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
-
-from . import logger
-
-if TYPE_CHECKING:
-    from pymatgen.core.structure import Structure
 
 
 def parse_spec(species: str) -> tuple[str, int]:
@@ -109,23 +103,3 @@ def get_sign(charge: int) -> str:
         return "-"
     else:
         return ""
-
-
-def convert_next_gen_mprest_data(
-    doc,
-) -> dict[str, Structure | str | None]:
-    """Converts the `MPDataDoc` object returned by a next-gen MP query to a dictionary.
-
-    Args:
-    ----
-        doc (MPDataDoc): A MPDataDoc object (based on a pydantic model) with fields 'structure' and 'material_id'
-    Returns:
-        A dictionary containing at least the keys 'structure' and
-        'material_id', with the associated values.
-
-    """
-    try:
-        return doc.dict(exclude={"fields_not_requested"})
-    except:
-        logger.warn(f"Could not convert input:\n {doc}\n to a dictionary.")
-        raise TypeError("Input is not an MPDataDoc object.")
