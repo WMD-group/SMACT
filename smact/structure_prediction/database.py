@@ -136,6 +136,8 @@ class StructureDB:
         if mp_api_key is None:
             # Try to get the API key from the environment
             mp_api_key = SETTINGS.get("PMG_MAPI_KEY") or os.environ.get("MP_API_KEY")
+        if mp_api_key is None:
+            raise ValueError("No Materials Project API key provided.")
 
         if mp_data is None:  # pragma: no cover
             if len(mp_api_key) != 32:
