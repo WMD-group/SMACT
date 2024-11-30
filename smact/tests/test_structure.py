@@ -233,6 +233,15 @@ class StructureTest(unittest.TestCase):
                 mp_struct = SmactStructure.from_mp(species, api_key)
                 self.assertEqual(local_struct, mp_struct)
 
+    def test_as_py_struct(self):
+        s1 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
+        s1_pym = s1.as_py_struct()
+        with open(TEST_PY_STRUCT) as f:
+            d = json.load(f)
+        py_structure = pymatgen.core.Structure.from_dict(d)
+
+        self.assertEqual(s1_pym, py_structure)
+
 
 class StructureDBTest(unittest.TestCase):
     """Test StructureDB interface."""
