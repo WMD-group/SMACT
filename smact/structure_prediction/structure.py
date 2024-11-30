@@ -649,3 +649,20 @@ class SmactStructure:
 
         """
         return pmg_Structure.from_str(self.as_poscar(), fmt="poscar")
+
+    def reduced_formula(self) -> str:
+        """
+        Generate a reduced formula for the structure.
+
+        Returns:
+        -------
+            str: Reduced formula of the structure.
+
+        Examples:
+        --------
+            >>> s = SmactStructure.from_file("tests/files/CaTiO3.txt")
+            >>> print(s.reduced_formula())
+            CaTiO3
+
+        """
+        return self.as_py_struct().composition.reduced_formula
