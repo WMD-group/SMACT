@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from collections import defaultdict
 from functools import reduce
@@ -11,6 +12,8 @@ from operator import itemgetter
 import numpy as np
 import pymatgen
 from pymatgen.analysis.bond_valence import BVAnalyzer
+from pymatgen.core import SETTINGS
+from pymatgen.core import Structure as pmg_Structure
 from pymatgen.ext.matproj import MPRester
 from pymatgen.transformations.standard_transformations import (
     OxidationStateDecorationTransformation,
@@ -18,7 +21,7 @@ from pymatgen.transformations.standard_transformations import (
 
 import smact
 
-from .utilities import convert_next_gen_mprest_data, get_sign
+from .utilities import get_sign
 
 
 class SmactStructure:
@@ -106,12 +109,20 @@ class SmactStructure:
         """
         if not isinstance(other, SmactStructure):
             return False
+
+        sites_equal = True
+        for si, sj in zip(self.sites.values(), other.sites.values(), strict=False):
+            for ci, cj in zip(si, sj, strict=False):
+                if not np.allclose(ci, cj, atol=1e-7):
+                    sites_equal = False
+                    break
+
         return all(
             [
                 self.species == other.species,
                 np.array_equal(self.lattice_mat, other.lattice_mat),
                 self.lattice_param == other.lattice_param,
-                self.sites == other.sites,
+                sites_equal,
                 list(self.sites.keys()) == list(other.sites.keys()),
             ]
         )
@@ -295,7 +306,7 @@ class SmactStructure:
     @staticmethod
     def from_mp(
         species: list[tuple[str, int, int] | tuple[smact.Species, int]],
-        api_key: str,
+        api_key: str | None = None,
         determine_oxi: str = "BV",
     ):
         """
@@ -304,10 +315,8 @@ class SmactStructure:
         Args:
         ----
             species: See :meth:`~.__init__`.
-            determine_oxi (str): The method to determine the assignments oxidation states in the structure.
-                Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence,
-                ICSD statistics or trial both sequentially, respectively.
-            api_key: A www.materialsproject.org API key.
+            determine_oxi (str): The method to determine the assignments oxidation states in the structure. Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence, ICSD statistics or trial both sequentially, respectively.
+            api_key (str| None): A www.materialsproject.org API key.
 
         Returns:
         -------
@@ -315,28 +324,36 @@ class SmactStructure:
 
         """
         sanit_species = SmactStructure._sanitise_species(species)
+        eles = SmactStructure._get_ele_stoics(sanit_species)
+        formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
 
-        with MPRester(api_key) as m:
-            eles = SmactStructure._get_ele_stoics(sanit_species)
-            formula = "".join(f"{ele}{stoic}" for ele, stoic in eles.items())
-            try:
-                # Legacy API routine
+        if api_key is None:
+            api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")
+
+        # Legacy API routine
+        if len(api_key) != 32:
+            with MPRester(api_key) as m:
                 structs = m.query(
                     criteria={"reduced_cell_formula": formula},
                     properties=["structure"],
                 )
-            except NotImplementedError:
-                # New API routine
-                docs = m.summary.search(formula=formula, fields=["structure"])
-                structs = [convert_next_gen_mprest_data(doc) for doc in docs]
 
-            if len(structs) == 0:
-                raise ValueError(
-                    "Could not find composition in Materials Project Database, " "please supply a structure."
-                )
+        else:
+            # New API routine
+            try:
+                from mp_api.client import MPRester as MPResterNew
 
-            # Default to first found structure
-            struct = structs[0]["structure"]
+                with MPResterNew(api_key, use_document_model=False) as m:
+                    structs = m.materials.summary.search(formula=formula, fields=["structure"])
+            except ImportError:
+                with MPRester(api_key) as m:
+                    structs = m.get_structures(chemsys_formula=formula)
+
+        if len(structs) == 0:
+            raise ValueError("Could not find composition in Materials Project Database, " "please supply a structure.")
+
+        # Default to first found structure
+        struct = structs[0]["structure"] if isinstance(structs[0], dict) else structs[0]
 
         if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
             if determine_oxi == "BV":
@@ -345,7 +362,7 @@ class SmactStructure:
 
             elif determine_oxi == "comp_ICSD":
                 comp = struct.composition
-                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
+                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])
                 struct = oxi_transform.apply_transformation(struct)
                 print("Charge assigned based on ICSD statistics")
 
@@ -356,7 +373,7 @@ class SmactStructure:
                     print("Oxidation states assigned using bond valence")
                 except ValueError:
                     comp = struct.composition
-                    oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
+                    oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])
                     struct = oxi_transform.apply_transformation(struct)
                     print("Oxidation states assigned based on ICSD statistics")
             else:
@@ -621,3 +638,31 @@ class SmactStructure:
                 poscar += f" {spec}\n"
 
         return poscar
+
+    def as_py_struct(self) -> pymatgen.core.Structure:
+        """
+        Represent the structure as a pymatgen Structure object.
+
+        Returns:
+        -------
+            pymatgen.core.Structure: pymatgen Structure object.
+
+        """
+        return pmg_Structure.from_str(self.as_poscar(), fmt="poscar")
+
+    def reduced_formula(self) -> str:
+        """
+        Generate a reduced formula for the structure.
+
+        Returns:
+        -------
+            str: Reduced formula of the structure.
+
+        Examples:
+        --------
+            >>> s = SmactStructure.from_file("tests/files/CaTiO3.txt")
+            >>> print(s.reduced_formula())
+            CaTiO3
+
+        """
+        return self.as_py_struct().composition.reduced_formula

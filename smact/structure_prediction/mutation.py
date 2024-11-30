@@ -412,7 +412,7 @@ class CationMutator:
 
         Yields:
         ------
-            Tuples of (:class:`SmactStructure`, probability).
+            Tuples of (:class:`SmactStructure`, probability, original species, new species).
 
         """
         for specie in structure.get_spec_strs():
@@ -427,7 +427,4 @@ class CationMutator:
                     ]
                 ):
                     continue
-                yield (
-                    self._mutate_structure(structure, specie, new_spec),
-                    prob,
-                )
+                yield (self._mutate_structure(structure, specie, new_spec), prob, specie, new_spec)
