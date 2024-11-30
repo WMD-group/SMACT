@@ -217,14 +217,14 @@ class StructureTest(unittest.TestCase):
                 self.assertEqual(SmactStructure._get_ele_stoics(test.species), expected)
 
     @unittest.skipUnless(
-        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_API_KEY")), "requires MP API key to be set."
+        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")), "requires MP API key to be set."
     )
     def test_from_mp(self):
         """Test downloading structures from materialsproject.org."""
         # TODO Needs ensuring that the structure query gets the same
         # structure as we have downloaded.
 
-        api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_API_KEY")
+        api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")
 
         for comp, species in self.TEST_SPECIES.items():
             with self.subTest(comp=comp):
