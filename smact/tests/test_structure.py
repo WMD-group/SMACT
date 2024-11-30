@@ -242,6 +242,14 @@ class StructureTest(unittest.TestCase):
 
         self.assertEqual(s1_pym, py_structure)
 
+    def test_reduced_formula(self):
+        """Test the reduced formula method."""
+        s1 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
+        s2 = SmactStructure.from_file(os.path.join(files_dir, "NaCl.txt"))
+
+        self.assertEqual(s1.reduced_formula(), "CaTiO3")
+        self.assertEqual(s2.reduced_formula(), "NaCl")
+
 
 class StructureDBTest(unittest.TestCase):
     """Test StructureDB interface."""
