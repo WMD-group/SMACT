@@ -18,7 +18,7 @@ from smact.screening import smact_filter
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 
-def convert_formula(combinations: list, num_elements: int, max_stoich: int):
+def convert_formula(combinations: list, num_elements: int, max_stoich: int) -> list:
     """Convert combinations into chemical formula.
 
     Args:
@@ -44,7 +44,7 @@ def generate_composition_with_smact(
     max_atomic_num: int = 103,
     num_processes: int | None = None,
     save_path: str | None = None,
-):
+) -> pd.DataFrame:
     """
     Generate all possible compositions of a given number of elements and
     filter them with SMACT.
