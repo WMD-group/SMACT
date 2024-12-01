@@ -23,31 +23,20 @@ jobs:
 
     runs-on: ${{matrix.os}}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Set up micromamba
-        uses: mamba-org/setup-micromamba@main
-      
-      - name: Create mamba environment
-        run: |
-          micromamba create -n smact_env python=${{ matrix.python-version }} --yes
-
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          micromamba activate smact_env
-          pip install uv
-          uv pip install build
-          python -m build --wheel
-          uv pip install dist/*.whl
-          uv pip install smact[dev,optional]
-          
+          python -m pip install --upgrade pip wheel setuptools
+          pip install -e ".[crystal_space,dev]"
+          pip install pytest-cov
       - name: Run tests and collect coverage
         env:
           MP_API_KEY: ${{ secrets.MP_API_KEY }}
-        run: |
-          micromamba activate smact_env
-          python -m pytest --cov=smact --cov-report=xml -v
+        run: python -m pytest --cov=smact --cov-report=xml -v
       - name: Upload coverage reports to CodeCov
         uses: codecov/codecov-action@v4
         with:
