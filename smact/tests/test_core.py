@@ -335,31 +335,50 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(smact.screening.ml_rep_generator([Pb, O], [1, 2]), PbO2_ml)
 
     def test_smact_filter(self):
+        oxidation_states_sets = ["smact14", "icsd24"]
+        oxidation_states_sets_results = {
+            "smact14": {
+                "thresh_2": [
+                    (("Na", "Fe", "Cl"), (1, -1, -1), (2, 1, 1)),
+                    (("Na", "Fe", "Cl"), (1, 1, -1), (1, 1, 2)),
+                ]
+            },
+            "icsd24": {"thresh_2": [(("Na", "Fe", "Cl"), (1, 1, -1), (1, 1, 2))]},
+        }
+
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
-        result = smact.screening.smact_filter([Na, Fe, Cl], threshold=2)
+
+        for ox_state_set in oxidation_states_sets:
+            with self.subTest(ox_state_set=ox_state_set):
+                output = smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=ox_state_set)
+                self.assertEqual(
+                    [(r[0], r[1], r[2]) for r in output],
+                    oxidation_states_sets_results[ox_state_set]["thresh_2"],
+                )
+
+        # Test that reading the oxidation states from a file produces the same results
         self.assertEqual(
-            [(r[0], r[1], r[2]) for r in result],
-            [
-                (("Na", "Fe", "Cl"), (1, -1, -1), (2, 1, 1)),
-                (("Na", "Fe", "Cl"), (1, 1, -1), (1, 1, 2)),
-            ],
-        )
-        self.assertEqual(
-            result,
+            smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set="smact14"),
             smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=TEST_OX_STATES),
         )
 
         self.assertEqual(
-            set(smact.screening.smact_filter([Na, Fe, Cl], threshold=2, species_unique=False)),
+            set(
+                smact.screening.smact_filter(
+                    [Na, Fe, Cl], threshold=2, species_unique=False, oxidation_states_set="smact14"
+                )
+            ),
             {
                 (("Na", "Fe", "Cl"), (2, 1, 1)),
                 (("Na", "Fe", "Cl"), (1, 1, 2)),
             },
         )
 
-        self.assertEqual(len(smact.screening.smact_filter([Na, Fe, Cl], threshold=8)), 77)
+        self.assertEqual(
+            len(smact.screening.smact_filter([Na, Fe, Cl], threshold=8, oxidation_states_set="smact14")), 77
+        )
 
-        result = smact.screening.smact_filter([Na, Fe, Cl], stoichs=[[1], [1], [4]])
+        result = smact.screening.smact_filter([Na, Fe, Cl], stoichs=[[1], [1], [4]], oxidation_states_set="smact14")
         self.assertEqual(
             [(r[0], r[1], r[2]) for r in result],
             [
@@ -368,7 +387,7 @@ class TestSequenceFunctions(unittest.TestCase):
         )
         stoichs = [list(range(1, 5)), list(range(1, 5)), list(range(1, 10))]
         self.assertEqual(
-            len(smact.screening.smact_filter([Na, Fe, Cl], stoichs=stoichs)),
+            len(smact.screening.smact_filter([Na, Fe, Cl], stoichs=stoichs, oxidation_states_set="smact14")),
             45,
         )
 
@@ -380,8 +399,8 @@ class TestSequenceFunctions(unittest.TestCase):
         # Test for single element
         self.assertTrue(smact.screening.smact_validity("Al"))
 
-        # Test for MgB2 which is invalid for the default oxi states but valid for the icsd states
-        self.assertFalse(smact.screening.smact_validity("MgB2"))
+        # Test for MgB2 which is invalid for the smact14 oxi states but valid for the icsd states
+        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set="smact14"))
         self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="icsd16"))
         self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set="pymatgen_sp"))
         self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="wiki"))
