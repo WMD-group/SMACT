@@ -335,7 +335,7 @@ def smact_filter(
     threshold: int | None = 8,
     stoichs: list[list[int]] | None = None,
     species_unique: bool = True,
-    oxidation_states_set: str = "smact14",
+    oxidation_states_set: str = "icsd24",
     comp_tuple: bool = False,
 ) -> list[tuple[str, int, int]] | list[tuple[str, int]]:
     """Function that applies the charge neutrality and electronegativity
@@ -438,7 +438,7 @@ def smact_validity(
     composition: pymatgen.core.Composition | str,
     use_pauling_test: bool = True,
     include_alloys: bool = True,
-    oxidation_states_set: str | bytes | os.PathLike = "smact14",
+    oxidation_states_set: str | bytes | os.PathLike = "icsd24",
 ) -> bool:
     """
     Check if a composition is valid according to the SMACT rules.
@@ -486,13 +486,13 @@ def smact_validity(
     smact_elems = [e[1] for e in space.items()]
     electronegs = [e.pauling_eneg for e in smact_elems]
 
-    if oxidation_states_set == "smact14" or oxidation_states_set is None:
+    if oxidation_states_set == "smact14":
         ox_combos = [e.oxidation_states_smact14 for e in smact_elems]
     elif oxidation_states_set == "icsd16":
         ox_combos = [e.oxidation_states_icsd16 for e in smact_elems]
     elif oxidation_states_set == "pymatgen_sp":
         ox_combos = [e.oxidation_states_sp for e in smact_elems]
-    elif oxidation_states_set == "icsd24":
+    elif oxidation_states_set == "icsd24" or oxidation_states_set is None:  # Default
         ox_combos = [e.oxidation_states_icsd24 for e in smact_elems]
     elif os.path.exists(oxidation_states_set):
         ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in smact_elems]
