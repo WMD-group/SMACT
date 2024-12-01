@@ -17,7 +17,7 @@
 **Semiconducting Materials from Analogy and Chemical Theory** (SMACT) is a collection of rapid screening and informatics tools that uses data about chemical elements.
 
 - **Documentation:** <https://smact.readthedocs.io/en/latest/>
-- **Examples:** <https://github.com/WMD-group/SMACT/tree/master/examples>
+- **Examples:** <https://smact.readthedocs.io/en/latest/examples.html>
 
 ![A blue interface with the text "SMACT v3" at the top. Below that, there is a label "Materials Search" followed by two radio buttons: "Hi-fi" and "Lo-fi". The "Lo-fi" button is currently selected](SMACT.png)
 
