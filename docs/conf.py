@@ -45,7 +45,7 @@ myst_enable_extensions = [
     "html_image",
 ]
 myst_url_schemes = ("http", "https", "mailto")
-jupyter_execute_notebooks = "off"
+nb_execution_mode = "off"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -154,7 +154,7 @@ html_title = "smact"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -418,5 +418,8 @@ MOCK_MODULES = [
     "pymatgen.analysis.structure_prediction",
     "pymatgen.transformations.standard_transformations",
     "tabulate",
+    "mp_api",
+    "mp_api.client",
+    "emmet",
 ]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)

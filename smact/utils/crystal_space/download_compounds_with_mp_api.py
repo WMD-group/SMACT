@@ -10,7 +10,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from mp_api.client import MPRester
-from pymatgen.core.composition import Composition
+from pymatgen.core import Composition
 from tqdm import tqdm
 
 
