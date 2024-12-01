@@ -9,7 +9,7 @@ from functools import partial
 from pathlib import Path
 
 import pandas as pd
-from pymatgen.core.composition import Composition
+from pymatgen.core import Composition
 from tqdm import tqdm
 
 from smact import Element, ordered_elements
@@ -50,16 +50,14 @@ def generate_composition_with_smact(
     filter them with SMACT.
 
     Args:
-    ----
-        num_elements: the number of elements in a compound. Defaults to 2.
-        max_stoich: the maximum stoichiometric coefficient. Defaults to 8.
-        max_atomic_num: the maximum atomic number. Defaults to 103.
-        num_processes: the number of processes to use. Defaults to None.
-        save_path: the path to save the results. Defaults to None.
+        num_elements (int): the number of elements in a compound. Defaults to 2.
+        max_stoich (int): the maximum stoichiometric coefficient. Defaults to 8.
+        max_atomic_num (int): the maximum atomic number. Defaults to 103.
+        num_processes (int): the number of processes to use. Defaults to None.
+        save_path (str): the path to save the results. Defaults to None.
 
     Returns:
-    -------
-        _description_
+        df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
 
     """
     # 1. generate all possible combinations of elements
