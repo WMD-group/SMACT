@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from os import path
 
 import pandas as pd
@@ -112,7 +111,7 @@ class ICSD24OxStatesFilter:
 
     def write(
         self,
-        filename: str | os.PathLike,
+        filename: str,
         threshold: int,
         include_zero: bool = False,
         comment: str | None = None,
@@ -120,7 +119,7 @@ class ICSD24OxStatesFilter:
         """Write the filtered ICSD 24 oxidation states list to a SMACT-compatible oxidation states txt file.
 
         Args:
-            filename (str | os.PathLike): The filename to write the filtered oxidation states list to.
+            filename (str): The filename to write the filtered oxidation states list to.
             threshold (int): The threshold for filtering the oxidation states list.
             include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
             comment (str): A comment to include in the txt file. Default is None.
