@@ -15,7 +15,6 @@ For workflows that have been used in real examples and in published work, visit 
    examples/filter
    examples/validity
    examples/lists
-   examples/neutral_combos
    examples/oxidation_states
    examples/compound_electroneg
    examples/valence_electron_count
