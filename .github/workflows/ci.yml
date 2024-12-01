@@ -33,12 +33,11 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
 
-
       - name: Install dependencies
         run: |
           pip install uv
           uv pip install -e ".[optional,dev]" --system
-  
+
       - name: Run tests and collect coverage
         env:
           MP_API_KEY: ${{ secrets.MP_API_KEY }}
