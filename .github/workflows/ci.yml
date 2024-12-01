@@ -43,7 +43,7 @@ jobs:
           MP_API_KEY: ${{ secrets.MP_API_KEY }}
         run: python -m pytest --cov=smact --cov-report=xml -v
       - name: Upload coverage reports to CodeCov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           #files: ./coverage.xml
