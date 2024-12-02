@@ -78,7 +78,6 @@ Use cases are available in our [examples](https://smact.readthedocs.io/en/latest
   - **structure_prediction**: A submodule which contains a collection of tools for facilitating crystal structure predictions via ionic substitutions
   - **dopant_prediction**: A submodule which contains a collections of tools for predicting dopants.
   - **utils.py** A collection of utility functions used throughout the codebase.
-  
 
 ## Requirements
 
