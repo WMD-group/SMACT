@@ -44,6 +44,7 @@ def generate_composition_with_smact(
     max_atomic_num: int = 103,
     num_processes: int | None = None,
     save_path: str | None = None,
+    oxidation_states_set: str = "icsd24",
 ) -> pd.DataFrame:
     """
     Generate all possible compositions of a given number of elements and
@@ -55,6 +56,7 @@ def generate_composition_with_smact(
         max_atomic_num (int): the maximum atomic number. Defaults to 103.
         num_processes (int): the number of processes to use. Defaults to None.
         save_path (str): the path to save the results. Defaults to None.
+        oxidation_states_set (str): the oxidation states set to use. Options are "smact14", "icsd16", "icsd24", "pymatgen_sp" or a filepath to a custom oxidation states list. For reproducing the Faraday Discussions results, use "smact14".
 
     Returns:
         df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
@@ -104,7 +106,10 @@ def generate_composition_with_smact(
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() if num_processes is None else num_processes)
     results = list(
         tqdm(
-            pool.imap_unordered(partial(smact_filter, threshold=max_stoich), compounds_pauling),
+            pool.imap_unordered(
+                partial(smact_filter, threshold=max_stoich, oxidation_states_set=oxidation_states_set),
+                compounds_pauling,
+            ),
             total=len(compounds_pauling),
         )
     )
