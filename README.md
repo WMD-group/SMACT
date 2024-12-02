@@ -33,7 +33,7 @@ There is a strong demand for functional materials across a wide range of technol
 
 Features are accessed through Python scripts, importing classes and functions as needed.
 The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be usede
-Use cases are available in our [examples](https://github.com/WMD-group/SMACT/tree/master/examples) and [tutorials](https://github.com/WMD-group/SMACT/tree/master/tutorials) folders.
+Use cases are available in our [examples](https://smact.readthedocs.io/en/latest/examples.html) and [tutorials](https://smact.readthedocs.io/en/latest/tutorials.html) folders.
 
 ## Code features
 
@@ -41,7 +41,7 @@ Use cases are available in our [examples](https://github.com/WMD-group/SMACT/tre
 
 - Oxidation states that are accessible to each element are included in their properties.
 
-- Element compositions can be screened through based on the heuristic filters of charge neutrality and electronegativity order. This is handled using the [screening module](https://smact.readthedocs.io/en/latest/smact.screening.html) and [this publication](<https://www.cell.com/chem/fulltext/S2451-9294(16)30155-3>) describes the underlying theory. An example procedure is [outlined in the docs](https://smact.readthedocs.io/en/latest/examples.html#neutral-combinations) and more examples can be found in the [counting examples subfolder](https://github.com/WMD-group/SMACT/tree/master/examples/Counting).
+- Element compositions can be screened through based on the heuristic filters of charge neutrality and electronegativity order. This is handled using the [screening module](https://smact.readthedocs.io/en/latest/smact.screening.html) and [this publication](<https://www.cell.com/chem/fulltext/S2451-9294(16)30155-3>) describes the underlying theory. An example procedure is [outlined in the docs](https://smact.readthedocs.io/en/latest/examples/filter.html).
 
 - Further filters can be applied to generated lists of compositions in order to screen for particular properties. These properties are either intrinsic properties of elements or are calculated for compositions using the [properties module](https://smact.readthedocs.io/en/latest/smact.properties.html). For example:
 
@@ -50,7 +50,7 @@ Use cases are available in our [examples](https://github.com/WMD-group/SMACT/tre
 
 - Compositions can also be filtered based on sustainability via the abundance of elements in the Earth's crust or via the [HHI scale](https://pubs.acs.org/doi/10.1021/cm400893e).
 
-- Compositions can be converted for use in Pymatgen or for representation to machine learning algorithms ([see "next steps" in this example](https://github.com/WMD-group/SMACT/blob/master/examples/Counting/Generate_compositions_lists.ipynb)) and the related [ElementEmbeddings](https://github.com/WMD-group/ElementEmbeddings) package.
+- Compositions can be converted for use in Pymatgen or for representation to machine learning algorithms ([see this example](https://smact.readthedocs.io/en/latest/tutorials/smact_generation_of_solar_oxides.html)) and the related [ElementEmbeddings](https://github.com/WMD-group/ElementEmbeddings) package.
 
 - The code also has tools for manipulating common crystal lattice types:
   - Certain structure types can be built using the [builder module](https://smact.readthedocs.io/en/latest/smact.builder.html)
@@ -77,6 +77,7 @@ Use cases are available in our [examples](https://github.com/WMD-group/SMACT/tre
   - **oxidation_states.py**: Used for predicting the likelihood of species coexisting in a compound based on a statistical model.
   - **structure_prediction**: A submodule which contains a collection of tools for facilitating crystal structure predictions via ionic substitutions
   - **dopant_prediction**: A submodule which contains a collections of tools for predicting dopants.
+  - **utils.py** A collection of utility functions used throughout the codebase.
 
 ## Requirements
 
@@ -89,6 +90,10 @@ The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE), [spgli
 The latest stable release can be installed via pip which will automatically set up other Python packages as required:
 
     pip install smact
+
+Optional dependencies can also be installed. These enable full replication of the examples and tutorials
+
+    pip install "smact[optional]"
 
 SMACT is also available via conda through the conda-forge channel on Anaconda Cloud:
 

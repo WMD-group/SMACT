@@ -35,7 +35,7 @@ Recommended reading: [How to Write the Perfect Pull Request](https://github.blog
 When developing locally, it is recommended to install the python packages in `requirements-dev.txt`.
 
 ```bash
-pip install -r requirements-dev.txt
+pip install -e ".[dev,docs]"
 ```
 
 This will allow you to run the tests locally with pytest as described in the main README,
