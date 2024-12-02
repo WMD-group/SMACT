@@ -58,7 +58,7 @@ class Element:
 
         Element.SSEPauling (float) : SSE based on regression fit with Pauling electronegativity
 
-        Element.oxidation_states (list) : Default list of allowed oxidation states for use in SMACT
+        Element.oxidation_states (list) : Default list of allowed oxidation states for use in SMACT. In >3.0, these are the ICSD24 set. In <3.0, these are the SMACT14 set.
 
         Element.oxidation_states_smact14 (list): Original list of oxidation states that were manually compiled for SMACT in 2014 (default in SMACT < 3.0)
 
@@ -179,7 +179,7 @@ class Element:
             ("number", dataset["Z"]),
             (
                 "oxidation_states",
-                data_loader.lookup_element_oxidation_states(symbol),
+                data_loader.lookup_element_oxidation_states_icsd24(symbol),
             ),
             (
                 "oxidation_states_smact14",
