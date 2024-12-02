@@ -47,7 +47,8 @@ class TestSequenceFunctions(unittest.TestCase):
         newlist = ["O", "Rb", "W"]
         dictionary = smact.element_dictionary(newlist, TEST_OX_STATES)
         self.assertEqual(dictionary["O"].crustal_abundance, 461000.0)
-        self.assertEqual(dictionary["Rb"].oxidation_states, [-1, 1])
+        self.assertEqual(dictionary["Rb"].oxidation_states_smact14, [-1, 1])
+        self.assertEqual(dictionary["Rb"].oxidation_states, [1])
         self.assertEqual(dictionary["Rb"].oxidation_states_custom, [-1, 1])
         self.assertEqual(dictionary["W"].name, "Tungsten")
         self.assertTrue("Rn" in smact.element_dictionary())
