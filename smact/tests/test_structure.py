@@ -21,6 +21,7 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from pymatgen.analysis.structure_prediction.substitution_probability import (
     SubstitutionProbability,
 )
+from pymatgen.core import SETTINGS
 
 import smact
 from smact import Species
@@ -215,13 +216,15 @@ class StructureTest(unittest.TestCase):
             with self.subTest(species=test.species):
                 self.assertEqual(SmactStructure._get_ele_stoics(test.species), expected)
 
-    @unittest.skipUnless(os.environ.get("MPI_KEY"), "requires MPI key to be set.")
+    @unittest.skipUnless(
+        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")), "requires MP API key to be set."
+    )
     def test_from_mp(self):
         """Test downloading structures from materialsproject.org."""
         # TODO Needs ensuring that the structure query gets the same
         # structure as we have downloaded.
-        # Need to modify the test for both legacy and next-gen queries
-        api_key = os.environ.get("MPI_KEY")
+
+        api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")
 
         for comp, species in self.TEST_SPECIES.items():
             with self.subTest(comp=comp):
@@ -229,6 +232,23 @@ class StructureTest(unittest.TestCase):
                 local_struct = SmactStructure.from_file(comp_file)
                 mp_struct = SmactStructure.from_mp(species, api_key)
                 self.assertEqual(local_struct, mp_struct)
+
+    def test_as_py_struct(self):
+        s1 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
+        s1_pym = s1.as_py_struct()
+        with open(TEST_PY_STRUCT) as f:
+            d = json.load(f)
+        py_structure = pymatgen.core.Structure.from_dict(d)
+
+        self.assertEqual(s1_pym, py_structure)
+
+    def test_reduced_formula(self):
+        """Test the reduced formula method."""
+        s1 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
+        s2 = SmactStructure.from_file(os.path.join(files_dir, "NaCl.txt"))
+
+        self.assertEqual(s1.reduced_formula(), "CaTiO3")
+        self.assertEqual(s2.reduced_formula(), "NaCl")
 
 
 class StructureDBTest(unittest.TestCase):

@@ -9,7 +9,7 @@ from functools import partial
 from pathlib import Path
 
 import pandas as pd
-from pymatgen.core.composition import Composition
+from pymatgen.core import Composition
 from tqdm import tqdm
 
 from smact import Element, ordered_elements
@@ -18,7 +18,7 @@ from smact.screening import smact_filter
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 
-def convert_formula(combinations: list, num_elements: int, max_stoich: int):
+def convert_formula(combinations: list, num_elements: int, max_stoich: int) -> list:
     """Convert combinations into chemical formula.
 
     Args:
@@ -44,22 +44,22 @@ def generate_composition_with_smact(
     max_atomic_num: int = 103,
     num_processes: int | None = None,
     save_path: str | None = None,
-):
+    oxidation_states_set: str = "icsd24",
+) -> pd.DataFrame:
     """
     Generate all possible compositions of a given number of elements and
     filter them with SMACT.
 
     Args:
-    ----
-        num_elements: the number of elements in a compound. Defaults to 2.
-        max_stoich: the maximum stoichiometric coefficient. Defaults to 8.
-        max_atomic_num: the maximum atomic number. Defaults to 103.
-        num_processes: the number of processes to use. Defaults to None.
-        save_path: the path to save the results. Defaults to None.
+        num_elements (int): the number of elements in a compound. Defaults to 2.
+        max_stoich (int): the maximum stoichiometric coefficient. Defaults to 8.
+        max_atomic_num (int): the maximum atomic number. Defaults to 103.
+        num_processes (int): the number of processes to use. Defaults to None.
+        save_path (str): the path to save the results. Defaults to None.
+        oxidation_states_set (str): the oxidation states set to use. Options are "smact14", "icsd16", "icsd24", "pymatgen_sp" or a filepath to a custom oxidation states list. For reproducing the Faraday Discussions results, use "smact14".
 
     Returns:
-    -------
-        _description_
+        df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
 
     """
     # 1. generate all possible combinations of elements
@@ -106,7 +106,10 @@ def generate_composition_with_smact(
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() if num_processes is None else num_processes)
     results = list(
         tqdm(
-            pool.imap_unordered(partial(smact_filter, threshold=max_stoich), compounds_pauling),
+            pool.imap_unordered(
+                partial(smact_filter, threshold=max_stoich, oxidation_states_set=oxidation_states_set),
+                compounds_pauling,
+            ),
             total=len(compounds_pauling),
         )
     )

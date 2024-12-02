@@ -9,7 +9,5 @@ Submodules
 .. toctree::
 
     smact.utils.composition
-    smact.utils.band_gap_simple
-    smact.utils.download_compounds_with_mp_api
-    smact.utils.generate_composition_with_smact
-    smact.utils.plot_embeddings
+    smact.utils.crystal_space
+    smact.utils.oxidation
