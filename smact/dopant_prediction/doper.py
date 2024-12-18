@@ -20,6 +20,13 @@ SKIPSSPECIES_COSINE_SIM_PATH = os.path.join(
     data_directory,
     "species_rep/skipspecies_20221028_319ion_dim200_cosine_similarity.json",
 )
+SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH = os.path.join(
+    data_directory, "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-Eform_cosine_similarity.json"
+)
+
+SPECIES_M3GNET_MP2023_GAP_COSINE_PATH = os.path.join(
+    data_directory, "species_rep/ion_embedding_SpeciesM3GNet-MP-2023.11.1-oxi-band_gap_SCRATCH.json"
+)
 
 
 class Doper:
@@ -52,10 +59,18 @@ class Doper:
         # check if both are provided
         if filepath and embedding:
             raise ValueError("Only one of filepath or embedding should be provided")
-        if embedding and embedding != "skipspecies":
+        if embedding and embedding not in [
+            "skipspecies",
+            "M3GNet-MP-2023.11.1-oxi-Eform",
+            "M3GNet-MP-2023.11.1-oxi-band_gap",
+        ]:
             raise ValueError(f"Embedding {embedding} is not supported")
-        if embedding:
+        if embedding == "skipspecies":
             self.cation_mutator = mutation.CationMutator.from_json(SKIPSSPECIES_COSINE_SIM_PATH)
+        elif embedding == "M3GNet-MP-2023.11.1-oxi-Eform":
+            self.cation_mutator = mutation.CationMutator.from_json(SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH)
+        elif embedding == "M3GNet-MP-2023.11.1-oxi-band_gap":
+            self.cation_mutator = mutation.CationMutator.from_json(SPECIES_M3GNET_MP2023_GAP_COSINE_PATH)
         elif filepath:
             self.cation_mutator = mutation.CationMutator.from_json(filepath)
         else:
