@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SMACT"
-version = "3.0"
+version = "3.0.1"
 description = "Semiconducting Materials by Analogy and Chemical Theory"
 readme = "README.md"
 authors = [
@@ -99,10 +99,9 @@ optional = [
     "seaborn>=0.13.2",
     "pymatgen>=2024.2.20",
     "matminer>=0.9.2",
-    "umap-learn>=0.5.3",
     "kaleido>=0.2.1",
     "ase>=3.22.0",
-    "numpy",
+    "llvmlite>=0.40",
     "ElementEmbeddings>=0.4",
     "dash>=2.18.2",
 

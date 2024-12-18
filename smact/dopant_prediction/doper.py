@@ -20,6 +20,13 @@ SKIPSSPECIES_COSINE_SIM_PATH = os.path.join(
     data_directory,
     "species_rep/skipspecies_20221028_319ion_dim200_cosine_similarity.json",
 )
+SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH = os.path.join(
+    data_directory, "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-Eform_cosine_similarity.json"
+)
+
+SPECIES_M3GNET_MP2023_GAP_COSINE_PATH = os.path.join(
+    data_directory, "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-band_gap_cosine_similarity.json"
+)
 
 
 class Doper:
@@ -52,10 +59,18 @@ class Doper:
         # check if both are provided
         if filepath and embedding:
             raise ValueError("Only one of filepath or embedding should be provided")
-        if embedding and embedding != "skipspecies":
+        if embedding and embedding not in [
+            "skipspecies",
+            "M3GNet-MP-2023.11.1-oxi-Eform",
+            "M3GNet-MP-2023.11.1-oxi-band_gap",
+        ]:
             raise ValueError(f"Embedding {embedding} is not supported")
-        if embedding:
+        if embedding == "skipspecies":
             self.cation_mutator = mutation.CationMutator.from_json(SKIPSSPECIES_COSINE_SIM_PATH)
+        elif embedding == "M3GNet-MP-2023.11.1-oxi-Eform":
+            self.cation_mutator = mutation.CationMutator.from_json(SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH)
+        elif embedding == "M3GNet-MP-2023.11.1-oxi-band_gap":
+            self.cation_mutator = mutation.CationMutator.from_json(SPECIES_M3GNET_MP2023_GAP_COSINE_PATH)
         elif filepath:
             self.cation_mutator = mutation.CationMutator.from_json(filepath)
         else:
@@ -82,12 +97,12 @@ class Doper:
             sum_prob = sub_prob
             for cation in cations:
                 if cation != original_specie:
-                    sum_prob += self._calculate_species_sim_prob(cation, selected_site)
+                    sum_prob += self.cation_mutator.sub_prob(cation, selected_site)
 
             selectivity = sub_prob / sum_prob
             selectivity = round(selectivity, 2)
             dopants.append(selectivity)
-            assert len(dopants) == 4
+            assert len(dopants) == 5
         return data
 
     def _merge_dicts(self, keys, dopants_list, groupby_list):
@@ -138,118 +153,19 @@ class Doper:
 
         return list(poss_n_type), list(poss_p_type)
 
-    def _calculate_species_sim_prob(self, species1, species2):
-        """
-        Calculate the similarity/probability between two species.
-
-        Args:
-        ----
-            species1 (str): The first species.
-            species2 (str): The second species.
-
-        Returns:
-        -------
-            float: The similarity between the two species.
-
-        """
-        if self.use_probability:
-            return self.cation_mutator.sub_prob(species1, species2)
-        else:
-            return self.cation_mutator.get_lambda(species1, species2)
-
     def get_dopants(self, num_dopants: int = 5, get_selectivity=True, group_by_charge=True) -> dict:
         """
-        Get the top num_dopants dopant suggestions for n- and p-type dopants.
+        Get the top n dopants for each case.
 
         Args:
         ----
-            num_dopants (int): The number of suggestions to return for n- and p-type dopants.
+            num_dopants (int): The number of dopants to return.
             get_selectivity (bool): Whether to calculate the selectivity of the dopants.
             group_by_charge (bool): Whether to group the dopants by charge.
 
         Returns:
         -------
-            (dict): Dopant suggestions, given as a dictionary with keys
-                "n-type cation substitutions", "p-type cation substitutions", "n-type anion substitutions", "p-type anion substitutions".
-
-        Examples:
-        --------
-            >>> test = Doper(("Ti4+", "O2-"))
-            >>> print(test.get_dopants(num_dopants=2))
-                {'n-type anion substitutions': {'-1': [['F1-', 'O2-', 0.01508116810515677, 1.0],
-                                       ['Cl1-','O2-', 0.004737202729901607, 1.0]],
-                                'sorted': [['F1-',
-                                            'O2-',
-                                            0.01508116810515677,
-                                            1.0],
-                                           ['Cl1-',
-                                            'O2-',
-                                            0.004737202729901607,
-                                            1.0]]},
-                'n-type cation substitutions': {'5': [['Ta5+',
-                                        'Ti4+',
-                                        8.790371775858281e-05,
-                                        1.0],
-                                       ['Nb5+',
-                                        'Ti4+',
-                                        7.830035204694342e-05,
-                                        1.0]],
-                                 '6': [['W6+',
-                                        'Ti4+',
-                                        3.4638026110457894e-05,
-                                        1.0],
-                                       ['Mo6+',
-                                        'Ti4+',
-                                        1.6924395455176864e-05,
-                                        1.0]],
-                                 'sorted': [['Ta5+',
-                                             'Ti4+',
-                                             8.790371775858281e-05,
-                                             1.0],
-                                            ['Nb5+',
-                                             'Ti4+',
-                                             7.830035204694342e-05,
-                                             1.0]]},
-                'p-type anion substitutions': {'-3': [['N3-',
-                                        'O2-',
-                                        0.0014663800608945628,
-                                        1.0]],
-                                'sorted': [['N3-',
-                                            'O2-',
-                                            0.0014663800608945628,
-                                            1.0]]},
-                'p-type cation substitutions': {'1': [['Na1+',
-                                        'Ti4+',
-                                        0.00010060400812977031,
-                                        1.0],
-                                       ['Li1+',
-                                        'Ti4+',
-                                        4.90559802023167e-05,
-                                        1.0]],
-                                 '2': [['Zn2+',
-                                        'Ti4+',
-                                        8.56373996146833e-05,
-                                        1.0],
-                                       ['Mn2+',
-                                        'Ti4+',
-                                        8.563568688381837e-05,
-                                        1.0]],
-                                 '3': [['Fe3+',
-                                        'Ti4+',
-                                        6.259479321178562e-05,
-                                        1.0],
-                                       ['V3+',
-                                        'Ti4+',
-                                        5.312098771970144e-05,
-                                        1.0]],
-                                 'sorted': [['Na1+',
-                                             'Ti4+',
-                                             0.00010060400812977031,
-                                             1.0],
-                                            ['Zn2+',
-                                             'Ti4+',
-                                             8.56373996146833e-05,
-                                             1.0]]}}
+            dict: A dictionary of the top n dopants for each case.
 
         """
         cations, anions = [], []
@@ -273,7 +189,7 @@ class Doper:
         for cation in cations:
             cation_charge = utilities.parse_spec(cation)[1]
 
-            for n_specie in poss_n_type_cat:
+            for _i, n_specie in enumerate(poss_n_type_cat):
                 n_specie_charge = utilities.parse_spec(n_specie)[1]
                 if cation_charge >= n_specie_charge:
                     continue
@@ -282,10 +198,10 @@ class Doper:
                         [
                             n_specie,
                             cation,
-                            self._calculate_species_sim_prob(cation, n_specie),
+                            self.cation_mutator.sub_prob(cation, n_specie),
+                            self.cation_mutator.get_lambda(cation, n_specie),
                         ]
                     )
-
             for p_specie in poss_p_type_cat:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if cation_charge <= p_specie_charge:
@@ -295,8 +211,9 @@ class Doper:
                         [
                             p_specie,
                             cation,
-                            self._calculate_species_sim_prob(cation, p_specie),
-                        ]
+                            self.cation_mutator.sub_prob(cation, p_specie),
+                            self.cation_mutator.get_lambda(cation, p_specie),
+                        ],
                     )
         for anion in anions:
             anion_charge = utilities.parse_spec(anion)[1]
@@ -310,7 +227,8 @@ class Doper:
                         [
                             n_specie,
                             anion,
-                            self._calculate_species_sim_prob(anion, n_specie),
+                            self.cation_mutator.sub_prob(anion, n_specie),
+                            self.cation_mutator.get_lambda(anion, n_specie),
                         ]
                     )
             for p_specie in poss_p_type_an:
@@ -322,7 +240,8 @@ class Doper:
                         [
                             p_specie,
                             anion,
-                            self._calculate_species_sim_prob(anion, p_specie),
+                            self.cation_mutator.sub_prob(anion, p_specie),
+                            self.cation_mutator.get_lambda(anion, p_specie),
                         ]
                     )
         dopants_lists = [n_type_cat, p_type_cat, n_type_an, p_type_an]
@@ -331,14 +250,25 @@ class Doper:
         for dopants_list in dopants_lists:
             dopants_list.sort(key=lambda x: x[2], reverse=True)
 
-        self.len_list = 3
+        self.len_list = 4
         if get_selectivity:
-            self.len_list = 4
+            self.len_list = 6
             for i in range(len(dopants_lists)):
                 sub = "cation"
                 if i > 1:
                     sub = "anion"
                 dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, sub)
+
+            for dopants_list in dopants_lists:
+                for dopant in dopants_list:
+                    similarity = dopant[3]
+                    selectivity = dopant[4]
+                    combined_score = self._calculate_combined_score(similarity, selectivity)
+                    dopant.append(combined_score)
+
+            # sort by combined score
+            for dopants_list in dopants_lists:
+                dopants_list.sort(key=lambda x: x[5], reverse=True)
 
         # if groupby
         groupby_lists = [dict()] * 4  # create list of empty dict length of 4 (n-cat, p-cat, n-an, p-an)
@@ -367,13 +297,14 @@ class Doper:
         # return the top (num_dopants) results for each case
         return self.results
 
-    def plot_dopants(self, cmap: str = "YlOrRd") -> None:
+    def plot_dopants(self, cmap: str = "YlOrRd", plot_value: str = "probability") -> None:
         """
         Plot the dopant suggestions using the periodic table heatmap.
 
         Args:
         ----
             cmap (str): The colormap to use for the heatmap.
+            plot_value (str): The value to plot on the heatmap. Options are "probability", "similarity" or "selectivity".
 
         Returns:
         -------
@@ -386,8 +317,14 @@ class Doper:
             # due to selectivity option
             if self.len_list == 3:
                 dict_results = {utilities.parse_spec(x)[0]: y for x, _, y in dopants.get("sorted")}
+            elif plot_value == "probability":
+                dict_results = {utilities.parse_spec(x)[0]: y for x, _, y, _, _, _ in dopants.get("sorted")}
+            elif plot_value == "similarity":
+                dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, y, _, _ in dopants.get("sorted")}
+            elif plot_value == "selectivity":
+                dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, _, y, _ in dopants.get("sorted")}
             else:
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, y, _ in dopants.get("sorted")}
+                dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, _, _, y in dopants.get("sorted")}
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
                 cmap=cmap,
@@ -399,6 +336,9 @@ class Doper:
         num = int(num_str)
         sign = "+" if num >= 0 else "-"
         return f"{abs(num)}{sign}"
+
+    def _calculate_combined_score(self, similarity: float, selectivity: float) -> float:
+        return (1 - 0.25) * similarity + 0.25 * selectivity
 
     @property
     def to_table(self):
@@ -413,10 +353,13 @@ class Doper:
         if not self.results:
             print("No data available")
             return
-        if self.use_probability:
-            headers = ["Rank", "Dopant", "Host", "Probability", "Selectivity"]
-        else:
-            headers = ["Rank", "Dopant", "Host", "Similarity", "Selectivity"]
+        # if self.use_probability:
+        #     headers = ["Rank", "Dopant", "Host", "Probability", "Selectivity", "Combined"]
+        # else:
+        #     headers = ["Rank", "Dopant", "Host", "Similarity", "Selectivity", "Combined"]
+
+        headers = ["Rank", "Dopant", "Host", "Probability", "Similarity", "Selectivity", "Combined"]
+
         for dopant_type, dopants in self.results.items():
             print("\033[91m" + str(dopant_type) + "\033[0m")
             for k, v in dopants.items():
