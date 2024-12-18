@@ -25,7 +25,7 @@ SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH = os.path.join(
 )
 
 SPECIES_M3GNET_MP2023_GAP_COSINE_PATH = os.path.join(
-    data_directory, "species_rep/ion_embedding_SpeciesM3GNet-MP-2023.11.1-oxi-band_gap_SCRATCH.json"
+    data_directory, "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-band_gap_cosine_similarity.json"
 )
 
 

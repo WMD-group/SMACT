@@ -68,6 +68,16 @@ class DopantPredictionTest(unittest.TestCase):
             for dopant_result_list in r:
                 self.assertTrue(0 <= dopant_result_list[2] <= 1)
 
+    def test_alternative_representations(self):
+        test_specie = ("Cu+", "Ga3+", "S2-")
+        test_gap = doper.Doper(test_specie, embedding="M3GNet-MP-2023.11.1-oxi-band_gap")
+        test_eform = doper.Doper(test_specie, embedding="M3GNet-MP-2023.11.1-oxi-Eform")
+        test_lamba = doper.Doper(test_specie, filepath=TEST_LAMBDA_JSON)
+        for test in [test_gap, test_eform, test_lamba]:
+            self.assertIsInstance(test, doper.Doper)
+            result = test.get_dopants()
+            self.assertIsInstance(result, dict)
+
     def test_format_number(self):
         test_specie = ("Cu+", "Ga3+", "S2-")
         test = doper.Doper(test_specie)
