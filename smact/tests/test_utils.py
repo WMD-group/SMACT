@@ -12,7 +12,18 @@ from pymatgen.core import SETTINGS, Composition
 from smact import Element
 from smact.screening import smact_filter
 from smact.utils.composition import comp_maker, formula_maker, parse_formula
-from smact.utils.crystal_space import download_compounds_with_mp_api, generate_composition_with_smact
+
+MP_API_AVAILABLE = False
+try:
+    from mp_api.client import MPRester
+
+    MP_API_AVAILABLE = True
+except ImportError:
+    pass
+if MP_API_AVAILABLE:
+    from smact.utils.crystal_space import download_compounds_with_mp_api
+
+from smact.utils.crystal_space import generate_composition_with_smact
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
 
@@ -122,7 +133,9 @@ class TestCrystalSpace(unittest.TestCase):
                 shutil.rmtree("data")
 
     @pytest.mark.skipif(
-        sys.platform == "win32" or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")),
+        sys.platform == "win32"
+        or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY"))
+        or not MP_API_AVAILABLE,
         reason="Test requires MP_API_KEY and fails on Windows due to filepath issues.",
     )
     def test_download_compounds_with_mp_api(self):

@@ -30,6 +30,14 @@ from smact.structure_prediction.mutation import CationMutator
 from smact.structure_prediction.prediction import StructurePredictor
 from smact.structure_prediction.structure import SmactStructure
 
+MP_API_AVAILABLE = False
+try:
+    from mp_api.client import MPRester
+
+    MP_API_AVAILABLE = True
+except ImportError:
+    pass
+
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_STRUCT = os.path.join(files_dir, "test_struct")
 TEST_POSCAR = os.path.join(files_dir, "test_poscar.txt")
@@ -217,7 +225,8 @@ class StructureTest(unittest.TestCase):
                 self.assertEqual(SmactStructure._get_ele_stoics(test.species), expected)
 
     @unittest.skipUnless(
-        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")), "requires MP API key to be set."
+        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY") or MP_API_AVAILABLE),
+        "requires MP API key to be set.",
     )
     def test_from_mp(self):
         """Test downloading structures from materialsproject.org."""
