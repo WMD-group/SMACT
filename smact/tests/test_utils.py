@@ -8,6 +8,7 @@ from importlib.util import find_spec
 
 import pandas as pd
 import pytest
+import requests
 from pymatgen.core import SETTINGS, Composition
 
 from smact import Element
@@ -16,7 +17,15 @@ from smact.utils.composition import comp_maker, formula_maker, parse_formula
 from smact.utils.crystal_space import generate_composition_with_smact
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
+MP_URL = "https://materialsproject.org"
 MP_API_AVAILABLE = bool(find_spec("mp_api"))
+
+try:
+    skip_mprester_tests = requests.get(MP_URL, timeout=60).status_code != 200
+
+except (ModuleNotFoundError, ImportError, requests.exceptions.ConnectionError):
+    # Skip all MPRester tests if some downstream problem on the website, mp-api or whatever.
+    skip_mprester_tests = True
 
 
 class TestComposition(unittest.TestCase):
@@ -125,9 +134,12 @@ class TestCrystalSpace(unittest.TestCase):
                 shutil.rmtree("data")
 
     @pytest.mark.skipif(
-        sys.platform == "win32"
-        or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY"))
-        or not MP_API_AVAILABLE,
+        (
+            sys.platform == "win32"
+            or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY"))
+            or not MP_API_AVAILABLE
+            or skip_mprester_tests
+        ),
         reason="Test requires MP_API_KEY and fails on Windows due to filepath issues.",
     )
     def test_download_compounds_with_mp_api(self):
