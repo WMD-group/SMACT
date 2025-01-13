@@ -9,6 +9,7 @@ import os
 import pickle
 import unittest
 from contextlib import contextmanager
+from importlib.util import find_spec
 from operator import itemgetter
 from random import sample
 from typing import ClassVar
@@ -17,6 +18,7 @@ import numpy as np
 import pandas as pd
 import pymatgen
 import pytest
+import requests
 from pandas.testing import assert_frame_equal, assert_series_equal
 from pymatgen.analysis.structure_prediction.substitution_probability import (
     SubstitutionProbability,
@@ -30,13 +32,15 @@ from smact.structure_prediction.mutation import CationMutator
 from smact.structure_prediction.prediction import StructurePredictor
 from smact.structure_prediction.structure import SmactStructure
 
-MP_API_AVAILABLE = False
-try:
-    from mp_api.client import MPRester
+MP_URL = "https://materialsproject.org"
+MP_API_AVAILABLE = bool(find_spec("mp_api"))
 
-    MP_API_AVAILABLE = True
-except ImportError:
-    pass
+try:
+    skip_mprester_tests = requests.get(MP_URL, timeout=60).status_code != 200
+
+except (ModuleNotFoundError, ImportError, requests.exceptions.ConnectionError):
+    # Skip all MPRester tests if some downstream problem on the website, mp-api or whatever.
+    skip_mprester_tests = True
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_STRUCT = os.path.join(files_dir, "test_struct")
@@ -224,9 +228,9 @@ class StructureTest(unittest.TestCase):
             with self.subTest(species=test.species):
                 self.assertEqual(SmactStructure._get_ele_stoics(test.species), expected)
 
-    @unittest.skipUnless(
-        (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY") or MP_API_AVAILABLE),
-        "requires MP API key to be set.",
+    @pytest.mark.skipif(
+        (skip_mprester_tests or not MP_API_AVAILABLE),
+        reason="Materials Project API not available or not configured.",
     )
     def test_from_mp(self):
         """Test downloading structures from materialsproject.org."""
