@@ -4,16 +4,28 @@ import os
 import shutil
 import sys
 import unittest
+from importlib.util import find_spec
 
 import pandas as pd
 import pytest
+import requests
 from pymatgen.core import SETTINGS, Composition
 
 from smact import Element
 from smact.screening import smact_filter
 from smact.utils.composition import comp_maker, formula_maker, parse_formula
-from smact.utils.crystal_space import download_compounds_with_mp_api, generate_composition_with_smact
+from smact.utils.crystal_space import generate_composition_with_smact
 from smact.utils.oxidation import ICSD24OxStatesFilter
+
+MP_URL = "https://materialsproject.org"
+MP_API_AVAILABLE = bool(find_spec("mp_api"))
+
+try:
+    skip_mprester_tests = requests.get(MP_URL, timeout=60).status_code != 200
+
+except (ModuleNotFoundError, ImportError, requests.exceptions.ConnectionError):
+    # Skip all MPRester tests if some downstream problem on the website, mp-api or whatever.
+    skip_mprester_tests = True
 
 
 class TestComposition(unittest.TestCase):
@@ -122,17 +134,25 @@ class TestCrystalSpace(unittest.TestCase):
                 shutil.rmtree("data")
 
     @pytest.mark.skipif(
-        sys.platform == "win32" or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")),
+        (
+            sys.platform == "win32"
+            or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY"))
+            or not MP_API_AVAILABLE
+            or skip_mprester_tests
+        ),
         reason="Test requires MP_API_KEY and fails on Windows due to filepath issues.",
     )
     def test_download_compounds_with_mp_api(self):
         save_mp_dir = "data/binary/mp_data"
-        download_compounds_with_mp_api.download_mp_data(
-            mp_api_key=os.environ.get("MP_API_KEY"),
-            num_elements=2,
-            max_stoich=1,
-            save_dir=save_mp_dir,
-        )
+        if MP_API_AVAILABLE:
+            from smact.utils.crystal_space import download_compounds_with_mp_api
+
+            download_compounds_with_mp_api.download_mp_data(
+                mp_api_key=os.environ.get("MP_API_KEY"),
+                num_elements=2,
+                max_stoich=1,
+                save_dir=save_mp_dir,
+            )
 
         # Check if the data was downloaded
         self.assertTrue(os.path.exists(save_mp_dir))
