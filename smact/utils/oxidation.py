@@ -82,6 +82,7 @@ class ICSD24OxStatesFilter:
 
     def get_species_occurrences_df(
         self,
+        consensus_threshold=3,
         include_one_oxidation_state: bool = False,
         sort_by_occurrences: bool = True,
     ):
@@ -90,12 +91,13 @@ class ICSD24OxStatesFilter:
         Args:
             include_one_oxidation_state (bool): Include oxidation states +1 and -1 in the species or include as + and - signs. Default is False.
             sort_by_occurrences (bool): Sort the species list by occurrences. Default is True.
+            consensus_threshold (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
 
         Returns:
             dataframe: The species list as a dataframe of species with their occurrences.
         """
         species_occurrences_df = self.ox_states_df[
-            (self.ox_states_df.results_count > 0) & (self.ox_states_df.oxidation_state != 0)
+            (self.ox_states_df.results_count >= consensus_threshold)
         ].reset_index(drop=True)
         species_occurrences_df["species"] = species_occurrences_df.apply(
             lambda x: unparse_spec(
