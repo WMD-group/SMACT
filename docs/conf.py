@@ -389,4 +389,3 @@ epub_exclude_files = ["search.html"]
 # epub_use_index = True
 
 # Mock out spglib and ase modules to avoid import failures
-
