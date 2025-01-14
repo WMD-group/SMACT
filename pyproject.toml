@@ -121,7 +121,19 @@ strict = [
     "dash==2.18.2",
 ]
 
+[tool.setuptools]
+include-package-data = true
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["smact","smact.*"]
+
+[tool.setuptools.package-data]
+"smact" = ["data/*.txt", "data/*.csv", "data/*.data", "data/*.xlsx", "data/*.json", "data/species_rep/*.json"]
+
+[tool.pytest.ini_options]
+minversion = 6.0
+testpaths = ["smact/tests"]
 
 [tool.ruff]
 target-version = "py310"
