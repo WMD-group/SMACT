@@ -17,7 +17,7 @@ from smact.utils.composition import comp_maker, formula_maker, parse_formula
 from smact.utils.crystal_space import generate_composition_with_smact
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
-MP_URL = "https://materialsproject.org"
+MP_URL = "https://api.materialsproject.org"
 MP_API_AVAILABLE = bool(find_spec("mp_api"))
 
 try:
