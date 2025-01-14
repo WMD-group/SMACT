@@ -97,7 +97,7 @@ class ICSD24OxStatesFilter:
             dataframe: The species list as a dataframe of species with their occurrences.
         """
         species_occurrences_df = self.ox_states_df[
-            (self.ox_states_df.results_count >= consensus_threshold)
+            (self.ox_states_df.results_count >= consensus_threshold) & (self.ox_states_df.oxidation_state != 0)
         ].reset_index(drop=True)
         species_occurrences_df["species"] = species_occurrences_df.apply(
             lambda x: unparse_spec(
@@ -106,7 +106,7 @@ class ICSD24OxStatesFilter:
             ),
             axis=1,
         )
-        species_occurrences_df = species_occurrences_df[["species", "results_count"]]
+        species_occurrences_df = species_occurrences_df[["element", "species", "results_count"]]
         if sort_by_occurrences:
             return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)
         return species_occurrences_df
