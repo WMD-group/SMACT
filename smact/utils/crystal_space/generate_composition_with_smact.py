@@ -57,6 +57,7 @@ def generate_composition_with_smact(
         num_processes (int): the number of processes to use. Defaults to None.
         save_path (str): the path to save the results. Defaults to None.
         oxidation_states_set (str): the oxidation states set to use. Options are "smact14", "icsd16", "icsd24", "pymatgen_sp" or a filepath to a custom oxidation states list. For reproducing the Faraday Discussions results, use "smact14".
+
     Returns:
         df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
 
@@ -71,11 +72,7 @@ def generate_composition_with_smact(
     # 2. generate all possible stoichiometric combinations
     print("#2. Generating all possible stoichiometric combinations...")
 
-    pool = multiprocessing.Pool(
-        processes=(
-            multiprocessing.cpu_count() if num_processes is None else num_processes
-        )
-    )
+    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     compounds = list(
         tqdm(
             pool.imap_unordered(
@@ -102,17 +99,11 @@ def generate_composition_with_smact(
     # 3. filter compounds with smact
     print("#3. Filtering compounds with SMACT...")
     elements_pauling = [
-        Element(element)
-        for element in ordered_elements(1, max_atomic_num)
-        if Element(element).pauling_eneg is not None
+        Element(element) for element in ordered_elements(1, max_atomic_num) if Element(element).pauling_eneg is not None
     ]  # omit elements without Pauling electronegativity (e.g., He, Ne, Ar, ...)
     compounds_pauling = list(itertools.combinations(elements_pauling, num_elements))
 
-    pool = multiprocessing.Pool(
-        processes=(
-            multiprocessing.cpu_count() if num_processes is None else num_processes
-        )
-    )
+    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     results = list(
         tqdm(
             pool.imap_unordered(
