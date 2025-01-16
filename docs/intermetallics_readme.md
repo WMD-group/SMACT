@@ -1,6 +1,6 @@
 # SMACT Intermetallics Enhancement
 
-This document describes the enhancements made to SMACT to better handle intermetallic compounds and alloys. The changes introduce a more sophisticated scoring system for identifying and validating intermetallic compounds, moving beyond the simple binary classification previously used.
+This document describes the enhancements made to SMACT to better handle intermetallic compounds and alloys. The changes introduce a scoring system for identifying and validating intermetallic compounds, moving beyond the simple binary classification previously used.
 
 ## Key Changes
 
@@ -98,7 +98,7 @@ print(intermetallic_score("Fe2O3"))  # ~0.45
 
 The existing `smact_validity` function in `smact.screening` has been enhanced:
 
-- New parameter `intermetallic_threshold` (default: 0.7)
+- New parameter `intermetallic_threshold` (default: 0.7) # TODO: change to 0.5 as the classification task suggests that this is the best parameter for the task
 - Uses the scoring system when `include_alloys=True`
 - More nuanced than previous binary metal check
 - Example:
@@ -125,11 +125,12 @@ print(smact_validity("Fe3Al", include_alloys=True, intermetallic_threshold=0.8))
 
 ### After
 
-- Sophisticated scoring system using multiple chemical descriptors
+- Scoring system using multiple chemical descriptors
 - Better handling of partial metallic character
 - Consideration of d-electron contributions
 - Continuous scoring (0-1) for more nuanced classification
-- Adjustable threshold for different applications
+- Adjustable threshold for different applications and weightings for said combined rule\*\*
+  -The intermetallic_threshold in smact_validity() can be raised or lowered. Literature shows that in real materials, the line between “intermetallic” and “ionic/metallic” can be fuzzy. Having a tunable threshold aligns with different research needs (e.g., searching for strongly metallic Heuslers vs. half-metallic systems)
 
 ## Usage Examples
 
@@ -192,24 +193,19 @@ metrics = {
 
 ## Future Development Directions
 
-1. **Machine Learning Integration**
-
-   - Train models on the new features
-   - Develop composition-specific thresholds
-
-2. **Additional Features**
+1. **Additional Features**
 
    - Incorporate atomic size factors
    - Add structure prediction capabilities
    - Include formation energy estimates
 
-3. **Validation and Refinement**
+2. **Validation and Refinement**
 
    - Benchmark against experimental databases
    - Refine scoring weights with more data
    - Add support for mixed-valence compounds
 
-4. **Extended Functionality**
+3. **Extended Functionality**
    - Add support for partial occupancies
    - Include temperature-dependent properties
    - Integrate with phase diagram tools
