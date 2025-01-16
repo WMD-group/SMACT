@@ -23,48 +23,56 @@ class ICSD24OxStatesFilter:
         """Initialise the ICSD 24 oxidation states list."""
         self.ox_states_df = pd.read_json(path.join(data_directory, "oxidation_states_icsd24_counts.json"))
 
-    def filter(self, threshold: int, include_zero: bool = False):
+    def filter(self, consensus: int = 3, include_zero: bool = False, commonality: str = "low"):
         """Filter the ICSD 24 oxidation states list by a threshold.
 
         Args:
-            threshold (int): The threshold for filtering the oxidation states list.
+            consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
             include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
+            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the threshold has been applied). "Low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. Default is "low".
 
         Returns:
             pd.DataFrame: The filtered oxidation states list as a DataFrame.
         """
+        commonality_map = {"low": 0, "medium": 10, "high": 50}
+        commonality_threshold = commonality_map.get(commonality)
         if not include_zero:
             filtered_df = self.ox_states_df[self.ox_states_df["oxidation_state"] != 0].reset_index(drop=True)
         else:
             filtered_df = self.ox_states_df
+        filtered_df = filtered_df[
+            (filtered_df["results_count"] >= consensus) & (filtered_df["results_count"] != 0)
+        ].reset_index(drop=True)
+        element_totals = filtered_df.groupby("element")["results_count"].transform("sum")
+        filtered_df["species_proportion (%)"] = filtered_df["results_count"] / element_totals * 100
+        filtered_df = filtered_df[filtered_df["species_proportion (%)"] >= commonality_threshold].reset_index(drop=True)
+
         summary_df = (
-            filtered_df[(filtered_df["results_count"] > 0)]
-            .groupby("element")
-            .apply(self._filter_oxidation_states, threshold, include_groups=False)
-            .reset_index()
+            filtered_df.groupby("element").apply(self._filter_oxidation_states, 0, include_groups=False).reset_index()
         )
         summary_df.columns = ["element", "oxidation_state"]
-        # Sort the elements by atomic number
         summary_df["atomic_number"] = summary_df["element"].apply(lambda x: Element(x).number)
         return summary_df.sort_values("atomic_number").drop(columns="atomic_number").reset_index(drop=True)
 
     def get_species_list(
         self,
-        threshold: int,
+        consensus: int,
         include_zero: bool = False,
         include_one_oxidation_state: bool = False,
+        commonality: str = "low",
     ):
         """Get the filtered ICSD 24 oxidation states list as a list of species.
 
         Args:
-            threshold (int): The threshold for filtering the oxidation states list.
+            consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
             include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
             include_one_oxidation_state (bool): Include oxidation states +1 and -1 in the filtered list or include as + and - signs. Default is False.
+            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the threshold has been applied). "Low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. Default is "low".
 
         Returns:
             list: The filtered oxidation states list as a list of species.
         """
-        filtered_df = self.filter(threshold, include_zero)
+        filtered_df = self.filter(consensus, include_zero, commonality)
         species_list = []
         for _, row in filtered_df.iterrows():
             ox_states = row["oxidation_state"].split(" ")
@@ -82,22 +90,28 @@ class ICSD24OxStatesFilter:
 
     def get_species_occurrences_df(
         self,
-        consensus_threshold=3,
+        consensus: int = 3,
         include_one_oxidation_state: bool = False,
         sort_by_occurrences: bool = True,
+        include_zero: bool = False,
     ):
         """Get the ICSD 24 oxidation states list as a dataframe of species with their occurrences.
 
         Args:
+            consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
             include_one_oxidation_state (bool): Include oxidation states +1 and -1 in the species or include as + and - signs. Default is False.
             sort_by_occurrences (bool): Sort the species list by occurrences. Default is True.
-            consensus_threshold (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
+            include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
 
         Returns:
             dataframe: The species list as a dataframe of species with their occurrences.
         """
-        species_occurrences_df = self.ox_states_df[
-            (self.ox_states_df.results_count >= consensus_threshold) & (self.ox_states_df.oxidation_state != 0)
+        if not include_zero:
+            species_occurrences_df = self.ox_states_df[self.ox_states_df["oxidation_state"] != 0].reset_index(drop=True)
+        else:
+            species_occurrences_df = self.ox_states_df
+        species_occurrences_df = species_occurrences_df[
+            (species_occurrences_df.results_count >= consensus)
         ].reset_index(drop=True)
         species_occurrences_df["species"] = species_occurrences_df.apply(
             lambda x: unparse_spec(
@@ -107,6 +121,10 @@ class ICSD24OxStatesFilter:
             axis=1,
         )
         species_occurrences_df = species_occurrences_df[["element", "species", "results_count"]]
+        element_totals = species_occurrences_df.groupby("element")["results_count"].transform("sum")
+        species_occurrences_df["species_proportion (%)"] = (
+            species_occurrences_df["results_count"] / element_totals * 100
+        )
         if sort_by_occurrences:
             return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)
         return species_occurrences_df
@@ -114,19 +132,21 @@ class ICSD24OxStatesFilter:
     def write(
         self,
         filename: str,
-        threshold: int,
-        include_zero: bool = False,
         comment: str | None = None,
+        consensus: int = 3,
+        include_zero: bool = False,
+        commonality: str = "low",
     ):
         """Write the filtered ICSD 24 oxidation states list to a SMACT-compatible oxidation states txt file.
 
         Args:
             filename (str): The filename to write the filtered oxidation states list to.
-            threshold (int): The threshold for filtering the oxidation states list.
-            include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
             comment (str): A comment to include in the txt file. Default is None.
+            consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
+            include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
+            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the threshold has been applied). "Low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. Default is "low".
         """
-        filtered_df = self.filter(threshold, include_zero)
+        filtered_df = self.filter(consensus, include_zero, commonality)
         # Convert the DataFrame to the require format
         summary_dict = filtered_df.set_index("element")["oxidation_state"].to_dict()
         all_elements = ordered_elements(1, 103)
@@ -144,7 +164,9 @@ class ICSD24OxStatesFilter:
         if not filename.endswith(".txt"):
             filename += ".txt"
         with open(filename, "w") as f:
-            f.write(f"#\n# Oxidation state set\n# Source: ICSD (2024), filtered for > {threshold} reports\n#\n")
+            f.write(
+                f"#\n# Oxidation state set\n# Source: ICSD (2024), filtered for {commonality} commonality of reports\n#\n"
+            )
             if comment:
                 f.write(f"# {comment}\n#\n")
             if include_zero:
@@ -154,6 +176,6 @@ class ICSD24OxStatesFilter:
 
     def _filter_oxidation_states(self, group: pd.DataFrame.groupby, threshold: int):
         """Filter the oxidation states list by a threshold."""
-        filtered_states = group[group["results_count"] > threshold]
+        filtered_states = group[group["results_count"] >= threshold]
 
         return " ".join(map(str, sorted(filtered_states["oxidation_state"])))
