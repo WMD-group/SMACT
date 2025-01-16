@@ -18,6 +18,7 @@ from smact import Element, element_dictionary, neutral_ratios
 from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
 )
+from smact.intermetallics import intermetallic_score
 
 if TYPE_CHECKING:
     import pymatgen
@@ -437,11 +438,13 @@ def smact_validity(
     use_pauling_test: bool = True,
     include_alloys: bool = True,
     oxidation_states_set: str = "icsd24",
+    intermetallic_threshold: float = 0.7,
 ) -> bool:
     """
     Check if a composition is valid according to the SMACT rules.
 
     Composition is considered valid if it passes the charge neutrality test and the Pauling electronegativity test.
+    For alloys/intermetallics (when include_alloys=True), uses a more sophisticated scoring system.
 
      .. warning::
         For backwards compatibility in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
@@ -457,6 +460,8 @@ def smact_validity(
             'pymatgen_sp' and 'wiki' for the 2014 SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure predictor and Wikipedia
             (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
             A filepath to an oxidation states text file can also be supplied.
+        intermetallic_threshold (float): When include_alloys=True, this threshold determines when a composition
+            is considered an intermetallic compound based on its score (0-1). Default is 0.7.
 
     Returns:
     -------
@@ -469,11 +474,14 @@ def smact_validity(
 
     if len(set(elem_symbols)) == 1:
         return True
+        
     if include_alloys:
-        is_metal_list = [elem_s in smact.metals for elem_s in elem_symbols]
-        if all(is_metal_list):
+        # Use the new intermetallic scoring system
+        score = intermetallic_score(composition)
+        if score >= intermetallic_threshold:
             return True
 
+    # Rest of the existing validation logic
     count = tuple(composition.as_dict().values())
     count = [int(c) for c in count]
     # Reduce stoichiometry to gcd
