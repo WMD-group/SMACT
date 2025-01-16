@@ -80,7 +80,9 @@ class TestComposition(unittest.TestCase):
         self.assertEqual(Composition("FeO"), comp2)
         self.assertEqual(Composition({"Fe2+": 1, "O2-": 1}), comp1)
         self.assertEqual(Composition({"Fe2+": 1, "Fe3+": 2, "O2-": 4}), comp3)
-        self.assertEqual(Composition({"Li+": 10, "Ge4+": 1, "P5+": 2, "S2-": 12}), comp4)
+        self.assertEqual(
+            Composition({"Li+": 10, "Ge4+": 1, "P5+": 2, "S2-": 12}), comp4
+        )
 
     def test_formula_maker(self):
         """Test the formula_maker function"""
@@ -115,17 +117,20 @@ class TestCrystalSpace(unittest.TestCase):
         }
         for ox_states in oxidation_states_sets:
             with self.subTest(ox_states=ox_states):
-                smact_df = generate_composition_with_smact.generate_composition_with_smact(
-                    num_elements=2,
-                    max_stoich=3,
-                    max_atomic_num=20,
-                    save_path=save_dir,
-                    oxidation_states_set=ox_states,
+                smact_df = (
+                    generate_composition_with_smact.generate_composition_with_smact(
+                        num_elements=2,
+                        max_stoich=3,
+                        max_atomic_num=20,
+                        save_path=save_dir,
+                        oxidation_states_set=ox_states,
+                    )
                 )
                 self.assertIsInstance(smact_df, pd.DataFrame)
                 self.assertTrue(len(smact_df) == 1330)
                 self.assertTrue(
-                    smact_df["smact_allowed"].sum() == oxidation_states_sets_dict[ox_states]["smact_allowed"]
+                    smact_df["smact_allowed"].sum()
+                    == oxidation_states_sets_dict[ox_states]["smact_allowed"]
                 )
                 # Check if the data was saved to disk
                 self.assertTrue(os.path.exists(save_dir))
@@ -163,8 +168,12 @@ class TestCrystalSpace(unittest.TestCase):
 
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
-TEST_ICSD_OX_STATES = os.path.join(files_dir, "test_icsd_oxidation_states_filter_1000.txt")
-TEST_ICSD_OX_STATES_W_ZERO = os.path.join(files_dir, "test_icsd_oxidation_states_filter_1000_w_0_ox_state.txt")
+TEST_ICSD_OX_STATES = os.path.join(
+    files_dir, "test_icsd_oxidation_states_filter_1000.txt"
+)
+TEST_ICSD_OX_STATES_W_ZERO = os.path.join(
+    files_dir, "test_icsd_oxidation_states_filter_1000_w_0_ox_state.txt"
+)
 
 
 class OxidationStatesTest(unittest.TestCase):
@@ -178,19 +187,20 @@ class OxidationStatesTest(unittest.TestCase):
     def test_oxidation_states_filter(self):
         self.assertIsInstance(self.ox_filter.ox_states_df, pd.DataFrame)
         threshold = 10
-        filtered_df = self.ox_filter.filter(threshold)
+        filtered_df = self.ox_filter.filter(consensus=threshold)
 
         self.assertIsInstance(filtered_df, pd.DataFrame)
         self.assertEqual(filtered_df.columns.tolist(), ["element", "oxidation_state"])
-        # self.assertEqual(filtered_df.loc[""])
 
     def test_oxidation_states_write(self):
         threshold = 1000
         filename = "test_ox_states"
         filename_w_zero = "test_ox_states_w_zero"
         comment = "Testing writing of ICSD 24 oxidation states list."
-        self.ox_filter.write(filename, threshold, comment=comment)
-        self.ox_filter.write(filename_w_zero, threshold, include_zero=True, comment=comment)
+        self.ox_filter.write(filename, comment=comment, consensus=threshold)
+        self.ox_filter.write(
+            filename_w_zero, comment=comment, consensus=threshold, include_zero=True
+        )
         self.assertTrue(os.path.exists(f"{filename}.txt"))
         with open(f"{filename}.txt") as f:
             self.assertEqual(f.read(), self.test_ox_states)
@@ -204,7 +214,7 @@ class OxidationStatesTest(unittest.TestCase):
 
     def test_oxidation_states_filter_species_list(self):
         for threshold, length in [(0, 490), (5, 358), (50, 227)]:
-            species_list = self.ox_filter.get_species_list(threshold)
+            species_list = self.ox_filter.get_species_list(consensus=threshold)
             self.assertIsInstance(species_list, list)
             self.assertEqual(len(species_list), length)
 
