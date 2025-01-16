@@ -474,7 +474,7 @@ def smact_validity(
 
     if len(set(elem_symbols)) == 1:
         return True
-        
+
     if include_alloys:
         # Use the new intermetallic scoring system
         score = intermetallic_score(composition)
