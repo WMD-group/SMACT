@@ -130,7 +130,7 @@ print(smact_validity("Fe3Al", include_alloys=True, intermetallic_threshold=0.8))
 - Consideration of d-electron contributions
 - Continuous scoring (0-1) for more nuanced classification
 - Adjustable threshold for different applications and weightings for said combined rule\*\*
-  -The intermetallic_threshold in smact_validity() can be raised or lowered. Literature shows that in real materials, the line between “intermetallic” and “ionic/metallic” can be fuzzy. Having a tunable threshold aligns with different research needs (e.g., searching for strongly metallic Heuslers vs. half-metallic systems)
+  -The intermetallic_threshold in smact_validity() can be raised or lowered. Literature shows that in real materials, the line between "intermetallic" and "ionic/metallic" can be fuzzy. Having a tunable threshold aligns with different research needs (e.g., searching for strongly metallic Heuslers vs. half-metallic systems)
 
 ## Usage Examples
 
@@ -197,7 +197,7 @@ metrics = {
 
    - Incorporate atomic size factors
    - Add structure prediction capabilities
-   - Include formation energy estimates
+   - Include formation energy estimates - linking back to Miedema's model [DOI Link](https://doi.org/10.1016/j.cpc.2016.08.013)
 
 2. **Validation and Refinement**
 
@@ -222,5 +222,13 @@ Contributions to improve the intermetallics functionality are welcome! Areas par
 ## References
 
 1. Original SMACT paper: [SMACT: Semiconducting Materials by Analogy and Chemical Theory](https://joss.theoj.org/papers/10.21105/joss.01361)
-2. Intermetallics theory and classification: Various literature sources
-3. Electronegativity scales and their application to intermetallics
+2. Intermetallics theory and classification literature sources:
+
+   - D.G. Pettifor introduced the concept of a single "chemical scale" or "structure map" coordinate (Pettifor number) to systematically separate compound classes. The new intermetallicscore is a step in that direction but customized to SMACT's internal data structures.
+
+     - Reference: D.G. Pettifor, "A chemical scale for crystal-structure maps," Solid State Communications. 51 (1984) 31–34. [DOI Link](<https://doi.org/10.1016/0038-1098(84)90765-8>)
+
+   - Also, The role of charge transfer and atomic size mismatch is pivotal in stabilizing intermetallic phases. Miedema's framework quantifies these effects, making it useful for predicting alloying behaviors and crystal structure, the parameters coded here, while conceptually similar have not implemented Miedema directly.
+     - Reference: A.R. Miedema, Cohesion in alloys - fundamentals of a semi-empirical model. [DOI Link](<https://doi.org/10.1016/0378-4363(80)90054-6>)
+
+3. Electronegativity scales (pauling electronegativity)
