@@ -11,19 +11,19 @@ A dedicated module for handling intermetallic compounds with several specialized
 #### `get_metal_fraction(composition)`
 
 - Calculates the fraction of metallic elements in a composition
-- Input: pymatgen Composition object
+- Input: Chemical formula (str) or pymatgen Composition object
 - Output: Float between 0-1
 - Example:
 
 ```python
-from pymatgen.core import Composition
 from smact.intermetallics import get_metal_fraction
 
 # Pure intermetallic - returns 1.0
-print(get_metal_fraction(Composition("Fe3Al")))
+print(get_metal_fraction("Fe3Al"))  # Works with string formula
+print(get_metal_fraction(Composition("Fe3Al")))  # Works with Composition
 
-# Mixed compound - returns fraction
-print(get_metal_fraction(Composition("Fe2O3")))
+# Mixed compound - returns fraction of how much of the compound is metallic
+print(get_metal_fraction("Fe2O3"))  # 0.4
 ```
 
 #### `get_d_electron_fraction(composition)`
@@ -36,10 +36,10 @@ print(get_metal_fraction(Composition("Fe2O3")))
 from smact.intermetallics import get_d_electron_fraction
 
 # Pure transition metal compound - returns 1.0
-print(get_d_electron_fraction(Composition("Fe2Nb")))
+print(get_d_electron_fraction("Fe2Nb"))
 
-# Main group compound - returns 0.0
-print(get_d_electron_fraction(Composition("Mg2Si")))
+# Mixed compound - returns fraction
+print(get_d_electron_fraction("Fe3Al"))  # 0.75 (Fe is d-block, Al is not)
 ```
 
 #### `get_distinct_metal_count(composition)`
@@ -52,10 +52,13 @@ print(get_d_electron_fraction(Composition("Mg2Si")))
 from smact.intermetallics import get_distinct_metal_count
 
 # Binary intermetallic
-print(get_distinct_metal_count(Composition("Fe3Al")))  # Returns 2
+print(get_distinct_metal_count("Fe3Al"))  # Returns 2
 
 # Complex HEA-like composition
-print(get_distinct_metal_count(Composition("NbTiAlCr")))  # Returns 4
+print(get_distinct_metal_count("NbTiAlCr"))  # Returns 4
+
+# Non-metallic compound
+print(get_distinct_metal_count("SiO2"))  # Returns 0
 ```
 
 #### `get_pauling_test_mismatch(composition)`
@@ -69,49 +72,129 @@ print(get_distinct_metal_count(Composition("NbTiAlCr")))  # Returns 4
 from smact.intermetallics import get_pauling_test_mismatch
 
 # Intermetallic - low mismatch
-print(get_pauling_test_mismatch(Composition("Fe3Al")))
+print(get_pauling_test_mismatch("Fe3Al"))  # 0.22
 
 # Ionic compound - high mismatch
-print(get_pauling_test_mismatch(Composition("NaCl")))
+print(get_pauling_test_mismatch("NaCl"))  # -1.23
 ```
 
 #### `intermetallic_score(composition)`
 
 - Main scoring function combining multiple metrics
 - Returns a score between 0-1
-- Higher scores indicate more intermetallic character
+- Higher scores indicate more intermetallic character depending on the set threshold and weighting of the metrics
 - Example:
 
 ```python
 from smact.intermetallics import intermetallic_score
 
 # Classic intermetallics - high scores
-print(intermetallic_score("Fe3Al"))  # ~0.85
-print(intermetallic_score("Ni3Ti"))  # ~0.82
+print(intermetallic_score("Fe3Al"))  # ~0.83
+print(intermetallic_score("Ni3Ti"))  # ~0.87
 
 # Non-intermetallics - low scores
-print(intermetallic_score("NaCl"))  # ~0.20
-print(intermetallic_score("Fe2O3"))  # ~0.45
+print(intermetallic_score("NaCl"))  # 0.63
+print(intermetallic_score("Fe2O3"))  # 0.64
+print(intermetallic_score("SiO2"))  # 0.25
 ```
 
 ### 2. Enhanced `smact_validity`
 
-The existing `smact_validity` function in `smact.screening` has been enhanced:
+The existing `smact_validity` function in `smact.screening` has been enhanced with three validation paths:
 
-- New parameter `intermetallic_threshold` (default: 0.7) # TODO: change to 0.5 as the classification task suggests that this is the best parameter for the task
-- Uses the scoring system when `include_alloys=True`
-- More nuanced than previous binary metal check
-- Example:
+1. Standard validation (charge neutrality and electronegativity)
+2. Simple metal alloy validation
+3. Intermetallic scoring validation
+
+Example usage showing all validation paths:
 
 ```python
 from smact.screening import smact_validity
 
-# Check with intermetallic detection
-print(smact_validity("Fe3Al", include_alloys=True))  # True
-print(smact_validity("NaCl", include_alloys=True))  # False
+# Test with different validation methods
+compound = "Fe3Al"
 
-# Adjust threshold for stricter filtering
-print(smact_validity("Fe3Al", include_alloys=True, intermetallic_threshold=0.8))
+# 1. Standard validation (no alloys/intermetallics)
+is_valid_standard = smact_validity(
+    compound, use_pauling_test=True, include_alloys=False, check_intermetallic=False
+)
+
+# 2. With alloy detection
+is_valid_alloy = smact_validity(
+    compound, use_pauling_test=True, include_alloys=True, check_intermetallic=False
+)
+
+# 3. With intermetallic detection
+is_valid_intermetallic = smact_validity(
+    compound,
+    use_pauling_test=True,
+    include_alloys=False,
+    check_intermetallic=True,
+    intermetallic_threshold=0.7,
+)
+
+# Or combine methods
+is_valid = smact_validity(
+    compound,
+    use_pauling_test=True,
+    include_alloys=True,
+    check_intermetallic=True,
+    intermetallic_threshold=0.7,
+)
+```
+
+### 3. Comprehensive Analysis Example
+
+Here's how to perform a detailed analysis of a compound:
+
+```python
+from smact.intermetallics import *
+from smact.screening import smact_validity
+
+
+def analyze_compound(formula):
+    """Perform comprehensive analysis of a compound."""
+    # Basic metrics
+    metal_frac = get_metal_fraction(formula)
+    d_frac = get_d_electron_fraction(formula)
+    n_metals = get_distinct_metal_count(formula)
+    pauling = get_pauling_test_mismatch(formula)
+    score = intermetallic_score(formula)
+
+    # Validity checks
+    valid_standard = smact_validity(
+        formula, use_pauling_test=True, include_alloys=False, check_intermetallic=False
+    )
+    valid_alloy = smact_validity(
+        formula, use_pauling_test=True, include_alloys=True, check_intermetallic=False
+    )
+    valid_intermetallic = smact_validity(
+        formula, use_pauling_test=True, include_alloys=False, check_intermetallic=True
+    )
+
+    print(f"Analysis of {formula}:")
+    print(f"Metal fraction: {metal_frac:.2f}")
+    print(f"d-electron fraction: {d_frac:.2f}")
+    print(f"Distinct metals: {n_metals}")
+    print(f"Pauling mismatch: {'nan' if math.isnan(pauling) else f'{pauling:.2f}'}")
+    print(f"Intermetallic score: {score:.2f}")
+    print(f"Valid (standard): {valid_standard}")
+    print(f"Valid (alloy): {valid_alloy}")
+    print(f"Valid (intermetallic): {valid_intermetallic}")
+
+
+# Example usage
+compounds = [
+    "Fe3Al",  # Classic intermetallic
+    "NaCl",  # Ionic
+    "Fe2O3",  # Metal oxide
+    "Cu2MgSn",  # Heusler alloy
+    "NbTiAlCr",  # High-entropy alloy
+]
+
+for compound in compounds:
+    analyze_compound(compound)
+    print("-" * 50)
 ```
 
 ## Differences from Previous Version
