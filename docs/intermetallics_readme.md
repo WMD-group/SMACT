@@ -19,8 +19,7 @@ A dedicated module for handling intermetallic compounds with several specialized
 from smact.intermetallics import get_metal_fraction
 
 # Pure intermetallic - returns 1.0
-print(get_metal_fraction("Fe3Al"))  # Works with string formula
-print(get_metal_fraction(Composition("Fe3Al")))  # Works with Composition
+print(get_metal_fraction("Fe3Al"))  # Works with string formula (& Composition object)
 
 # Mixed compound - returns fraction of how much of the compound is metallic
 print(get_metal_fraction("Fe2O3"))  # 0.4
