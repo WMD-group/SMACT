@@ -11,7 +11,7 @@ from smact.properties import valence_electron_count
 
 
 def _ensure_composition(composition: str | Composition) -> Composition:
-    """Convert input to pymatgen Composition if it isn't already.
+    """Convert input to a pymatgen Composition if it isn't already.
 
     Args:
         composition: Chemical formula as string or pymatgen Composition
@@ -21,11 +21,17 @@ def _ensure_composition(composition: str | Composition) -> Composition:
 
     Raises:
         ValueError: If the composition string is empty
+        ValueError: If the formula is invalid and can't be parsed.
     """
     if isinstance(composition, str):
         if not composition.strip():
             raise ValueError("Empty composition")
-        return Composition(composition)
+        # Try to parse with pymatgen
+        try:
+            return Composition(composition)
+        except ValueError as exc:
+            # If pymatgen can't parse, re-raise with a message the test expects
+            raise ValueError("Invalid formula") from exc
     return composition
 
 
