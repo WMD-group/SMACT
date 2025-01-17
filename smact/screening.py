@@ -438,13 +438,14 @@ def smact_validity(
     use_pauling_test: bool = True,
     include_alloys: bool = True,
     oxidation_states_set: str = "icsd24",
+    check_intermetallic: bool = False,
     intermetallic_threshold: float = 0.7,
 ) -> bool:
     """
     Check if a composition is valid according to the SMACT rules.
 
     Composition is considered valid if it passes the charge neutrality test and the Pauling electronegativity test.
-    For alloys/intermetallics (when include_alloys=True), uses a more sophisticated scoring system.
+    Can also validate intermetallic compounds using a scoring system, and simple metal alloys.
 
      .. warning::
         For backwards compatibility in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
@@ -460,8 +461,9 @@ def smact_validity(
             'pymatgen_sp' and 'wiki' for the 2014 SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure predictor and Wikipedia
             (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
             A filepath to an oxidation states text file can also be supplied.
-        intermetallic_threshold (float): When include_alloys=True, this threshold determines when a composition
-            is considered an intermetallic compound based on its score (0-1). Default is 0.7.
+        check_intermetallic (bool): If True, uses the intermetallic scoring system to validate potential intermetallic compounds.
+        intermetallic_threshold (float): Score threshold (0-1) above which a compound is considered a valid intermetallic.
+            Only used if check_intermetallic is True.
 
     Returns:
     -------
@@ -472,16 +474,22 @@ def smact_validity(
         composition = Composition(composition)
     elem_symbols = tuple(composition.as_dict().keys())
 
+    # Single element case
     if len(set(elem_symbols)) == 1:
         return True
 
-    if include_alloys:
-        # Use the new intermetallic scoring system
+    # Check for intermetallic compounds if enabled
+    if check_intermetallic:
         score = intermetallic_score(composition)
         if score >= intermetallic_threshold:
             return True
 
-    # Rest of the existing validation logic
+    # Check for simple metal alloys if enabled
+    if include_alloys:
+        is_metal_list = [elem_s in smact.metals for elem_s in elem_symbols]
+        if all(is_metal_list):
+            return True
+
     count = tuple(composition.as_dict().values())
     count = [int(c) for c in count]
     # Reduce stoichiometry to gcd
@@ -508,7 +516,6 @@ def smact_validity(
             stacklevel=2,
         )
         ox_combos = [e.oxidation_states_wiki for e in smact_elems]
-
     else:
         raise (
             Exception(

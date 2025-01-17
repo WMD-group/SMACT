@@ -10,31 +10,46 @@ from smact import Element
 from smact.properties import valence_electron_count
 
 
+def _ensure_composition(composition: str | Composition) -> Composition:
+    """Convert input to pymatgen Composition if it isn't already.
+
+    Args:
+        composition: Chemical formula as string or pymatgen Composition
+
+    Returns:
+        Composition: A pymatgen Composition object
+    """
+    if isinstance(composition, str):
+        return Composition(composition)
+    return composition
+
+
 # Helper function to reduce code duplication in element fraction calculations
-def get_element_fraction(composition: Composition, element_set: set[str]) -> float:
+def get_element_fraction(composition: str | Composition, element_set: set[str]) -> float:
     """Calculate the fraction of elements from a given set in a composition.
     This helper function is used to avoid code duplication in functions that
     calculate fractions of specific element types (e.g., metals, d-block elements).
 
     Args:
-        composition: A pymatgen Composition object
+        composition: Chemical formula as string or pymatgen Composition
         element_set: Set of element symbols to check for
 
     Returns:
         float: Fraction of the composition that consists of elements from the set (0-1)
     """
-    total_amt = sum(composition.values())
-    target_amt = sum(amt for el, amt in composition.items() if el.symbol in element_set)
+    comp = _ensure_composition(composition)
+    total_amt = sum(comp.values())
+    target_amt = sum(amt for el, amt in comp.items() if el.symbol in element_set)
     return target_amt / total_amt
 
 
 # Uses helper function with smact.metals set
-def get_metal_fraction(composition: Composition) -> float:
+def get_metal_fraction(composition: str | Composition) -> float:
     """Calculate the fraction of metallic elements in a composition.
     Implemented using get_element_fraction helper with smact.metals set.
 
     Args:
-        composition: A pymatgen Composition object
+        composition: Chemical formula as string or pymatgen Composition
 
     Returns:
         float: Fraction of the composition that consists of metallic elements (0-1)
@@ -43,12 +58,12 @@ def get_metal_fraction(composition: Composition) -> float:
 
 
 # Uses helper function with smact.d_block set
-def get_d_electron_fraction(composition: Composition) -> float:
+def get_d_electron_fraction(composition: str | Composition) -> float:
     """Calculate the fraction of d-block elements in a composition.
     Implemented using get_element_fraction helper with smact.d_block set.
 
     Args:
-        composition: A pymatgen Composition object
+        composition: Chemical formula as string or pymatgen Composition
 
     Returns:
         float: Fraction of the composition that consists of d-block elements (0-1)
@@ -56,29 +71,31 @@ def get_d_electron_fraction(composition: Composition) -> float:
     return get_element_fraction(composition, smact.d_block)
 
 
-def get_distinct_metal_count(composition: Composition) -> int:
+def get_distinct_metal_count(composition: str | Composition) -> int:
     """Count the number of distinct metallic elements in a composition.
 
     Args:
-        composition: A pymatgen Composition object
+        composition: Chemical formula as string or pymatgen Composition
 
     Returns:
         int: Number of distinct metallic elements
     """
-    return sum(1 for el in composition.elements if el.symbol in smact.metals)
+    comp = _ensure_composition(composition)
+    return sum(1 for el in comp.elements if el.symbol in smact.metals)
 
 
-def get_pauling_test_mismatch(composition: Composition) -> float:
+def get_pauling_test_mismatch(composition: str | Composition) -> float:
     """Calculate a score for how much the composition deviates from ideal Pauling electronegativity ordering.
 
     Args:
-        composition: A pymatgen Composition object
+        composition: Chemical formula as string or pymatgen Composition
 
     Returns:
         float: Mismatch score (0 = perfect match, higher = more deviation, nan = missing data)
     """
+    comp = _ensure_composition(composition)
     # Convert pymatgen elements to SMACT elements using their symbols
-    elements = [Element(el.symbol) for el in composition.elements]
+    elements = [Element(el.symbol) for el in comp.elements]
     electronegativities = [el.pauling_eneg for el in elements]
 
     # Return nan if any electronegativities are None
@@ -121,23 +138,22 @@ def intermetallic_score(composition: str | Composition) -> float:
         >>> intermetallic_score("NaCl")
         0.2   # Low score - ionic compound
     """
-    if isinstance(composition, str):
-        composition = Composition(composition)
+    comp = _ensure_composition(composition)
 
     # 1. Basic metrics
-    metal_fraction = get_metal_fraction(composition)
-    d_electron_fraction = get_d_electron_fraction(composition)
-    n_metals = get_distinct_metal_count(composition)
+    metal_fraction = get_metal_fraction(comp)
+    d_electron_fraction = get_d_electron_fraction(comp)
+    n_metals = get_distinct_metal_count(comp)
 
     # 2. Electronic structure indicators
     try:
-        vec = valence_electron_count(composition.reduced_formula)
+        vec = valence_electron_count(comp.reduced_formula)
         vec_factor = 1.0 - (abs(vec - 8.0) / 8.0)  # Normalized around VEC=8
     except ValueError:
         vec_factor = 0.5  # Default if we can't calculate VEC
 
     # 3. Bonding character
-    pauling_mismatch = get_pauling_test_mismatch(composition)
+    pauling_mismatch = get_pauling_test_mismatch(comp)
 
     # 4. Calculate weighted score
     # These weights can be tuned based on empirical testing
