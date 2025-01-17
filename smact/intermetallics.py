@@ -10,8 +10,28 @@ from smact import Element
 from smact.properties import valence_electron_count
 
 
+# Helper function to reduce code duplication in element fraction calculations
+def get_element_fraction(composition: Composition, element_set: set[str]) -> float:
+    """Calculate the fraction of elements from a given set in a composition.
+    This helper function is used to avoid code duplication in functions that
+    calculate fractions of specific element types (e.g., metals, d-block elements).
+
+    Args:
+        composition: A pymatgen Composition object
+        element_set: Set of element symbols to check for
+
+    Returns:
+        float: Fraction of the composition that consists of elements from the set (0-1)
+    """
+    total_amt = sum(composition.values())
+    target_amt = sum(amt for el, amt in composition.items() if el.symbol in element_set)
+    return target_amt / total_amt
+
+
+# Uses helper function with smact.metals set
 def get_metal_fraction(composition: Composition) -> float:
     """Calculate the fraction of metallic elements in a composition.
+    Implemented using get_element_fraction helper with smact.metals set.
 
     Args:
         composition: A pymatgen Composition object
@@ -19,13 +39,13 @@ def get_metal_fraction(composition: Composition) -> float:
     Returns:
         float: Fraction of the composition that consists of metallic elements (0-1)
     """
-    total_amt = sum(composition.values())
-    metal_amt = sum(amt for el, amt in composition.items() if el.symbol in smact.metals)
-    return metal_amt / total_amt
+    return get_element_fraction(composition, smact.metals)
 
 
+# Uses helper function with smact.d_block set
 def get_d_electron_fraction(composition: Composition) -> float:
     """Calculate the fraction of d-block elements in a composition.
+    Implemented using get_element_fraction helper with smact.d_block set.
 
     Args:
         composition: A pymatgen Composition object
@@ -33,9 +53,7 @@ def get_d_electron_fraction(composition: Composition) -> float:
     Returns:
         float: Fraction of the composition that consists of d-block elements (0-1)
     """
-    total_amt = sum(composition.values())
-    d_block_amt = sum(amt for el, amt in composition.items() if el.symbol in smact.d_block)
-    return d_block_amt / total_amt
+    return get_element_fraction(composition, smact.d_block)
 
 
 def get_distinct_metal_count(composition: Composition) -> int:
@@ -57,15 +75,15 @@ def get_pauling_test_mismatch(composition: Composition) -> float:
         composition: A pymatgen Composition object
 
     Returns:
-        float: Mismatch score (0 = perfect match, higher = more deviation)
+        float: Mismatch score (0 = perfect match, higher = more deviation, nan = missing data)
     """
     # Convert pymatgen elements to SMACT elements using their symbols
     elements = [Element(el.symbol) for el in composition.elements]
     electronegativities = [el.pauling_eneg for el in elements]
 
-    # Skip if any electronegativities are None
+    # Return nan if any electronegativities are None
     if None in electronegativities:
-        return 0.0
+        return float("nan")
 
     # Calculate pairwise differences
     mismatches = []

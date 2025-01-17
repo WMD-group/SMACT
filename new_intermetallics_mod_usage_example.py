@@ -16,7 +16,7 @@ compounds = [
     "CoAl",
     "Fe3C",
     "NbTiAlCr",
-    "Cu2MgSn",
+    "Cu2MgSn",  # Contains Actinium (Ac) which has no Pauling electronegativity data
 ]
 
 print("Testing SMACT validity with intermetallic detection:")
@@ -34,5 +34,5 @@ for compound in compounds:
 
     print(f"\nCompound: {compound}")
     print(f"Standard validity: {is_valid_standard}")
-    print(f"With intermetallic detection: {is_valid_intermetallic}")
+    print(f"With intermetallic detection validity: {is_valid_intermetallic}")
     print(f"Intermetallic score: {score:.2f}")
