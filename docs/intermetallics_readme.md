@@ -306,11 +306,10 @@ Contributions to improve the intermetallics functionality are welcome! Areas par
 1. Original SMACT paper: [SMACT: Semiconducting Materials by Analogy and Chemical Theory](https://joss.theoj.org/papers/10.21105/joss.01361)
 2. Intermetallics theory and classification literature sources:
 
-   - D.G. Pettifor introduced the concept of a single "chemical scale" or "structure map" coordinate (Pettifor number) to systematically separate compound classes. The new intermetallicscore is a step in that direction but customized to SMACT's internal data structures.
+   - D.G. Pettifor introduced the concept of a single "chemical scale" or "structure map" coordinate (Pettifor number) to systematically separate compound classes [1, p. 31]. The new intermetallicscore is a step in that direction but customized to SMACT's internal data structures.
 
      - Reference: D.G. Pettifor, "A chemical scale for crystal-structure maps," Solid State Communications. 51 (1984) 31–34. [DOI Link](<https://doi.org/10.1016/0038-1098(84)90765-8>)
 
-   - Also, The role of charge transfer and atomic size mismatch is pivotal in stabilizing intermetallic phases. Miedema's framework quantifies these effects, making it useful for predicting alloying behaviors and crystal structure, the parameters coded here, while conceptually similar have not implemented Miedema directly.
-     - Reference: A.R. Miedema, Cohesion in alloys - fundamentals of a semi-empirical model. [DOI Link](<https://doi.org/10.1016/0378-4363(80)90054-6>)
+   - The role of charge transfer and atomic size mismatch is pivotal in stabilizing intermetallic phases. Miedema's framework quantifies these effects, making it useful for predicting alloying behaviors and crystal structure. The parameters coded here, while conceptually similar, have not implemented Miedema's model directly. [DOI Link](<https://doi.org/10.1016/0378-4363(80)90054-6>)
 
 3. Electronegativity scales (pauling electronegativity)
