@@ -161,15 +161,12 @@ class TestIntermetallics(unittest.TestCase):
         """Test edge cases and error handling."""
         # Single element
         score = intermetallic_score("Fe")
-        self.assertTrue(
-            0.0 <= score <= 1.0,
-            msg=f"Expected score between 0 and 1 for Fe, got {score:.2f}",
-        )
+        self.assertTrue(0.0 <= score <= 1.0, msg=f"Expected score between 0 and 1 for Fe, got {score:.2f}")
 
-        # Empty composition should not crash
+        # Empty composition -> expect ValueError("Empty composition")
         with pytest.raises(ValueError, match="Empty composition"):
             intermetallic_score("")
 
-        # Invalid formula should raise error
+        # Invalid formula -> e.g. "NotAnElement"
         with pytest.raises(ValueError, match="Invalid formula"):
             intermetallic_score("NotAnElement")

@@ -18,13 +18,17 @@ def _ensure_composition(composition: str | Composition) -> Composition:
 
     Returns:
         Composition: A pymatgen Composition object
+
+    Raises:
+        ValueError: If the composition string is empty
     """
     if isinstance(composition, str):
+        if not composition.strip():
+            raise ValueError("Empty composition")
         return Composition(composition)
     return composition
 
 
-# Helper function to reduce code duplication in element fraction calculations
 def get_element_fraction(composition: str | Composition, element_set: set[str]) -> float:
     """Calculate the fraction of elements from a given set in a composition.
     This helper function is used to avoid code duplication in functions that
@@ -43,128 +47,105 @@ def get_element_fraction(composition: str | Composition, element_set: set[str]) 
     return target_amt / total_amt
 
 
-# Uses helper function with smact.metals set
 def get_metal_fraction(composition: str | Composition) -> float:
     """Calculate the fraction of metallic elements in a composition.
+
     Implemented using get_element_fraction helper with smact.metals set.
-
-    Args:
-        composition: Chemical formula as string or pymatgen Composition
-
-    Returns:
-        float: Fraction of the composition that consists of metallic elements (0-1)
     """
     return get_element_fraction(composition, smact.metals)
 
 
-# Uses helper function with smact.d_block set
 def get_d_electron_fraction(composition: str | Composition) -> float:
     """Calculate the fraction of d-block elements in a composition.
+
     Implemented using get_element_fraction helper with smact.d_block set.
-
-    Args:
-        composition: Chemical formula as string or pymatgen Composition
-
-    Returns:
-        float: Fraction of the composition that consists of d-block elements (0-1)
     """
     return get_element_fraction(composition, smact.d_block)
 
 
 def get_distinct_metal_count(composition: str | Composition) -> int:
-    """Count the number of distinct metallic elements in a composition.
-
-    Args:
-        composition: Chemical formula as string or pymatgen Composition
-
-    Returns:
-        int: Number of distinct metallic elements
-    """
+    """Count the number of distinct metallic elements in a composition."""
     comp = _ensure_composition(composition)
     return sum(1 for el in comp.elements if el.symbol in smact.metals)
 
 
 def get_pauling_test_mismatch(composition: str | Composition) -> float:
-    """Calculate a score for how much the composition deviates from ideal Pauling electronegativity ordering.
+    """Calculate a score for how much the composition deviates from ideal
+    Pauling electronegativity ordering.
 
-    Args:
-        composition: Chemical formula as string or pymatgen Composition
+    Higher mismatch => more difference (ionic, e.g. NaCl).
+    Lower mismatch => metal-metal bonds (e.g. Fe-Al).
 
     Returns:
-        float: Mismatch score (0 = perfect match, higher = more deviation, nan = missing data)
+        float: Mismatch score (0=perfect match, higher=more deviation, NaN=missing data)
     """
     comp = _ensure_composition(composition)
-    # Convert pymatgen elements to SMACT elements using their symbols
     elements = [Element(el.symbol) for el in comp.elements]
     electronegativities = [el.pauling_eneg for el in elements]
 
-    # Return nan if any electronegativities are None
+    # If any element lacks a known electronegativity, return NaN
     if None in electronegativities:
         return float("nan")
+    else:
+        mismatches = []
+        for i, (_el1, eneg1) in enumerate(zip(elements, electronegativities, strict=False)):
+            for _el2, eneg2 in zip(elements[i + 1 :], electronegativities[i + 1 :], strict=False):
+                # Always use absolute difference
+                mismatch = abs(eneg1 - eneg2)
+                mismatches.append(mismatch)
 
-    # Calculate pairwise differences
-    mismatches = []
-    for i, (el1, eneg1) in enumerate(zip(elements, electronegativities, strict=False)):
-        for el2, eneg2 in zip(elements[i + 1 :], electronegativities[i + 1 :], strict=False):
-            # For metal pairs, we expect small electronegativity differences
-            if el1.symbol in smact.metals and el2.symbol in smact.metals:
-                mismatches.append(abs(eneg1 - eneg2))
-            # For metal-nonmetal pairs, we expect larger differences
-            elif (el1.symbol in smact.metals) != (el2.symbol in smact.metals):
-                mismatches.append(1.0 - abs(eneg1 - eneg2))
-
-    return np.mean(mismatches) if mismatches else 0.0
+        # Return average mismatch across all unique pairs
+        return np.mean(mismatches) if mismatches else 0.0
 
 
 def intermetallic_score(composition: str | Composition) -> float:
-    """Calculate a score indicating how likely a composition is to be an intermetallic compound.
+    """Calculate a score (0-1) indicating how intermetallic a composition is.
 
-    The score is based on several heuristics:
     1. Fraction of metallic elements
     2. Number of distinct metals
-    3. Presence of d-block elements
-    4. Electronegativity differences
-    5. Valence electron count
+    3. d-electron fraction
+    4. Electronegativity difference (Pauling mismatch)
+    5. Valence electron count proximity to 8
 
     Args:
-        composition: Chemical formula as string or pymatgen Composition
-
-    Returns:
-        float: Score between 0 and 1, where higher values indicate more intermetallic character
-
-    Example:
-        >>> intermetallic_score("Fe3Al")
-        0.85  # High score - likely intermetallic
-        >>> intermetallic_score("NaCl")
-        0.2   # Low score - ionic compound
+        composition: Chemical formula or pymatgen Composition
     """
     comp = _ensure_composition(composition)
 
-    # 1. Basic metrics
+    # Basic metrics
     metal_fraction = get_metal_fraction(comp)
     d_electron_fraction = get_d_electron_fraction(comp)
     n_metals = get_distinct_metal_count(comp)
 
-    # 2. Electronic structure indicators
+    # Valence electron count factor
     try:
         vec = valence_electron_count(comp.reduced_formula)
-        vec_factor = 1.0 - (abs(vec - 8.0) / 8.0)  # Normalized around VEC=8
+        vec_factor = 1.0 - abs(vec - 8.0) / 8.0
     except ValueError:
-        vec_factor = 0.5  # Default if we can't calculate VEC
+        vec_factor = 0.5
 
-    # 3. Bonding character
+    # Pauling mismatch => large => penalize
     pauling_mismatch = get_pauling_test_mismatch(comp)
+    if np.isnan(pauling_mismatch):
+        pauling_term = 0.5
+    else:
+        scale = 3.0
+        penalty = min(pauling_mismatch / scale, 1.0)
+        pauling_term = 1.0 - penalty
 
-    # 4. Calculate weighted score
-    # These weights can be tuned based on empirical testing
-    weights = {"metal_fraction": 0.3, "d_electron": 0.2, "n_metals": 0.2, "vec": 0.15, "pauling": 0.15}
-
+    # Weighted sum
+    weights = {
+        "metal_fraction": 0.3,
+        "d_electron": 0.2,
+        "n_metals": 0.2,
+        "vec": 0.15,
+        "pauling": 0.15,
+    }
     score = (
         weights["metal_fraction"] * metal_fraction
         + weights["d_electron"] * d_electron_fraction
-        + weights["n_metals"] * min(1.0, n_metals / 3.0)  # Normalized to max of 3 metals
+        + weights["n_metals"] * min(n_metals / 3.0, 1.0)
         + weights["vec"] * vec_factor
-        + weights["pauling"] * (1.0 - pauling_mismatch)  # Invert mismatch score
+        + weights["pauling"] * pauling_term
     )
-
-    return min(1.0, max(0.0, score))  # Clamp between 0 and 1
+    return max(0.0, min(1.0, score))

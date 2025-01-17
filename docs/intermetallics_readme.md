@@ -310,6 +310,7 @@ Contributions to improve the intermetallics functionality are welcome! Areas par
 
      - Reference: D.G. Pettifor, "A chemical scale for crystal-structure maps," Solid State Communications. 51 (1984) 31–34. [DOI Link](<https://doi.org/10.1016/0038-1098(84)90765-8>)
 
-   - The role of charge transfer and atomic size mismatch is pivotal in stabilizing intermetallic phases. Miedema's framework quantifies these effects, making it useful for predicting alloying behaviors and crystal structure. The parameters coded here, while conceptually similar, have not implemented Miedema's model directly. [DOI Link](<https://doi.org/10.1016/0378-4363(80)90054-6>)
+   - The role of charge transfer and atomic size mismatch is pivotal in stabilizing intermetallic phases. Miedema's framework quantifies these effects, making it useful for predicting alloying behaviors and crystal structure. The parameters coded here, while conceptually similar, have not implemented Miedema's model directly.
+   - Reference: A.R. Miedema, Cohesion in alloys - fundamentals of a semi-empirical model.[DOI Link](<https://doi.org/10.1016/0378-4363(80)90054-6>)
 
 3. Electronegativity scales (pauling electronegativity)
