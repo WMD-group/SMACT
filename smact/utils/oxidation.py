@@ -21,15 +21,13 @@ class ICSD24OxStatesFilter:
 
     def __init__(self):
         """Initialise the ICSD 24 oxidation states list."""
-        self.ox_states_df = pd.read_json(
-            path.join(data_directory, "oxidation_states_icsd24_counts.json")
-        )
+        self.ox_states_df = pd.read_json(path.join(data_directory, "oxidation_states_icsd24_counts.json"))
 
     def filter(
         self,
         consensus: int = 3,
         include_zero: bool = False,
-        commonality: str | float | int = "low",
+        commonality: str | float = "low",
     ):
         """Filter the ICSD 24 oxidation states list by a threshold.
 
@@ -45,47 +43,28 @@ class ICSD24OxStatesFilter:
 
         if isinstance(commonality, str):
             commonality_threshold = commonality_map.get(commonality)
-        elif isinstance(commonality, (int, float)):
+        elif isinstance(commonality, int | float):
             commonality_threshold = commonality
         else:
-            raise ValueError(
-                "commonality must be a string ('low', 'medium', 'high'), a float or an integer"
-            )
+            raise TypeError("commonality must be a string ('low', 'medium', 'high'), a float or an integer")
 
         if not include_zero:
-            filtered_df = self.ox_states_df[
-                self.ox_states_df["oxidation_state"] != 0
-            ].reset_index(drop=True)
+            filtered_df = self.ox_states_df[self.ox_states_df["oxidation_state"] != 0].reset_index(drop=True)
         else:
             filtered_df = self.ox_states_df
         filtered_df = filtered_df[
-            (filtered_df["results_count"] >= consensus)
-            & (filtered_df["results_count"] != 0)
+            (filtered_df["results_count"] >= consensus) & (filtered_df["results_count"] != 0)
         ].reset_index(drop=True)
-        element_totals = filtered_df.groupby("element")["results_count"].transform(
-            "sum"
-        )
-        filtered_df["species_proportion (%)"] = (
-            filtered_df["results_count"] / element_totals * 100
-        )
-        filtered_df = filtered_df[
-            filtered_df["species_proportion (%)"] >= commonality_threshold
-        ].reset_index(drop=True)
+        element_totals = filtered_df.groupby("element")["results_count"].transform("sum")
+        filtered_df["species_proportion (%)"] = filtered_df["results_count"] / element_totals * 100
+        filtered_df = filtered_df[filtered_df["species_proportion (%)"] >= commonality_threshold].reset_index(drop=True)
 
         summary_df = (
-            filtered_df.groupby("element")
-            .apply(self._filter_oxidation_states, 0, include_groups=False)
-            .reset_index()
+            filtered_df.groupby("element").apply(self._filter_oxidation_states, 0, include_groups=False).reset_index()
         )
         summary_df.columns = ["element", "oxidation_state"]
-        summary_df["atomic_number"] = summary_df["element"].apply(
-            lambda x: Element(x).number
-        )
-        return (
-            summary_df.sort_values("atomic_number")
-            .drop(columns="atomic_number")
-            .reset_index(drop=True)
-        )
+        summary_df["atomic_number"] = summary_df["element"].apply(lambda x: Element(x).number)
+        return summary_df.sort_values("atomic_number").drop(columns="atomic_number").reset_index(drop=True)
 
     def get_species_list(
         self,
@@ -140,9 +119,7 @@ class ICSD24OxStatesFilter:
             dataframe: The species list as a dataframe of species with their occurrences.
         """
         if not include_zero:
-            species_occurrences_df = self.ox_states_df[
-                self.ox_states_df["oxidation_state"] != 0
-            ].reset_index(drop=True)
+            species_occurrences_df = self.ox_states_df[self.ox_states_df["oxidation_state"] != 0].reset_index(drop=True)
         else:
             species_occurrences_df = self.ox_states_df
         species_occurrences_df = species_occurrences_df[
@@ -155,19 +132,13 @@ class ICSD24OxStatesFilter:
             ),
             axis=1,
         )
-        species_occurrences_df = species_occurrences_df[
-            ["element", "species", "results_count"]
-        ]
-        element_totals = species_occurrences_df.groupby("element")[
-            "results_count"
-        ].transform("sum")
+        species_occurrences_df = species_occurrences_df[["element", "species", "results_count"]]
+        element_totals = species_occurrences_df.groupby("element")["results_count"].transform("sum")
         species_occurrences_df["species_proportion (%)"] = (
             species_occurrences_df["results_count"] / element_totals * 100
         )
         if sort_by_occurrences:
-            return species_occurrences_df.sort_values(
-                "results_count", ascending=False
-            ).reset_index(drop=True)
+            return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)
         return species_occurrences_df
 
     def write(
