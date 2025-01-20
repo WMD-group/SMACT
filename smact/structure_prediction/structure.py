@@ -350,7 +350,7 @@ class SmactStructure:
                     structs = m.get_structures(chemsys_formula=formula)
 
         if len(structs) == 0:
-            raise ValueError("Could not find composition in Materials Project Database, " "please supply a structure.")
+            raise ValueError("Could not find composition in Materials Project Database, please supply a structure.")
 
         # Default to first found structure
         struct = structs[0]["structure"] if isinstance(structs[0], dict) else structs[0]

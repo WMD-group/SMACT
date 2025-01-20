@@ -113,7 +113,7 @@ class Oxidation_state_probability_finder:
 
     def compound_probability(self, structure: Structure, ignore_stoichiometry: bool = True) -> float:
         """
-        calculate overall probability for structure or composition.
+        Calculate overall probability for structure or composition.
 
         Args:
         ----

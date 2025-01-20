@@ -103,7 +103,7 @@ def lookup_element_oxidation_states(symbol, copy=True):
             return _el_ox_states[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Oxidation states for element {symbol} " "not found.")
+            print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
 
 
@@ -149,7 +149,7 @@ def lookup_element_oxidation_states_icsd(symbol, copy=True):
             return _el_ox_states_icsd[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Oxidation states for element {symbol}" "not found.")
+            print(f"WARNING: Oxidation states for element {symbol}not found.")
         return None
 
 
@@ -197,7 +197,7 @@ def lookup_element_oxidation_states_sp(symbol, copy=True):
             return _el_ox_states_sp[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Oxidation states for element {symbol} " "not found.")
+            print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
 
 
@@ -245,7 +245,7 @@ def lookup_element_oxidation_states_wiki(symbol, copy=True):
             return _el_ox_states_wiki[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Oxidation states for element {symbol} " "not found.")
+            print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
 
 
@@ -294,7 +294,7 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
             return _el_ox_states_custom[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Oxidation states for element {symbol} " "not found.")
+            print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
 
 
@@ -339,7 +339,7 @@ def lookup_element_oxidation_states_icsd24(symbol, copy=True):
             return _el_ox_states_icsd24[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Oxidation states for element {symbol} " "not found.")
+            print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
 
 
@@ -548,7 +548,7 @@ def lookup_element_shannon_radius_data(symbol, copy=True):
             return _element_shannon_radii_data[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Shannon-radius data for element {symbol} not " "found.")
+            print(f"WARNING: Shannon-radius data for element {symbol} not found.")
 
         return None
 
@@ -646,7 +646,7 @@ def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
             return _element_shannon_radii_data_extendedML[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Extended Shannon-radius data for element {symbol} not " "found.")
+            print(f"WARNING: Extended Shannon-radius data for element {symbol} not found.")
 
         return None
 
@@ -712,7 +712,7 @@ def lookup_element_sse_data(symbol):
         return _element_ssedata[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Solid-state energy data for element {symbol} not" " found.")
+            print(f"WARNING: Solid-state energy data for element {symbol} not found.")
 
         return None
 
@@ -909,7 +909,7 @@ def lookup_element_magpie_data(symbol: str, copy: bool = True):
         return _element_magpie_data[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Magpie data for element {symbol} not " "found.")
+            print(f"WARNING: Magpie data for element {symbol} not found.")
 
         return None
 
@@ -954,6 +954,6 @@ def lookup_element_valence_data(symbol: str, copy: bool = True):
         return _element_valence_data[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Valence data for element {symbol} not " "found.")
+            print(f"WARNING: Valence data for element {symbol} not found.")
 
         return None
