@@ -52,7 +52,7 @@ repos:
     rev: v2.3.0
     hooks:
       - id: codespell
-        stages: [commit, commit-msg]
+        stages: [pre-commit, commit-msg]
         args: [--toml, pyproject.toml]
         additional_dependencies:
           - tomli

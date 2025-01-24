@@ -72,7 +72,7 @@ def generate_composition_with_smact(
     # 2. generate all possible stoichiometric combinations
     print("#2. Generating all possible stoichiometric combinations...")
 
-    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() if num_processes is None else num_processes)
+    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     compounds = list(
         tqdm(
             pool.imap_unordered(
@@ -103,11 +103,15 @@ def generate_composition_with_smact(
     ]  # omit elements without Pauling electronegativity (e.g., He, Ne, Ar, ...)
     compounds_pauling = list(itertools.combinations(elements_pauling, num_elements))
 
-    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count() if num_processes is None else num_processes)
+    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     results = list(
         tqdm(
             pool.imap_unordered(
-                partial(smact_filter, threshold=max_stoich, oxidation_states_set=oxidation_states_set),
+                partial(
+                    smact_filter,
+                    threshold=max_stoich,
+                    oxidation_states_set=oxidation_states_set,
+                ),
                 compounds_pauling,
             ),
             total=len(compounds_pauling),
