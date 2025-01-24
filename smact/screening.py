@@ -109,10 +109,8 @@ def _no_repeats(
             else:
                 anions.append(symbol)
         return not (
-            not repeat_anions
-            and len(anions) != len(set(anions))
-            or not repeat_cations
-            and len(cations) != len(set(cations))
+            (not repeat_anions and len(anions) != len(set(anions)))
+            or (not repeat_cations and len(cations) != len(set(cations)))
         )
 
 
@@ -209,12 +207,8 @@ def eneg_states_test(ox_states: list[int], enegs: list[float]):
         if (
             eneg1 is None
             or eneg2 is None
-            or (ox1 > 0)
-            and (ox2 < 0)
-            and (eneg1 >= eneg2)
-            or (ox1 < 0)
-            and (ox2 > 0)
-            and (eneg1 <= eneg2)
+            or ((ox1 > 0) and (ox2 < 0) and (eneg1 >= eneg2))
+            or ((ox1 < 0) and (ox2 > 0) and (eneg1 <= eneg2))
         ):
             return False
     return True
@@ -248,13 +242,8 @@ def eneg_states_test_threshold(ox_states: list[int], enegs: list[float], thresho
 
     """
     for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=False)), 2):
-        if (
-            (ox1 > 0)
-            and (ox2 < 0)
-            and ((eneg1 - eneg2) > threshold)
-            or (ox1 < 0)
-            and (ox2 > 0)
-            and (eneg2 - eneg1) > threshold
+        if ((ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold)) or (
+            (ox1 < 0) and (ox2 > 0) and (eneg2 - eneg1) > threshold
         ):
             return False
     return True
