@@ -18,7 +18,7 @@ from smact import Element, element_dictionary, neutral_ratios
 from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
 )
-from smact.intermetallics import intermetallic_score
+from smact.metallicity import metallicity_score
 
 if TYPE_CHECKING:
     import pymatgen
@@ -438,14 +438,14 @@ def smact_validity(
     use_pauling_test: bool = True,
     include_alloys: bool = True,
     oxidation_states_set: str = "icsd24",
-    check_intermetallic: bool = False,
-    intermetallic_threshold: float = 0.7,
+    check_metallicity: bool = False,
+    metallicity_threshold: float = 0.7,
 ) -> bool:
     """
     Check if a composition is valid according to the SMACT rules.
 
     Composition is considered valid if it passes the charge neutrality test and the Pauling electronegativity test.
-    Can also validate intermetallic compounds using a scoring system, and simple metal alloys.
+    Can also validate metal alloys by using a metallicity scoring system.
 
      .. warning::
         For backwards compatibility in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
@@ -461,9 +461,9 @@ def smact_validity(
             'pymatgen_sp' and 'wiki' for the 2014 SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure predictor and Wikipedia
             (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
             A filepath to an oxidation states text file can also be supplied.
-        check_intermetallic (bool): If True, uses the intermetallic scoring system to validate potential intermetallic compounds.
-        intermetallic_threshold (float): Score threshold (0-1) above which a compound is considered a valid intermetallic.
-            Only used if check_intermetallic is True.
+        check_metallicity (bool): If True, uses the metallicity scoring system to validate potential metallic/alloy compounds.
+        metallicity_threshold (float): Score threshold (0-1) above which a compound is considered a valid metallic/alloy.
+            Only used if check_metallicity is True.
 
     Returns:
     -------
@@ -479,9 +479,9 @@ def smact_validity(
         return True
 
     # Check for intermetallic compounds if enabled
-    if check_intermetallic:
-        score = intermetallic_score(composition)
-        if score >= intermetallic_threshold:
+    if check_metallicity:
+        score = metallicity_score(composition)
+        if score >= metallicity_threshold:
             return True
 
     # Check for simple metal alloys if enabled

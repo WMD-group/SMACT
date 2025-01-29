@@ -104,8 +104,8 @@ def get_pauling_test_mismatch(composition: str | Composition) -> float:
         return np.mean(mismatches) if mismatches else 0.0
 
 
-def intermetallic_score(composition: str | Composition) -> float:
-    """Calculate a score (0-1) indicating how intermetallic a composition is.
+def metallicity_score(composition: str | Composition) -> float:
+    """Calculate a score (0-1) indicating the degree of a compound's metallic/alloy nature.
 
     1. Fraction of metallic elements
     2. Number of distinct metals
