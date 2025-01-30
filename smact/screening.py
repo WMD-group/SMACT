@@ -478,16 +478,16 @@ def smact_validity(
     if len(set(elem_symbols)) == 1:
         return True
 
-    # Check for intermetallic compounds if enabled
-    if check_metallicity:
-        score = metallicity_score(composition)
-        if score >= metallicity_threshold:
-            return True
-
     # Check for simple metal alloys if enabled
     if include_alloys:
         is_metal_list = [elem_s in smact.metals for elem_s in elem_symbols]
         if all(is_metal_list):
+            return True
+
+    # Check for metallic-like compounds if enabled
+    if check_metallicity:
+        score = metallicity_score(composition)
+        if score >= metallicity_threshold:
             return True
 
     count = tuple(composition.as_dict().values())
