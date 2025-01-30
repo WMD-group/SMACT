@@ -91,6 +91,7 @@ visualisation = [
     "pymatviz",
     "dash",
 ]
+ml = ["xgboost","shap","smact[featurisers]"]
 
 optional = [
     "pydantic>=2.9.2",
@@ -104,6 +105,7 @@ optional = [
     "llvmlite>=0.40",
     "ElementEmbeddings>=0.4",
     "dash>=2.18.2",
+    "smact[ml]"
 
 ]
 strict = [
