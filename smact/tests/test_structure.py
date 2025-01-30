@@ -229,7 +229,11 @@ class StructureTest(unittest.TestCase):
                 self.assertEqual(SmactStructure._get_ele_stoics(test.species), expected)
 
     @pytest.mark.skipif(
-        (skip_mprester_tests or not MP_API_AVAILABLE),
+        (
+            skip_mprester_tests
+            or not MP_API_AVAILABLE
+            or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY"))
+        ),
         reason="Materials Project API not available or not configured.",
     )
     def test_from_mp(self):
