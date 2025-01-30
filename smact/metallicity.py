@@ -61,7 +61,7 @@ def get_metal_fraction(composition: str | Composition) -> float:
     return get_element_fraction(composition, smact.metals)
 
 
-def get_d_electron_fraction(composition: str | Composition) -> float:
+def get_d_block_element_fraction(composition: str | Composition) -> float:
     """Calculate the fraction of d-block elements in a composition.
 
     Implemented using get_element_fraction helper with smact.d_block set.
@@ -109,7 +109,7 @@ def metallicity_score(composition: str | Composition) -> float:
 
     1. Fraction of metallic elements
     2. Number of distinct metals
-    3. d-electron fraction
+    3. d-block element fraction
     4. Electronegativity difference (Pauling mismatch)
     5. Valence electron count proximity to 8
 
@@ -120,7 +120,7 @@ def metallicity_score(composition: str | Composition) -> float:
 
     # Basic metrics
     metal_fraction = get_metal_fraction(comp)
-    d_electron_fraction = get_d_electron_fraction(comp)
+    d_block_element_fraction = get_d_block_element_fraction(comp)
     n_metals = get_distinct_metal_count(comp)
 
     # Valence electron count factor
@@ -142,14 +142,14 @@ def metallicity_score(composition: str | Composition) -> float:
     # Weighted sum
     weights = {
         "metal_fraction": 0.3,
-        "d_electron": 0.2,
+        "d_block_element_fraction": 0.2,
         "n_metals": 0.2,
         "vec": 0.15,
         "pauling": 0.15,
     }
     score = (
         weights["metal_fraction"] * metal_fraction
-        + weights["d_electron"] * d_electron_fraction
+        + weights["d_block_element_fraction"] * d_block_element_fraction
         + weights["n_metals"] * min(n_metals / 3.0, 1.0)
         + weights["vec"] * vec_factor
         + weights["pauling"] * pauling_term

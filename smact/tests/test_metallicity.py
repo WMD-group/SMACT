@@ -9,7 +9,7 @@ from pymatgen.core import Composition
 
 import smact
 from smact.metallicity import (
-    get_d_electron_fraction,
+    get_d_block_element_fraction,
     get_distinct_metal_count,
     get_element_fraction,
     get_metal_fraction,
@@ -90,11 +90,11 @@ class TestMetallicity(unittest.TestCase):
             msg=f"Expected fractional metal content for Fe2O3, got {fe2o3:.2f}",
         )
 
-    def test_get_d_electron_fraction(self):
-        """Test d-electron fraction calculation."""
+    def test_get_d_block_element_fraction(self):
+        """Test d-block element fraction calculation."""
         # Should be 1.0 for pure transition metal compounds
         self.assertAlmostEqual(
-            get_d_electron_fraction(Composition("Fe2Nb")),
+            get_d_block_element_fraction(Composition("Fe2Nb")),
             1.0,
             places=6,
             msg="Expected all d-block elements in Fe2Nb",
@@ -102,7 +102,7 @@ class TestMetallicity(unittest.TestCase):
 
         # Should be 0.0 for compounds with no d-block elements
         self.assertAlmostEqual(
-            get_d_electron_fraction(Composition("NaCl")),
+            get_d_block_element_fraction(Composition("NaCl")),
             0.0,
             places=6,
             msg="Expected no d-block elements in NaCl",
