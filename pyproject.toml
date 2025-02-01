@@ -77,7 +77,7 @@ mp = ["mp-api"]
 
 crystal_space = ["mp-api",
 "ElementEmbeddings",
-"umap-learn==0.5.3",
+"umap-learn==0.5.7",
 "kaleido",
 "pydantic<2.10.0"]
 
@@ -113,7 +113,7 @@ strict = [
     "seaborn==0.13.2",
     "pymatgen==2024.11.13",
     "matminer==0.9.3",
-    "umap-learn==0.5.3",
+    "umap-learn==0.5.7",
     "kaleido==0.2.1",
     "ase==3.24.0",
     "numpy",
