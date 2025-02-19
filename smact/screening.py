@@ -7,13 +7,12 @@ from __future__ import annotations
 import itertools
 import os
 import warnings
+from collections.abc import Generator
 from itertools import combinations
 from typing import TYPE_CHECKING
 
-import numpy as np
 from pymatgen.core import Composition
 
-import smact
 from smact import Element, element_dictionary, neutral_ratios
 from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
@@ -21,6 +20,8 @@ from smact.data_loader import (
 from smact.metallicity import metallicity_score
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     import pymatgen
 
 
@@ -422,6 +423,156 @@ def smact_filter(
         return list(set(compositions))
 
 
+# ---------------------------------------------------------------------
+#                      Revised SMACT Screening Logic
+# ---------------------------------------------------------------------
+
+
+def _generate_valid_combos(
+    composition: pymatgen.core.Composition,
+    use_pauling_test: bool = True,
+    include_alloys: bool = True,
+    oxidation_states_set: str = "icsd24",
+    check_metallicity: bool = False,
+    metallicity_threshold: float = 0.7,
+) -> Generator[tuple[tuple[str, ...], tuple[int, ...], tuple[int, ...]], None, None]:
+    """
+    Internal generator that yields each valid combination as (element_symbols, ox_states, stoich_ratio).
+
+    Yields on-the-fly so we can short-circuit or accumulate as needed.
+
+    Args:
+        composition (Composition): Pymatgen composition object.
+        use_pauling_test (bool): Whether to apply the Pauling electronegativity test.
+        include_alloys (bool): If True, pure metal compositions are valid.
+        oxidation_states_set (str): Choice of oxidation-states set.
+        check_metallicity (bool): If True, apply a metallicity scoring system.
+        metallicity_threshold (float): Score above which a composition is considered valid metallic/alloy.
+
+    Yields:
+        (element_symbols, ox_states, ratio) for each valid oxidation-state combination.
+    """
+    from smact import _gcd_recursive, metals
+
+    elem_symbols = tuple(composition.as_dict().keys())
+
+    # Single-element logic
+    if len(set(elem_symbols)) == 1:
+        # For a single element, we consider it valid (common assumption).
+        # You could yield (elem_symbols, (0 or oxidation-state?), (1,)) if needed.
+        # e.g. yield (elem_symbols, (0,), (1,)) or just skip.
+        yield (elem_symbols, (0,), (1,))
+        return
+
+    # Alloy check
+    if include_alloys and all(sym in metals for sym in elem_symbols):
+        yield (elem_symbols, tuple([0] * len(elem_symbols)), tuple([1] * len(elem_symbols)))
+        return
+
+    # Metallic scoring
+    if check_metallicity:
+        score = metallicity_score(composition)
+        if score >= metallicity_threshold:
+            yield (elem_symbols, tuple([0] * len(elem_symbols)), tuple([1] * len(elem_symbols)))
+            return
+
+    # Convert composition counts -> stoichiometric ratios
+    counts = [int(v) for v in composition.as_dict().values()]
+    gcd_val = _gcd_recursive(*counts)
+    stoichs = [(int(c // gcd_val),) for c in counts]
+
+    # Build smact elements + electronegativities
+    space = element_dictionary(elem_symbols)
+    smact_elems = [e[1] for e in space.items()]
+    electronegs = [e.pauling_eneg for e in smact_elems]
+
+    # Get oxidation states data
+    if oxidation_states_set == "smact14":
+        ox_combos = [el.oxidation_states_smact14 for el in smact_elems]
+    elif oxidation_states_set == "icsd16":
+        ox_combos = [el.oxidation_states_icsd16 for el in smact_elems]
+    elif oxidation_states_set == "pymatgen_sp":
+        ox_combos = [el.oxidation_states_sp for el in smact_elems]
+    elif oxidation_states_set == "icsd24" or oxidation_states_set is None:
+        ox_combos = [el.oxidation_states_icsd24 for el in smact_elems]
+    elif os.path.exists(oxidation_states_set):
+        ox_combos = [oxi_custom(el.symbol, oxidation_states_set) for el in smact_elems]
+    elif oxidation_states_set == "wiki":
+        warnings.warn(
+            "This set of oxidation states is from Wikipedia. Use with caution.",
+            stacklevel=2,
+        )
+        ox_combos = [el.oxidation_states_wiki for el in smact_elems]
+    else:
+        raise ValueError(f"{oxidation_states_set} is not valid. Provide a known set or a valid file path.")
+
+    threshold = max(int(c // gcd_val) for c in counts)
+
+    # Enumerate possible combos
+    for ox_states in itertools.product(*ox_combos):
+        cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
+        if cn_e:
+            if use_pauling_test:
+                try:
+                    en_ok = pauling_test(ox_states, electronegs)
+                except TypeError:
+                    en_ok = True
+            else:
+                en_ok = True
+
+            if en_ok:
+                for ratio in cn_r:
+                    # yield the full info so others can do what they want with it
+                    yield (elem_symbols, ox_states, ratio)
+
+
+def get_valid_combinations(
+    composition: pymatgen.core.Composition | str,
+    use_pauling_test: bool = True,
+    include_alloys: bool = True,
+    oxidation_states_set: str = "icsd24",
+    check_metallicity: bool = False,
+    metallicity_threshold: float = 0.7,
+) -> list[tuple[tuple[str, ...], tuple[int, ...]]]:
+    """
+    Return the *full* list of valid (element_symbols, ratio) combos for the input composition,
+    ignoring short-circuiting. Useful if you need to see *all* solutions.
+
+    Args:
+        composition (pymatgen.core.Composition or str): The chemical composition to evaluate.
+        use_pauling_test (bool): Apply Pauling electronegativity test.
+        include_alloys (bool): Accept pure-metal compositions.
+        oxidation_states_set (str): Choice of oxidation-states set.
+        check_metallicity (bool): Include metallic scoring check.
+        metallicity_threshold (float): Threshold for metallic scoring.
+
+    Returns:
+        A list of (element_symbols, ratio) for each valid combination.
+        If none are valid, returns an empty list.
+    """
+    if isinstance(composition, str):
+        composition = Composition(composition)
+
+    valid_combos = []
+    seen = set()
+    for elem_symbols, _ox_states, ratio in _generate_valid_combos(
+        composition,
+        use_pauling_test=use_pauling_test,
+        include_alloys=include_alloys,
+        oxidation_states_set=oxidation_states_set,
+        check_metallicity=check_metallicity,
+        metallicity_threshold=metallicity_threshold,
+    ):
+        # We only store (elem_symbols, ratio) in final list.
+        # If you want oxidation_states as well, store them, or return them - this can be done by adding _ox_states to the combo tuple
+        combo = (elem_symbols, ratio)
+        if combo not in seen:
+            seen.add(combo)
+            valid_combos.append(combo)
+
+    return valid_combos
+
+
 def smact_validity(
     composition: pymatgen.core.Composition | str,
     use_pauling_test: bool = True,
@@ -429,108 +580,52 @@ def smact_validity(
     oxidation_states_set: str = "icsd24",
     check_metallicity: bool = False,
     metallicity_threshold: float = 0.7,
-) -> bool:
+    return_all: bool = False,
+) -> bool | list[tuple[tuple[str, ...], tuple[int, ...]]]:
     """
-    Check if a composition is valid according to the SMACT rules.
+    Check if a composition is valid according to SMACT rules:
+    1) Passes charge neutrality.
+    2) Passes (optional) Pauling electronegativity test, or is considered an alloy or metal if so chosen.
 
-    Composition is considered valid if it passes the charge neutrality test and the Pauling electronegativity test.
-    Can also validate metal alloys by using a metallicity scoring system.
-
-     .. warning::
-        For backwards compatibility in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
-        In SMACT 3.0, the smact_filter function will be set to use a new default oxidation states set.
+    If `return_all=False`, short-circuits on the first valid combo and returns a bool.
+    If `return_all=True`, returns a list of all valid (element_symbols, ratio) combos.
 
     Args:
-    ----
-        composition (Union[pymatgen.core.Composition, str]): Composition/formula to check. This can be a pymatgen Composition object or a string.
-        use_pauling_test (bool): Whether to use the Pauling electronegativity test
-        include_alloys (bool): If True, compositions which only contain metal elements will be considered valid without further checks.
-        oxidation_states_set (str): A string to choose which set of
-            oxidation states should be chosen for charge-balancing. Options are 'smact14', 'icsd14', 'icsd24',
-            'pymatgen_sp' and 'wiki' for the 2014 SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure predictor and Wikipedia
-            (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
-            A filepath to an oxidation states text file can also be supplied.
-        check_metallicity (bool): If True, uses the metallicity scoring system to validate potential metallic/alloy compounds.
-        metallicity_threshold (float): Score threshold (0-1) above which a compound is considered a valid metallic/alloy.
-            Only used if check_metallicity is True.
+        composition (Composition or str): Composition to check.
+        use_pauling_test (bool): Whether to apply the Pauling EN test.
+        include_alloys (bool): Consider pure metals valid automatically.
+        oxidation_states_set (str): Which set of oxidation states to use.
+        check_metallicity (bool): If True, consider high metallicity valid.
+        metallicity_threshold (float): Score threshold for metallicity validity.
+        return_all (bool): If True, return *all* valid combos. If False, just return boolean.
 
     Returns:
-    -------
-        bool: True if the composition is valid, False otherwise
-
+        bool or list:
+            - If `return_all=False`: Returns True/False. (True if *any* valid combo found)
+            - If `return_all=True`: Returns list of (element_symbols, ratio).
     """
     if isinstance(composition, str):
         composition = Composition(composition)
-    elem_symbols = tuple(composition.as_dict().keys())
 
-    # Single element case
-    if len(set(elem_symbols)) == 1:
-        return True
-
-    # Check for simple metal alloys if enabled
-    if include_alloys:
-        is_metal_list = [elem_s in smact.metals for elem_s in elem_symbols]
-        if all(is_metal_list):
-            return True
-
-    # Check for metallic-like compounds if enabled
-    if check_metallicity:
-        score = metallicity_score(composition)
-        if score >= metallicity_threshold:
-            return True
-
-    count = tuple(composition.as_dict().values())
-    count = [int(c) for c in count]
-    # Reduce stoichiometry to gcd
-    gcd = smact._gcd_recursive(*count)
-    count = [int(c / gcd) for c in count]
-
-    space = element_dictionary(elem_symbols)
-    smact_elems = [e[1] for e in space.items()]
-    electronegs = [e.pauling_eneg for e in smact_elems]
-
-    if oxidation_states_set == "smact14":
-        ox_combos = [e.oxidation_states_smact14 for e in smact_elems]
-    elif oxidation_states_set == "icsd16":
-        ox_combos = [e.oxidation_states_icsd16 for e in smact_elems]
-    elif oxidation_states_set == "pymatgen_sp":
-        ox_combos = [e.oxidation_states_sp for e in smact_elems]
-    elif oxidation_states_set == "icsd24" or oxidation_states_set is None:  # Default
-        ox_combos = [e.oxidation_states_icsd24 for e in smact_elems]
-    elif os.path.exists(oxidation_states_set):
-        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in smact_elems]
-    elif oxidation_states_set == "wiki":
-        warnings.warn(
-            "This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.",
-            stacklevel=2,
+    if return_all:
+        # Collect them all from the generator
+        return get_valid_combinations(
+            composition,
+            use_pauling_test=use_pauling_test,
+            include_alloys=include_alloys,
+            oxidation_states_set=oxidation_states_set,
+            check_metallicity=check_metallicity,
+            metallicity_threshold=metallicity_threshold,
         )
-        ox_combos = [e.oxidation_states_wiki for e in smact_elems]
     else:
-        raise (
-            Exception(
-                f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd16", "icsd24", "pymatgen_sp","wiki" or a filepath to a textfile of oxidation states.'
-            )
-        )
-
-    threshold = np.max(count)
-    compositions = []
-    for ox_states in itertools.product(*ox_combos):
-        stoichs = [(c,) for c in count]
-        # Test for charge balance
-        cn_e, cn_r = smact.neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
-        # Electronegativity test
-        if cn_e:
-            if use_pauling_test:
-                try:
-                    electroneg_OK = pauling_test(ox_states, electronegs)
-                except TypeError:
-                    # if no electronegativity data, assume it is okay
-                    electroneg_OK = True
-            else:
-                electroneg_OK = True
-            if electroneg_OK:
-                for ratio in cn_r:
-                    compositions.append((elem_symbols, ox_states, ratio))
-    compositions = [(i[0], i[2]) for i in compositions]
-    compositions = list(set(compositions))
-    return len(compositions) > 0
+        # TRUE SHORT-CIRCUIT: Return immediately upon first success
+        for _, _, _ in _generate_valid_combos(
+            composition,
+            use_pauling_test=use_pauling_test,
+            include_alloys=include_alloys,
+            oxidation_states_set=oxidation_states_set,
+            check_metallicity=check_metallicity,
+            metallicity_threshold=metallicity_threshold,
+        ):
+            return True
+        return False

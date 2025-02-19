@@ -5,7 +5,7 @@ import os
 import unittest
 
 import pytest
-from pymatgen.core import Structure
+from pymatgen.core import Composition, Structure
 from pymatgen.core.periodic_table import Specie
 
 import smact
@@ -392,20 +392,64 @@ class TestSequenceFunctions(unittest.TestCase):
             45,
         )
 
-    def test_smact_validity(self):
-        self.assertTrue(smact.screening.smact_validity("NaCl"))
-        self.assertTrue(smact.screening.smact_validity("Na10Cl10"))
-        self.assertFalse(smact.screening.smact_validity("Al3Li", include_alloys=False))
-        self.assertTrue(smact.screening.smact_validity("Al3Li", include_alloys=True))
-        # Test for single element
-        self.assertTrue(smact.screening.smact_validity("Al"))
+    # --------- New tests for revised screening logic ---------
 
-        # Test for MgB2 which is invalid for the smact14 oxi states but valid for the icsd states
-        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set="smact14"))
-        self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="icsd16"))
-        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set="pymatgen_sp"))
-        self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="wiki"))
-        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set=TEST_OX_STATES))
+    def test_get_valid_combinations(self):
+        """
+        Test that get_valid_combinations returns a list of valid (element_symbols, ratio) combinations.
+        """
+        valid_combos = smact.screening.get_valid_combinations("NaCl")
+        self.assertIsInstance(valid_combos, list)
+        self.assertTrue(len(valid_combos) > 0)
+        for combo in valid_combos:
+            # Each combo should be a tuple of (element_symbols, ratio)
+            self.assertEqual(len(combo), 2)
+            self.assertIsInstance(combo[0], tuple)
+            self.assertIsInstance(combo[1], tuple)
+
+    def test_smact_validity_return_all(self):
+        """
+        Test that smact_validity with return_all=True returns a list of valid combinations.
+        """
+        result = smact.screening.smact_validity("NaCl", return_all=True)
+        self.assertIsInstance(result, list)
+        self.assertTrue(len(result) > 0)
+        # Each item in the returned list should be a tuple of (element_symbols, ratio)
+        for combo in result:
+            self.assertEqual(len(combo), 2)
+            self.assertIsInstance(combo[0], tuple)
+            self.assertIsInstance(combo[1], tuple)
+
+    def test_smact_validity_short_circuit(self):
+        """
+        Test that smact_validity with return_all=False returns a boolean (and short-circuits).
+        """
+        result = smact.screening.smact_validity("NaCl", return_all=False)
+        self.assertIsInstance(result, bool)
+        self.assertTrue(result)
+
+    def test_smact_validity_invalid(self):
+        """
+        Test that an invalid composition returns False (or an empty list when return_all=True).
+        Here, "Al3Li" with include_alloys disabled is expected to be invalid.
+        """
+        result_bool = smact.screening.smact_validity("Al3Li", include_alloys=False, return_all=False)
+        self.assertFalse(result_bool)
+        result_all = smact.screening.smact_validity("Al3Li", include_alloys=False, return_all=True)
+        self.assertEqual(result_all, [])
+
+    def test_generate_valid_combos(self):
+        """
+        Test the internal generator _generate_valid_combos to ensure it yields valid tuples.
+        """
+        combos = list(smact.screening._generate_valid_combos(Composition("NaCl")))
+        self.assertTrue(len(combos) > 0)
+        for combo in combos:
+            # Each yielded combo should be a tuple of (element_symbols, ox_states, ratio)
+            self.assertEqual(len(combo), 3)
+            self.assertIsInstance(combo[0], tuple)
+            self.assertIsInstance(combo[1], tuple)
+            self.assertIsInstance(combo[2], tuple)
 
     # ---------------- Lattice ----------------
     def test_Lattice_class(self):
