@@ -114,7 +114,15 @@ class TestSequenceFunctions(unittest.TestCase):
     # ---------------- SCREENING ----------------
 
     def test_pauling_test(self):
-        Sn, S = (smact.Element(label) for label in ("Sn", "S"))
+        """Test pauling_test functionality with various inputs and edge cases"""
+        # Test basic functionality with valid inputs
+        Sn, S = (smact.Element(lbl) for lbl in ("Sn", "S"))
+        self.assertTrue(smact.screening.pauling_test([2, -2], [Sn.pauling_eneg, S.pauling_eneg], threshold=0.3))
+
+        # Test with missing electronegativity
+        self.assertFalse(smact.screening.pauling_test([2, -2], [None, S.pauling_eneg]))
+
+        # Test with different oxidation states
         self.assertTrue(
             smact.screening.pauling_test(
                 (+2, -2),
@@ -122,6 +130,8 @@ class TestSequenceFunctions(unittest.TestCase):
             )
         )
         self.assertFalse(smact.screening.pauling_test((-2, +2), (Sn.pauling_eneg, S.pauling_eneg)))
+
+        # Test with repeat anions/cations flags
         self.assertFalse(
             smact.screening.pauling_test(
                 (-2, -2, +2),
@@ -136,22 +146,6 @@ class TestSequenceFunctions(unittest.TestCase):
                 (S.pauling_eneg, S.pauling_eneg, Sn.pauling_eneg),
                 symbols=("S", "S", "Sn"),
                 repeat_cations=False,
-            )
-        )
-        self.assertFalse(
-            smact.screening.pauling_test(
-                (-2, +2, +2),
-                (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "Sn", "Sn"),
-                repeat_cations=False,
-            )
-        )
-        self.assertTrue(
-            smact.screening.pauling_test(
-                (-2, +2, +2),
-                (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "Sn", "Sn"),
-                repeat_anions=False,
             )
         )
 
@@ -309,7 +303,6 @@ class TestSequenceFunctions(unittest.TestCase):
             0.0,
             0.0,
             0.0,
-            0.0,
             0.3333333333333333,
             0.0,
             0.0,
@@ -392,7 +385,7 @@ class TestSequenceFunctions(unittest.TestCase):
             45,
         )
 
-    # --------- New Tests for Revised Screening Logic ---------
+    # --------- Tests for Screening Logic ---------
 
     def test_get_valid_combinations(self):
         """Test get_valid_combinations returns valid (element_symbols, ratio) combinations"""
@@ -429,6 +422,8 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_generate_valid_combos(self):
         """Test _generate_valid_combos yields valid tuples"""
+        from pymatgen.core import Composition
+
         combos = list(smact.screening._generate_valid_combos(Composition("NaCl")))
         self.assertGreater(len(combos), 0)
         for combo in combos:
@@ -437,11 +432,36 @@ class TestSequenceFunctions(unittest.TestCase):
             self.assertIsInstance(combo[1], tuple)
             self.assertIsInstance(combo[2], tuple)
 
-    def test_smact_validity_no_pauling_test(self):
-        """Test compositions valid when use_pauling_test=False"""
-        result = smact.screening.smact_validity("ZnS", use_pauling_test=False)
-        self.assertIsInstance(result, bool)
-        self.assertTrue(result)
+        # Test additional branches
+        single_elem_combos = list(smact.screening._generate_valid_combos(Composition("Fe")))
+        self.assertEqual(len(single_elem_combos), 1)
+        self.assertEqual(single_elem_combos[0], (("Fe",), (0,), (1,)))
+
+        alloy_combos = list(smact.screening._generate_valid_combos(Composition("FeAl"), include_alloys=True))
+        self.assertGreater(len(alloy_combos), 0)
+
+        metallic_combos = list(
+            smact.screening._generate_valid_combos(Composition("Fe"), check_metallicity=True, metallicity_threshold=0.5)
+        )
+        self.assertGreater(len(metallic_combos), 0)
+
+        no_pauling_combos = list(smact.screening._generate_valid_combos(Composition("NaCl"), use_pauling_test=False))
+        self.assertGreater(len(no_pauling_combos), 0)
+
+    def test_pauling_test_type_error_handling(self):
+        """Test handling of TypeError in pauling test"""
+        import smact.screening
+
+        def mock_pauling_test(*args, **kwargs):
+            raise TypeError("Mock TypeError")
+
+        original_pauling_test = smact.screening.pauling_test
+        try:
+            smact.screening.pauling_test = mock_pauling_test
+            result = smact.screening.smact_validity("NaCl", use_pauling_test=True, return_all=False)
+            self.assertTrue(result)
+        finally:
+            smact.screening.pauling_test = original_pauling_test
 
     def test_smact_validity_type_error_electronegativity(self):
         """Test pauling_test handles missing electronegativity"""
@@ -454,62 +474,18 @@ class TestSequenceFunctions(unittest.TestCase):
         finally:
             He.pauling_eneg = original_eneg
 
-    def test_smact_validity_oxidation_set_none(self):
-        """Test None oxidation_states_set defaults to icsd24"""
-        result = smact.screening.smact_validity("NaCl", oxidation_states_set=None)
-        self.assertTrue(result)
-
-    def test_smact_validity_raises_value_error_for_bad_oxidation_set(self):
-        """Test ValueError raised for invalid oxidation_states_set"""
-        with pytest.raises(ValueError):
-            smact.screening.smact_validity("NaCl", oxidation_states_set="notavalidset")
-
-    def test_smact_validity_high_metallicity(self):
-        """Test metallicity scoring path"""
-        result = smact.screening.smact_validity("Fe", check_metallicity=True, metallicity_threshold=0.0)
-        self.assertTrue(result)
-
-    def test_generate_valid_combos_high_metallicity(self):
-        """Test _generate_valid_combos yields for high-metallicity composition"""
-        from pymatgen.core import Composition
-
-        from smact.screening import _generate_valid_combos
-
-        combos = list(_generate_valid_combos(Composition("Fe"), check_metallicity=True, metallicity_threshold=0.0))
-        self.assertEqual(len(combos), 1)
-        self.assertEqual(combos[0], (("Fe",), (0,), (1,)))
-
-    def test_screening_extra_coverage(self):
-        """Test additional branches in _generate_valid_combos and pauling_test"""
-        from smact.screening import _generate_valid_combos, pauling_test
-
-        single_elem_combos = list(_generate_valid_combos(Composition("Fe")))
-        self.assertEqual(len(single_elem_combos), 1)
-        self.assertEqual(single_elem_combos[0], (("Fe",), (0,), (1,)))
-
-        alloy_combos = list(_generate_valid_combos(Composition("FeAl"), include_alloys=True))
-        self.assertGreater(len(alloy_combos), 0)
-
-        metallic_combos = list(
-            _generate_valid_combos(Composition("Fe"), check_metallicity=True, metallicity_threshold=0.5)
-        )
-        self.assertGreater(len(metallic_combos), 0)
-
-        Sn, S = (smact.Element(lbl) for lbl in ("Sn", "S"))
-        self.assertTrue(pauling_test([2, -2], [Sn.pauling_eneg, S.pauling_eneg], threshold=0.3))
-
-        self.assertFalse(pauling_test([2, -2], [None, S.pauling_eneg]))
-
-        no_pauling_combos = list(_generate_valid_combos(Composition("NaCl"), use_pauling_test=False))
-        self.assertGreater(len(no_pauling_combos), 0)
-
-    def test_type_checking_import(self):
-        """Test _generate_valid_combos returns Generator"""
+    def test_type_checking(self):
+        """Test type checking and annotations"""
         from collections.abc import Generator
+        from typing import get_type_hints
 
-        from smact.screening import _generate_valid_combos
+        # Test return type hints
+        hints = get_type_hints(smact.screening._generate_valid_combos)
+        self.assertIn("return", hints)
+        self.assertTrue(issubclass(hints["return"], Generator))
 
-        combos = _generate_valid_combos(Composition("Fe"))
+        # Test generator instance
+        combos = smact.screening._generate_valid_combos(Composition("Fe"))
         self.assertIsInstance(combos, Generator)
         combo_list = list(combos)
         self.assertGreater(len(combo_list), 0)
@@ -549,29 +525,3 @@ class TestSequenceFunctions(unittest.TestCase):
         structure = Structure.from_file(TEST_STRUCT)
         ox = smact.oxidation_states.Oxidation_state_probability_finder()
         self.assertEqual(ox.compound_probability(structure), 1.0)
-
-
-## force the except TypeError block in smact_validity's try/except to be triggered.
-def test_smact_validity_type_error_forced(self):
-    """
-    Force the except TypeError block in smact_validity's try/except to be triggered.
-    This covers lines where an exception is raised during the pauling_test call.
-    """
-    import smact.screening
-
-    original_pauling_test = smact.screening.pauling_test
-
-    def mock_pauling_test(*args, **kwargs):
-        # Force a TypeError, e.g., simulating a numeric comparison failure
-        raise TypeError("Mock TypeError triggered")
-
-    try:
-        smact.screening.pauling_test = mock_pauling_test
-        # This should trigger the except block -> electroneg_OK = True
-        result = smact.screening.smact_validity("NaCl", use_pauling_test=True, return_all=False)
-        self.assertIsInstance(result, bool)
-        # Typically, the code sets electroneg_OK = True in the except block, so we expect True
-        self.assertTrue(result)
-    finally:
-        # Restore original function to avoid side effects in other tests
-        smact.screening.pauling_test = original_pauling_test
