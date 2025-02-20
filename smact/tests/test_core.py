@@ -549,3 +549,29 @@ class TestSequenceFunctions(unittest.TestCase):
         structure = Structure.from_file(TEST_STRUCT)
         ox = smact.oxidation_states.Oxidation_state_probability_finder()
         self.assertEqual(ox.compound_probability(structure), 1.0)
+
+
+## force the except TypeError block in smact_validity's try/except to be triggered.
+def test_smact_validity_type_error_forced(self):
+    """
+    Force the except TypeError block in smact_validity's try/except to be triggered.
+    This covers lines where an exception is raised during the pauling_test call.
+    """
+    import smact.screening
+
+    original_pauling_test = smact.screening.pauling_test
+
+    def mock_pauling_test(*args, **kwargs):
+        # Force a TypeError, e.g., simulating a numeric comparison failure
+        raise TypeError("Mock TypeError triggered")
+
+    try:
+        smact.screening.pauling_test = mock_pauling_test
+        # This should trigger the except block -> electroneg_OK = True
+        result = smact.screening.smact_validity("NaCl", use_pauling_test=True, return_all=False)
+        self.assertIsInstance(result, bool)
+        # Typically, the code sets electroneg_OK = True in the except block, so we expect True
+        self.assertTrue(result)
+    finally:
+        # Restore original function to avoid side effects in other tests
+        smact.screening.pauling_test = original_pauling_test
