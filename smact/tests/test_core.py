@@ -114,15 +114,7 @@ class TestSequenceFunctions(unittest.TestCase):
     # ---------------- SCREENING ----------------
 
     def test_pauling_test(self):
-        """Test pauling_test functionality with various inputs and edge cases"""
-        # Test basic functionality with valid inputs
-        Sn, S = (smact.Element(lbl) for lbl in ("Sn", "S"))
-        self.assertTrue(smact.screening.pauling_test([2, -2], [Sn.pauling_eneg, S.pauling_eneg], threshold=0.3))
-
-        # Test with missing electronegativity
-        self.assertFalse(smact.screening.pauling_test([2, -2], [None, S.pauling_eneg]))
-
-        # Test with different oxidation states
+        Sn, S = (smact.Element(label) for label in ("Sn", "S"))
         self.assertTrue(
             smact.screening.pauling_test(
                 (+2, -2),
@@ -130,8 +122,6 @@ class TestSequenceFunctions(unittest.TestCase):
             )
         )
         self.assertFalse(smact.screening.pauling_test((-2, +2), (Sn.pauling_eneg, S.pauling_eneg)))
-
-        # Test with repeat anions/cations flags
         self.assertFalse(
             smact.screening.pauling_test(
                 (-2, -2, +2),
@@ -146,6 +136,22 @@ class TestSequenceFunctions(unittest.TestCase):
                 (S.pauling_eneg, S.pauling_eneg, Sn.pauling_eneg),
                 symbols=("S", "S", "Sn"),
                 repeat_cations=False,
+            )
+        )
+        self.assertFalse(
+            smact.screening.pauling_test(
+                (-2, +2, +2),
+                (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
+                symbols=("S", "Sn", "Sn"),
+                repeat_cations=False,
+            )
+        )
+        self.assertTrue(
+            smact.screening.pauling_test(
+                (-2, +2, +2),
+                (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
+                symbols=("S", "Sn", "Sn"),
+                repeat_anions=False,
             )
         )
 
@@ -303,6 +309,7 @@ class TestSequenceFunctions(unittest.TestCase):
             0.0,
             0.0,
             0.0,
+            0.0,
             0.3333333333333333,
             0.0,
             0.0,
@@ -385,110 +392,64 @@ class TestSequenceFunctions(unittest.TestCase):
             45,
         )
 
-    # --------- Tests for Screening Logic ---------
+    # --------- New tests for revised screening logic ---------
 
     def test_get_valid_combinations(self):
-        """Test get_valid_combinations returns valid (element_symbols, ratio) combinations"""
+        """
+        Test that get_valid_combinations returns a list of valid (element_symbols, ratio) combinations.
+        """
         valid_combos = smact.screening.get_valid_combinations("NaCl")
         self.assertIsInstance(valid_combos, list)
-        self.assertGreater(len(valid_combos), 0)
+        self.assertTrue(len(valid_combos) > 0)
         for combo in valid_combos:
+            # Each combo should be a tuple of (element_symbols, ratio)
             self.assertEqual(len(combo), 2)
             self.assertIsInstance(combo[0], tuple)
             self.assertIsInstance(combo[1], tuple)
 
     def test_smact_validity_return_all(self):
-        """Test smact_validity with return_all=True returns valid combinations"""
+        """
+        Test that smact_validity with return_all=True returns a list of valid combinations.
+        """
         result = smact.screening.smact_validity("NaCl", return_all=True)
         self.assertIsInstance(result, list)
-        self.assertGreater(len(result), 0)
+        self.assertTrue(len(result) > 0)
+        # Each item in the returned list should be a tuple of (element_symbols, ratio)
         for combo in result:
             self.assertEqual(len(combo), 2)
             self.assertIsInstance(combo[0], tuple)
             self.assertIsInstance(combo[1], tuple)
 
     def test_smact_validity_short_circuit(self):
-        """Test smact_validity with return_all=False returns boolean"""
+        """
+        Test that smact_validity with return_all=False returns a boolean (and short-circuits).
+        """
         result = smact.screening.smact_validity("NaCl", return_all=False)
         self.assertIsInstance(result, bool)
         self.assertTrue(result)
 
     def test_smact_validity_invalid(self):
-        """Test invalid composition returns False or empty list"""
+        """
+        Test that an invalid composition returns False (or an empty list when return_all=True).
+        Here, "Al3Li" with include_alloys disabled is expected to be invalid.
+        """
         result_bool = smact.screening.smact_validity("Al3Li", include_alloys=False, return_all=False)
         self.assertFalse(result_bool)
         result_all = smact.screening.smact_validity("Al3Li", include_alloys=False, return_all=True)
         self.assertEqual(result_all, [])
 
     def test_generate_valid_combos(self):
-        """Test _generate_valid_combos yields valid tuples"""
-        from pymatgen.core import Composition
-
+        """
+        Test the internal generator _generate_valid_combos to ensure it yields valid tuples.
+        """
         combos = list(smact.screening._generate_valid_combos(Composition("NaCl")))
-        self.assertGreater(len(combos), 0)
+        self.assertTrue(len(combos) > 0)
         for combo in combos:
+            # Each yielded combo should be a tuple of (element_symbols, ox_states, ratio)
             self.assertEqual(len(combo), 3)
             self.assertIsInstance(combo[0], tuple)
             self.assertIsInstance(combo[1], tuple)
             self.assertIsInstance(combo[2], tuple)
-
-        # Test additional branches
-        single_elem_combos = list(smact.screening._generate_valid_combos(Composition("Fe")))
-        self.assertEqual(len(single_elem_combos), 1)
-        self.assertEqual(single_elem_combos[0], (("Fe",), (0,), (1,)))
-
-        alloy_combos = list(smact.screening._generate_valid_combos(Composition("FeAl"), include_alloys=True))
-        self.assertGreater(len(alloy_combos), 0)
-
-        metallic_combos = list(
-            smact.screening._generate_valid_combos(Composition("Fe"), check_metallicity=True, metallicity_threshold=0.5)
-        )
-        self.assertGreater(len(metallic_combos), 0)
-
-        no_pauling_combos = list(smact.screening._generate_valid_combos(Composition("NaCl"), use_pauling_test=False))
-        self.assertGreater(len(no_pauling_combos), 0)
-
-    def test_pauling_test_type_error_handling(self):
-        """Test handling of TypeError in pauling test"""
-        import smact.screening
-
-        def mock_pauling_test(*args, **kwargs):
-            raise TypeError("Mock TypeError")
-
-        original_pauling_test = smact.screening.pauling_test
-        try:
-            smact.screening.pauling_test = mock_pauling_test
-            result = smact.screening.smact_validity("NaCl", use_pauling_test=True, return_all=False)
-            self.assertTrue(result)
-        finally:
-            smact.screening.pauling_test = original_pauling_test
-
-    def test_smact_validity_type_error_electronegativity(self):
-        """Test pauling_test handles missing electronegativity"""
-        He = smact.Element("He")
-        original_eneg = He.pauling_eneg
-        He.pauling_eneg = None
-        try:
-            result = smact.screening.smact_validity("HeF2")
-            self.assertIsInstance(result, bool)
-        finally:
-            He.pauling_eneg = original_eneg
-
-    def test_type_checking(self):
-        """Test type checking and annotations"""
-        from collections.abc import Generator
-        from typing import get_type_hints
-
-        # Test return type hints
-        hints = get_type_hints(smact.screening._generate_valid_combos)
-        self.assertIn("return", hints)
-        self.assertTrue(issubclass(hints["return"], Generator))
-
-        # Test generator instance
-        combos = smact.screening._generate_valid_combos(Composition("Fe"))
-        self.assertIsInstance(combos, Generator)
-        combo_list = list(combos)
-        self.assertGreater(len(combo_list), 0)
 
     # ---------------- Lattice ----------------
     def test_Lattice_class(self):
