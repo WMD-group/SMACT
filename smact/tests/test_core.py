@@ -584,3 +584,70 @@ class TestSequenceFunctions(unittest.TestCase):
             self.assertTrue(result)
         finally:
             smact.screening.pauling_test = original_pauling_test
+
+    def test_icsd16_oxidation_states_coverage(self):
+        """
+        Ensure coverage of:
+            elif oxidation_states_set == "icsd16"
+        and that we get a valid combo for "NaCl".
+        """
+        combos = list(
+            smact.screening._generate_valid_combos(
+                Composition("NaCl"), oxidation_states_set="icsd16", use_pauling_test=True
+            )
+        )
+        # We expect at least one valid (Na, Cl) combo
+        self.assertTrue(len(combos) > 0)
+
+    def test_pymatgen_sp_oxidation_states_coverage(self):
+        """
+        Ensure coverage of:
+            elif oxidation_states_set == "pymatgen_sp"
+        """
+        combos = list(
+            smact.screening._generate_valid_combos(
+                Composition("NaCl"), oxidation_states_set="pymatgen_sp", use_pauling_test=True
+            )
+        )
+        self.assertTrue(len(combos) > 0)
+
+    def test_icsd24_oxidation_states_coverage(self):
+        """
+        Ensure coverage of:
+            elif oxidation_states_set == "icsd24" or oxidation_states_set is None
+        (first half with "icsd24")
+        """
+        combos = list(
+            smact.screening._generate_valid_combos(
+                Composition("NaCl"), oxidation_states_set="icsd24", use_pauling_test=True
+            )
+        )
+        self.assertTrue(len(combos) > 0)
+
+    def test_none_oxidation_states_coverage(self):
+        """
+        Ensure coverage of:
+            elif oxidation_states_set == "icsd24" or oxidation_states_set is None
+        (second half with None)
+        """
+        combos = list(
+            smact.screening._generate_valid_combos(
+                Composition("NaCl"), oxidation_states_set=None, use_pauling_test=True
+            )
+        )
+        self.assertTrue(len(combos) > 0)
+
+    def test_en_ok_block_coverage(self):
+        """
+        Specifically check that when en_ok=True,
+        we enter the 'if en_ok: for ratio in cn_r:' block (line ~521).
+        Using an easy passing composition: NaCl
+        """
+        combos = list(
+            smact.screening._generate_valid_combos(
+                Composition("NaCl"),
+                oxidation_states_set="icsd16",  # or any set that yields valid combos
+                use_pauling_test=True,
+            )
+        )
+        self.assertTrue(len(combos) > 0)
