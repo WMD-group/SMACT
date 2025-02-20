@@ -486,3 +486,101 @@ class TestSequenceFunctions(unittest.TestCase):
         structure = Structure.from_file(TEST_STRUCT)
         ox = smact.oxidation_states.Oxidation_state_probability_finder()
         self.assertEqual(ox.compound_probability(structure), 1.0)
+
+    # --------- Additional Coverage Tests (for untested lines in screening) ---------
+
+    def test_generate_valid_combos_single_element(self):
+        """
+        Test single-element logic in _generate_valid_combos
+        (yields once and returns immediately).
+        """
+        combos = list(smact.screening._generate_valid_combos(Composition("Fe")))
+        self.assertEqual(len(combos), 1)
+        # Expect (("Fe",), (0,), (1,)) from the single-element branch
+        self.assertEqual(combos[0], (("Fe",), (0,), (1,)))
+
+    def test_generate_valid_combos_alloy_check(self):
+        """
+        Test the alloy check path: If include_alloys is True
+        and all elements are metals, yields once and returns.
+        """
+        # "FeAl" is a metallic binary; if include_alloys=True, we skip the normal routine
+        combos = list(smact.screening._generate_valid_combos(Composition("FeAl"), include_alloys=True))
+        self.assertGreater(len(combos), 0)  # Should yield at least 1
+        # Typically single yield: (("Fe","Al"),(0,0),(1,1))
+
+    def test_generate_valid_combos_high_metallicity(self):
+        """
+        Test the metallic scoring path in _generate_valid_combos:
+        score >= threshold => yield once, then return.
+        """
+        # "Fe" alone triggers single-element logic, so let's do a multi-element metallic composition:
+        combos = list(
+            smact.screening._generate_valid_combos(
+                Composition("FeNi"),
+                check_metallicity=True,
+                metallicity_threshold=0.0,
+                include_alloys=False,  # so we don't short-circuit on the 'alloy check'
+            )
+        )
+        self.assertGreater(len(combos), 0)
+        # We only need to confirm it hits the metallic yield. The exact combos depend on oxidation states.
+
+    def test_generate_valid_combos_bad_oxidation_states_set(self):
+        """
+        Test that a bad oxidation_states_set raises ValueError.
+        """
+        with pytest.raises(ValueError):
+            list(
+                smact.screening._generate_valid_combos(
+                    Composition("NaCl"),
+                    oxidation_states_set="invalid_ox_set_path_123",
+                )
+            )
+
+    def test_generate_valid_combos_wiki_warning(self):
+        """
+        Test that 'wiki' oxidation_states_set triggers a warning.
+        """
+        with pytest.warns(UserWarning, match="This set of oxidation states is from Wikipedia"):
+            combos = list(
+                smact.screening._generate_valid_combos(
+                    Composition("NaCl"),
+                    oxidation_states_set="wiki",
+                )
+            )
+            self.assertGreater(len(combos), 0)
+
+    def test_generate_valid_combos_oxidation_states_file(self):
+        """
+        Test that providing a valid file path triggers the file-based combos branch.
+        """
+        from os.path import exists
+
+        self.assertTrue(exists(TEST_OX_STATES), "TEST_OX_STATES must exist for this test.")
+        combos = list(
+            smact.screening._generate_valid_combos(
+                Composition("NaCl"),
+                oxidation_states_set=TEST_OX_STATES,
+            )
+        )
+        self.assertGreater(len(combos), 0)
+
+    def test_smact_validity_type_error_forced(self):
+        """
+        Force the except TypeError block in smact_validity's try/except to be triggered.
+        """
+        import smact.screening
+
+        original_pauling_test = smact.screening.pauling_test
+
+        def mock_pauling_test(*args, **kwargs):
+            raise TypeError("Mock TypeError triggered")
+
+        try:
+            smact.screening.pauling_test = mock_pauling_test
+            result = smact.screening.smact_validity("NaCl", use_pauling_test=True, return_all=False)
+            self.assertIsInstance(result, bool)
+            self.assertTrue(result)
+        finally:
+            smact.screening.pauling_test = original_pauling_test
