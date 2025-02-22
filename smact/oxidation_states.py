@@ -37,7 +37,9 @@ class Oxidation_state_probability_finder:
 
         """
         if probability_table is None:
-            with open(path.join(data_directory, "oxidation_state_probability_table.json")) as f:
+            with open(
+                path.join(data_directory, "oxidation_state_probability_table.json")
+            ) as f:
                 probability_data = json.load(f)
             # Put data into the required format
             probability_table = {}
@@ -84,7 +86,9 @@ class Oxidation_state_probability_finder:
 
         # Check that both the species are included in the probability table
         if not all(elem in self._included_species for elem in [an_key, cat_key]):
-            raise NameError(f"One or both of [{cat_key}, {an_key}] are not in the probability table.")
+            raise NameError(
+                f"One or both of [{cat_key}, {an_key}] are not in the probability table."
+            )
 
         return (an_key, cat_key)
 
@@ -111,7 +115,9 @@ class Oxidation_state_probability_finder:
         """Returns a list of species for which there exists data in the probability table used."""
         return self._included_species
 
-    def compound_probability(self, structure: Structure, ignore_stoichiometry: bool = True) -> float:
+    def compound_probability(
+        self, structure: Structure, ignore_stoichiometry: bool = True
+    ) -> float:
         """
         Calculate overall probability for structure or composition.
 
@@ -147,7 +153,9 @@ class Oxidation_state_probability_finder:
                 for i in structure
             ]
         else:
-            raise TypeError("Input requires a list of SMACT or Pymatgen Species or a Structure.")
+            raise TypeError(
+                "Input requires a list of SMACT or Pymatgen Species or a Structure."
+            )
 
         # Put most electonegative element last in list by sorting by electroneg
         structure.sort(key=lambda x: x.pauling_eneg)
