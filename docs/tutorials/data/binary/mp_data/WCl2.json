@@ -1,1 +1,402 @@
-{"builder_meta": null, "nsites": null, "elements": null, "nelements": null, "composition": null, "composition_reduced": null, "formula_pretty": "WCl2", "formula_anonymous": "AB2", "chemsys": null, "volume": 962.7793431057232, "density": 5.27243158785095, "density_atomic": 26.743870641825644, "symmetry": null, "property_name": null, "material_id": "mp-1207828", "deprecated": null, "deprecation_reasons": null, "last_updated": null, "origins": null, "warnings": null, "structure": {"@module": "pymatgen.core.structure", "@class": "Structure", "charge": 0, "lattice": {"matrix": [[7.35794222, 5.7246898900000005, 0.0], [-7.35794222, 5.7246898900000005, 0.0], [-0.0, -0.0, 11.42847886]], "pbc": [true, true, true], "a": 9.322627743803071, "b": 9.322627743803071, "c": 11.42847886, "alpha": 90.0, "beta": 90.0, "gamma": 104.23212239360404, "volume": 962.7793431057233}, "properties": {}, "sites": [{"species": [{"element": "W", "occu": 1}], "abc": [0.12555974, 0.87443926, 0.0], "properties": {"magmom": -0.0}, "label": "W", "xyz": [-5.510212237901335, 5.724684165310111, 0.0]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.87443926, 0.12555974, 0.0], "properties": {"magmom": -0.0}, "label": "W", "xyz": [5.510212237901335, 5.724684165310111, 0.0]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.37444026, 0.6255607400000001, 0.5], "properties": {"magmom": -0.0}, "label": "W", "xyz": [-1.8477299820986657, 5.724695614689891, 5.71423943]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.6255607400000001, 0.37444026, 0.5], "properties": {"magmom": -0.0}, "label": "W", "xyz": [1.8477299820986657, 5.724695614689891, 5.71423943]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.43166977, 0.43166977, 0.35405891], "properties": {"magmom": 0.0}, "label": "W", "xyz": [0.0, 4.942351136275251, 4.046354768129643]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.56833023, 0.56833023, 0.64594109], "properties": {"magmom": 0.0}, "label": "W", "xyz": [0.0, 6.507028643724751, 7.382124091870358]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.06833023, 0.06833023, 0.85405891], "properties": {"magmom": 0.0}, "label": "W", "xyz": [0.0, 0.7823387537247495, 9.760594198129644]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.9316697700000001, 0.9316697700000001, 0.14594109], "properties": {"magmom": 0.0}, "label": "W", "xyz": [0.0, 10.667041026275252, 1.6678846618703573]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.1456707, 0.1456707, 0.06843196], "properties": {"magmom": 0.0}, "label": "W", "xyz": [0.0, 1.667839167118446, 0.7820732082083656]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.8543293, 0.8543293, 0.93156804], "properties": {"magmom": 0.0}, "label": "W", "xyz": [0.0, 9.781540612881555, 10.646405651791635]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.354329299999999, 0.354329299999999, 0.56843196], "properties": {"magmom": 0.0}, "label": "W", "xyz": [0.0, 4.056850722881543, 6.496312638208365]}, {"species": [{"element": "W", "occu": 1}], "abc": [0.645670699999999, 0.645670699999999, 0.43156804], "properties": {"magmom": 0.0}, "label": "W", "xyz": [0.0, 7.392529057118436, 4.932166221791634]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.287758399999999, 0.712241599999999, 0.0], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [-3.123322858960704, 5.724689889999989, 0.0]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.712241599999999, 0.287758399999999, 0.0], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [3.123322858960704, 5.724689889999989, 0.0]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.2122416, 0.7877584, 0.5], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [-4.234619361039296, 5.7246898900000005, 5.71423943]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.7877584, 0.2122416, 0.5], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [4.234619361039296, 5.7246898900000005, 5.71423943]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.19464113, 0.95550252, 0.2070822], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [-5.598374145048886, 6.584215725202699, 2.366634544982292]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.8053588700000001, 0.04449748, 0.7929178], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [5.598374145048886, 4.865164054797302, 9.061844315017709]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.30535887, 0.54449748, 0.7070822], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [-1.759568074951114, 4.865164054797302, 8.080873974982293]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.45550252, 0.69464113, 0.2929178], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [-1.7595680749511144, 6.5842157252027, 3.347604885017708]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.69464113, 0.45550252, 0.2929178], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [1.7595680749511144, 6.5842157252027, 3.347604885017708]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.54449748, 0.30535887, 0.7070822], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [1.759568074951114, 4.865164054797302, 8.080873974982293]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.04449748, 0.8053588700000001, 0.7929178], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [-5.598374145048886, 4.865164054797302, 9.061844315017709]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.95550252, 0.19464113, 0.2070822], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [5.598374145048886, 6.584215725202699, 2.366634544982292]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.35036706, 0.35036706, 0.149272699999999], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [0.0, 4.011485532342047, 1.7059598963251108]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.64963294, 0.64963294, 0.8507273], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [0.0, 7.437894247657955, 9.722518963674878]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.14963294, 0.14963294, 0.649272699999999], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [0.0, 1.7132043576579532, 7.420199326325111]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.8503670600000001, 0.8503670600000001, 0.350727299999999], "properties": {"magmom": -0.0}, "label": "Cl", "xyz": [0.0, 9.736175422342049, 4.008279533674867]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.67360108, 0.91300431, 0.07510234], "properties": {"magmom": 0.0}, "label": "Cl", "xyz": [-1.761515133621371, 9.082823835552508, 0.8583055050265325]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.32639892, 0.08699569, 0.9248976600000001], "properties": {"magmom": 0.0}, "label": "Cl", "xyz": [1.7615151336213701, 2.366555944447493, 10.570173354973468]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.82639892, 0.58699569, 0.57510234], "properties": {"magmom": 0.0}, "label": "Cl", "xyz": [1.761515133621371, 8.091245834447493, 6.572544935026533]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.41300431, 0.17360108, 0.42489766], "properties": {"magmom": 0.0}, "label": "Cl", "xyz": [1.7615151336213706, 3.3581339455525074, 4.855933924973468]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.17360108, 0.41300431, 0.42489766], "properties": {"magmom": 0.0}, "label": "Cl", "xyz": [-1.7615151336213706, 3.3581339455525074, 4.855933924973468]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.58699569, 0.82639892, 0.57510234], "properties": {"magmom": 0.0}, "label": "Cl", "xyz": [-1.761515133621371, 8.091245834447493, 6.572544935026533]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.08699569, 0.32639892, 0.9248976600000001], "properties": {"magmom": 0.0}, "label": "Cl", "xyz": [-1.7615151336213701, 2.366555944447493, 10.570173354973468]}, {"species": [{"element": "Cl", "occu": 1}], "abc": [0.91300431, 0.67360108, 0.07510234], "properties": {"magmom": 0.0}, "label": "Cl", "xyz": [1.761515133621371, 9.082823835552508, 0.8583055050265325]}]}, "task_ids": null, "uncorrected_energy_per_atom": null, "energy_per_atom": -22.049266549444447, "formation_energy_per_atom": -0.825042491111111, "energy_above_hull": 0.0, "is_stable": true, "equilibrium_reaction_energy_per_atom": null, "decomposes_to": null, "xas": null, "grain_boundaries": null, "band_gap": 2.8217, "cbm": null, "vbm": null, "efermi": 1.52268437, "is_gap_direct": null, "is_metal": null, "es_source_calc_id": null, "bandstructure": null, "dos": null, "dos_energy_up": null, "dos_energy_down": null, "is_magnetic": null, "ordering": null, "total_magnetization": 0.0, "total_magnetization_normalized_vol": null, "total_magnetization_normalized_formula_units": null, "num_magnetic_sites": null, "num_unique_magnetic_sites": null, "types_of_magnetic_species": null, "bulk_modulus": null, "shear_modulus": null, "universal_anisotropy": null, "homogeneous_poisson": null, "e_total": null, "e_ionic": null, "e_electronic": null, "n": null, "e_ij_max": null, "weighted_surface_energy_EV_PER_ANG2": null, "weighted_surface_energy": null, "weighted_work_function": null, "surface_anisotropy": null, "shape_factor": null, "has_reconstructed": null, "possible_species": null, "has_props": null, "theoretical": null, "database_IDs": null, "fields_not_requested": ["builder_meta", "nsites", "elements", "nelements", "composition", "composition_reduced", "chemsys", "symmetry", "property_name", "deprecated", "deprecation_reasons", "last_updated", "origins", "warnings", "task_ids", "uncorrected_energy_per_atom", "equilibrium_reaction_energy_per_atom", "decomposes_to", "xas", "grain_boundaries", "cbm", "vbm", "is_gap_direct", "is_metal", "es_source_calc_id", "bandstructure", "dos", "dos_energy_up", "dos_energy_down", "is_magnetic", "ordering", "total_magnetization_normalized_vol", "total_magnetization_normalized_formula_units", "num_magnetic_sites", "num_unique_magnetic_sites", "types_of_magnetic_species", "bulk_modulus", "shear_modulus", "universal_anisotropy", "homogeneous_poisson", "e_total", "e_ionic", "e_electronic", "n", "e_ij_max", "weighted_surface_energy_EV_PER_ANG2", "weighted_surface_energy", "weighted_work_function", "surface_anisotropy", "shape_factor", "has_reconstructed", "possible_species", "has_props", "theoretical", "database_IDs"]}
+{
+  "builder_meta": null,
+  "nsites": null,
+  "elements": null,
+  "nelements": null,
+  "composition": null,
+  "composition_reduced": null,
+  "formula_pretty": "WCl2",
+  "formula_anonymous": "AB2",
+  "chemsys": null,
+  "volume": 962.7793431057232,
+  "density": 5.27243158785095,
+  "density_atomic": 26.743870641825644,
+  "symmetry": null,
+  "property_name": null,
+  "material_id": "mp-1207828",
+  "deprecated": null,
+  "deprecation_reasons": null,
+  "last_updated": null,
+  "origins": null,
+  "warnings": null,
+  "structure": {
+    "@module": "pymatgen.core.structure",
+    "@class": "Structure",
+    "charge": 0,
+    "lattice": {
+      "matrix": [
+        [7.35794222, 5.7246898900000005, 0.0],
+        [-7.35794222, 5.7246898900000005, 0.0],
+        [-0.0, -0.0, 11.42847886]
+      ],
+      "pbc": [true, true, true],
+      "a": 9.322627743803071,
+      "b": 9.322627743803071,
+      "c": 11.42847886,
+      "alpha": 90.0,
+      "beta": 90.0,
+      "gamma": 104.23212239360404,
+      "volume": 962.7793431057233
+    },
+    "properties": {},
+    "sites": [
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.12555974, 0.87443926, 0.0],
+        "properties": { "magmom": -0.0 },
+        "label": "W",
+        "xyz": [-5.510212237901335, 5.724684165310111, 0.0]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.87443926, 0.12555974, 0.0],
+        "properties": { "magmom": -0.0 },
+        "label": "W",
+        "xyz": [5.510212237901335, 5.724684165310111, 0.0]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.37444026, 0.6255607400000001, 0.5],
+        "properties": { "magmom": -0.0 },
+        "label": "W",
+        "xyz": [-1.8477299820986657, 5.724695614689891, 5.71423943]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.6255607400000001, 0.37444026, 0.5],
+        "properties": { "magmom": -0.0 },
+        "label": "W",
+        "xyz": [1.8477299820986657, 5.724695614689891, 5.71423943]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.43166977, 0.43166977, 0.35405891],
+        "properties": { "magmom": 0.0 },
+        "label": "W",
+        "xyz": [0.0, 4.942351136275251, 4.046354768129643]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.56833023, 0.56833023, 0.64594109],
+        "properties": { "magmom": 0.0 },
+        "label": "W",
+        "xyz": [0.0, 6.507028643724751, 7.382124091870358]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.06833023, 0.06833023, 0.85405891],
+        "properties": { "magmom": 0.0 },
+        "label": "W",
+        "xyz": [0.0, 0.7823387537247495, 9.760594198129644]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.9316697700000001, 0.9316697700000001, 0.14594109],
+        "properties": { "magmom": 0.0 },
+        "label": "W",
+        "xyz": [0.0, 10.667041026275252, 1.6678846618703573]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.1456707, 0.1456707, 0.06843196],
+        "properties": { "magmom": 0.0 },
+        "label": "W",
+        "xyz": [0.0, 1.667839167118446, 0.7820732082083656]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.8543293, 0.8543293, 0.93156804],
+        "properties": { "magmom": 0.0 },
+        "label": "W",
+        "xyz": [0.0, 9.781540612881555, 10.646405651791635]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.354329299999999, 0.354329299999999, 0.56843196],
+        "properties": { "magmom": 0.0 },
+        "label": "W",
+        "xyz": [0.0, 4.056850722881543, 6.496312638208365]
+      },
+      {
+        "species": [{ "element": "W", "occu": 1 }],
+        "abc": [0.645670699999999, 0.645670699999999, 0.43156804],
+        "properties": { "magmom": 0.0 },
+        "label": "W",
+        "xyz": [0.0, 7.392529057118436, 4.932166221791634]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.287758399999999, 0.712241599999999, 0.0],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [-3.123322858960704, 5.724689889999989, 0.0]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.712241599999999, 0.287758399999999, 0.0],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [3.123322858960704, 5.724689889999989, 0.0]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.2122416, 0.7877584, 0.5],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [-4.234619361039296, 5.7246898900000005, 5.71423943]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.7877584, 0.2122416, 0.5],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [4.234619361039296, 5.7246898900000005, 5.71423943]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.19464113, 0.95550252, 0.2070822],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [-5.598374145048886, 6.584215725202699, 2.366634544982292]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.8053588700000001, 0.04449748, 0.7929178],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [5.598374145048886, 4.865164054797302, 9.061844315017709]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.30535887, 0.54449748, 0.7070822],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [-1.759568074951114, 4.865164054797302, 8.080873974982293]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.45550252, 0.69464113, 0.2929178],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [-1.7595680749511144, 6.5842157252027, 3.347604885017708]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.69464113, 0.45550252, 0.2929178],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [1.7595680749511144, 6.5842157252027, 3.347604885017708]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.54449748, 0.30535887, 0.7070822],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [1.759568074951114, 4.865164054797302, 8.080873974982293]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.04449748, 0.8053588700000001, 0.7929178],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [-5.598374145048886, 4.865164054797302, 9.061844315017709]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.95550252, 0.19464113, 0.2070822],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [5.598374145048886, 6.584215725202699, 2.366634544982292]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.35036706, 0.35036706, 0.149272699999999],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [0.0, 4.011485532342047, 1.7059598963251108]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.64963294, 0.64963294, 0.8507273],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [0.0, 7.437894247657955, 9.722518963674878]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.14963294, 0.14963294, 0.649272699999999],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [0.0, 1.7132043576579532, 7.420199326325111]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.8503670600000001, 0.8503670600000001, 0.350727299999999],
+        "properties": { "magmom": -0.0 },
+        "label": "Cl",
+        "xyz": [0.0, 9.736175422342049, 4.008279533674867]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.67360108, 0.91300431, 0.07510234],
+        "properties": { "magmom": 0.0 },
+        "label": "Cl",
+        "xyz": [-1.761515133621371, 9.082823835552508, 0.8583055050265325]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.32639892, 0.08699569, 0.9248976600000001],
+        "properties": { "magmom": 0.0 },
+        "label": "Cl",
+        "xyz": [1.7615151336213701, 2.366555944447493, 10.570173354973468]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.82639892, 0.58699569, 0.57510234],
+        "properties": { "magmom": 0.0 },
+        "label": "Cl",
+        "xyz": [1.761515133621371, 8.091245834447493, 6.572544935026533]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.41300431, 0.17360108, 0.42489766],
+        "properties": { "magmom": 0.0 },
+        "label": "Cl",
+        "xyz": [1.7615151336213706, 3.3581339455525074, 4.855933924973468]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.17360108, 0.41300431, 0.42489766],
+        "properties": { "magmom": 0.0 },
+        "label": "Cl",
+        "xyz": [-1.7615151336213706, 3.3581339455525074, 4.855933924973468]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.58699569, 0.82639892, 0.57510234],
+        "properties": { "magmom": 0.0 },
+        "label": "Cl",
+        "xyz": [-1.761515133621371, 8.091245834447493, 6.572544935026533]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.08699569, 0.32639892, 0.9248976600000001],
+        "properties": { "magmom": 0.0 },
+        "label": "Cl",
+        "xyz": [-1.7615151336213701, 2.366555944447493, 10.570173354973468]
+      },
+      {
+        "species": [{ "element": "Cl", "occu": 1 }],
+        "abc": [0.91300431, 0.67360108, 0.07510234],
+        "properties": { "magmom": 0.0 },
+        "label": "Cl",
+        "xyz": [1.761515133621371, 9.082823835552508, 0.8583055050265325]
+      }
+    ]
+  },
+  "task_ids": null,
+  "uncorrected_energy_per_atom": null,
+  "energy_per_atom": -22.049266549444447,
+  "formation_energy_per_atom": -0.825042491111111,
+  "energy_above_hull": 0.0,
+  "is_stable": true,
+  "equilibrium_reaction_energy_per_atom": null,
+  "decomposes_to": null,
+  "xas": null,
+  "grain_boundaries": null,
+  "band_gap": 2.8217,
+  "cbm": null,
+  "vbm": null,
+  "efermi": 1.52268437,
+  "is_gap_direct": null,
+  "is_metal": null,
+  "es_source_calc_id": null,
+  "bandstructure": null,
+  "dos": null,
+  "dos_energy_up": null,
+  "dos_energy_down": null,
+  "is_magnetic": null,
+  "ordering": null,
+  "total_magnetization": 0.0,
+  "total_magnetization_normalized_vol": null,
+  "total_magnetization_normalized_formula_units": null,
+  "num_magnetic_sites": null,
+  "num_unique_magnetic_sites": null,
+  "types_of_magnetic_species": null,
+  "bulk_modulus": null,
+  "shear_modulus": null,
+  "universal_anisotropy": null,
+  "homogeneous_poisson": null,
+  "e_total": null,
+  "e_ionic": null,
+  "e_electronic": null,
+  "n": null,
+  "e_ij_max": null,
+  "weighted_surface_energy_EV_PER_ANG2": null,
+  "weighted_surface_energy": null,
+  "weighted_work_function": null,
+  "surface_anisotropy": null,
+  "shape_factor": null,
+  "has_reconstructed": null,
+  "possible_species": null,
+  "has_props": null,
+  "theoretical": null,
+  "database_IDs": null,
+  "fields_not_requested": [
+    "builder_meta",
+    "nsites",
+    "elements",
+    "nelements",
+    "composition",
+    "composition_reduced",
+    "chemsys",
+    "symmetry",
+    "property_name",
+    "deprecated",
+    "deprecation_reasons",
+    "last_updated",
+    "origins",
+    "warnings",
+    "task_ids",
+    "uncorrected_energy_per_atom",
+    "equilibrium_reaction_energy_per_atom",
+    "decomposes_to",
+    "xas",
+    "grain_boundaries",
+    "cbm",
+    "vbm",
+    "is_gap_direct",
+    "is_metal",
+    "es_source_calc_id",
+    "bandstructure",
+    "dos",
+    "dos_energy_up",
+    "dos_energy_down",
+    "is_magnetic",
+    "ordering",
+    "total_magnetization_normalized_vol",
+    "total_magnetization_normalized_formula_units",
+    "num_magnetic_sites",
+    "num_unique_magnetic_sites",
+    "types_of_magnetic_species",
+    "bulk_modulus",
+    "shear_modulus",
+    "universal_anisotropy",
+    "homogeneous_poisson",
+    "e_total",
+    "e_ionic",
+    "e_electronic",
+    "n",
+    "e_ij_max",
+    "weighted_surface_energy_EV_PER_ANG2",
+    "weighted_surface_energy",
+    "weighted_work_function",
+    "surface_anisotropy",
+    "shape_factor",
+    "has_reconstructed",
+    "possible_species",
+    "has_props",
+    "theoretical",
+    "database_IDs"
+  ]
+}

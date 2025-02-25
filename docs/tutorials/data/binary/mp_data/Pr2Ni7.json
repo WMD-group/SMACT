@@ -1,1 +1,402 @@
-{"builder_meta": null, "nsites": null, "elements": null, "nelements": null, "composition": null, "composition_reduced": null, "formula_pretty": "Pr2Ni7", "formula_anonymous": "A2B7", "chemsys": null, "volume": 548.3313276605805, "density": 8.390577322539144, "density_atomic": 15.23142576834946, "symmetry": null, "property_name": null, "material_id": "mp-1201333", "deprecated": null, "deprecation_reasons": null, "last_updated": null, "origins": null, "warnings": null, "structure": {"@module": "pymatgen.core.structure", "@class": "Structure", "charge": 0, "lattice": {"matrix": [[5.066059, 0.0, 0.0], [-2.533029, 4.387335, 0.0], [0.0, 0.0, 24.670163]], "pbc": [true, true, true], "a": 5.066059, "b": 5.066058064912601, "c": 24.670163, "alpha": 90.0, "beta": 90.0, "gamma": 119.99999957614153, "volume": 548.3313276605805}, "properties": {}, "sites": [{"species": [{"element": "Pr", "occu": 1}], "abc": [0.333333, 0.666667, 0.470163999999999], "properties": {"magmom": 0.033}, "label": "Pr", "xyz": [-2.199696000015905e-06, 2.924891462445, 11.599022516731976]}, {"species": [{"element": "Pr", "occu": 1}], "abc": [0.666667, 0.333333, 0.529836], "properties": {"magmom": 0.033}, "label": "Pr", "xyz": [2.533032199696, 1.462443537555, 13.071140483267998]}, {"species": [{"element": "Pr", "occu": 1}], "abc": [0.666667, 0.333333, 0.970163999999999], "properties": {"magmom": 0.033}, "label": "Pr", "xyz": [2.533032199696, 1.462443537555, 23.934104016731975]}, {"species": [{"element": "Pr", "occu": 1}], "abc": [0.333333, 0.666667, 0.029835999999999002], "properties": {"magmom": 0.033}, "label": "Pr", "xyz": [-2.199696000015905e-06, 2.924891462445, 0.7360589832679754]}, {"species": [{"element": "Pr", "occu": 1}], "abc": [0.333333, 0.666667, 0.32558000000000004], "properties": {"magmom": 0.043000000000000003}, "label": "Pr", "xyz": [-2.199696000015905e-06, 2.924891462445, 8.03211166954]}, {"species": [{"element": "Pr", "occu": 1}], "abc": [0.666667, 0.333333, 0.67442], "properties": {"magmom": 0.043000000000000003}, "label": "Pr", "xyz": [2.533032199696, 1.462443537555, 16.638051330459998]}, {"species": [{"element": "Pr", "occu": 1}], "abc": [0.666667, 0.333333, 0.8255800000000001], "properties": {"magmom": 0.043000000000000003}, "label": "Pr", "xyz": [2.533032199696, 1.462443537555, 20.367193169540002]}, {"species": [{"element": "Pr", "occu": 1}], "abc": [0.333333, 0.666667, 0.17442000000000002], "properties": {"magmom": 0.043000000000000003}, "label": "Pr", "xyz": [-2.199696000015905e-06, 2.924891462445, 4.30296983046]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.0, 0.0, 0.5], "properties": {"magmom": -0.052000000000000005}, "label": "Ni", "xyz": [0.0, 0.0, 12.3350815]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.0, 0.0, 0.0], "properties": {"magmom": -0.052000000000000005}, "label": "Ni", "xyz": [0.0, 0.0, 0.0]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.833117999999999, 0.166882, 0.25], "properties": {"magmom": -0.379}, "label": "Ni", "xyz": [3.7979079963839952, 0.7321672394700001, 6.16754075]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.833117999999999, 0.666235, 0.25], "properties": {"magmom": -0.379}, "label": "Ni", "xyz": [2.5330323661469953, 2.9229961337250003, 6.16754075]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.333765, 0.166882, 0.25], "properties": {"magmom": -0.379}, "label": "Ni", "xyz": [1.2681562365569998, 0.7321672394700001, 6.16754075]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.166882, 0.833117999999999, 0.75], "properties": {"magmom": -0.379}, "label": "Ni", "xyz": [-1.2648779963839976, 3.655167760529996, 18.502622249999998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.166882, 0.333765, 0.75], "properties": {"magmom": -0.379}, "label": "Ni", "xyz": [-2.3661469999991525e-06, 1.4643388662749999, 18.502622249999998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.666235, 0.833117999999999, 0.75], "properties": {"magmom": -0.379}, "label": "Ni", "xyz": [1.2648737634430027, 3.655167760529996, 18.502622249999998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.833951, 0.166049, 0.412454], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [3.804238036688, 0.7285125894150001, 10.175307410001999]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.833951, 0.667901, 0.412454], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [2.5330323669800006, 2.930305433835, 10.175307410001999]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.332099, 0.166049, 0.412454], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [1.2618261954199999, 0.7285125894150001, 10.175307410001999]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.166049, 0.833951, 0.587546], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [-1.2712080366880003, 3.658822410585, 14.494855589998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.166049, 0.332099, 0.587546], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [-2.3669799998904395e-06, 1.457029566165, 14.494855589998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.667901, 0.833951, 0.587546], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [1.2712038045799998, 3.658822410585, 14.494855589998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.166049, 0.833951, 0.912454], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [-1.2712080366880003, 3.658822410585, 22.510388910002]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.166049, 0.332099, 0.912454], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [-2.3669799998904395e-06, 1.457029566165, 22.510388910002]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.667901, 0.833951, 0.912454], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [1.2712038045799998, 3.658822410585, 22.510388910002]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.833951, 0.166049, 0.087546], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [3.804238036688, 0.7285125894150001, 2.159774089998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.833951, 0.667901, 0.087546], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [2.5330323669800006, 2.930305433835, 2.159774089998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.332099, 0.166049, 0.087546], "properties": {"magmom": -0.14100000000000001}, "label": "Ni", "xyz": [1.2618261954199999, 0.7285125894150001, 2.159774089998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.0, 0.0, 0.331001999999999], "properties": {"magmom": -0.264}, "label": "Ni", "xyz": [0.0, 0.0, 8.165873293325975]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.0, 0.0, 0.668998], "properties": {"magmom": -0.264}, "label": "Ni", "xyz": [0.0, 0.0, 16.504289706673998]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.0, 0.0, 0.831001999999999], "properties": {"magmom": -0.264}, "label": "Ni", "xyz": [0.0, 0.0, 20.500954793325974]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.0, 0.0, 0.168997999999999], "properties": {"magmom": -0.264}, "label": "Ni", "xyz": [0.0, 0.0, 4.169208206673975]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.333333, 0.666667, 0.667536], "properties": {"magmom": -0.234}, "label": "Ni", "xyz": [-2.199696000015905e-06, 2.924891462445, 16.468221928368]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.666667, 0.333333, 0.332464], "properties": {"magmom": -0.234}, "label": "Ni", "xyz": [2.533032199696, 1.462443537555, 8.201941071632]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.666667, 0.333333, 0.167536], "properties": {"magmom": -0.234}, "label": "Ni", "xyz": [2.533032199696, 1.462443537555, 4.133140428368]}, {"species": [{"element": "Ni", "occu": 1}], "abc": [0.333333, 0.666667, 0.832464], "properties": {"magmom": -0.234}, "label": "Ni", "xyz": [-2.199696000015905e-06, 2.924891462445, 20.537022571631997]}]}, "task_ids": null, "uncorrected_energy_per_atom": null, "energy_per_atom": -5.841255632222222, "formation_energy_per_atom": -0.279933445925924, "energy_above_hull": 0.0, "is_stable": true, "equilibrium_reaction_energy_per_atom": null, "decomposes_to": null, "xas": null, "grain_boundaries": null, "band_gap": 0.0, "cbm": null, "vbm": null, "efermi": 6.1534858, "is_gap_direct": null, "is_metal": null, "es_source_calc_id": null, "bandstructure": null, "dos": null, "dos_energy_up": null, "dos_energy_down": null, "is_magnetic": null, "ordering": null, "total_magnetization": 5.022122, "total_magnetization_normalized_vol": null, "total_magnetization_normalized_formula_units": null, "num_magnetic_sites": null, "num_unique_magnetic_sites": null, "types_of_magnetic_species": null, "bulk_modulus": null, "shear_modulus": null, "universal_anisotropy": null, "homogeneous_poisson": null, "e_total": null, "e_ionic": null, "e_electronic": null, "n": null, "e_ij_max": null, "weighted_surface_energy_EV_PER_ANG2": null, "weighted_surface_energy": null, "weighted_work_function": null, "surface_anisotropy": null, "shape_factor": null, "has_reconstructed": null, "possible_species": null, "has_props": null, "theoretical": null, "database_IDs": null, "fields_not_requested": ["builder_meta", "nsites", "elements", "nelements", "composition", "composition_reduced", "chemsys", "symmetry", "property_name", "deprecated", "deprecation_reasons", "last_updated", "origins", "warnings", "task_ids", "uncorrected_energy_per_atom", "equilibrium_reaction_energy_per_atom", "decomposes_to", "xas", "grain_boundaries", "cbm", "vbm", "is_gap_direct", "is_metal", "es_source_calc_id", "bandstructure", "dos", "dos_energy_up", "dos_energy_down", "is_magnetic", "ordering", "total_magnetization_normalized_vol", "total_magnetization_normalized_formula_units", "num_magnetic_sites", "num_unique_magnetic_sites", "types_of_magnetic_species", "bulk_modulus", "shear_modulus", "universal_anisotropy", "homogeneous_poisson", "e_total", "e_ionic", "e_electronic", "n", "e_ij_max", "weighted_surface_energy_EV_PER_ANG2", "weighted_surface_energy", "weighted_work_function", "surface_anisotropy", "shape_factor", "has_reconstructed", "possible_species", "has_props", "theoretical", "database_IDs"]}
+{
+  "builder_meta": null,
+  "nsites": null,
+  "elements": null,
+  "nelements": null,
+  "composition": null,
+  "composition_reduced": null,
+  "formula_pretty": "Pr2Ni7",
+  "formula_anonymous": "A2B7",
+  "chemsys": null,
+  "volume": 548.3313276605805,
+  "density": 8.390577322539144,
+  "density_atomic": 15.23142576834946,
+  "symmetry": null,
+  "property_name": null,
+  "material_id": "mp-1201333",
+  "deprecated": null,
+  "deprecation_reasons": null,
+  "last_updated": null,
+  "origins": null,
+  "warnings": null,
+  "structure": {
+    "@module": "pymatgen.core.structure",
+    "@class": "Structure",
+    "charge": 0,
+    "lattice": {
+      "matrix": [
+        [5.066059, 0.0, 0.0],
+        [-2.533029, 4.387335, 0.0],
+        [0.0, 0.0, 24.670163]
+      ],
+      "pbc": [true, true, true],
+      "a": 5.066059,
+      "b": 5.066058064912601,
+      "c": 24.670163,
+      "alpha": 90.0,
+      "beta": 90.0,
+      "gamma": 119.99999957614153,
+      "volume": 548.3313276605805
+    },
+    "properties": {},
+    "sites": [
+      {
+        "species": [{ "element": "Pr", "occu": 1 }],
+        "abc": [0.333333, 0.666667, 0.470163999999999],
+        "properties": { "magmom": 0.033 },
+        "label": "Pr",
+        "xyz": [-2.199696000015905e-6, 2.924891462445, 11.599022516731976]
+      },
+      {
+        "species": [{ "element": "Pr", "occu": 1 }],
+        "abc": [0.666667, 0.333333, 0.529836],
+        "properties": { "magmom": 0.033 },
+        "label": "Pr",
+        "xyz": [2.533032199696, 1.462443537555, 13.071140483267998]
+      },
+      {
+        "species": [{ "element": "Pr", "occu": 1 }],
+        "abc": [0.666667, 0.333333, 0.970163999999999],
+        "properties": { "magmom": 0.033 },
+        "label": "Pr",
+        "xyz": [2.533032199696, 1.462443537555, 23.934104016731975]
+      },
+      {
+        "species": [{ "element": "Pr", "occu": 1 }],
+        "abc": [0.333333, 0.666667, 0.029835999999999002],
+        "properties": { "magmom": 0.033 },
+        "label": "Pr",
+        "xyz": [-2.199696000015905e-6, 2.924891462445, 0.7360589832679754]
+      },
+      {
+        "species": [{ "element": "Pr", "occu": 1 }],
+        "abc": [0.333333, 0.666667, 0.32558000000000004],
+        "properties": { "magmom": 0.043000000000000003 },
+        "label": "Pr",
+        "xyz": [-2.199696000015905e-6, 2.924891462445, 8.03211166954]
+      },
+      {
+        "species": [{ "element": "Pr", "occu": 1 }],
+        "abc": [0.666667, 0.333333, 0.67442],
+        "properties": { "magmom": 0.043000000000000003 },
+        "label": "Pr",
+        "xyz": [2.533032199696, 1.462443537555, 16.638051330459998]
+      },
+      {
+        "species": [{ "element": "Pr", "occu": 1 }],
+        "abc": [0.666667, 0.333333, 0.8255800000000001],
+        "properties": { "magmom": 0.043000000000000003 },
+        "label": "Pr",
+        "xyz": [2.533032199696, 1.462443537555, 20.367193169540002]
+      },
+      {
+        "species": [{ "element": "Pr", "occu": 1 }],
+        "abc": [0.333333, 0.666667, 0.17442000000000002],
+        "properties": { "magmom": 0.043000000000000003 },
+        "label": "Pr",
+        "xyz": [-2.199696000015905e-6, 2.924891462445, 4.30296983046]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.0, 0.0, 0.5],
+        "properties": { "magmom": -0.052000000000000005 },
+        "label": "Ni",
+        "xyz": [0.0, 0.0, 12.3350815]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.0, 0.0, 0.0],
+        "properties": { "magmom": -0.052000000000000005 },
+        "label": "Ni",
+        "xyz": [0.0, 0.0, 0.0]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.833117999999999, 0.166882, 0.25],
+        "properties": { "magmom": -0.379 },
+        "label": "Ni",
+        "xyz": [3.7979079963839952, 0.7321672394700001, 6.16754075]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.833117999999999, 0.666235, 0.25],
+        "properties": { "magmom": -0.379 },
+        "label": "Ni",
+        "xyz": [2.5330323661469953, 2.9229961337250003, 6.16754075]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.333765, 0.166882, 0.25],
+        "properties": { "magmom": -0.379 },
+        "label": "Ni",
+        "xyz": [1.2681562365569998, 0.7321672394700001, 6.16754075]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.166882, 0.833117999999999, 0.75],
+        "properties": { "magmom": -0.379 },
+        "label": "Ni",
+        "xyz": [-1.2648779963839976, 3.655167760529996, 18.502622249999998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.166882, 0.333765, 0.75],
+        "properties": { "magmom": -0.379 },
+        "label": "Ni",
+        "xyz": [-2.3661469999991525e-6, 1.4643388662749999, 18.502622249999998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.666235, 0.833117999999999, 0.75],
+        "properties": { "magmom": -0.379 },
+        "label": "Ni",
+        "xyz": [1.2648737634430027, 3.655167760529996, 18.502622249999998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.833951, 0.166049, 0.412454],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [3.804238036688, 0.7285125894150001, 10.175307410001999]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.833951, 0.667901, 0.412454],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [2.5330323669800006, 2.930305433835, 10.175307410001999]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.332099, 0.166049, 0.412454],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [1.2618261954199999, 0.7285125894150001, 10.175307410001999]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.166049, 0.833951, 0.587546],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [-1.2712080366880003, 3.658822410585, 14.494855589998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.166049, 0.332099, 0.587546],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [-2.3669799998904395e-6, 1.457029566165, 14.494855589998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.667901, 0.833951, 0.587546],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [1.2712038045799998, 3.658822410585, 14.494855589998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.166049, 0.833951, 0.912454],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [-1.2712080366880003, 3.658822410585, 22.510388910002]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.166049, 0.332099, 0.912454],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [-2.3669799998904395e-6, 1.457029566165, 22.510388910002]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.667901, 0.833951, 0.912454],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [1.2712038045799998, 3.658822410585, 22.510388910002]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.833951, 0.166049, 0.087546],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [3.804238036688, 0.7285125894150001, 2.159774089998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.833951, 0.667901, 0.087546],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [2.5330323669800006, 2.930305433835, 2.159774089998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.332099, 0.166049, 0.087546],
+        "properties": { "magmom": -0.14100000000000001 },
+        "label": "Ni",
+        "xyz": [1.2618261954199999, 0.7285125894150001, 2.159774089998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.0, 0.0, 0.331001999999999],
+        "properties": { "magmom": -0.264 },
+        "label": "Ni",
+        "xyz": [0.0, 0.0, 8.165873293325975]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.0, 0.0, 0.668998],
+        "properties": { "magmom": -0.264 },
+        "label": "Ni",
+        "xyz": [0.0, 0.0, 16.504289706673998]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.0, 0.0, 0.831001999999999],
+        "properties": { "magmom": -0.264 },
+        "label": "Ni",
+        "xyz": [0.0, 0.0, 20.500954793325974]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.0, 0.0, 0.168997999999999],
+        "properties": { "magmom": -0.264 },
+        "label": "Ni",
+        "xyz": [0.0, 0.0, 4.169208206673975]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.333333, 0.666667, 0.667536],
+        "properties": { "magmom": -0.234 },
+        "label": "Ni",
+        "xyz": [-2.199696000015905e-6, 2.924891462445, 16.468221928368]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.666667, 0.333333, 0.332464],
+        "properties": { "magmom": -0.234 },
+        "label": "Ni",
+        "xyz": [2.533032199696, 1.462443537555, 8.201941071632]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.666667, 0.333333, 0.167536],
+        "properties": { "magmom": -0.234 },
+        "label": "Ni",
+        "xyz": [2.533032199696, 1.462443537555, 4.133140428368]
+      },
+      {
+        "species": [{ "element": "Ni", "occu": 1 }],
+        "abc": [0.333333, 0.666667, 0.832464],
+        "properties": { "magmom": -0.234 },
+        "label": "Ni",
+        "xyz": [-2.199696000015905e-6, 2.924891462445, 20.537022571631997]
+      }
+    ]
+  },
+  "task_ids": null,
+  "uncorrected_energy_per_atom": null,
+  "energy_per_atom": -5.841255632222222,
+  "formation_energy_per_atom": -0.279933445925924,
+  "energy_above_hull": 0.0,
+  "is_stable": true,
+  "equilibrium_reaction_energy_per_atom": null,
+  "decomposes_to": null,
+  "xas": null,
+  "grain_boundaries": null,
+  "band_gap": 0.0,
+  "cbm": null,
+  "vbm": null,
+  "efermi": 6.1534858,
+  "is_gap_direct": null,
+  "is_metal": null,
+  "es_source_calc_id": null,
+  "bandstructure": null,
+  "dos": null,
+  "dos_energy_up": null,
+  "dos_energy_down": null,
+  "is_magnetic": null,
+  "ordering": null,
+  "total_magnetization": 5.022122,
+  "total_magnetization_normalized_vol": null,
+  "total_magnetization_normalized_formula_units": null,
+  "num_magnetic_sites": null,
+  "num_unique_magnetic_sites": null,
+  "types_of_magnetic_species": null,
+  "bulk_modulus": null,
+  "shear_modulus": null,
+  "universal_anisotropy": null,
+  "homogeneous_poisson": null,
+  "e_total": null,
+  "e_ionic": null,
+  "e_electronic": null,
+  "n": null,
+  "e_ij_max": null,
+  "weighted_surface_energy_EV_PER_ANG2": null,
+  "weighted_surface_energy": null,
+  "weighted_work_function": null,
+  "surface_anisotropy": null,
+  "shape_factor": null,
+  "has_reconstructed": null,
+  "possible_species": null,
+  "has_props": null,
+  "theoretical": null,
+  "database_IDs": null,
+  "fields_not_requested": [
+    "builder_meta",
+    "nsites",
+    "elements",
+    "nelements",
+    "composition",
+    "composition_reduced",
+    "chemsys",
+    "symmetry",
+    "property_name",
+    "deprecated",
+    "deprecation_reasons",
+    "last_updated",
+    "origins",
+    "warnings",
+    "task_ids",
+    "uncorrected_energy_per_atom",
+    "equilibrium_reaction_energy_per_atom",
+    "decomposes_to",
+    "xas",
+    "grain_boundaries",
+    "cbm",
+    "vbm",
+    "is_gap_direct",
+    "is_metal",
+    "es_source_calc_id",
+    "bandstructure",
+    "dos",
+    "dos_energy_up",
+    "dos_energy_down",
+    "is_magnetic",
+    "ordering",
+    "total_magnetization_normalized_vol",
+    "total_magnetization_normalized_formula_units",
+    "num_magnetic_sites",
+    "num_unique_magnetic_sites",
+    "types_of_magnetic_species",
+    "bulk_modulus",
+    "shear_modulus",
+    "universal_anisotropy",
+    "homogeneous_poisson",
+    "e_total",
+    "e_ionic",
+    "e_electronic",
+    "n",
+    "e_ij_max",
+    "weighted_surface_energy_EV_PER_ANG2",
+    "weighted_surface_energy",
+    "weighted_work_function",
+    "surface_anisotropy",
+    "shape_factor",
+    "has_reconstructed",
+    "possible_species",
+    "has_props",
+    "theoretical",
+    "database_IDs"
+  ]
+}
