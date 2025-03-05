@@ -7,13 +7,7 @@ on:
       - master
 
 jobs:
-  qa:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
   test:
-    needs: qa
     strategy:
       fail-fast: false
       matrix:
