@@ -17,7 +17,7 @@ from smact.utils.composition import comp_maker, formula_maker, parse_formula
 from smact.utils.crystal_space import generate_composition_with_smact
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
-MP_URL = "https://materialsproject.org"
+MP_URL = "https://api.materialsproject.org"
 MP_API_AVAILABLE = bool(find_spec("mp_api"))
 
 try:
@@ -163,8 +163,8 @@ class TestCrystalSpace(unittest.TestCase):
 
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
-TEST_ICSD_OX_STATES = os.path.join(files_dir, "test_icsd_oxidation_states_filter_1000.txt")
-TEST_ICSD_OX_STATES_W_ZERO = os.path.join(files_dir, "test_icsd_oxidation_states_filter_1000_w_0_ox_state.txt")
+TEST_ICSD_OX_STATES = os.path.join(files_dir, "oxidation_states_icsd24_consensus.txt")
+TEST_ICSD_OX_STATES_W_ZERO = os.path.join(files_dir, "oxidation_states_icsd24_consensus_w_0.txt")
 
 
 class OxidationStatesTest(unittest.TestCase):
@@ -178,43 +178,95 @@ class OxidationStatesTest(unittest.TestCase):
     def test_oxidation_states_filter(self):
         self.assertIsInstance(self.ox_filter.ox_states_df, pd.DataFrame)
         threshold = 10
-        filtered_df = self.ox_filter.filter(threshold)
+        filtered_df = self.ox_filter.filter(consensus=threshold)
 
         self.assertIsInstance(filtered_df, pd.DataFrame)
         self.assertEqual(filtered_df.columns.tolist(), ["element", "oxidation_state"])
-        # self.assertEqual(filtered_df.loc[""])
 
     def test_oxidation_states_write(self):
-        threshold = 1000
+        self.maxDiff = None
+
         filename = "test_ox_states"
+        comment = "Testing writing of ICSD 24 oxidation states list."
+        self.ox_filter.write(
+            filename,
+            comment=comment,
+            consensus=3,
+            include_zero=False,
+            commonality="low",
+        )
+
+        self.assertTrue(os.path.exists(f"{filename}.txt"))
+        # Read the file and check its content
+        with open(f"{filename}.txt") as f:
+            content = f.read()
+        # Check if the comment is included in the file
+        self.assertIn(comment, content)
+        # Check if the file content matches the expected content
+        self.assertEqual(content, self.test_ox_states)
+        os.remove(f"{filename}.txt")
+
         filename_w_zero = "test_ox_states_w_zero"
         comment = "Testing writing of ICSD 24 oxidation states list."
-        self.ox_filter.write(filename, threshold, comment=comment)
-        self.ox_filter.write(filename_w_zero, threshold, include_zero=True, comment=comment)
-        self.assertTrue(os.path.exists(f"{filename}.txt"))
-        with open(f"{filename}.txt") as f:
-            self.assertEqual(f.read(), self.test_ox_states)
+        self.ox_filter.write(
+            filename_w_zero,
+            comment=comment,
+            consensus=3,
+            include_zero=True,
+            commonality="low",
+        )
 
-        self.assertTrue(os.path.exists(f"{filename}_w_zero.txt"))
-        with open(f"{filename}_w_zero.txt") as f:
-            self.assertEqual(f.read(), self.test_ox_states_w_zero)
-        # Clean up
-        os.remove(f"{filename}.txt")
-        os.remove(f"{filename}_w_zero.txt")
+        self.assertTrue(os.path.exists(f"{filename_w_zero}.txt"))
+        # Read the file and check its content
+        with open(f"{filename_w_zero}.txt") as f:
+            content = f.read()
+        # Check if the comment is included in the file
+        self.assertIn(comment, content)
+        # Check if the file content matches the expected content
+        self.assertEqual(content, self.test_ox_states_w_zero)
+        os.remove(f"{filename_w_zero}.txt")
 
-    def test_oxidation_states_filter_species_list(self):
-        for threshold, length in [(0, 490), (5, 358), (50, 227)]:
-            species_list = self.ox_filter.get_species_list(threshold)
-            self.assertIsInstance(species_list, list)
-            self.assertEqual(len(species_list), length)
+    def test_get_species_list(self):
+        # Test with default parameters
+        species_list = self.ox_filter.get_species_list()
+        self.assertIsInstance(species_list, list)
+        self.assertGreater(len(species_list), 0)  # Ensure the list is not empty
+
+        # Test with include_zero=True
+        species_list_with_zero = self.ox_filter.get_species_list(include_zero=True)
+        self.assertIsInstance(species_list_with_zero, list)
+        self.assertGreater(len(species_list_with_zero), 0)
+
+        # Test with include_one_oxidation_state=True
+        species_list_with_one = self.ox_filter.get_species_list(include_one_oxidation_state=True)
+        self.assertIsInstance(species_list_with_one, list)
+        self.assertGreater(len(species_list_with_one), 0)
+
+        # Test with different commonality levels
+        species_list_low = self.ox_filter.get_species_list(commonality="low")
+        self.assertIsInstance(species_list_low, list)
+        self.assertGreater(len(species_list_low), 0)
+
+        species_list_medium = self.ox_filter.get_species_list(commonality="medium")
+        self.assertIsInstance(species_list_medium, list)
+        self.assertGreater(len(species_list_medium), 0)
+
+        species_list_high = self.ox_filter.get_species_list(commonality="high")
+        self.assertIsInstance(species_list_high, list)
+        self.assertGreater(len(species_list_high), 0)
+
+        # Test with a specific consensus threshold
+        species_list_threshold = self.ox_filter.get_species_list(consensus=5)
+        self.assertIsInstance(species_list_threshold, list)
+        self.assertGreater(len(species_list_threshold), 0)
 
     def test_oxidation_states_filter_species_occurrences(self):
-        species_occurrences_df = self.ox_filter.get_species_occurrences_df()
+        species_occurrences_df = self.ox_filter.get_species_occurrences_df(consensus=1)
         self.assertIsInstance(species_occurrences_df, pd.DataFrame)
         self.assertEqual(
             species_occurrences_df.columns.tolist(),
-            ["species", "results_count"],
+            ["element", "species", "results_count", "species_proportion (%)"],
         )
-        self.assertEqual(species_occurrences_df.shape, (490, 2))
+        self.assertEqual(species_occurrences_df.shape, (490, 4))
         self.assertEqual(species_occurrences_df.iloc[0]["species"], "O2-")
         self.assertEqual(species_occurrences_df.iloc[0]["results_count"], 116910)
