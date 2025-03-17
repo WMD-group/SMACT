@@ -280,9 +280,9 @@ class OxidationStatesTest(unittest.TestCase):
 
         # Verify that only species with maximum proportion for each element are included
         for species in species_list_main:
-            element = species.split("+")[0].split("-")[
-                0
-            ]  # Extract element from species string
+            element = (
+                species.split("+")[0].split("-")[0].rstrip("0123456789")
+            )  # Extract element from species string
             species_proportion = df_main[df_main["species"] == species][
                 "species_proportion (%)"
             ].iloc[0]
