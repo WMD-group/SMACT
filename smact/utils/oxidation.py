@@ -34,30 +34,44 @@ class ICSD24OxStatesFilter:
         Args:
             consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
             include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
-            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "Low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. Users may also specify their own threshold (float or int). Default is "low".
+            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "low".
 
         Returns:
             pd.DataFrame: The filtered oxidation states list as a DataFrame.
         """
         commonality_map = {"low": 0, "medium": 10, "high": 50}
+        commonality_threshold = 0
 
         if isinstance(commonality, str):
-            commonality_threshold = commonality_map.get(commonality)
+            if commonality == "main":
+                pass
+            else:
+                commonality_threshold = commonality_map.get(commonality)
         elif isinstance(commonality, int | float):
             commonality_threshold = commonality
         else:
-            raise TypeError("commonality must be a string ('low', 'medium', 'high'), a float or an integer")
+            raise TypeError("commonality must be a string ('low', 'medium', 'high', 'main'), a float or an integer")
 
         if not include_zero:
             filtered_df = self.ox_states_df[self.ox_states_df["oxidation_state"] != 0].reset_index(drop=True)
         else:
             filtered_df = self.ox_states_df
+
         filtered_df = filtered_df[
             (filtered_df["results_count"] >= consensus) & (filtered_df["results_count"] != 0)
         ].reset_index(drop=True)
+
         element_totals = filtered_df.groupby("element")["results_count"].transform("sum")
         filtered_df["species_proportion (%)"] = filtered_df["results_count"] / element_totals * 100
-        filtered_df = filtered_df[filtered_df["species_proportion (%)"] >= commonality_threshold].reset_index(drop=True)
+
+        if commonality == "main":
+            filtered_df = (
+                filtered_df.loc[filtered_df.groupby("element")["species_proportion (%)"].idxmax()]
+            ).reset_index(drop=True)
+        else:
+            filtered_df = filtered_df[filtered_df["species_proportion (%)"] >= commonality_threshold].reset_index(
+                drop=True
+            )
 
         summary_df = (
             filtered_df.groupby("element").apply(self._filter_oxidation_states, 0, include_groups=False).reset_index()
@@ -79,7 +93,7 @@ class ICSD24OxStatesFilter:
             consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
             include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
             include_one_oxidation_state (bool): Include oxidation states +1 and -1 in the filtered list or include as + and - signs. Default is False.
-            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "Low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. Users may also specify their own threshold (float or int). Default is "low".
+            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "low".
 
         Returns:
             list: The filtered oxidation states list as a list of species.
@@ -156,7 +170,7 @@ class ICSD24OxStatesFilter:
             comment (str): A comment to include in the txt file. Default is None.
             consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
             include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
-            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "Low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. Users may also specify their own threshold (float or int). Default is "low".
+            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "low".
         """
         filtered_df = self.filter(consensus, include_zero, commonality)
         # Convert the DataFrame to the require format
