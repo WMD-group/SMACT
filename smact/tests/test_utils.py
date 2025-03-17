@@ -80,7 +80,9 @@ class TestComposition(unittest.TestCase):
         self.assertEqual(Composition("FeO"), comp2)
         self.assertEqual(Composition({"Fe2+": 1, "O2-": 1}), comp1)
         self.assertEqual(Composition({"Fe2+": 1, "Fe3+": 2, "O2-": 4}), comp3)
-        self.assertEqual(Composition({"Li+": 10, "Ge4+": 1, "P5+": 2, "S2-": 12}), comp4)
+        self.assertEqual(
+            Composition({"Li+": 10, "Ge4+": 1, "P5+": 2, "S2-": 12}), comp4
+        )
 
     def test_formula_maker(self):
         """Test the formula_maker function"""
@@ -115,17 +117,20 @@ class TestCrystalSpace(unittest.TestCase):
         }
         for ox_states in oxidation_states_sets:
             with self.subTest(ox_states=ox_states):
-                smact_df = generate_composition_with_smact.generate_composition_with_smact(
-                    num_elements=2,
-                    max_stoich=3,
-                    max_atomic_num=20,
-                    save_path=save_dir,
-                    oxidation_states_set=ox_states,
+                smact_df = (
+                    generate_composition_with_smact.generate_composition_with_smact(
+                        num_elements=2,
+                        max_stoich=3,
+                        max_atomic_num=20,
+                        save_path=save_dir,
+                        oxidation_states_set=ox_states,
+                    )
                 )
                 self.assertIsInstance(smact_df, pd.DataFrame)
                 self.assertTrue(len(smact_df) == 1330)
                 self.assertTrue(
-                    smact_df["smact_allowed"].sum() == oxidation_states_sets_dict[ox_states]["smact_allowed"]
+                    smact_df["smact_allowed"].sum()
+                    == oxidation_states_sets_dict[ox_states]["smact_allowed"]
                 )
                 # Check if the data was saved to disk
                 self.assertTrue(os.path.exists(save_dir))
@@ -164,7 +169,9 @@ class TestCrystalSpace(unittest.TestCase):
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_ICSD_OX_STATES = os.path.join(files_dir, "oxidation_states_icsd24_consensus.txt")
-TEST_ICSD_OX_STATES_W_ZERO = os.path.join(files_dir, "oxidation_states_icsd24_consensus_w_0.txt")
+TEST_ICSD_OX_STATES_W_ZERO = os.path.join(
+    files_dir, "oxidation_states_icsd24_consensus_w_0.txt"
+)
 
 
 class OxidationStatesTest(unittest.TestCase):
@@ -238,7 +245,9 @@ class OxidationStatesTest(unittest.TestCase):
         self.assertGreater(len(species_list_with_zero), 0)
 
         # Test with include_one_oxidation_state=True
-        species_list_with_one = self.ox_filter.get_species_list(include_one_oxidation_state=True)
+        species_list_with_one = self.ox_filter.get_species_list(
+            include_one_oxidation_state=True
+        )
         self.assertIsInstance(species_list_with_one, list)
         self.assertGreater(len(species_list_with_one), 0)
 
@@ -259,6 +268,43 @@ class OxidationStatesTest(unittest.TestCase):
         species_list_threshold = self.ox_filter.get_species_list(consensus=5)
         self.assertIsInstance(species_list_threshold, list)
         self.assertGreater(len(species_list_threshold), 0)
+
+        # Test commonality="main" (should return species with max proportion for each element)
+        species_list_main = self.ox_filter.get_species_list(commonality="main")
+        self.assertIsInstance(species_list_main, list)
+        self.assertGreater(len(species_list_main), 0)
+
+        # Get the original dataframe for comparison
+        df_main = self.ox_filter.get_species_occurrences_df()
+        max_proportions = df_main.groupby("element")["species_proportion (%)"].max()
+
+        # Verify that only species with maximum proportion for each element are included
+        for species in species_list_main:
+            element = species.split("+")[0].split("-")[
+                0
+            ]  # Extract element from species string
+            species_proportion = df_main[df_main["species"] == species][
+                "species_proportion (%)"
+            ].iloc[0]
+            self.assertEqual(species_proportion, max_proportions[element])
+
+        # Test specific commonality threshold
+        threshold = 50.0  # Testing with 50% threshold
+        species_list_threshold = self.ox_filter.get_species_list(commonality=threshold)
+        self.assertIsInstance(species_list_threshold, list)
+
+        # Verify that all species meet the threshold requirement
+        df_threshold = self.ox_filter.get_species_occurrences_df()
+        for species in species_list_threshold:
+            proportion = df_threshold[df_threshold["species"] == species][
+                "species_proportion (%)"
+            ].iloc[0]
+            self.assertGreaterEqual(proportion, threshold)
+
+        # Test that "main" returns different results than threshold-based filtering
+        species_list_main = self.ox_filter.get_species_list(commonality="main")
+        species_list_high_threshold = self.ox_filter.get_species_list(commonality=90.0)
+        self.assertNotEqual(set(species_list_main), set(species_list_high_threshold))
 
     def test_oxidation_states_filter_species_occurrences(self):
         species_occurrences_df = self.ox_filter.get_species_occurrences_df(consensus=1)
