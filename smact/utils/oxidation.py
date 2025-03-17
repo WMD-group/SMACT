@@ -40,6 +40,7 @@ class ICSD24OxStatesFilter:
             pd.DataFrame: The filtered oxidation states list as a DataFrame.
         """
         commonality_map = {"low": 0, "medium": 10, "high": 50}
+        commonality_threshold = 0
 
         if isinstance(commonality, str):
             if commonality == "main":
