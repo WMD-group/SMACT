@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.1
+    rev: v0.11.2
     hooks:
       # Run the linting tool
       - id: ruff
@@ -10,13 +10,13 @@ repos:
       - id: ruff-format
         types_or: [python, pyi] # TODO: Fix notebooks to remove this
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.41.0
+    rev: v0.44.0
     hooks:
       - id: markdownlint
         # MD013: line too long
@@ -44,24 +44,24 @@ repos:
         additional_dependencies:
           - prettier
   - repo: https://github.com/kynan/nbstripout
-    rev: 0.7.1
+    rev: 0.8.1
     hooks:
       - id: nbstripout
         args: [--drop-empty-cells, --keep-output]
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
+    rev: v2.4.1
     hooks:
       - id: codespell
-        stages: [commit, commit-msg]
+        stages: [pre-commit, commit-msg]
         args: [--toml, pyproject.toml]
         additional_dependencies:
           - tomli
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.376
+    rev: v1.1.398
     hooks:
       - id: pyright
         args: [--level, error]
   - repo: https://github.com/adamchainz/blacken-docs
-    rev: 1.18.0
+    rev: 1.19.1
     hooks:
       - id: blacken-docs
