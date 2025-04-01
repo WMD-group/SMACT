@@ -5,7 +5,7 @@ ci:
   autoupdate_commit_msg: pre-commit autoupdate
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.9
+    rev: v0.11.2
     hooks:
       # Run the linting tool
       - id: ruff
@@ -62,7 +62,7 @@ repos:
         additional_dependencies:
           - tomli
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.396
+    rev: v1.1.398
     hooks:
       - id: pyright
         args: [--level, error]
