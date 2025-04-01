@@ -18,6 +18,7 @@ from smact import Element, element_dictionary, neutral_ratios
 from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
 )
+from smact.metallicity import metallicity_score
 
 if TYPE_CHECKING:
     import pymatgen
@@ -109,10 +110,8 @@ def _no_repeats(
             else:
                 anions.append(symbol)
         return not (
-            not repeat_anions
-            and len(anions) != len(set(anions))
-            or not repeat_cations
-            and len(cations) != len(set(cations))
+            (not repeat_anions and len(anions) != len(set(anions)))
+            or (not repeat_cations and len(cations) != len(set(cations)))
         )
 
 
@@ -209,12 +208,8 @@ def eneg_states_test(ox_states: list[int], enegs: list[float]):
         if (
             eneg1 is None
             or eneg2 is None
-            or (ox1 > 0)
-            and (ox2 < 0)
-            and (eneg1 >= eneg2)
-            or (ox1 < 0)
-            and (ox2 > 0)
-            and (eneg1 <= eneg2)
+            or ((ox1 > 0) and (ox2 < 0) and (eneg1 >= eneg2))
+            or ((ox1 < 0) and (ox2 > 0) and (eneg1 <= eneg2))
         ):
             return False
     return True
@@ -248,13 +243,8 @@ def eneg_states_test_threshold(ox_states: list[int], enegs: list[float], thresho
 
     """
     for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=False)), 2):
-        if (
-            (ox1 > 0)
-            and (ox2 < 0)
-            and ((eneg1 - eneg2) > threshold)
-            or (ox1 < 0)
-            and (ox2 > 0)
-            and (eneg2 - eneg1) > threshold
+        if ((ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold)) or (
+            (ox1 < 0) and (ox2 > 0) and (eneg2 - eneg1) > threshold
         ):
             return False
     return True
@@ -437,11 +427,14 @@ def smact_validity(
     use_pauling_test: bool = True,
     include_alloys: bool = True,
     oxidation_states_set: str = "icsd24",
+    check_metallicity: bool = False,
+    metallicity_threshold: float = 0.7,
 ) -> bool:
     """
     Check if a composition is valid according to the SMACT rules.
 
     Composition is considered valid if it passes the charge neutrality test and the Pauling electronegativity test.
+    Can also validate metal alloys by using a metallicity scoring system.
 
      .. warning::
         For backwards compatibility in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
@@ -457,6 +450,9 @@ def smact_validity(
             'pymatgen_sp' and 'wiki' for the 2014 SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure predictor and Wikipedia
             (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively.
             A filepath to an oxidation states text file can also be supplied.
+        check_metallicity (bool): If True, uses the metallicity scoring system to validate potential metallic/alloy compounds.
+        metallicity_threshold (float): Score threshold (0-1) above which a compound is considered a valid metallic/alloy.
+            Only used if check_metallicity is True.
 
     Returns:
     -------
@@ -467,11 +463,20 @@ def smact_validity(
         composition = Composition(composition)
     elem_symbols = tuple(composition.as_dict().keys())
 
+    # Single element case
     if len(set(elem_symbols)) == 1:
         return True
+
+    # Check for simple metal alloys if enabled
     if include_alloys:
         is_metal_list = [elem_s in smact.metals for elem_s in elem_symbols]
         if all(is_metal_list):
+            return True
+
+    # Check for metallic-like compounds if enabled
+    if check_metallicity:
+        score = metallicity_score(composition)
+        if score >= metallicity_threshold:
             return True
 
     count = tuple(composition.as_dict().values())
@@ -500,7 +505,6 @@ def smact_validity(
             stacklevel=2,
         )
         ox_combos = [e.oxidation_states_wiki for e in smact_elems]
-
     else:
         raise (
             Exception(

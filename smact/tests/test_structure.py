@@ -32,7 +32,7 @@ from smact.structure_prediction.mutation import CationMutator
 from smact.structure_prediction.prediction import StructurePredictor
 from smact.structure_prediction.structure import SmactStructure
 
-MP_URL = "https://materialsproject.org"
+MP_URL = "https://api.materialsproject.org"
 MP_API_AVAILABLE = bool(find_spec("mp_api"))
 
 try:
@@ -229,7 +229,11 @@ class StructureTest(unittest.TestCase):
                 self.assertEqual(SmactStructure._get_ele_stoics(test.species), expected)
 
     @pytest.mark.skipif(
-        (skip_mprester_tests or not MP_API_AVAILABLE),
+        (
+            skip_mprester_tests
+            or not MP_API_AVAILABLE
+            or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY"))
+        ),
         reason="Materials Project API not available or not configured.",
     )
     def test_from_mp(self):
