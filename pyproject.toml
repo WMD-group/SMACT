@@ -23,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Chemistry",
 ]
@@ -44,7 +45,7 @@ dependencies = [
     "pathos",
     "pymatgen>=2024.2.20",
     "scipy",
-    "spglib",
+    "spglib>=2.6.0",
     "typing-extensions",
 ]
 license = {text = "MIT"}
@@ -87,17 +88,16 @@ featurisers = [
 ]
 
 visualisation = [
-    "seaborn",
-    "pymatviz",
-    "dash",
+    "seaborn>=0.13.2",
+    "pymatviz>=0.15",
+    "dash>=2.18.2",
 ]
 ml = ["xgboost","shap","smact[featurisers]"]
 
 optional = [
     "pydantic>=2.9.2",
     "smact[mp]",
-    "pymatviz>=0.14",
-    "seaborn>=0.13.2",
+    "smact[visualisation]",
     "pymatgen>=2024.2.20",
     "matminer>=0.9.2",
     "kaleido>=0.2.1",
@@ -331,3 +331,10 @@ ignore-words-list = [
             "assertIn",
             "Mater",
         ]
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "jupyter-client>=8.6.3",
+    "notebook>=7.3.3",
+]
