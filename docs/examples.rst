@@ -20,3 +20,4 @@ For workflows that have been used in real examples and in published work, visit 
    examples/valence_electron_count
    examples/doper
    examples/distorter
+   examples/metallicity
