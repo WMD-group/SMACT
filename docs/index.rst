@@ -56,6 +56,8 @@ Contents:
    examples
    tutorials
    smact
+   CHANGELOG
+   CONTRIBUTING
 
 
 Indices and tables
