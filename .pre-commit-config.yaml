@@ -5,7 +5,7 @@ ci:
   autoupdate_commit_msg: pre-commit autoupdate
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.3
+    rev: v0.9.9
     hooks:
       # Run the linting tool
       - id: ruff
@@ -54,7 +54,7 @@ repos:
       - id: nbstripout
         args: [--drop-empty-cells, --keep-output]
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.0
+    rev: v2.4.1
     hooks:
       - id: codespell
         stages: [pre-commit, commit-msg]
@@ -62,7 +62,7 @@ repos:
         additional_dependencies:
           - tomli
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.392.post0
+    rev: v1.1.396
     hooks:
       - id: pyright
         args: [--level, error]

@@ -260,6 +260,37 @@ class OxidationStatesTest(unittest.TestCase):
         self.assertIsInstance(species_list_threshold, list)
         self.assertGreater(len(species_list_threshold), 0)
 
+        # Test commonality="main" (should return species with max proportion for each element)
+        species_list_main = self.ox_filter.get_species_list(commonality="main")
+        self.assertIsInstance(species_list_main, list)
+        self.assertGreater(len(species_list_main), 0)
+
+        # Get the original dataframe for comparison
+        df_main = self.ox_filter.get_species_occurrences_df()
+        max_proportions = df_main.groupby("element")["species_proportion (%)"].max()
+
+        # Verify that only species with maximum proportion for each element are included
+        for species in species_list_main:
+            element = species.split("+")[0].split("-")[0].rstrip("0123456789")  # Extract element from species string
+            species_proportion = df_main[df_main["species"] == species]["species_proportion (%)"].iloc[0]
+            self.assertEqual(species_proportion, max_proportions[element])
+
+        # Test specific commonality threshold
+        threshold = 50.0  # Testing with 50% threshold
+        species_list_threshold = self.ox_filter.get_species_list(commonality=threshold)
+        self.assertIsInstance(species_list_threshold, list)
+
+        # Verify that all species meet the threshold requirement
+        df_threshold = self.ox_filter.get_species_occurrences_df()
+        for species in species_list_threshold:
+            proportion = df_threshold[df_threshold["species"] == species]["species_proportion (%)"].iloc[0]
+            self.assertGreaterEqual(proportion, threshold)
+
+        # Test that "main" returns different results than threshold-based filtering
+        species_list_main = self.ox_filter.get_species_list(commonality="main")
+        species_list_high_threshold = self.ox_filter.get_species_list(commonality=90.0)
+        self.assertNotEqual(set(species_list_main), set(species_list_high_threshold))
+
     def test_oxidation_states_filter_species_occurrences(self):
         species_occurrences_df = self.ox_filter.get_species_occurrences_df(consensus=1)
         self.assertIsInstance(species_occurrences_df, pd.DataFrame)
