@@ -19,7 +19,7 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
         @functools.wraps(func)
         def wrapper_timeit(*args, **kwargs):
             if delim:
-                logging.info("-" * DELIM_LENGTH)
+                logging.info("-" * DELIM_LENGTH)  # noqa: LOG015
 
             times = []
             value = None
@@ -28,10 +28,10 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
                 value = func(*args, **kwargs)
                 times.append(time() - t0)
 
-            logging.info(f"{func.__name__} -- Average over {n} repeats = {mean(times)}s")
+            logging.info(f"{func.__name__} -- Average over {n} repeats = {mean(times)}s")  # noqa: LOG015
 
             if delim:
-                logging.info("-" * DELIM_LENGTH)
+                logging.info("-" * DELIM_LENGTH)  # noqa: LOG015
             return value
 
         return wrapper_timeit
