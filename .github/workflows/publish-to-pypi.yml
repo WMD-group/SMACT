@@ -7,20 +7,36 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-n-publish:
-    name: Build and publish SMACT distributions to PyPI
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-      - name: Install dependencies
-        run: uv sync --extra optional --dev
       - name: Build
         run: uv build
-      - name: Publish distribution to PyPI
-        if: startsWith(github.ref, 'refs/tags')
+      - uses: actions/upload-artifact@v4
+        with:
+          path: dist/*.*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      # For pypi trusted publishing
+      id-token: write
+    steps:
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact
+          path: dist
+      - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
-          password: ${{secrets.PYPI_API_TOKEN}}
+          skip-existing: true
+          verbose: true
