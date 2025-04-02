@@ -1,5 +1,54 @@
 # Changelog
 
+## [Unreleased](https://github.com/WMD-group/SMACT/tree/HEAD)
+
+[Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.1.0...HEAD)
+
+**Merged pull requests:**
+
+- Update workflows [\#405](https://github.com/WMD-group/SMACT/pull/405) ([AntObi](https://github.com/AntObi))
+- Update workflows and requirements \(Merge develop into master\) [\#404](https://github.com/WMD-group/SMACT/pull/404) ([AntObi](https://github.com/AntObi))
+
+## [v3.1.0](https://github.com/WMD-group/SMACT/tree/v3.1.0) (2025-04-02)
+
+[Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.0.2...v3.1.0)
+
+**Breaking changes:**
+
+- Updated oxidation.py and its tests [\#366](https://github.com/WMD-group/SMACT/pull/366) ([KingaMas](https://github.com/KingaMas))
+
+**Implemented enhancements:**
+
+- Changes to the smact_validity function to allow for early short-circuiting resolving issue \#378 [\#379](https://github.com/WMD-group/SMACT/pull/379) ([ryannduma](https://github.com/ryannduma))
+- SMACT Metallicity Handling Enhancements [\#367](https://github.com/WMD-group/SMACT/pull/367) ([ryannduma](https://github.com/ryannduma))
+
+**Fixed bugs:**
+
+- Chore/remove data in docs tutorials [\#383](https://github.com/WMD-group/SMACT/pull/383) ([AntObi](https://github.com/AntObi))
+- fix: correct function call for d block element count [\#371](https://github.com/WMD-group/SMACT/pull/371) ([AntObi](https://github.com/AntObi))
+- Fix the MP URL to ensure tests run [\#365](https://github.com/WMD-group/SMACT/pull/365) ([AntObi](https://github.com/AntObi))
+
+**Closed issues:**
+
+- Function smact_validity slow [\#378](https://github.com/WMD-group/SMACT/issues/378)
+
+**Merged pull requests:**
+
+- Update version numbers [\#394](https://github.com/WMD-group/SMACT/pull/394) ([AntObi](https://github.com/AntObi))
+- Feat/more uv changes [\#393](https://github.com/WMD-group/SMACT/pull/393) ([AntObi](https://github.com/AntObi))
+- Update dependabot.yml [\#391](https://github.com/WMD-group/SMACT/pull/391) ([AntObi](https://github.com/AntObi))
+- \[pre-commit.ci\] pre-commit autoupdate [\#387](https://github.com/WMD-group/SMACT/pull/387) ([pre-commit-ci[bot]](https://github.com/apps/pre-commit-ci))
+- Added 'main' to 'commonality' parameter in the 'filter' function [\#386](https://github.com/WMD-group/SMACT/pull/386) ([KingaMas](https://github.com/KingaMas))
+- Remove redundant pre-commit qa in Actions [\#385](https://github.com/WMD-group/SMACT/pull/385) ([AntObi](https://github.com/AntObi))
+- Feat/add python 3.13 support [\#384](https://github.com/WMD-group/SMACT/pull/384) ([AntObi](https://github.com/AntObi))
+- Updating tutorials [\#382](https://github.com/WMD-group/SMACT/pull/382) ([KingaMas](https://github.com/KingaMas))
+- Updating tutorials [\#381](https://github.com/WMD-group/SMACT/pull/381) ([KingaMas](https://github.com/KingaMas))
+- \[pre-commit.ci\] pre-commit autoupdate [\#377](https://github.com/WMD-group/SMACT/pull/377) ([pre-commit-ci[bot]](https://github.com/apps/pre-commit-ci))
+- \[WIP\] Update continuous integration and contributing guide [\#368](https://github.com/WMD-group/SMACT/pull/368) ([AntObi](https://github.com/AntObi))
+- Add a Changelog to the Documentation [\#364](https://github.com/WMD-group/SMACT/pull/364) ([AntObi](https://github.com/AntObi))
+- Drop setup.py [\#363](https://github.com/WMD-group/SMACT/pull/363) ([AntObi](https://github.com/AntObi))
+- Sync Develop Branch with Master branch [\#362](https://github.com/WMD-group/SMACT/pull/362) ([AntObi](https://github.com/AntObi))
+
 ## [v3.0.2](https://github.com/WMD-group/SMACT/tree/v3.0.2) (2025-01-13)
 
 [Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.0.1...v3.0.2)
