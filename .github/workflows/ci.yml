@@ -13,6 +13,9 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
         os: [ubuntu-latest, macos-latest, windows-latest]
+        exclude:
+          - os: windows-latest
+            python-version: 3.13 # Temporarily disable Windows for Python 3.13 due to compatibility issues
 
     runs-on: ${{matrix.os}}
     steps:
