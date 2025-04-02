@@ -30,17 +30,13 @@ jobs:
           github_changelog_generator -u WMD-group -p SMACT --token $CHANGELOG_GITHUB_TOKEN --output docs/CHANGELOG.md --exclude-labels dependencies
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
+          python-version: "3.13"
 
       - name: Run filter script
         run: |
-          python dev_scripts/filter_changelog.py docs/CHANGELOG.md
+          uv run python dev_scripts/filter_changelog.py docs/CHANGELOG.md
 
       - name: Run pre-commit hooks
         uses: pre-commit/action@v3.0.1
