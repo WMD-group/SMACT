@@ -38,7 +38,26 @@ jobs:
       - name: Run filter script
         run: |
           uv run python dev_scripts/filter_changelog.py docs/CHANGELOG.md
-          uv run pre-commit run --files docs/CHANGELOG.md
+
+      - name: Install dependencies
+        run: |
+          npm install -g markdownlint-cli prettier
+
+      - name: Run markdownlint
+        run: |
+          markdownlint docs/CHANGELOG.md
+
+      - name: Run Prettier
+        run: |
+          npx prettier --write docs/CHANGELOG.md
+          git add docs/CHANGELOG.md
+          git commit -m "Apply Prettier formatting to CHANGELOG.md" || echo "No changes to commit"
+
+      - name: Run codespell
+        run: |
+          uv run codespell docs/CHANGELOG.md
+          git add docs/CHANGELOG.md
+          git commit -m "Fix typos in CHANGELOG.md" || echo "No changes to commit"
 
       - name: Commit and push changes
         run: |
