@@ -41,6 +41,7 @@ keywords = [
 dependencies = [
     "ase",
     "numpy<3",
+    "pandarallel[optional]>=1.6.5",
     "pandas",
     "pathos",
     "pymatgen>=2024.2.20",
@@ -76,25 +77,20 @@ docs = [
     "myst-nb==1.1.2"
 ]
 mp = ["mp-api>=0.45.3"]
-
 crystal_space = ["smact[mp]",
-"ElementEmbeddings",
+"ElementEmbeddings>=0.4",
 "umap-learn==0.5.7",
-"kaleido",
-"pydantic<2.10.0"]
-
+"kaleido>=0.2.1",]
 featurisers = [
     "matminer",
     "ElementEmbeddings",
 ]
-
 visualisation = [
     "seaborn>=0.13.2",
     "pymatviz>=0.15",
     "dash>=2.18.2",
 ]
 ml = ["xgboost","shap","smact[featurisers]"]
-
 optional = [
     "pydantic>=2.9.2",
     "smact[mp]",
@@ -106,8 +102,9 @@ optional = [
     "llvmlite>=0.40",
     "ElementEmbeddings>=0.4",
     "dash>=2.18.2",
-    "smact[ml]"
-
+    "smact[ml]",
+    "pandarallel>=1.6.5",
+    "matplotlib-venn[shapely]>=1.1.2",
 ]
 strict = [
     "pydantic==2.9.2",
