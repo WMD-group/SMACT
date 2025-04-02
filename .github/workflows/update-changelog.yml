@@ -43,15 +43,17 @@ jobs:
         run: |
           npm install -g markdownlint-cli prettier
 
-      - name: Run markdownlint
-        run: |
-          markdownlint docs/CHANGELOG.md
-
       - name: Run Prettier
         run: |
           npx prettier --write docs/CHANGELOG.md
           git add docs/CHANGELOG.md
           git commit -m "Apply Prettier formatting to CHANGELOG.md" || echo "No changes to commit"
+
+      - name: Run markdownlint
+        run: |
+          markdownlint --fix docs/CHANGELOG.md
+          git add docs/CHANGELOG.md
+          git commit -m "Fix markdown linting issues in CHANGELOG.md" || echo "No changes to commit"
 
       - name: Run codespell
         run: |
