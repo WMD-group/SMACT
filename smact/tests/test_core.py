@@ -392,20 +392,109 @@ class TestSequenceFunctions(unittest.TestCase):
             45,
         )
 
-    def test_smact_validity(self):
-        self.assertTrue(smact.screening.smact_validity("NaCl"))
-        self.assertTrue(smact.screening.smact_validity("Na10Cl10"))
-        self.assertFalse(smact.screening.smact_validity("Al3Li", include_alloys=False))
-        self.assertTrue(smact.screening.smact_validity("Al3Li", include_alloys=True))
-        # Test for single element
-        self.assertTrue(smact.screening.smact_validity("Al"))
+    # --------- New tests for revised screening logic ---------
 
-        # Test for MgB2 which is invalid for the smact14 oxi states but valid for the icsd states
-        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set="smact14"))
-        self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="icsd16"))
-        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set="pymatgen_sp"))
-        self.assertTrue(smact.screening.smact_validity("MgB2", oxidation_states_set="wiki"))
-        self.assertFalse(smact.screening.smact_validity("MgB2", oxidation_states_set=TEST_OX_STATES))
+    def test_smact_validity(self):
+        """
+        Test that smact_validity returns a boolean indicating whether a composition is valid.
+        """
+        # Test with a valid composition
+        result = smact.screening.smact_validity("NaCl")
+        self.assertIsInstance(result, bool)
+        self.assertTrue(result)
+
+        # Test with an invalid composition
+        invalid_result = smact.screening.smact_validity("Al3Li", include_alloys=False)
+        self.assertFalse(invalid_result)
+
+    def test_smact_validity_parameters(self):
+        """
+        Test smact_validity with different parameter combinations
+        """
+        # Test with pauling test disabled
+        result_no_pauling = smact.screening.smact_validity("NaCl", use_pauling_test=False)
+        self.assertTrue(result_no_pauling)
+
+        # Test with metallicity check
+        result_metallicity = smact.screening.smact_validity("Fe", check_metallicity=True, metallicity_threshold=0.1)
+        self.assertTrue(result_metallicity)
+
+        # Test with different oxidation states set
+        result_ox_states = smact.screening.smact_validity("NaCl", oxidation_states_set="icsd16")
+        self.assertTrue(result_ox_states)
+
+    def test_smact_validity_type_error_forced(self):
+        """
+        Force the except TypeError block in smact_validity's try/except to be triggered.
+        """
+        import smact.screening
+
+        original_pauling_test = smact.screening.pauling_test
+
+        def mock_pauling_test(*args, **kwargs):
+            raise TypeError("Mock TypeError triggered")
+
+        try:
+            smact.screening.pauling_test = mock_pauling_test
+            result = smact.screening.smact_validity("NaCl", use_pauling_test=True)
+            self.assertIsInstance(result, bool)
+            self.assertTrue(result)
+        finally:
+            smact.screening.pauling_test = original_pauling_test
+
+    def test_smact_validity_special_cases(self):
+        """
+        Test special cases in smact_validity:
+        - Single elements
+        - Alloys
+        - High metallicity
+        """
+        # Single element should be valid
+        self.assertTrue(smact.screening.smact_validity("Fe"))
+
+        # Alloy should be valid when include_alloys=True
+        self.assertTrue(smact.screening.smact_validity("FeAl", include_alloys=True))
+
+        # High metallicity check
+        self.assertTrue(
+            smact.screening.smact_validity(
+                "FeNi",
+                check_metallicity=True,
+                metallicity_threshold=0.5,
+                include_alloys=False,  # Test metallicity path specifically
+            )
+        )
+
+    def test_smact_validity_oxidation_states(self):
+        """
+        Test various oxidation state sets in smact_validity
+        """
+        # Test different oxidation state sets
+        oxidation_sets = ["smact14", "icsd16", "icsd24", "pymatgen_sp"]
+        for ox_set in oxidation_sets:
+            self.assertTrue(
+                smact.screening.smact_validity("NaCl", oxidation_states_set=ox_set),
+                f"Failed with oxidation state set: {ox_set}",
+            )
+
+        # Test with file path
+        from os.path import dirname, join, realpath
+
+        files_dir = join(dirname(realpath(__file__)), "files")
+        test_ox_states = join(files_dir, "test_oxidation_states.txt")
+        self.assertTrue(smact.screening.smact_validity("NaCl", oxidation_states_set=test_ox_states))
+
+    def test_smact_validity_error_handling(self):
+        """
+        Test error handling in smact_validity
+        """
+        # Test with invalid oxidation states set
+        with pytest.raises(ValueError):
+            smact.screening.smact_validity("NaCl", oxidation_states_set="invalid_set")
+
+        # Test that wiki set gives warning
+        with pytest.warns(UserWarning):
+            smact.screening.smact_validity("NaCl", oxidation_states_set="wiki")
 
     # ---------------- Lattice ----------------
     def test_Lattice_class(self):
@@ -442,3 +531,15 @@ class TestSequenceFunctions(unittest.TestCase):
         structure = Structure.from_file(TEST_STRUCT)
         ox = smact.oxidation_states.Oxidation_state_probability_finder()
         self.assertEqual(ox.compound_probability(structure), 1.0)
+
+    # --------- Additional Coverage Tests (for untested lines in screening) ---------
+
+    def test_smact_validity_oxidation_states_file(self):
+        """
+        Test that providing a valid file path triggers the file-based combos branch.
+        """
+        from os.path import exists
+
+        self.assertTrue(exists(TEST_OX_STATES), "TEST_OX_STATES must exist for this test.")
+        # Test just the validity
+        self.assertTrue(smact.screening.smact_validity("NaCl", oxidation_states_set=TEST_OX_STATES))

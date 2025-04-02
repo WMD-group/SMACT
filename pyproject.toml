@@ -110,7 +110,7 @@ optional = [
 ]
 strict = [
     "pydantic==2.9.2",
-    "mp-api==0.45.0",
+    "mp-api==0.45.3",
     "pymatviz==0.15.1",
     "mp-api==0.45.3",
     "seaborn==0.13.2",
@@ -332,11 +332,25 @@ ignore-words-list = [
             "assertIn",
             "Mater",
         ]
+[tool.coverage.report]
+exclude_also = [
+    'def __repr__',
+    'if self.debug:',
+    'if settings.DEBUG',
+    'raise AssertionError',
+    'raise NotImplementedError',
+    'if 0:',
+    'if __name__ == .__main__.:',
+    'if TYPE_CHECKING:',
+    'class .*\bProtocol\):',
+    '@(abc\.)?abstractmethod',
+    ]
 
 [dependency-groups]
 dev = [
     "blacken-docs>=1.19.1",
     "codespell>=2.4.1",
+    "ipykernel>=6.29.5",
     "myst-nb==1.1.2",
     "nbstripout>=0.8.1",
     "pre-commit>=4.2.0",
