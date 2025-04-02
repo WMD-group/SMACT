@@ -14,6 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Git user
+        run: |
+          git config --local user.name "GitHub Action"
+          git config --local user.email "action@github.com"
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -57,7 +62,7 @@ jobs:
 
       - name: Run codespell
         run: |
-          uv run codespell docs/CHANGELOG.md
+          uv run codespell -w docs/CHANGELOG.md
           git add docs/CHANGELOG.md
           git commit -m "Fix typos in CHANGELOG.md" || echo "No changes to commit"
 
