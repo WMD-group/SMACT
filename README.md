@@ -81,7 +81,7 @@ Use cases are available in our [examples](https://smact.readthedocs.io/en/latest
 
 ## Requirements
 
-The main language is Python 3 and has been tested using Python 3.10+.
+The main language is Python 3 and has been tested using Python 3.10 - 3.13 (Windows is not officially supported for Python 3.13 as of yet).
 Basic requirements are Numpy and Scipy.
 The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE), [spglib](http://atztogo.github.io/spglib), and [pymatgen](https://pymatgen.org) are also required for many components.
 

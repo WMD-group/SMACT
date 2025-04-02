@@ -1,6 +1,7 @@
 [build-system]
 # Minimum requirements for the build system to execute.
-requires = ["setuptools>=65.0.0"]  # PEP 508 specifications.
+requires = ["setuptools>=77.0.0",
+"oldest-supported-numpy"]  # PEP 508 specifications.
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -17,7 +18,6 @@ maintainers = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -48,7 +48,8 @@ dependencies = [
     "spglib>=2.6.0",
     "typing-extensions",
 ]
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 
 [project.urls]
 Homepage = "https://github.com/WMD-group/SMACT"
