@@ -115,8 +115,6 @@ To clone the project from GitHub and make a local installation:
 With -e pip will create links to the source folder so that that changes
 to the code will be immediately reflected on the PATH.
 
-
-
 ## License and attribution
 
 Python code and original data tables are licensed under the MIT License.
