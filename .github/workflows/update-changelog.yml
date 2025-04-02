@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 jobs:
   update-changelog:
@@ -32,16 +33,12 @@ jobs:
       - name: Set up Python
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.13"
+          python-version: "3.12"
 
       - name: Run filter script
         run: |
           uv run python dev_scripts/filter_changelog.py docs/CHANGELOG.md
-
-      - name: Run pre-commit hooks
-        uses: pre-commit/action@v3.0.1
-        with:
-          extra_args: --files docs/CHANGELOG.md
+          uv run pre-commit run --files docs/CHANGELOG.md
 
       - name: Commit and push changes
         run: |
