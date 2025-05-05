@@ -125,7 +125,7 @@ idna==3.7
     # via requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==8.5.0
+importlib-metadata==8.7.0
     # via
     #   dash
     #   jupyter-cache
@@ -225,7 +225,7 @@ monty==2025.3.3
     #   matminer
     #   mp-api
     #   pymatgen
-mp-api==0.45.3
+mp-api==0.45.5
     # via smact (pyproject.toml)
 mpmath==1.3.0
     # via sympy
@@ -370,7 +370,7 @@ pydantic-settings==2.6.1
     # via
     #   emmet-core
     #   maggma
-pydash==8.0.4
+pydash==8.0.5
     # via maggma
 pydata-sphinx-theme==0.16.1
     # via sphinx-book-theme
@@ -380,7 +380,7 @@ pygments==2.19.1
     #   ipython
     #   pydata-sphinx-theme
     #   sphinx
-pymatgen==2025.3.10
+pymatgen==2025.4.24
     # via
     #   smact (pyproject.toml)
     #   elementembeddings
