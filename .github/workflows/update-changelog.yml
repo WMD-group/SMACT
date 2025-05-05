@@ -36,7 +36,7 @@ jobs:
           github_changelog_generator -u WMD-group -p SMACT --token $CHANGELOG_GITHUB_TOKEN --output docs/CHANGELOG.md --exclude-labels dependencies
 
       - name: Set up Python
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
 
