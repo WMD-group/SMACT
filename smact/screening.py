@@ -15,7 +15,7 @@ from pymatgen.core import Composition
 from smact import Element, element_dictionary, neutral_ratios
 from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
-)
+) 
 from smact.metallicity import metallicity_score
 
 if TYPE_CHECKING:
@@ -399,6 +399,92 @@ def smact_filter(
         warnings.warn(
             "This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.",
             stacklevel=2,
+        )
+
+    for ox_states in itertools.product(*ox_combos):
+        # Test for charge balance
+        cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
+        # Electronegativity test
+        if cn_e:
+            electroneg_OK = pauling_test(ox_states, electronegs)
+            if electroneg_OK:
+                for ratio in cn_r:
+                    compositions.append((symbols, ox_states, ratio))
+
+    # Return list depending on whether we are interested in unique species combinations
+    # or just unique element combinations.
+    if species_unique:
+        return compositions
+    else:
+        compositions = [(i[0], i[2]) for i in compositions]
+        return list(set(compositions))
+
+
+def smact_filter_new(
+    els: tuple[Element] | list[Element],
+    oxidation_states_set: str,
+    threshold: int | None = 8,
+    species_unique: bool = True,
+) -> list[tuple[str, int, int]] | list[tuple[str, int]]:
+    """Function that applies the charge neutrality and electronegativity
+    tests in one go for simple application in external scripts that
+    wish to apply the general 'smact test'.
+
+    .. warning::
+        For backwards compatibility in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
+        In SMACT 3.0, the smact_filter function will be set to use a new default oxidation states set.
+
+    Args:
+    ----
+        els (tuple/list): A list of smact.Element objects.
+        threshold (int): Threshold for stoichiometry limit, default = 8.
+        stoichs (list[int]): A selection of valid stoichiometric ratios for each site.
+        species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
+        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'smact14', 'icsd16',"icsd24", 'pymatgen_sp' and 'wiki' for the  2014 SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively. A filepath to an oxidation states text file can also be supplied as well.
+
+    Returns:
+    -------
+        allowed_comps (list): Allowed compositions for that chemical system
+        in the form [(elements), (oxidation states), (ratios)] if species_unique=True
+        or in the form [(elements), (ratios)] if species_unique=False.
+
+    Example usage:
+        >>> from smact.screening import smact_filter
+        >>> from smact import Element
+        >>> els = (Element("Cs"), Element("Pb"), Element("I"))
+        >>> comps = smact_filter(els, threshold=5)
+        >>> for comp in comps:
+        >>>     print(comp)
+        [('Cs', 'Pb', 'I'), (1, -4, -1), (5, 1, 1)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 1, 3)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 2, 5)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (2, 1, 4)]
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (3, 1, 5)]
+        [('Cs', 'Pb', 'I'), (1, 4, -1), (1, 1, 5)]
+
+    Example (using stoichs):
+        >>> from smact.screening import smact_filter
+        >>> from smact import Element
+        >>> comps = smact_filter(els, stoichs=[[1], [1], [3]])
+        >>> for comp in comps:
+        >>>     print(comp)
+        [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 1, 3)]
+
+
+    """
+    compositions = []
+
+    # Get symbols and electronegativities
+    symbols = tuple(e.symbol for e in els)
+    electronegs = tuple(e.pauling_eneg for e in els)
+
+    if os.path.exists(oxidation_states_set):
+        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
+    else:
+        raise (
+            Exception(
+                f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
+            )
         )
 
     for ox_states in itertools.product(*ox_combos):
