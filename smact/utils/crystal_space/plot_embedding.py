@@ -125,7 +125,7 @@ def plot_reducers_embeddings(
             )
 
     # add legend
-    for label in legend_colors:
+    for label in legend_colors.items():
         fig.add_trace(
             go.Scatter(
                 x=[None],
