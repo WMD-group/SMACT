@@ -50,6 +50,15 @@ def _get_data_rows(filename):
                 yield line.split()
 
 
+def _get_data_rows_custom_ox_states(filename):
+    """Generator for datafile entries by row for custom oxidation states lists. Skips rows with no oxidation states for performance."""
+    with open(filename) as file:
+        for line in file:
+            line = line.strip()
+            if line[0] != "#" and any(char.isdigit() for char in line):
+                yield line.split()
+
+
 def float_or_None(x):
     """Cast a string to a float or to a None."""
     try:
@@ -89,8 +98,12 @@ def lookup_element_oxidation_states(symbol, copy=True):
     if _el_ox_states is None:
         _el_ox_states = {}
 
-        for items in _get_data_rows(os.path.join(data_directory, "oxidation_states.txt")):
-            _el_ox_states[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
+        for items in _get_data_rows(
+            os.path.join(data_directory, "oxidation_states.txt")
+        ):
+            _el_ox_states[items[0]] = [
+                int(oxidationState) for oxidationState in items[1:]
+            ]
 
     if symbol in _el_ox_states:
         if copy:
@@ -137,8 +150,12 @@ def lookup_element_oxidation_states_icsd(symbol, copy=True):
     if _el_ox_states_icsd is None:
         _el_ox_states_icsd = {}
 
-        for items in _get_data_rows(os.path.join(data_directory, "oxidation_states_icsd.txt")):
-            _el_ox_states_icsd[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
+        for items in _get_data_rows(
+            os.path.join(data_directory, "oxidation_states_icsd.txt")
+        ):
+            _el_ox_states_icsd[items[0]] = [
+                int(oxidationState) for oxidationState in items[1:]
+            ]
     if symbol in _el_ox_states_icsd:
         if copy:
             # _el_ox_states_icsd stores lists -> if copy is set, make an implicit
@@ -183,8 +200,12 @@ def lookup_element_oxidation_states_sp(symbol, copy=True):
     if _el_ox_states_sp is None:
         _el_ox_states_sp = {}
 
-        for items in _get_data_rows(os.path.join(data_directory, "oxidation_states_SP.txt")):
-            _el_ox_states_sp[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
+        for items in _get_data_rows(
+            os.path.join(data_directory, "oxidation_states_SP.txt")
+        ):
+            _el_ox_states_sp[items[0]] = [
+                int(oxidationState) for oxidationState in items[1:]
+            ]
 
     if symbol in _el_ox_states_sp:
         if copy:
@@ -231,8 +252,12 @@ def lookup_element_oxidation_states_wiki(symbol, copy=True):
     if _el_ox_states_wiki is None:
         _el_ox_states_wiki = {}
 
-        for items in _get_data_rows(os.path.join(data_directory, "oxidation_states_wiki.txt")):
-            _el_ox_states_wiki[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
+        for items in _get_data_rows(
+            os.path.join(data_directory, "oxidation_states_wiki.txt")
+        ):
+            _el_ox_states_wiki[items[0]] = [
+                int(oxidationState) for oxidationState in items[1:]
+            ]
 
     if symbol in _el_ox_states_wiki:
         if copy:
@@ -281,7 +306,9 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
         _el_ox_states_custom = {}
 
         for items in _get_data_rows(filepath):
-            _el_ox_states_custom[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
+            _el_ox_states_custom[items[0]] = [
+                int(oxidationState) for oxidationState in items[1:]
+            ]
 
     if symbol in _el_ox_states_custom:
         if copy:
@@ -325,8 +352,12 @@ def lookup_element_oxidation_states_icsd24(symbol, copy=True):
     if _el_ox_states_icsd24 is None:
         _el_ox_states_icsd24 = {}
 
-        for items in _get_data_rows(os.path.join(data_directory, "oxidation_states_icsd24_filtered.txt")):
-            _el_ox_states_icsd24[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
+        for items in _get_data_rows(
+            os.path.join(data_directory, "oxidation_states_icsd24_filtered.txt")
+        ):
+            _el_ox_states_icsd24[items[0]] = [
+                int(oxidationState) for oxidationState in items[1:]
+            ]
 
     if symbol in _el_ox_states_icsd24:
         if copy:
@@ -441,7 +472,9 @@ def lookup_element_data(symbol: str, copy: bool = True):
             # or, if not clearly a number, to None
             clean_items = items[0:2] + list(map(float_or_None, items[2:]))
 
-            _element_data.update({items[0]: dict(list(zip(keys, clean_items, strict=False)))})
+            _element_data.update(
+                {items[0]: dict(list(zip(keys, clean_items, strict=False)))}
+            )
 
     if symbol in _element_data:
         if copy:
@@ -607,7 +640,9 @@ def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
     if _element_shannon_radii_data_extendedML is None:
         _element_shannon_radii_data_extendedML = {}
 
-        with open(os.path.join(data_directory, "shannon_radii_ML_extended.csv")) as file:
+        with open(
+            os.path.join(data_directory, "shannon_radii_ML_extended.csv")
+        ) as file:
             reader = csv.reader(file)
 
             # Skip the first row (headers).
@@ -641,12 +676,16 @@ def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
             # function on each element.
             # The dictionary values are all Python "value types", so
             # nothing further is required to make a deep copy.
-            return [item.copy() for item in _element_shannon_radii_data_extendedML[symbol]]
+            return [
+                item.copy() for item in _element_shannon_radii_data_extendedML[symbol]
+            ]
         else:
             return _element_shannon_radii_data_extendedML[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Extended Shannon-radius data for element {symbol} not found.")
+            print(
+                f"WARNING: Extended Shannon-radius data for element {symbol} not found."
+            )
 
         return None
 
@@ -783,7 +822,9 @@ def lookup_element_sse2015_data(symbol, copy=True):
             return _element_sse2015_data[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Solid-state energy (revised 2015) data for element {symbol} not found.")
+            print(
+                f"WARNING: Solid-state energy (revised 2015) data for element {symbol} not found."
+            )
 
         return None
 
