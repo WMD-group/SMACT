@@ -284,7 +284,7 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
 
     Args:
     ----
-        symbol (str) : the atomic symbol of the element to look up.
+        symbol (str) : the atomic symbol of the element to look up. "all" can be used to return the list (copy=True) or dict (copy=False) for all oxidation states.
         filepath (str) : the path to the text file containing the
             oxidation states data.
         copy (Optional(bool)): if True (default), return a copy of the
@@ -319,6 +319,12 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
             return list(_el_ox_states_custom[symbol])
         else:
             return _el_ox_states_custom[symbol]
+    elif symbol == "all":
+        print("Returning the data for all elements.")
+        if copy:
+            return list(_el_ox_states_custom)
+        else:
+            return _el_ox_states_custom
     else:
         if _print_warnings:
             print(f"WARNING: Oxidation states for element {symbol} not found.")
