@@ -305,7 +305,7 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
     if _el_ox_states_custom is None:
         _el_ox_states_custom = {}
 
-        for items in _get_data_rows(filepath):
+        for items in _get_data_rows_custom_ox_states(filepath):
             _el_ox_states_custom[items[0]] = [
                 int(oxidationState) for oxidationState in items[1:]
             ]
