@@ -55,6 +55,9 @@ def float_or_None(x):
         return None
 
 
+_el_ox_states = None
+
+
 def lookup_element_oxidation_states(symbol, copy=True):
     """
     Retrieve a list of known oxidation states for an element.
@@ -256,7 +259,9 @@ def lookup_element_oxidation_states_wiki(symbol, copy=True):
             print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
 
+
 _el_ox_states_custom = None
+
 
 def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
     """
@@ -285,12 +290,10 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
 
     if _el_ox_states_custom is None:
         _el_ox_states_custom = {}
-
         for items in _get_data_rows(filepath):
             _el_ox_states_custom[items[0]] = [
                 int(oxidationState) for oxidationState in items[1:]
             ]
-
     if symbol in _el_ox_states_custom:
         if copy:
             # _el_ox_states_custom stores lists -> if copy is set, make an implicit
