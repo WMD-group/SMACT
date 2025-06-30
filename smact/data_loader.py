@@ -19,8 +19,6 @@ from smact import data_directory
 # Module-level switch: print "verbose" warning messages
 # about missing data.
 _print_warnings = False
-# Global cache for storing oxidation states of elements (initialized lazily).
-_el_ox_states_custom = None
 
 
 def set_warnings(enable=True):
@@ -258,6 +256,7 @@ def lookup_element_oxidation_states_wiki(symbol, copy=True):
             print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
 
+_el_ox_states_custom = None
 
 def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
     """
@@ -287,7 +286,7 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
     if _el_ox_states_custom is None:
         _el_ox_states_custom = {}
 
-        for items in _get_data_rows_custom_ox_states(filepath):
+        for items in _get_data_rows(filepath):
             _el_ox_states_custom[items[0]] = [
                 int(oxidationState) for oxidationState in items[1:]
             ]
@@ -297,7 +296,6 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
             # _el_ox_states_custom stores lists -> if copy is set, make an implicit
             # deep copy.  The elements of the lists are integers, which are
             # "value types" in Python.
-
             return list(_el_ox_states_custom[symbol])
         else:
             return _el_ox_states_custom[symbol]
