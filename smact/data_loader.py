@@ -11,17 +11,16 @@ are used in the background and it is not necessary to use them directly.
 """
 
 from __future__ import annotations
-
 import csv
 import os
-
 import pandas as pd
-
 from smact import data_directory
 
 # Module-level switch: print "verbose" warning messages
 # about missing data.
 _print_warnings = False
+# Global cache for storing oxidation states of elements (initialized lazily).
+_el_ox_states_custom = None
 
 
 def set_warnings(enable=True):
@@ -42,15 +41,6 @@ def set_warnings(enable=True):
 
 
 def _get_data_rows(filename):
-    """Generator for datafile entries by row."""
-    with open(filename) as file:
-        for line in file:
-            line = line.strip()
-            if line[0] != "#":
-                yield line.split()
-
-
-def _get_data_rows_custom_ox_states(filename):
     """Generator for datafile entries by row for custom oxidation states lists. Skips rows with no oxidation states for performance."""
     with open(filename) as file:
         for line in file:
@@ -65,10 +55,6 @@ def float_or_None(x):
         return float(x)
     except ValueError:
         return None
-
-
-# Loader and cache for the element oxidation-state data.
-_el_ox_states = None
 
 
 def lookup_element_oxidation_states(symbol, copy=True):
@@ -97,7 +83,6 @@ def lookup_element_oxidation_states(symbol, copy=True):
 
     if _el_ox_states is None:
         _el_ox_states = {}
-
         for items in _get_data_rows(
             os.path.join(data_directory, "oxidation_states.txt")
         ):
@@ -272,9 +257,6 @@ def lookup_element_oxidation_states_wiki(symbol, copy=True):
         if _print_warnings:
             print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
-
-
-_el_ox_states_custom = None
 
 
 def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
