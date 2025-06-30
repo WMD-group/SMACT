@@ -420,14 +420,13 @@ def smact_filter(
             if pauling_test(ox_states, electronegs):
                 for ratio in cn_r:
                     compositions.append((symbols, ox_states, ratio))
-    if not species_unique:
-        compositions = list(set([(i[0], i[2]) for i in compositions]))
-
-    flat_results = []
-
-
-for result_batch in results:
-    flat_results.extend(result_batch)
+    # Return list depending on whether we are interested in unique species combinations
+    # or just unique element combinations.
+    if species_unique:
+        return compositions
+    else:
+        compositions = [(i[0], i[2]) for i in compositions]
+        return list(set(compositions))
 
 
 # ---------------------------------------------------------------------
