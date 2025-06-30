@@ -354,8 +354,8 @@ def smact_filter(
     Returns:
     -------
         allowed_comps (list): Allowed compositions for that chemical system
-        in the form [(elements), (oxidation states), (ratios)] if species_unique=True
-        or in the form [(elements), (ratios)] if species_unique=False.
+        in the form [(elements), (oxidation states), (ratios)] if species_unique=True and tuple=False
+        or in the form [(elements), (ratios)] if species_unique=False and tuple=False.
 
     Example usage:
         >>> from smact.screening import smact_filter
@@ -381,7 +381,6 @@ def smact_filter(
 
 
     """
-    compositions = []
 
     # Get symbols and electronegativities
     symbols = tuple(e.symbol for e in els)
@@ -404,7 +403,7 @@ def smact_filter(
                 stacklevel=2,
             )
     elif os.path.exists(oxidation_states_set):
-        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
+        ox_combos = (oxi_custom(e.symbol, oxidation_states_set) for e in els)
     else:
         raise (
             Exception(
@@ -412,6 +411,7 @@ def smact_filter(
             )
         )
 
+    compositions = []
     for ox_states in itertools.product(*ox_combos):
         # Test for charge balance
         cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
@@ -420,14 +420,14 @@ def smact_filter(
             if pauling_test(ox_states, electronegs):
                 for ratio in cn_r:
                     compositions.append((symbols, ox_states, ratio))
+    if not species_unique:
+        compositions = list(set([(i[0], i[2]) for i in compositions]))
 
-    # Return list depending on whether we are interested in unique species combinations
-    # or just unique element combinations.
-    if species_unique:
-        return compositions
-    else:
-        compositions = [(i[0], i[2]) for i in compositions]
-        return list(set(compositions))
+    flat_results = []
+
+
+for result_batch in results:
+    flat_results.extend(result_batch)
 
 
 # ---------------------------------------------------------------------
