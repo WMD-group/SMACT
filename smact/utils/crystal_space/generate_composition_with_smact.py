@@ -151,7 +151,7 @@ def generate_composition_with_smact_custom(
     max_atomic_num: int = 103,
     num_processes: int | None = None,
     save_path: str | None = None,
-    oxidation_states_set: str = None,
+    oxidation_states_set: str | None = None,
 ) -> pd.DataFrame:
     """
     Generate all possible compositions of a given number of elements and
@@ -210,7 +210,7 @@ def generate_composition_with_smact_custom(
     elements_pauling = [
         Element(element)
         for element in ordered_elements(1, max_atomic_num)
-        if element in ox_states_custom.keys()
+        if element in ox_states_custom
         and Element(element).pauling_eneg is not None
         and Element(element).pauling_eneg >= Element("Fr").pauling_eneg
     ]
