@@ -5,7 +5,7 @@ ci:
   autoupdate_commit_msg: pre-commit autoupdate
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.2
+    rev: v0.11.4
     hooks:
       # Run the linting tool
       - id: ruff
