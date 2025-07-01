@@ -344,8 +344,8 @@ def smact_filter(
     Returns:
     -------
         allowed_comps (list): Allowed compositions for that chemical system
-        in the form [(elements), (oxidation states), (ratios)] if species_unique=True
-        or in the form [(elements), (ratios)] if species_unique=False.
+        in the form [(elements), (oxidation states), (ratios)] if species_unique=True and tuple=False
+        or in the form [(elements), (ratios)] if species_unique=False and tuple=False.
 
     Example usage:
         >>> from smact.screening import smact_filter
@@ -371,8 +371,6 @@ def smact_filter(
 
 
     """
-    compositions = []
-
     # Get symbols and electronegativities
     symbols = tuple(e.symbol for e in els)
     electronegs = [e.pauling_eneg for e in els]
@@ -385,32 +383,32 @@ def smact_filter(
         "pymatgen_sp": [e.oxidation_states_sp for e in els],
         "wiki": [e.oxidation_states_wiki for e in els],
     }
+
     if oxidation_states_set in oxi_set:
         ox_combos = oxi_set[oxidation_states_set]
+        if oxidation_states_set == "wiki":
+            warnings.warn(
+                "This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.",
+                stacklevel=2,
+            )
     elif os.path.exists(oxidation_states_set):
-        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
+        ox_combos = (oxi_custom(e.symbol, oxidation_states_set) for e in els)
     else:
         raise (
             Exception(
                 f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
             )
         )
-    if oxidation_states_set == "wiki":
-        warnings.warn(
-            "This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.",
-            stacklevel=2,
-        )
 
+    compositions = []
     for ox_states in itertools.product(*ox_combos):
         # Test for charge balance
         cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
         # Electronegativity test
         if cn_e:
-            electroneg_OK = pauling_test(ox_states, electronegs)
-            if electroneg_OK:
+            if pauling_test(ox_states, electronegs):
                 for ratio in cn_r:
                     compositions.append((symbols, ox_states, ratio))
-
     # Return list depending on whether we are interested in unique species combinations
     # or just unique element combinations.
     if species_unique:

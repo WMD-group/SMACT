@@ -42,11 +42,11 @@ def set_warnings(enable=True):
 
 
 def _get_data_rows(filename):
-    """Generator for datafile entries by row."""
+    """Generator for datafile entries by row for custom oxidation states lists. Skips rows with no oxidation states for performance."""
     with open(filename) as file:
         for line in file:
             line = line.strip()
-            if line[0] != "#":
+            if line[0] != "#" and any(char.isdigit() for char in line):
                 yield line.split()
 
 
@@ -58,7 +58,6 @@ def float_or_None(x):
         return None
 
 
-# Loader and cache for the element oxidation-state data.
 _el_ox_states = None
 
 
@@ -88,7 +87,6 @@ def lookup_element_oxidation_states(symbol, copy=True):
 
     if _el_ox_states is None:
         _el_ox_states = {}
-
         for items in _get_data_rows(os.path.join(data_directory, "oxidation_states.txt")):
             _el_ox_states[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
 
@@ -259,7 +257,7 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
 
     Args:
     ----
-        symbol (str) : the atomic symbol of the element to look up.
+        symbol (str) : the atomic symbol of the element to look up. "all" can be used to return the list (copy=True) or dict (copy=False) for all oxidation states.
         filepath (str) : the path to the text file containing the
             oxidation states data.
         copy (Optional(bool)): if True (default), return a copy of the
@@ -279,19 +277,21 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
 
     if _el_ox_states_custom is None:
         _el_ox_states_custom = {}
-
         for items in _get_data_rows(filepath):
             _el_ox_states_custom[items[0]] = [int(oxidationState) for oxidationState in items[1:]]
-
     if symbol in _el_ox_states_custom:
         if copy:
             # _el_ox_states_custom stores lists -> if copy is set, make an implicit
             # deep copy.  The elements of the lists are integers, which are
             # "value types" in Python.
-
             return list(_el_ox_states_custom[symbol])
         else:
             return _el_ox_states_custom[symbol]
+    elif symbol == "all":
+        if copy:
+            return list(_el_ox_states_custom)
+        else:
+            return _el_ox_states_custom
     else:
         if _print_warnings:
             print(f"WARNING: Oxidation states for element {symbol} not found.")
