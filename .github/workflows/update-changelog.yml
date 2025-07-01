@@ -1,0 +1,79 @@
+name: Update Changelog
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Install github_changelog_generator
+        run: |
+          gem install github_changelog_generator
+
+      - name: Generate changelog
+        env:
+          CHANGELOG_GITHUB_TOKEN: ${{ secrets.CHANGELOG_GITHUB_TOKEN }}
+        run: |
+          github_changelog_generator -u WMD-group -p SMACT --token $CHANGELOG_GITHUB_TOKEN --output docs/CHANGELOG.md --exclude-labels dependencies
+
+      - name: Set up Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run filter script
+        run: |
+          uv run python dev_scripts/filter_changelog.py docs/CHANGELOG.md
+
+      - name: Install dependencies
+        run: |
+          npm install -g markdownlint-cli prettier
+
+      - name: Run Prettier
+        run: |
+          npx prettier --write docs/CHANGELOG.md
+          git add docs/CHANGELOG.md
+          git commit -m "Apply Prettier formatting to CHANGELOG.md" || echo "No changes to commit"
+
+      - name: Run markdownlint
+        run: |
+          markdownlint --fix docs/CHANGELOG.md
+          git add docs/CHANGELOG.md
+          git commit -m "Fix markdown linting issues in CHANGELOG.md" || echo "No changes to commit"
+
+      - name: Run codespell
+        run: |
+          uv run codespell -w docs/CHANGELOG.md
+          git add docs/CHANGELOG.md
+          git commit -m "Fix typos in CHANGELOG.md" || echo "No changes to commit"
+
+      - name: Commit and push changes
+        run: |
+
+          git add docs/CHANGELOG.md
+          git add .
+          git commit -m "Update changelog for new release"
+          git pull --rebase origin develop  # Pull latest changes and rebase
+          git push origin develop  # Push changes to the develop branch
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

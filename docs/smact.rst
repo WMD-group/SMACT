@@ -29,6 +29,7 @@ Submodules
   smact.properties
   smact.screening
   smact.oxidation_states
+  smact.metallicity
   smact.builder
   smact.distorter
   smact.lattice
