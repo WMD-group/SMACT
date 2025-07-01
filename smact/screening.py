@@ -59,9 +59,7 @@ def pauling_test(
         return eneg_states_test(oxidation_states, electronegativities)
 
     elif repeat_anions and repeat_cations:
-        return eneg_states_test_threshold(
-            oxidation_states, electronegativities, threshold=threshold
-        )
+        return eneg_states_test_threshold(oxidation_states, electronegativities, threshold=threshold)
 
     elif _no_repeats(
         oxidation_states,
@@ -72,9 +70,7 @@ def pauling_test(
         if threshold == 0.0:
             return eneg_states_test(oxidation_states, electronegativities)
         else:
-            return eneg_states_test_threshold(
-                oxidation_states, electronegativities, threshold=threshold
-            )
+            return eneg_states_test_threshold(oxidation_states, electronegativities, threshold=threshold)
     else:
         return False
 
@@ -206,9 +202,7 @@ def eneg_states_test(ox_states: list[int], enegs: list[float]):
                cations, otherwise False
 
     """
-    for (ox1, eneg1), (ox2, eneg2) in combinations(
-        list(zip(ox_states, enegs, strict=False)), 2
-    ):
+    for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=False)), 2):
         if (
             eneg1 is None
             or eneg2 is None
@@ -219,9 +213,7 @@ def eneg_states_test(ox_states: list[int], enegs: list[float]):
     return True
 
 
-def eneg_states_test_threshold(
-    ox_states: list[int], enegs: list[float], threshold: float | None = 0
-):
+def eneg_states_test_threshold(ox_states: list[int], enegs: list[float], threshold: float | None = 0):
     """
     Internal function for checking electronegativity criterion.
 
@@ -248,9 +240,7 @@ def eneg_states_test_threshold(
                cations, otherwise False
 
     """
-    for (ox1, eneg1), (ox2, eneg2) in combinations(
-        list(zip(ox_states, enegs, strict=False)), 2
-    ):
+    for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=False)), 2):
         if ((ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold)) or (
             (ox1 < 0) and (ox2 > 0) and (eneg2 - eneg1) > threshold
         ):
@@ -381,7 +371,6 @@ def smact_filter(
 
 
     """
-
     # Get symbols and electronegativities
     symbols = tuple(e.symbol for e in els)
     electronegs = [e.pauling_eneg for e in els]
@@ -510,9 +499,7 @@ def smact_validity(
         )
         ox_combos = [el.oxidation_states_wiki for el in smact_elems]
     else:
-        raise ValueError(
-            f"{oxidation_states_set} is not valid. Provide a known set or a valid file path."
-        )
+        raise ValueError(f"{oxidation_states_set} is not valid. Provide a known set or a valid file path.")
 
     # Check all possible oxidation state combinations
     for ox_states in itertools.product(*ox_combos):

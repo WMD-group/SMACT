@@ -1,19 +1,20 @@
 """Utility functions for SMACT generation of compositions."""
 
 from __future__ import annotations
+
 import itertools
 import multiprocessing
 import warnings
 from functools import partial
 from pathlib import Path
+
 import pandas as pd
 from pymatgen.core import Composition
 from tqdm import tqdm
+
 from smact import Element, ordered_elements
-from smact.screening import smact_filter
-from smact.utils.composition import formula_maker
 from smact.data_loader import lookup_element_oxidation_states_custom
-from more_itertools import chunked
+from smact.screening import smact_filter
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 
@@ -90,11 +91,7 @@ def generate_composition_with_smact(
     # 2. generate all possible stoichiometric combinations
     print("#2. Generating all possible stoichiometric combinations...")
 
-    pool = multiprocessing.Pool(
-        processes=(
-            multiprocessing.cpu_count() if num_processes is None else num_processes
-        )
-    )
+    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     compounds = list(
         tqdm(
             pool.imap_unordered(
@@ -121,9 +118,7 @@ def generate_composition_with_smact(
     # 3. filter compounds with smact
     print("#3. Filtering compounds with SMACT...")
 
-    ox_states_custom = lookup_element_oxidation_states_custom(
-        "all", oxidation_states_set, copy=False
-    )
+    ox_states_custom = lookup_element_oxidation_states_custom("all", oxidation_states_set, copy=False)
 
     elements_pauling = [
         Element(element)
@@ -134,11 +129,7 @@ def generate_composition_with_smact(
     ]
     compounds_pauling = list(itertools.combinations(elements_pauling, num_elements))
 
-    pool = multiprocessing.Pool(
-        processes=(
-            multiprocessing.cpu_count() if num_processes is None else num_processes
-        )
-    )
+    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     results = list(
         tqdm(
             pool.imap_unordered(
