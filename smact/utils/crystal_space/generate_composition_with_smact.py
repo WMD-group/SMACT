@@ -18,6 +18,24 @@ from more_itertools import chunked
 warnings.simplefilter(action="ignore", category=UserWarning)
 
 
+oxidation_states_set_global = None
+max_stoich_global = None
+
+
+def init_worker(ox_states, max_stoich):
+    global oxidation_states_set_global, max_stoich_global
+    oxidation_states_set_global = ox_states
+    max_stoich_global = max_stoich
+
+
+def smact_filter_wrapper(compound):
+    return smact_filter(
+        compound,
+        threshold=max_stoich_global,
+        oxidation_states_set=oxidation_states_set_global,
+    )
+
+
 def convert_formula(combinations: list, num_elements: int, max_stoich: int) -> list:
     """Convert combinations into chemical formula.
 
@@ -67,7 +85,7 @@ def generate_composition_with_smact(
 
     elements = [Element(element) for element in ordered_elements(1, max_atomic_num)]
     combinations = list(itertools.combinations(elements, num_elements))
-    print(f"Number of generated combinations: {len(list(combinations))}")
+    print(f"Number of generated combinations: {len(combinations)}")
 
     # 2. generate all possible stoichiometric combinations
     print("#2. Generating all possible stoichiometric combinations...")
@@ -102,11 +120,18 @@ def generate_composition_with_smact(
 
     # 3. filter compounds with smact
     print("#3. Filtering compounds with SMACT...")
+
+    ox_states_custom = lookup_element_oxidation_states_custom(
+        "all", oxidation_states_set, copy=False
+    )
+
     elements_pauling = [
         Element(element)
         for element in ordered_elements(1, max_atomic_num)
-        if Element(element).pauling_eneg is not None
-    ]  # omit elements without Pauling electronegativity (e.g., He, Ne, Ar, ...)
+        if element in ox_states_custom.keys()
+        and Element(element).pauling_eneg is not None
+        and Element(element).pauling_eneg >= Element("Fr").pauling_eneg
+    ]
     compounds_pauling = list(itertools.combinations(elements_pauling, num_elements))
 
     pool = multiprocessing.Pool(
@@ -150,101 +175,5 @@ def generate_composition_with_smact(
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
         df.to_pickle(save_path)
         print(f"Saved to {save_path}")
-
-    return df
-
-
-def return_statistics(
-    num_elements: int = 2,
-    max_stoich: int = 8,
-    max_atomic_num: int = 103,
-    num_processes: int | None = None,
-    save_path: str | None = None,
-    oxidation_states_set: str = "icsd24",
-) -> pd.DataFrame:
-    """
-    Return statistics on SMACT-filtered compositions.
-
-    Args:
-        num_elements (int): the number of elements in a compound. Defaults to 2.
-        max_stoich (int): the maximum stoichiometric coefficient. Defaults to 8.
-        max_atomic_num (int): the maximum atomic number. Defaults to 103.
-        num_processes (int): the number of processes to use. Defaults to None.
-        save_path (str): the path to save the results. Defaults to None.
-        oxidation_states_set (str): the oxidation states set to use. Options are "smact14", "icsd16", "icsd24", "pymatgen_sp" or a filepath to a custom oxidation states list. For reproducing the Faraday Discussions results, use "smact14".
-
-    Returns:
-        df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
-
-    """
-    ox_states_custom = lookup_element_oxidation_states_custom(
-        "all", oxidation_states_set, copy=False
-    )
-
-    elements_pauling = [
-        Element(element)
-        for element in ordered_elements(1, max_atomic_num)
-        if element in ox_states_custom.keys()
-        and Element(element).pauling_eneg is not None
-        and Element(element).pauling_eneg >= Element("Fr").pauling_eneg
-    ]
-
-    compounds_pauling = tuple(itertools.combinations(elements_pauling, num_elements))
-
-    def init_worker(ox_states):
-        global oxidation_states_set
-        oxidation_states_set = ox_states
-
-    def smact_filter_wrapper(compound):
-        return smact_filter(
-            compound, threshold=max_stoich, oxidation_states_set=oxidation_states_set
-        )
-
-    num_processes = num_processes or multiprocessing.cpu_count()
-    chunksize = max(1, len(compounds_pauling) // (4 * num_processes))
-    batch_size = 2000  # Adjust based on memory capacity
-
-    smact_allowed = set()
-
-    for batch in chunked(compounds_pauling, batch_size):
-        with multiprocessing.Pool(
-            processes=num_processes,
-            initializer=init_worker,
-            initargs=(oxidation_states_set,),
-        ) as pool:
-            batch_results = pool.map(smact_filter_wrapper, batch, chunksize=chunksize)
-            for result in batch_results:
-                if result:
-                    for res in result:
-                        symbols_stoich = zip(res[0], res[2], strict=False)
-                        composition_dict = dict(symbols_stoich)
-                        formula = Composition(composition_dict).reduced_formula
-                        smact_allowed.add(formula)
-
-            del batch_results
-
-    smact_allowed_list = list(smact_allowed)
-
-    # Generate all possible compounds for DataFrame index
-    elements = [Element(element) for element in ordered_elements(1, max_atomic_num)]
-    combinations = itertools.combinations(elements, num_elements)
-
-    compounds = set()
-    for combination in combinations:
-        symbols = [element.symbol for element in combination]
-        for counts in itertools.product(range(1, max_stoich + 1), repeat=num_elements):
-            formula_dict = dict(zip(symbols, counts, strict=False))
-            formula = Composition(formula_dict).reduced_formula
-            compounds.add(formula)
-
-    compounds_list = list(compounds)
-
-    # Create DataFrame
-    df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])
-    df.loc[smact_allowed, "smact_allowed"] = True
-
-    if save_path is not None:
-        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-        df.to_pickle(save_path)
 
     return df

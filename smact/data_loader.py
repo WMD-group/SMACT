@@ -303,7 +303,6 @@ def lookup_element_oxidation_states_custom(symbol, filepath, copy=True):
         else:
             return _el_ox_states_custom[symbol]
     elif symbol == "all":
-        print("Returning the data for all elements.")
         if copy:
             return list(_el_ox_states_custom)
         else:
