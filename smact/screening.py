@@ -429,9 +429,13 @@ def smact_validity(
     composition: pymatgen.core.Composition | str,
     use_pauling_test: bool = True,
     include_alloys: bool = True,
-    oxidation_states_set: str = "icsd24",
     check_metallicity: bool = False,
     metallicity_threshold: float = 0.7,
+    make_custom_oxidation_states: bool = True,
+    include_zero: bool = False,
+    consensus: int = 3,
+    commonality: str = "low",
+    oxidation_states_set: str | None = None,
 ) -> bool:
     """
     Check if a composition is valid according to SMACT rules:
@@ -444,14 +448,17 @@ def smact_validity(
         composition (Composition or str): Composition to check.
         use_pauling_test (bool): Whether to apply the Pauling EN test.
         include_alloys (bool): Consider pure metals valid automatically.
-        oxidation_states_set (str): Which set of oxidation states to use.
         check_metallicity (bool): If True, consider high metallicity valid.
         metallicity_threshold (float): Score threshold for metallicity validity.
-
+        include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
+        consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
+        commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "low".
+        oxidation_states_set (str): Which set of oxidation states to use.
     Returns:
         bool: True if the composition is valid, False otherwise.
     """
     from smact import _gcd_recursive, metals, neutral_ratios
+    from smact.utils.oxidation import ICSD24OxStatesFilter
 
     if isinstance(composition, str):
         composition = Composition(composition)
@@ -482,6 +489,13 @@ def smact_validity(
     space = element_dictionary(elem_symbols)
     smact_elems = [e[1] for e in space.items()]
     electronegs = [e.pauling_eneg for e in smact_elems]
+
+    ox_filter = ICSD24OxStatesFilter()
+    ox_filter.write(
+        consensus=consensus,
+        include_zero=include_zero,
+        commonality=commonality
+    )
 
     # Get oxidation states data
     if oxidation_states_set == "smact14":
