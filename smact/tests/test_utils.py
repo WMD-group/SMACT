@@ -142,14 +142,12 @@ class TestCrystalSpace(unittest.TestCase):
         }
         for ox_states in oxidation_states_sets:
             with self.subTest(ox_states=ox_states):
-                smact_df = (
-                    generate_composition_with_smact.generate_composition_with_smact_custom(
-                        num_elements=2,
-                        max_stoich=3,
-                        max_atomic_num=20,
-                        save_path=save_dir,
-                        oxidation_states_set=ox_states,
-                    )
+                smact_df = generate_composition_with_smact.generate_composition_with_smact_custom(
+                    num_elements=2,
+                    max_stoich=3,
+                    max_atomic_num=20,
+                    save_path=save_dir,
+                    oxidation_states_set=ox_states,
                 )
                 self.assertIsInstance(smact_df, pd.DataFrame)
                 self.assertTrue(len(smact_df) == 1330)
