@@ -457,11 +457,11 @@ def smact_validity(
     from smact import _gcd_recursive, metals, neutral_ratios
     from smact.utils.oxidation import ICSD24OxStatesFilter
 
-    if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):  
-        warnings.warn(  
-            "Parameters include_zero, consensus, and commonality are only used when oxidation_states_set is None",  
-            stacklevel=2  
-        )  
+    if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):
+        warnings.warn(
+            "Parameters include_zero, consensus, and commonality are only used when oxidation_states_set is None",
+            stacklevel=2,
+        )
 
     if isinstance(composition, str):
         composition = Composition(composition)
