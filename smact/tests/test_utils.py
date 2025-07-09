@@ -143,7 +143,7 @@ class TestCrystalSpace(unittest.TestCase):
         for ox_states in oxidation_states_sets:
             with self.subTest(ox_states=ox_states):
                 smact_df = (
-                    generate_composition_with_smact.generate_composition_with_smact(
+                    generate_composition_with_smact.generate_composition_with_smact_custom(
                         num_elements=2,
                         max_stoich=3,
                         max_atomic_num=20,
