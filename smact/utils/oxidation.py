@@ -174,10 +174,8 @@ class ICSD24OxStatesFilter:
             commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "low".
         """
         filtered_df = self.filter(consensus, include_zero, commonality)
-        print(f"This is what the filtered df looks like {filtered_df}")
         # Convert the DataFrame to the require format
         summary_dict = filtered_df.set_index("element")["oxidation_state"].to_dict()
-        print(f"This is what the summary dict looks like {summary_dict}")
         all_elements = ordered_elements(1, 103)
         final_summary = []
 
@@ -188,7 +186,6 @@ class ICSD24OxStatesFilter:
                 final_summary.append(f"{element} {oxidation_states}".strip())
             else:
                 final_summary.append(element)
-        print(f"This is what the final summary looks like {final_summary}")
         # Write the filtered oxidation states list to a txt file
         if not filename.endswith(".txt"):
             filename += ".txt"
