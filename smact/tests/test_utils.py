@@ -154,8 +154,7 @@ class TestCrystalSpace(unittest.TestCase):
                 self.assertIsInstance(smact_df, pd.DataFrame)
                 self.assertTrue(len(smact_df) == 1330)
                 self.assertTrue(
-                    smact_df["smact_allowed"].sum()
-                    == oxidation_states_sets_dict[ox_states]["smact_allowed"]
+                    smact_df["smact_allowed"].sum() == oxidation_states_sets_dict[ox_states]["smact_allowed"]
                 )
                 # Check if the data was saved to disk
                 self.assertTrue(os.path.exists(save_dir))
