@@ -344,8 +344,8 @@ def smact_filter(
     Returns:
     -------
         allowed_comps (list): Allowed compositions for that chemical system
-        in the form [(elements), (oxidation states), (ratios)] if species_unique=True
-        or in the form [(elements), (ratios)] if species_unique=False.
+        in the form [(elements), (oxidation states), (ratios)] if species_unique=True and tuple=False
+        or in the form [(elements), (ratios)] if species_unique=False and tuple=False.
 
     Example usage:
         >>> from smact.screening import smact_filter
@@ -371,8 +371,6 @@ def smact_filter(
 
 
     """
-    compositions = []
-
     # Get symbols and electronegativities
     symbols = tuple(e.symbol for e in els)
     electronegs = [e.pauling_eneg for e in els]
@@ -385,32 +383,31 @@ def smact_filter(
         "pymatgen_sp": [e.oxidation_states_sp for e in els],
         "wiki": [e.oxidation_states_wiki for e in els],
     }
+
     if oxidation_states_set in oxi_set:
         ox_combos = oxi_set[oxidation_states_set]
+        if oxidation_states_set == "wiki":
+            warnings.warn(
+                "This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.",
+                stacklevel=2,
+            )
     elif os.path.exists(oxidation_states_set):
-        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
+        ox_combos = (oxi_custom(e.symbol, oxidation_states_set) for e in els)
     else:
         raise (
             Exception(
                 f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
             )
         )
-    if oxidation_states_set == "wiki":
-        warnings.warn(
-            "This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.",
-            stacklevel=2,
-        )
 
+    compositions = []
     for ox_states in itertools.product(*ox_combos):
         # Test for charge balance
         cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
         # Electronegativity test
-        if cn_e:
-            electroneg_OK = pauling_test(ox_states, electronegs)
-            if electroneg_OK:
-                for ratio in cn_r:
-                    compositions.append((symbols, ox_states, ratio))
-
+        if cn_e and pauling_test(ox_states, electronegs):
+            for ratio in cn_r:
+                compositions.append((symbols, ox_states, ratio))
     # Return list depending on whether we are interested in unique species combinations
     # or just unique element combinations.
     if species_unique:
@@ -429,9 +426,12 @@ def smact_validity(
     composition: pymatgen.core.Composition | str,
     use_pauling_test: bool = True,
     include_alloys: bool = True,
-    oxidation_states_set: str = "icsd24",
     check_metallicity: bool = False,
     metallicity_threshold: float = 0.7,
+    oxidation_states_set: str | None = None,
+    include_zero: bool = False,
+    consensus: int = 3,
+    commonality: str = "medium",
 ) -> bool:
     """
     Check if a composition is valid according to SMACT rules:
@@ -444,14 +444,24 @@ def smact_validity(
         composition (Composition or str): Composition to check.
         use_pauling_test (bool): Whether to apply the Pauling EN test.
         include_alloys (bool): Consider pure metals valid automatically.
-        oxidation_states_set (str): Which set of oxidation states to use.
         check_metallicity (bool): If True, consider high metallicity valid.
         metallicity_threshold (float): Score threshold for metallicity validity.
+        oxidation_states_set (str): Which set of oxidation states to use. If specified it overrides the making of the oxidation states set.
+        include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
+        consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
+        commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "medium".
 
     Returns:
         bool: True if the composition is valid, False otherwise.
     """
     from smact import _gcd_recursive, metals, neutral_ratios
+    from smact.utils.oxidation import ICSD24OxStatesFilter
+
+    if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):
+        warnings.warn(
+            "Parameters include_zero, consensus, and commonality are only used when oxidation_states_set is None",
+            stacklevel=2,
+        )
 
     if isinstance(composition, str):
         composition = Composition(composition)
@@ -484,7 +494,20 @@ def smact_validity(
     electronegs = [e.pauling_eneg for e in smact_elems]
 
     # Get oxidation states data
-    if oxidation_states_set == "smact14":
+    if oxidation_states_set is None:
+        ox_filter = ICSD24OxStatesFilter()
+        filtered_df = ox_filter.filter(consensus=consensus, include_zero=include_zero, commonality=commonality)
+        oxidation_dict = {
+            row["element"]: [int(x) for x in row["oxidation_state"].split()] for _, row in filtered_df.iterrows()
+        }
+        ox_combos = []
+        for el in smact_elems:
+            ox_el = oxidation_dict.get(el.symbol, None)
+            if ox_el is not None:
+                ox_combos.append(ox_el)
+            else:
+                return False
+    elif oxidation_states_set == "smact14":
         ox_combos = [el.oxidation_states_smact14 for el in smact_elems]
     elif oxidation_states_set == "icsd16":
         ox_combos = [el.oxidation_states_icsd16 for el in smact_elems]

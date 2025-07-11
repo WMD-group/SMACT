@@ -136,6 +136,7 @@ class ICSD24OxStatesFilter:
             species_occurrences_df = self.ox_states_df[self.ox_states_df["oxidation_state"] != 0].reset_index(drop=True)
         else:
             species_occurrences_df = self.ox_states_df
+
         species_occurrences_df = species_occurrences_df[
             (species_occurrences_df.results_count >= consensus)
         ].reset_index(drop=True)
@@ -185,7 +186,6 @@ class ICSD24OxStatesFilter:
                 final_summary.append(f"{element} {oxidation_states}".strip())
             else:
                 final_summary.append(element)
-
         # Write the filtered oxidation states list to a txt file
         if not filename.endswith(".txt"):
             filename += ".txt"

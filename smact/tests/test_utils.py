@@ -133,6 +133,33 @@ class TestCrystalSpace(unittest.TestCase):
                 # Clean up
                 shutil.rmtree("data")
 
+    def test_generate_composition_with_smact_custom(self):
+        save_dir = "data/binary/df_binary_label.pkl"
+        oxidation_states_sets = ["smact14", "icsd24"]
+        oxidation_states_sets_dict = {
+            "smact14": {"smact_allowed": 388},
+            "icsd24": {"smact_allowed": 342},
+        }
+        for ox_states in oxidation_states_sets:
+            with self.subTest(ox_states=ox_states):
+                smact_df = generate_composition_with_smact.generate_composition_with_smact_custom(
+                    num_elements=2,
+                    max_stoich=3,
+                    max_atomic_num=20,
+                    save_path=save_dir,
+                    oxidation_states_set=ox_states,
+                )
+                self.assertIsInstance(smact_df, pd.DataFrame)
+                self.assertTrue(len(smact_df) == 1330)
+                self.assertTrue(
+                    smact_df["smact_allowed"].sum() == oxidation_states_sets_dict[ox_states]["smact_allowed"]
+                )
+                # Check if the data was saved to disk
+                self.assertTrue(os.path.exists(save_dir))
+
+                # Clean up
+                shutil.rmtree("data")
+
     @pytest.mark.skipif(
         (
             sys.platform == "win32"
