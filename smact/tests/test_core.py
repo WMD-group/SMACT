@@ -488,11 +488,11 @@ class TestSequenceFunctions(unittest.TestCase):
         """Test mixed valence handling in smact_validity."""
         self.assertFalse(
             smact.screening.smact_validity("Fe3O4"),
-            f"Failed with mixed_valence=False: Fe3O4",
+            "Failed with mixed_valence=False: Fe3O4",
         )
         self.assertTrue(
             smact.screening.smact_validity("Fe3O4", mixed_valence=True),
-            f"Failed with mixed_valence=True: Fe3O4",
+            "Failed with mixed_valence=True: Fe3O4",
         )
 
     def test_smact_validity_error_handling(self):
