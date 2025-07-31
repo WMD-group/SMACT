@@ -484,6 +484,17 @@ class TestSequenceFunctions(unittest.TestCase):
         test_ox_states = join(files_dir, "test_oxidation_states.txt")
         self.assertTrue(smact.screening.smact_validity("NaCl", oxidation_states_set=test_ox_states))
 
+    def test_smact_validity_mixed_valence(self):
+        """Test mixed valence handling in smact_validity."""
+        self.assertFalse(
+            smact.screening.smact_validity("Fe3O4"),
+            f"Failed with mixed_valence=False: Fe3O4",
+        )
+        self.assertTrue(
+            smact.screening.smact_validity("Fe3O4", mixed_valence=True),
+            f"Failed with mixed_valence=True: Fe3O4",
+        )
+
     def test_smact_validity_error_handling(self):
         """
         Test error handling in smact_validity
