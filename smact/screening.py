@@ -21,7 +21,29 @@ from smact.metallicity import metallicity_score
 if TYPE_CHECKING:
     import pymatgen
 
-MIXED_VALENCE_ELEMENTS = ["Fe", "Mn", "Co", "Cu", "Ni", "V", "Ti", "Cr", "Nb", "Mo", "W", "Re", "Ru", "Os", "Pd", "Ag", "Au", "Sn", "Sb", "Bi"]
+MIXED_VALENCE_ELEMENTS = [
+    "Fe",
+    "Mn",
+    "Co",
+    "Cu",
+    "Ni",
+    "V",
+    "Ti",
+    "Cr",
+    "Nb",
+    "Mo",
+    "W",
+    "Re",
+    "Ru",
+    "Os",
+    "Pd",
+    "Ag",
+    "Au",
+    "Sn",
+    "Sb",
+    "Bi",
+]
+
 
 def pauling_test(
     oxidation_states: list[int],
@@ -457,7 +479,7 @@ def smact_validity(
     Returns:
         bool: True if the composition is valid, False otherwise.
     """
-    from smact import _gcd_recursive, metals, neutral_ratios
+    from smact import _gcd_recursive, metals
     from smact.utils.oxidation import ICSD24OxStatesFilter
 
     if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):
@@ -547,11 +569,11 @@ def _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols):
     new_ox_combos = []
     new_stoichs = []
     new_electronegs = []
-    for el, ox, count, electrnoeg in zip(elem_symbols, ox_combos, stoichs, electronegs):
+    for el, ox, count, electrnoeg in zip(elem_symbols, ox_combos, stoichs, electronegs, strict=False):
         if el in MIXED_VALENCE_ELEMENTS:
             new_ox_combos.extend([ox] * count[0])
             new_electronegs.extend([electrnoeg] * count[0])
-            new_stoichs.extend([(1, )] * count[0])
+            new_stoichs.extend([(1,)] * count[0])
         else:
             new_ox_combos.append(ox)
             new_electronegs.append(electrnoeg)
