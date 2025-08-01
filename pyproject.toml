@@ -121,6 +121,11 @@ strict = [
     "ElementEmbeddings==0.6.1",
     "dash==3.0.2",
 ]
+elementembeddings = [
+    "elementembeddings>=0.6.1",
+    "pydantic>=2.9.2",
+    "scikit-learn>=1.6.1",
+]
 
 [tool.setuptools]
 include-package-data = true
