@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
-from enum import StrEnum, auto
+from enum import Enum
 from typing import TYPE_CHECKING
 
 from elementembeddings.composition import composition_featuriser as ee_composition_featuriser
 from elementembeddings.composition import species_composition_featuriser as ee_species_composition_featuriser
+
+try:
+    from enum import StrEnum
+except ImportError:
+
+    class StrEnum(str, Enum):
+        """Backport of Python 3.11's StrEnum for Python 3.10."""
+
+        def __str__(self):
+            return str(self.value)
+
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -18,36 +29,36 @@ if TYPE_CHECKING:
 class AllowedElementEmbeddings(StrEnum):
     """ElementEmbeddings implemented in ElementEmbeddings."""
 
-    magpie = auto()
-    mat2vec = auto()
-    skipatom = auto()
-    cgnf = auto()
-    xenonpy = auto()
-    random = auto()
-    oliynyk = auto()
-    matscholar = auto()
-    crystallm = auto()
-    megnet = auto()
+    magpie = "magpie"
+    mat2vec = "mat2vec"
+    skipatom = "skipatom"
+    cgnf = "cgnf"
+    xenonpy = "xenonpy"
+    random = "random"
+    oliynyk = "oliynyk"
+    matscholar = "matscholar"
+    crystallm = "crystallm"
+    megnet = "megnet"
 
 
 class AllowedSpeciesEmbeddings(StrEnum):
     """Allowed Species Embeddings."""
 
-    skipspecies = auto()
+    skipspecies = "skipspecies"
 
 
 # Should be moved to element embeddings codebase
 class PoolingStats(StrEnum):
     """Pooling statistical operations."""
 
-    mean = auto()
-    variance = auto()
-    minpool = auto()
-    maxpool = auto()
-    range = auto()
-    sum = auto()
-    geometric_mean = auto()
-    harmonic_mean = auto()
+    mean = "mean"
+    variance = "variance"
+    minpool = "minpool"
+    maxpool = "maxpool"
+    range = "range"
+    sum = "sum"
+    geometric_mean = "geometric_mean"
+    harmonic_mean = "harmonic_mean"
 
 
 def composition_featuriser(

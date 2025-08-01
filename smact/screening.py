@@ -7,7 +7,7 @@ from __future__ import annotations
 import itertools
 import os
 import warnings
-from enum import StrEnum, auto
+from enum import Enum
 from itertools import combinations
 from typing import TYPE_CHECKING
 
@@ -20,6 +20,17 @@ from smact.data_loader import (
 from smact.metallicity import metallicity_score
 from smact.utils.composition import composition_dict_maker, formula_maker
 
+try:
+    from enum import StrEnum
+except ImportError:
+
+    class StrEnum(str, Enum):
+        """Backport of Python 3.11's StrEnum for Python 3.10."""
+
+        def __str__(self):
+            return str(self.value)
+
+
 if TYPE_CHECKING:
     import pymatgen
 
@@ -27,9 +38,9 @@ if TYPE_CHECKING:
 class SmactFilterOutputs(StrEnum):
     """Allowed outputs of the `smact_filter` function."""
 
-    default = auto()
-    formula = auto()
-    dict = auto()
+    default = "default"
+    formula = "formula"
+    dict = "dict"
 
 
 def pauling_test(
