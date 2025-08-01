@@ -3793,7 +3793,6 @@ docs = [
 elementembeddings = [
     { name = "elementembeddings" },
     { name = "pydantic" },
-    { name = "scikit-learn" },
 ]
 featurisers = [
     { name = "elementembeddings" },
@@ -3912,7 +3911,6 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "readthedocs-sphinx-search", marker = "extra == 'docs'", specifier = "==0.3.2" },
     { name = "ruff", marker = "extra == 'dev'" },
-    { name = "scikit-learn", marker = "extra == 'elementembeddings'", specifier = ">=1.6.1" },
     { name = "scipy" },
     { name = "seaborn", marker = "extra == 'strict'", specifier = "==0.13.2" },
     { name = "seaborn", marker = "extra == 'visualisation'", specifier = ">=0.13.2" },
