@@ -1,3 +1,1 @@
-'''MODULE DESCRIPTION'''
-
-__all__ = []
+"""External packages."""
