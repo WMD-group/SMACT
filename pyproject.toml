@@ -177,7 +177,6 @@ ignore = [
     "FBT002",  # Boolean default positional argument in function
     "ISC001",
     "NPY201",  # TODO: enable after migration to NumPy 2.0
-    "PD901",   # pandas-df-variable-name
     "PERF203", # Use of try-except in for/while loop
     "PERF401", # Replace "for" loops with list comprehension
     "PLR0911", # Too many return statements
