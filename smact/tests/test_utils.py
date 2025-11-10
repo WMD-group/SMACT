@@ -5,6 +5,7 @@ import shutil
 import sys
 import unittest
 from importlib.util import find_spec
+from smact.utils.crystal_space import download_compounds_with_mp_api
 
 import pandas as pd
 import pytest
@@ -172,7 +173,7 @@ class TestCrystalSpace(unittest.TestCase):
     def test_download_compounds_with_mp_api(self):
         save_mp_dir = "data/binary/mp_data"
         if MP_API_AVAILABLE:
-            from smact.utils.crystal_space import download_compounds_with_mp_api
+            
 
             download_compounds_with_mp_api.download_mp_data(
                 mp_api_key=os.environ.get("MP_API_KEY"),
