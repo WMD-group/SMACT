@@ -525,7 +525,7 @@ def smact_validity(
 
     # Check all possible oxidation state combinations
     for ox_states in itertools.product(*ox_combos):
-        cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
+        cn_e, _ = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
 
         if cn_e:
             if not use_pauling_test:
