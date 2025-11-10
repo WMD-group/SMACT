@@ -171,7 +171,7 @@ jupyter-client==8.6.3
     # via
     #   ipykernel
     #   nbclient
-jupyter-core==5.7.2
+jupyter-core==5.8.1
     # via
     #   ipykernel
     #   jupyter-client
@@ -415,7 +415,7 @@ python-dateutil==2.9.0.post0
     #   maggma
     #   matplotlib
     #   pandas
-python-dotenv==1.0.1
+python-dotenv==1.1.1
     # via pydantic-settings
 pytz==2024.1
     # via
@@ -440,7 +440,7 @@ referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.3
+requests==2.32.4
     # via
     #   dash
     #   matminer
@@ -617,7 +617,7 @@ umap-learn==0.5.7
     #   elementembeddings
 uncertainties==3.2.2
     # via pymatgen
-urllib3==2.2.2
+urllib3==2.5.0
     # via
     #   botocore
     #   requests
