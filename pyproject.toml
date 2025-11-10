@@ -167,6 +167,7 @@ ignore = [
     "B023",    # Function definition does not bind loop variable
     "B028",    # No explicit stacklevel keyword argument found
     "B904",    # Within an except clause, raise exceptions with ...
+    "PD901",   # pandas-df-variable-name
     "C408",    # unnecessary-collection-call
     "D105",    # Missing docstring in magic method
     "D205",    # One blank line required between summary line and description

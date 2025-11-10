@@ -18,13 +18,13 @@ import os
 import sqlite3
 from typing import TYPE_CHECKING
 
+from mp_api.client import MPRester as MPResterNew
 from pymatgen.core import SETTINGS
 from pymatgen.ext.matproj import MPRester
 
 from . import logger
 from .structure import SmactStructure
 from .utilities import get_sign
-from mp_api.client import MPRester as MPResterNew
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

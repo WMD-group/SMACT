@@ -3,19 +3,21 @@ based on chemical composition.
 """
 
 from __future__ import annotations
+
 import itertools
 import os
 import warnings
-from smact import _gcd_recursive, metals, neutral_ratios
-from smact.utils.oxidation import ICSD24OxStatesFilter
 from itertools import combinations
 from typing import TYPE_CHECKING
+
 from pymatgen.core import Composition
-from smact import Element, element_dictionary, neutral_ratios
+
+from smact import Element, _gcd_recursive, element_dictionary, metals, neutral_ratios
 from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
 )
 from smact.metallicity import metallicity_score
+from smact.utils.oxidation import ICSD24OxStatesFilter
 
 if TYPE_CHECKING:
     import pymatgen
@@ -453,7 +455,6 @@ def smact_validity(
     Returns:
         bool: True if the composition is valid, False otherwise.
     """
-
     if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):
         warnings.warn(
             "Parameters include_zero, consensus, and commonality are only used when oxidation_states_set is None",

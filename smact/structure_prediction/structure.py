@@ -11,6 +11,7 @@ from operator import itemgetter
 
 import numpy as np
 import pymatgen
+from mp_api.client import MPRester as MPResterNew
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.core import SETTINGS
 from pymatgen.core import Structure as pmg_Structure
@@ -20,7 +21,7 @@ from pymatgen.transformations.standard_transformations import (
 )
 
 import smact
-from mp_api.client import MPRester as MPResterNew
+
 from .utilities import get_sign
 
 
@@ -371,8 +372,6 @@ class SmactStructure:
         else:
             # New API routine
             try:
-                
-
                 with MPResterNew(api_key, use_document_model=False) as m:
                     structs = m.materials.summary.search(formula=formula, fields=["structure"])
             except ImportError:

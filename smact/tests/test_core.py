@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 import unittest
-from os.path import exists
+from os.path import dirname, exists, join, realpath
 
 import pytest
 from pymatgen.core import Structure
@@ -22,7 +22,6 @@ from smact.properties import (
     compound_electroneg,
     valence_electron_count,
 )
-from os.path import dirname, join, realpath
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_OX_STATES = os.path.join(files_dir, "test_oxidation_states.txt")
@@ -429,7 +428,6 @@ class TestSequenceFunctions(unittest.TestCase):
         """
         Force the except TypeError block in smact_validity's try/except to be triggered.
         """
-        
 
         original_pauling_test = smact.screening.pauling_test
 
@@ -495,7 +493,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # Test that wiki set gives warning
         with pytest.warns(UserWarning, match=r"This set of oxidation states is from Wikipedia"):
-            smact.screening.smact_validity("NaCl", oxidation_states_set="wiki") 
+            smact.screening.smact_validity("NaCl", oxidation_states_set="wiki")
 
     # ---------------- Lattice ----------------
     def test_Lattice_class(self):
