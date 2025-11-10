@@ -493,8 +493,8 @@ class TestSequenceFunctions(unittest.TestCase):
             smact.screening.smact_validity("NaCl", oxidation_states_set="invalid_set")
 
         # Test that wiki set gives warning
-        with pytest.warns(UserWarning):
-            smact.screening.smact_validity("NaCl", oxidation_states_set="wiki")
+        with pytest.warns(UserWarning, match=r"This set of oxidation states is from Wikipedia"):
+            smact.screening.smact_validity("NaCl", oxidation_states_set="wiki") 
 
     # ---------------- Lattice ----------------
     def test_Lattice_class(self):
