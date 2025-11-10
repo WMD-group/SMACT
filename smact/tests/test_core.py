@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from os.path import exists
 
 import pytest
 from pymatgen.core import Structure
@@ -538,7 +539,6 @@ class TestSequenceFunctions(unittest.TestCase):
         """
         Test that providing a valid file path triggers the file-based combos branch.
         """
-        from os.path import exists
 
         self.assertTrue(exists(TEST_OX_STATES), "TEST_OX_STATES must exist for this test.")
         # Test just the validity
