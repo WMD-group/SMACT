@@ -21,29 +21,6 @@ from smact.metallicity import metallicity_score
 if TYPE_CHECKING:
     import pymatgen
 
-MIXED_VALENCE_ELEMENTS = [
-    "Fe",
-    "Mn",
-    "Co",
-    "Cu",
-    "Ni",
-    "V",
-    "Ti",
-    "Cr",
-    "Nb",
-    "Mo",
-    "W",
-    "Re",
-    "Ru",
-    "Os",
-    "Pd",
-    "Ag",
-    "Au",
-    "Sn",
-    "Sb",
-    "Bi",
-]
-
 
 def pauling_test(
     oxidation_states: list[int],
@@ -455,7 +432,6 @@ def smact_validity(
     include_zero: bool = False,
     consensus: int = 3,
     commonality: str = "medium",
-    mixed_valence: bool = False,
 ) -> bool:
     """
     Check if a composition is valid according to SMACT rules:
@@ -474,12 +450,11 @@ def smact_validity(
         include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
         consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
         commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "medium".
-        mixed_valence (bool): If True, allow mixed valence elements to be treated as separate species. Default is False.
 
     Returns:
         bool: True if the composition is valid, False otherwise.
     """
-    from smact import _gcd_recursive, metals
+    from smact import _gcd_recursive, metals, neutral_ratios
     from smact.utils.oxidation import ICSD24OxStatesFilter
 
     if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):
@@ -552,37 +527,6 @@ def smact_validity(
         raise ValueError(f"{oxidation_states_set} is not valid. Provide a known set or a valid file path.")
 
     # Check all possible oxidation state combinations
-    ox_valid = _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
-
-    if ox_valid:
-        return True
-    elif mixed_valence and any(el in MIXED_VALENCE_ELEMENTS for el in elem_symbols):
-        # treat any potential mixed valence elements as separate species
-        ox_combos, stoichs, electronegs = _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols)
-        return _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
-
-    return False
-
-
-def _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols):
-    """Utility function to expand mixed valence elements in the composition."""
-    new_ox_combos = []
-    new_stoichs = []
-    new_electronegs = []
-    for el, ox, count, electrnoeg in zip(elem_symbols, ox_combos, stoichs, electronegs, strict=False):
-        if el in MIXED_VALENCE_ELEMENTS:
-            new_ox_combos.extend([ox] * count[0])
-            new_electronegs.extend([electrnoeg] * count[0])
-            new_stoichs.extend([(1,)] * count[0])
-        else:
-            new_ox_combos.append(ox)
-            new_electronegs.append(electrnoeg)
-            new_stoichs.append(count)
-    return new_ox_combos, new_stoichs, new_electronegs
-
-
-def _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test=True):
-    """Utility function to check if there is a valid oxidation state solution."""
     for ox_states in itertools.product(*ox_combos):
         cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
 
