@@ -107,7 +107,7 @@ class TestSequenceFunctions(unittest.TestCase):
     # ---------------- BUILDER ----------------
 
     def test_builder_ZnS(self):
-        ZnS, sys_ZnS = wurtzite(["Zn", "S"])
+        ZnS, _ = wurtzite(["Zn", "S"])
         self.assertEqual((ZnS.sites[0].position[2]), 0)
         self.assertEqual((ZnS.sites[0].position[0]), 2.0 / 3.0)
 
