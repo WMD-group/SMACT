@@ -20,7 +20,7 @@ from pymatgen.transformations.standard_transformations import (
 )
 
 import smact
-
+from mp_api.client import MPRester as MPResterNew
 from .utilities import get_sign
 
 
@@ -371,7 +371,7 @@ class SmactStructure:
         else:
             # New API routine
             try:
-                from mp_api.client import MPRester as MPResterNew
+                
 
                 with MPResterNew(api_key, use_document_model=False) as m:
                     structs = m.materials.summary.search(formula=formula, fields=["structure"])
