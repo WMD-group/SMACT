@@ -127,6 +127,36 @@ class SmactStructure:
             ]
         )
 
+    def __hash__(self):
+        """
+        Provide a hash consistent with :meth:`__eq__`.
+
+        The hash is computed from immutable representations of the
+        structure's key attributes. Coordinates are rounded to 1e-7 to
+        match the tolerance used in equality checks (np.allclose with
+        atol=1e-7). Note: mutating a hashed instance (changing sites,
+        species, or lattice) will change its logical identity and can
+        break dictionary/set invariants; prefer using immutable objects
+        as dict keys.
+        """
+        # species is a list of tuples -> make it a tuple of tuples
+        species_t = tuple(tuple(s) for s in self.species)
+
+        # lattice_mat is a numpy array -> convert to tuple of tuples
+        lattice_t = tuple(tuple(row) for row in self.lattice_mat.tolist())
+
+        # sites: preserve insertion/order of keys (constructor enforces order)
+        # Round coordinates to 1e-7 to match __eq__ tolerance
+        sites_t = tuple(
+            (
+                spec,
+                tuple(tuple(round(c, 7) for c in coord) for coord in coords),
+            )
+            for spec, coords in self.sites.items()
+        )
+
+        return hash((species_t, lattice_t, self.lattice_param, sites_t))
+
     @staticmethod
     def _sanitise_species(
         species: list[tuple[str, int, int] | tuple[smact.Species, int]],
