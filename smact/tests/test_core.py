@@ -21,6 +21,7 @@ from smact.properties import (
     compound_electroneg,
     valence_electron_count,
 )
+from os.path import dirname, join, realpath
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_OX_STATES = os.path.join(files_dir, "test_oxidation_states.txt")
@@ -427,7 +428,7 @@ class TestSequenceFunctions(unittest.TestCase):
         """
         Force the except TypeError block in smact_validity's try/except to be triggered.
         """
-        import smact.screening
+        
 
         original_pauling_test = smact.screening.pauling_test
 
@@ -478,7 +479,6 @@ class TestSequenceFunctions(unittest.TestCase):
             )
 
         # Test with file path
-        from os.path import dirname, join, realpath
 
         files_dir = join(dirname(realpath(__file__)), "files")
         test_ox_states = join(files_dir, "test_oxidation_states.txt")
