@@ -24,6 +24,7 @@ from pymatgen.ext.matproj import MPRester
 from . import logger
 from .structure import SmactStructure
 from .utilities import get_sign
+from mp_api.client import MPRester as MPResterNew
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -147,8 +148,6 @@ class StructureDB:
                         properties=["structure", "material_id"],
                     )
             else:
-                from mp_api.client import MPRester as MPResterNew
-
                 with MPResterNew(mp_api_key, use_document_model=False) as m:
                     data = m.materials.summary.search(theoretical=False, fields=["structure", "material_id"])
 
