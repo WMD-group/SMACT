@@ -10,7 +10,7 @@ alabaster==1.0.0
     # via sphinx
 annotated-types==0.7.0
     # via pydantic
-appnope==0.1.4 ; platform_system == 'Darwin'
+appnope==0.1.4 ; sys_platform == 'darwin'
     # via ipykernel
 ase==3.24.0
     # via smact (pyproject.toml)
@@ -30,6 +30,8 @@ bcrypt==4.3.0
     # via paramiko
 beautifulsoup4==4.13.3
     # via pydata-sphinx-theme
+bibtexparser==1.4.3
+    # via pymatgen
 black==25.1.0
     # via blacken-docs
 blacken-docs==1.19.1
@@ -60,7 +62,7 @@ cloudpickle==3.1.1
     # via shap
 codespell==2.4.1
     # via smact (pyproject.toml)
-colorama==0.4.6 ; sys_platform == 'win32' or platform_system == 'Windows'
+colorama==0.4.6 ; sys_platform == 'win32'
     # via
     #   click
     #   ipython
@@ -79,12 +81,6 @@ cycler==0.12.1
     # via matplotlib
 dash==3.0.2
     # via smact (pyproject.toml)
-dash-core-components==2.0.0
-    # via dash
-dash-html-components==2.0.0
-    # via dash
-dash-table==5.0.0
-    # via dash
 debugpy==1.8.13
     # via ipykernel
 decorator==5.2.1
@@ -92,6 +88,7 @@ decorator==5.2.1
 dill==0.3.8
     # via
     #   multiprocess
+    #   pandarallel
     #   pathos
 dnspython==2.7.0
     # via
@@ -107,10 +104,6 @@ elementembeddings==0.6.1
     # via smact (pyproject.toml)
 emmet-core==0.84.5
     # via mp-api
-exceptiongroup==1.2.2 ; python_full_version < '3.11'
-    # via
-    #   ipython
-    #   pytest
 executing==2.2.0
     # via stack-data
 fastjsonschema==2.21.1
@@ -205,6 +198,7 @@ matplotlib==3.9.3
     #   adjusttext
     #   ase
     #   elementembeddings
+    #   matplotlib-venn
     #   pymatgen
     #   pymatviz
     #   seaborn
@@ -212,6 +206,8 @@ matplotlib-inline==0.1.7
     # via
     #   ipykernel
     #   ipython
+matplotlib-venn==1.1.2
+    # via smact (pyproject.toml)
 mdit-py-plugins==0.4.2
     # via myst-parser
 mdurl==0.1.2
@@ -277,6 +273,7 @@ numpy==1.26.2
     #   maggma
     #   matminer
     #   matplotlib
+    #   matplotlib-venn
     #   monty
     #   numba
     #   opentsne
@@ -287,10 +284,11 @@ numpy==1.26.2
     #   scipy
     #   seaborn
     #   shap
+    #   shapely
     #   spglib
     #   umap-learn
     #   xgboost
-nvidia-nccl-cu12==2.26.2 ; platform_machine != 'aarch64' and platform_system == 'Linux'
+nvidia-nccl-cu12==2.26.2 ; platform_machine != 'aarch64' and sys_platform == 'linux'
     # via xgboost
 opentsne==1.0.2
     # via elementembeddings
@@ -308,11 +306,14 @@ packaging==24.0
     #   sphinx
 palettable==3.3.3
     # via pymatgen
+pandarallel==1.6.5
+    # via smact (pyproject.toml)
 pandas==2.2.3
     # via
     #   smact (pyproject.toml)
     #   maggma
     #   matminer
+    #   pandarallel
     #   pymatgen
     #   pymatviz
     #   seaborn
@@ -347,15 +348,15 @@ ppft==1.7.6.8
 prompt-toolkit==3.0.50
     # via ipython
 psutil==7.0.0
-    # via ipykernel
+    # via
+    #   ipykernel
+    #   pandarallel
 ptyprocess==0.7.0 ; sys_platform != 'emscripten' and sys_platform != 'win32'
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
 pybtex==0.24.0
-    # via
-    #   emmet-core
-    #   pymatgen
+    # via emmet-core
 pycparser==2.22
     # via cffi
 pydantic==2.9.2
@@ -399,7 +400,9 @@ pynacl==1.5.0
 pynndescent==0.5.13
     # via umap-learn
 pyparsing==3.1.1
-    # via matplotlib
+    # via
+    #   bibtexparser
+    #   matplotlib
 pyright==1.1.398
     # via smact (pyproject.toml)
 pytest==8.3.5
@@ -479,6 +482,7 @@ scipy==1.14.1
     #   adjusttext
     #   ase
     #   elementembeddings
+    #   matplotlib-venn
     #   opentsne
     #   pymatgen
     #   pymatviz
@@ -500,6 +504,8 @@ setuptools==78.1.1
     #   mp-api
 shap==0.46.0
     # via smact (pyproject.toml)
+shapely==2.1.2
+    # via matplotlib-venn
 six==1.16.0
     # via
     #   latexcodec
@@ -565,13 +571,10 @@ tenacity==8.2.3
 threadpoolctl==3.6.0
     # via scikit-learn
 tomli==2.2.1 ; python_full_version <= '3.11'
-    # via
-    #   black
-    #   coverage
-    #   pytest
-    #   sphinx
+    # via coverage
 tornado==6.5.1
     # via
+    #   smact (pyproject.toml)
     #   ipykernel
     #   jupyter-client
 tqdm==4.67.1
@@ -595,7 +598,6 @@ typing-extensions==4.12.2
     # via
     #   smact (pyproject.toml)
     #   beautifulsoup4
-    #   black
     #   dash
     #   elementembeddings
     #   emmet-core
