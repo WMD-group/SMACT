@@ -346,6 +346,7 @@ exclude_also = [
 
 [dependency-groups]
 dev = [
+    "coverage>=7.10.6",
     "jupyter>=1.1.1",
     "jupyter-client>=8.6.3",
     "notebook>=7.3.3",
