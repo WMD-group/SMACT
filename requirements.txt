@@ -4,7 +4,7 @@ accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 adjusttext==1.3.0
     # via elementembeddings
-aioitertools==0.12.0
+aioitertools==0.13.0
     # via maggma
 alabaster==1.0.0
     # via sphinx
@@ -12,11 +12,11 @@ annotated-types==0.7.0
     # via pydantic
 appnope==0.1.4 ; sys_platform == 'darwin'
     # via ipykernel
-ase==3.24.0
+ase==3.27.0
     # via smact (pyproject.toml)
-asttokens==3.0.0
+asttokens==3.0.1
     # via stack-data
-attrs==24.2.0
+attrs==25.4.0
     # via
     #   jsonlines
     #   jsonschema
@@ -26,39 +26,39 @@ babel==2.17.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-bcrypt==4.3.0
+bcrypt==5.0.0
     # via paramiko
-beautifulsoup4==4.13.3
+beautifulsoup4==4.14.3
     # via pydata-sphinx-theme
 bibtexparser==1.4.3
     # via pymatgen
-black==25.1.0
+black==25.12.0
     # via blacken-docs
-blacken-docs==1.19.1
+blacken-docs==1.20.0
     # via smact (pyproject.toml)
 blinker==1.9.0
     # via flask
-boto3==1.40.42
+boto3==1.42.21
     # via maggma
-botocore==1.40.42
+botocore==1.42.21
     # via
     #   boto3
     #   s3transfer
-certifi==2024.7.4
+certifi==2026.1.4
     # via requests
-cffi==1.17.1
+cffi==2.0.0
     # via
     #   cryptography
     #   pynacl
     #   pyzmq
 charset-normalizer==3.4.4
     # via requests
-click==8.1.7
+click==8.3.1
     # via
     #   black
     #   flask
     #   jupyter-cache
-cloudpickle==3.1.1
+cloudpickle==3.1.2
     # via shap
 codespell==2.4.1
     # via smact (pyproject.toml)
@@ -69,32 +69,32 @@ colorama==0.4.6 ; sys_platform == 'win32'
     #   pytest
     #   sphinx
     #   tqdm
-comm==0.2.2
+comm==0.2.3
     # via ipykernel
-contourpy==1.2.0
+contourpy==1.3.2
     # via matplotlib
-coverage==7.11.3
+coverage==7.13.1
     # via pytest-cov
-cryptography==44.0.1
+cryptography==46.0.3
     # via paramiko
 cycler==0.12.1
     # via matplotlib
 dash==3.3.0
     # via smact (pyproject.toml)
-debugpy==1.8.17
+debugpy==1.8.19
     # via ipykernel
 decorator==5.2.1
     # via ipython
-dill==0.3.8
+dill==0.4.0
     # via
     #   multiprocess
     #   pandarallel
     #   pathos
-dnspython==2.7.0
+dnspython==2.8.0
     # via
     #   maggma
     #   pymongo
-docutils==0.21.2
+docutils==0.22.4
     # via
     #   myst-parser
     #   pydata-sphinx-theme
@@ -102,32 +102,32 @@ docutils==0.21.2
     #   sphinx-rtd-theme
 elementembeddings==0.6.1
     # via smact (pyproject.toml)
-emmet-core==0.84.5
+emmet-core==0.85.1
     # via mp-api
-executing==2.2.0
+executing==2.2.1
     # via stack-data
-fastjsonschema==2.21.1
+fastjsonschema==2.21.2
     # via nbformat
-flask==3.0.3
+flask==3.1.2
     # via dash
-fonttools==4.53.0
+fonttools==4.61.1
     # via matplotlib
 greenlet==3.1.1 ; (python_full_version < '3.14' and platform_machine == 'AMD64') or (python_full_version < '3.14' and platform_machine == 'WIN32') or (python_full_version < '3.14' and platform_machine == 'aarch64') or (python_full_version < '3.14' and platform_machine == 'amd64') or (python_full_version < '3.14' and platform_machine == 'ppc64le') or (python_full_version < '3.14' and platform_machine == 'win32') or (python_full_version < '3.14' and platform_machine == 'x86_64')
     # via sqlalchemy
-idna==3.7
+idna==3.11
     # via requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==8.7.0
+importlib-metadata==8.7.1
     # via
     #   dash
     #   jupyter-cache
     #   myst-nb
-iniconfig==2.1.0
+iniconfig==2.3.0
     # via pytest
-ipykernel==6.29.5
+ipykernel==7.1.0
     # via myst-nb
-ipython==8.34.0
+ipython==8.38.0
     # via
     #   ipykernel
     #   myst-nb
@@ -145,45 +145,45 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-joblib==1.4.2
+joblib==1.5.3
     # via
     #   pymatgen
     #   pynndescent
     #   scikit-learn
 jsonlines==4.0.0
     # via maggma
-jsonschema==4.23.0
+jsonschema==4.25.1
     # via
     #   maggma
     #   nbformat
-jsonschema-specifications==2024.10.1
+jsonschema-specifications==2025.9.1
     # via jsonschema
 jupyter-cache==1.0.1
     # via myst-nb
-jupyter-client==8.6.3
+jupyter-client==8.7.0
     # via
     #   ipykernel
     #   nbclient
-jupyter-core==5.8.1
+jupyter-core==5.9.1
     # via
     #   ipykernel
     #   jupyter-client
     #   nbclient
     #   nbformat
-kaleido==0.2.1
+kaleido==1.2.0
     # via smact (pyproject.toml)
 kiwisolver==1.4.9
     # via matplotlib
-latexcodec==2.0.1
+latexcodec==3.0.1
     # via pybtex
-llvmlite==0.43.0
+llvmlite==0.46.0
     # via
     #   smact (pyproject.toml)
     #   numba
     #   pynndescent
 maggma==0.72.0
     # via mp-api
-markdown-it-py==3.0.0
+markdown-it-py==4.0.0
     # via
     #   mdit-py-plugins
     #   myst-parser
@@ -193,7 +193,7 @@ markupsafe==3.0.3
     #   werkzeug
 matminer==0.9.3
     # via smact (pyproject.toml)
-matplotlib==3.9.3
+matplotlib==3.10.8
     # via
     #   adjusttext
     #   ase
@@ -202,13 +202,13 @@ matplotlib==3.9.3
     #   pymatgen
     #   pymatviz
     #   seaborn
-matplotlib-inline==0.1.7
+matplotlib-inline==0.2.1
     # via
     #   ipykernel
     #   ipython
 matplotlib-venn==1.1.2
     # via smact (pyproject.toml)
-mdit-py-plugins==0.4.2
+mdit-py-plugins==0.5.0
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
@@ -221,23 +221,23 @@ monty==2025.3.3
     #   matminer
     #   mp-api
     #   pymatgen
-mp-api==0.45.5
+mp-api==0.45.15
     # via smact (pyproject.toml)
 mpmath==1.3.0
     # via sympy
-msgpack==1.1.0
+msgpack==1.1.2
     # via
     #   maggma
     #   mp-api
-multiprocess==0.70.16
+multiprocess==0.70.18
     # via pathos
-mypy-extensions==1.0.0
+mypy-extensions==1.1.0
     # via black
 myst-nb==1.3.0
     # via smact (pyproject.toml)
 myst-parser==4.0.1
     # via myst-nb
-nbclient==0.10.2
+nbclient==0.10.4
     # via
     #   jupyter-cache
     #   myst-nb
@@ -247,22 +247,22 @@ nbformat==5.10.4
     #   myst-nb
     #   nbclient
     #   nbstripout
-nbstripout==0.8.1
+nbstripout==0.8.2
     # via smact (pyproject.toml)
 nest-asyncio==1.6.0
     # via
     #   dash
     #   ipykernel
-networkx==3.2.1
+networkx==3.4.2
     # via pymatgen
-nodeenv==1.9.1
+nodeenv==1.10.0
     # via pyright
-numba==0.60.0
+numba==0.63.1
     # via
     #   pynndescent
     #   shap
     #   umap-learn
-numpy==1.26.2
+numpy==2.2.6
     # via
     #   smact (pyproject.toml)
     #   adjusttext
@@ -288,13 +288,13 @@ numpy==1.26.2
     #   spglib
     #   umap-learn
     #   xgboost
-nvidia-nccl-cu12==2.26.2 ; platform_machine != 'aarch64' and sys_platform == 'linux'
+nvidia-nccl-cu12==2.28.9 ; platform_machine != 'aarch64' and sys_platform == 'linux'
     # via xgboost
-opentsne==1.0.2
+opentsne==1.0.4
     # via elementembeddings
-orjson==3.10.12
+orjson==3.11.5
     # via maggma
-packaging==24.0
+packaging==25.0
     # via
     #   black
     #   ipykernel
@@ -308,7 +308,7 @@ palettable==3.3.3
     # via pymatgen
 pandarallel==1.6.5
     # via smact (pyproject.toml)
-pandas==2.2.3
+pandas==2.3.3
     # via
     #   smact (pyproject.toml)
     #   maggma
@@ -318,19 +318,19 @@ pandas==2.2.3
     #   pymatviz
     #   seaborn
     #   shap
-paramiko==3.5.1
+paramiko==4.0.0
     # via sshtunnel
-parso==0.8.4
+parso==0.8.5
     # via jedi
-pathos==0.3.2
+pathos==0.3.4
     # via smact (pyproject.toml)
 pathspec==0.12.1
     # via black
 pexpect==4.9.0 ; sys_platform != 'emscripten' and sys_platform != 'win32'
     # via ipython
-pillow==10.4.0
+pillow==12.1.0
     # via matplotlib
-platformdirs==4.3.7
+platformdirs==4.5.1
     # via
     #   black
     #   jupyter-core
@@ -339,17 +339,17 @@ plotly==6.5.0
     #   dash
     #   pymatgen
     #   pymatviz
-pluggy==1.5.0
+pluggy==1.6.0
     # via
     #   pytest
     #   pytest-cov
-pox==0.3.4
+pox==0.3.6
     # via pathos
-ppft==1.7.6.8
+ppft==1.7.7
     # via pathos
-prompt-toolkit==3.0.50
+prompt-toolkit==3.0.52
     # via ipython
-psutil==7.0.0
+psutil==7.2.1
     # via
     #   ipykernel
     #   pandarallel
@@ -357,19 +357,19 @@ ptyprocess==0.7.0 ; sys_platform != 'emscripten' and sys_platform != 'win32'
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pybtex==0.24.0
+pybtex==0.25.1
     # via emmet-core
-pycparser==2.22
+pycparser==2.23
     # via cffi
-pydantic==2.9.2
+pydantic==2.12.5
     # via
     #   smact (pyproject.toml)
     #   emmet-core
     #   maggma
     #   pydantic-settings
-pydantic-core==2.23.4
+pydantic-core==2.41.5
     # via pydantic
-pydantic-settings==2.6.1
+pydantic-settings==2.12.0
     # via
     #   emmet-core
     #   maggma
@@ -377,13 +377,13 @@ pydash==8.0.5
     # via maggma
 pydata-sphinx-theme==0.16.1
     # via sphinx-book-theme
-pygments==2.19.1
+pygments==2.19.2
     # via
     #   accessible-pygments
     #   ipython
     #   pydata-sphinx-theme
     #   sphinx
-pymatgen==2025.4.24
+pymatgen==2025.10.7
     # via
     #   smact (pyproject.toml)
     #   elementembeddings
@@ -393,11 +393,11 @@ pymatgen==2025.4.24
     #   pymatviz
 pymatviz==0.16.0
     # via smact (pyproject.toml)
-pymongo==4.10.1
+pymongo==4.15.5
     # via
     #   maggma
     #   matminer
-pynacl==1.5.0
+pynacl==1.6.2
     # via paramiko
 pynndescent==0.5.13
     # via umap-learn
@@ -405,9 +405,9 @@ pyparsing==3.3.1
     # via
     #   bibtexparser
     #   matplotlib
-pyright==1.1.398
+pyright==1.1.407
     # via smact (pyproject.toml)
-pytest==8.3.5
+pytest==9.0.2
     # via
     #   smact (pyproject.toml)
     #   pytest-cov
@@ -420,15 +420,15 @@ python-dateutil==2.9.0.post0
     #   maggma
     #   matplotlib
     #   pandas
-python-dotenv==1.1.1
+python-dotenv==1.2.1
     # via pydantic-settings
-pytz==2024.1
+pytz==2025.2
     # via
     #   mongomock
     #   pandas
-pywin32==310 ; platform_python_implementation != 'PyPy' and sys_platform == 'win32'
+pywin32==311 ; platform_python_implementation != 'PyPy' and sys_platform == 'win32'
     # via jupyter-core
-pyyaml==6.0.1
+pyyaml==6.0.3
     # via
     #   jupyter-cache
     #   myst-nb
@@ -441,35 +441,35 @@ pyzmq==27.1.0
     #   maggma
 readthedocs-sphinx-search==0.3.2
     # via smact (pyproject.toml)
-referencing==0.35.1
+referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.4
+requests==2.32.5
     # via
     #   dash
     #   matminer
     #   mp-api
     #   pymatgen
     #   sphinx
-retrying==1.3.4
+retrying==1.4.2
     # via dash
-rpds-py==0.21.0
+rpds-py==0.30.0
     # via
     #   jsonschema
     #   referencing
-ruamel-yaml==0.18.6
+ruamel-yaml==0.19.1
     # via
     #   maggma
     #   monty
     #   pymatgen
 ruamel-yaml-clib==0.2.8 ; python_full_version < '3.13' and platform_python_implementation == 'CPython'
     # via ruamel-yaml
-ruff==0.11.2
+ruff==0.14.10
     # via smact (pyproject.toml)
-s3transfer==0.14.0
+s3transfer==0.16.0
     # via boto3
-scikit-learn==1.5.2
+scikit-learn==1.7.2
     # via
     #   elementembeddings
     #   matminer
@@ -478,7 +478,7 @@ scikit-learn==1.5.2
     #   pynndescent
     #   shap
     #   umap-learn
-scipy==1.14.1
+scipy==1.15.3
     # via
     #   smact (pyproject.toml)
     #   adjusttext
@@ -497,18 +497,18 @@ seaborn==0.13.2
     # via
     #   smact (pyproject.toml)
     #   elementembeddings
-sentinels==1.0.0
+sentinels==1.1.1
     # via mongomock
 setuptools==80.9.0
     # via
     #   dash
     #   maggma
     #   mp-api
-shap==0.46.0
+shap==0.49.1
     # via smact (pyproject.toml)
 shapely==2.1.2
     # via matplotlib-venn
-six==1.16.0
+six==1.17.0
     # via
     #   latexcodec
     #   pybtex
@@ -518,11 +518,11 @@ slicer==0.0.8
     # via shap
 smart-open==7.5.0
     # via mp-api
-snowballstemmer==2.2.0
+snowballstemmer==3.0.1
     # via sphinx
-soupsieve==2.6
+soupsieve==2.8.1
     # via beautifulsoup4
-spglib==2.6.0
+spglib==2.7.0
     # via
     #   smact (pyproject.toml)
     #   pymatgen
@@ -535,7 +535,7 @@ sphinx==8.1.3
     #   sphinx-book-theme
     #   sphinx-rtd-theme
     #   sphinxcontrib-jquery
-sphinx-book-theme==1.1.3
+sphinx-book-theme==1.1.4
     # via smact (pyproject.toml)
 sphinx-rtd-theme==3.0.2
     # via smact (pyproject.toml)
@@ -553,7 +553,7 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-sqlalchemy==2.0.40
+sqlalchemy==2.0.45
     # via jupyter-cache
 sshtunnel==0.4.0
     # via maggma
@@ -568,13 +568,13 @@ tabulate==0.9.0
     #   jupyter-cache
     #   pandas
     #   pymatgen
-tenacity==8.2.3
+tenacity==9.1.2
     # via plotly
 threadpoolctl==3.6.0
     # via scikit-learn
 tomli==2.2.1 ; python_full_version <= '3.11'
     # via coverage
-tornado==6.5.1
+tornado==6.5.4
     # via
     #   ipykernel
     #   jupyter-client
@@ -595,7 +595,7 @@ traitlets==5.14.3
     #   matplotlib-inline
     #   nbclient
     #   nbformat
-typing-extensions==4.12.2
+typing-extensions==4.15.0
     # via
     #   smact (pyproject.toml)
     #   beautifulsoup4
@@ -612,27 +612,27 @@ typing-extensions==4.12.2
     #   pyright
     #   spglib
     #   sqlalchemy
-tzdata==2024.1
+tzdata==2025.3
     # via pandas
-umap-learn==0.5.7
+umap-learn==0.5.9.post2
     # via
     #   smact (pyproject.toml)
     #   elementembeddings
-uncertainties==3.2.2
+uncertainties==3.2.3
     # via pymatgen
-urllib3==2.5.0
+urllib3==2.6.2
     # via
     #   botocore
     #   requests
-wcwidth==0.2.13
+wcwidth==0.2.14
     # via prompt-toolkit
-werkzeug==3.0.6
+werkzeug==3.1.4
     # via
     #   dash
     #   flask
-wrapt==1.17.2
+wrapt==2.0.1
     # via smart-open
-xgboost==2.1.3
+xgboost==3.1.2
     # via smact (pyproject.toml)
-zipp==3.21.0
+zipp==3.23.0
     # via importlib-metadata
