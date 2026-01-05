@@ -74,7 +74,7 @@ docs = [
     "sphinx_rtd_theme==3.0.2",
     "readthedocs-sphinx-search==0.3.2",
     "sphinx-book-theme==1.1.3",
-    "myst-nb==1.1.2"
+    "myst-nb==1.3.0"
 ]
 mp = ["mp-api>=0.45.3"]
 crystal_space = ["smact[mp]",
@@ -353,7 +353,7 @@ dev = [
     "blacken-docs>=1.19.1",
     "codespell>=2.4.1",
     "ipykernel>=6.29.5",
-    "myst-nb==1.1.2",
+    "myst-nb==1.3.0",
     "nbstripout>=0.8.1",
     "pre-commit>=4.2.0",
     "pyright>=1.1.398",
