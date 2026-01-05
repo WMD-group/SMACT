@@ -9,12 +9,12 @@ updates:
     directory: /
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 1000
     target-branch: develop
 
   - package-ecosystem: "pip" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 1000
     target-branch: develop
