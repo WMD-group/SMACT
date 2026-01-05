@@ -288,7 +288,7 @@ numpy==1.26.2
     #   spglib
     #   umap-learn
     #   xgboost
-nvidia-nccl-cu12==2.26.2 ; platform_machine != 'aarch64' and sys_platform == 'linux'
+nvidia-nccl-cu12==2.28.9 ; platform_machine != 'aarch64' and sys_platform == 'linux'
     # via xgboost
 opentsne==1.0.2
     # via elementembeddings
