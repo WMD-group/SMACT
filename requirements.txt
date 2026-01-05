@@ -290,7 +290,7 @@ numpy==1.26.2
     #   xgboost
 nvidia-nccl-cu12==2.26.2 ; platform_machine != 'aarch64' and sys_platform == 'linux'
     # via xgboost
-opentsne==1.0.2
+opentsne==1.0.4
     # via elementembeddings
 orjson==3.10.12
     # via maggma
