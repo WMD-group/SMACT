@@ -426,7 +426,7 @@ pytz==2024.1
     # via
     #   mongomock
     #   pandas
-pywin32==310 ; platform_python_implementation != 'PyPy' and sys_platform == 'win32'
+pywin32==311 ; platform_python_implementation != 'PyPy' and sys_platform == 'win32'
     # via jupyter-core
 pyyaml==6.0.1
     # via
