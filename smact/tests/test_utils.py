@@ -14,7 +14,7 @@ from pymatgen.core import SETTINGS, Composition
 from smact import Element
 from smact.screening import smact_filter
 from smact.utils.composition import comp_maker, formula_maker, parse_formula
-from smact.utils.crystal_space import generate_composition_with_smact
+from smact.utils.crystal_space import download_compounds_with_mp_api, generate_composition_with_smact
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
 MP_URL = "https://api.materialsproject.org"
@@ -172,8 +172,6 @@ class TestCrystalSpace(unittest.TestCase):
     def test_download_compounds_with_mp_api(self):
         save_mp_dir = "data/binary/mp_data"
         if MP_API_AVAILABLE:
-            from smact.utils.crystal_space import download_compounds_with_mp_api
-
             download_compounds_with_mp_api.download_mp_data(
                 mp_api_key=os.environ.get("MP_API_KEY"),
                 num_elements=2,
