@@ -485,6 +485,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_smact_validity_mixed_valence(self):
         """Test mixed valence handling in smact_validity."""
+        # Fe3O4 (magnetite): Fe2+Fe3+2O4 - classic mixed valence compound
         self.assertFalse(
             smact.screening.smact_validity("Fe3O4"),
             "Failed with mixed_valence=False: Fe3O4",
@@ -492,6 +493,65 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertTrue(
             smact.screening.smact_validity("Fe3O4", mixed_valence=True),
             "Failed with mixed_valence=True: Fe3O4",
+        )
+
+        # Mn3O4 (hausmannite): Mn2+Mn3+2O4 - similar structure to magnetite
+        self.assertFalse(
+            smact.screening.smact_validity("Mn3O4"),
+            "Failed with mixed_valence=False: Mn3O4",
+        )
+        self.assertTrue(
+            smact.screening.smact_validity("Mn3O4", mixed_valence=True),
+            "Failed with mixed_valence=True: Mn3O4",
+        )
+
+        # Co3O4: Co2+Co3+2O4
+        self.assertFalse(
+            smact.screening.smact_validity("Co3O4"),
+            "Failed with mixed_valence=False: Co3O4",
+        )
+        self.assertTrue(
+            smact.screening.smact_validity("Co3O4", mixed_valence=True),
+            "Failed with mixed_valence=True: Co3O4",
+        )
+
+        # U3O8: mixed U4+/U6+ oxide
+        self.assertTrue(
+            smact.screening.smact_validity("U3O8", mixed_valence=True),
+            "Failed with mixed_valence=True: U3O8",
+        )
+
+        # Negative case: Li3O4 should fail even with mixed_valence=True
+        # (Li only has +1, cannot balance)
+        self.assertFalse(
+            smact.screening.smact_validity("Li3O4", mixed_valence=True),
+            "Li3O4 should fail even with mixed_valence=True",
+        )
+
+        # Compounds that pass without mixed_valence should still pass with it
+        self.assertTrue(
+            smact.screening.smact_validity("Fe2O3", mixed_valence=True),
+            "Fe2O3 should pass with mixed_valence=True",
+        )
+        self.assertTrue(
+            smact.screening.smact_validity("NaCl", mixed_valence=True),
+            "NaCl should pass with mixed_valence=True",
+        )
+
+        # Test with different oxidation_states_set
+        self.assertTrue(
+            smact.screening.smact_validity("Fe3O4", mixed_valence=True, oxidation_states_set="icsd24"),
+            "Failed with mixed_valence=True and icsd24: Fe3O4",
+        )
+        self.assertTrue(
+            smact.screening.smact_validity("Fe3O4", mixed_valence=True, oxidation_states_set="smact14"),
+            "Failed with mixed_valence=True and smact14: Fe3O4",
+        )
+
+        # Test with use_pauling_test=False
+        self.assertTrue(
+            smact.screening.smact_validity("Fe3O4", mixed_valence=True, use_pauling_test=False),
+            "Failed with mixed_valence=True and use_pauling_test=False: Fe3O4",
         )
 
     def test_smact_validity_error_handling(self):

@@ -43,6 +43,10 @@ MIXED_VALENCE_ELEMENTS = [
     "Sn",
     "Sb",
     "Bi",
+    "Ce",
+    "Eu",
+    "Yb",
+    "U",
 ]
 
 
@@ -475,10 +479,18 @@ def smact_validity(
         include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
         consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
         commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "medium".
-        mixed_valence (bool): If True, allow mixed valence elements to be treated as separate species. Default is False.
+        mixed_valence (bool): If True and standard validation fails, retry by allowing
+            elements in MIXED_VALENCE_ELEMENTS to adopt different oxidation states for
+            each atom (e.g., Fe3O4 becomes valid as Fe2+Fe3+2O4). Default is False.
 
     Returns:
         bool: True if the composition is valid, False otherwise.
+
+    Example:
+        >>> smact_validity("Fe3O4")  # Fails: no single Fe oxidation state works
+        False
+        >>> smact_validity("Fe3O4", mixed_valence=True)  # Passes: Fe2+ + 2*Fe3+ + 4*O2- = 0
+        True
     """
     if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):
         warnings.warn(
@@ -563,18 +575,33 @@ def smact_validity(
 
 
 def _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols):
-    """Utility function to expand mixed valence elements in the composition."""
+    """Expand mixed-valence elements so each atom can adopt independent oxidation states.
+
+    For elements in MIXED_VALENCE_ELEMENTS, this function expands the composition
+    so that each atom is treated as a separate site with stoichiometry 1. This allows
+    different atoms of the same element to adopt different oxidation states (e.g.,
+    Fe3O4 can have Fe2+ and Fe3+ simultaneously).
+
+    Args:
+        ox_combos: List of possible oxidation states for each element.
+        stoichs: List of stoichiometry tuples for each element.
+        electronegs: List of Pauling electronegativities for each element.
+        elem_symbols: List of element symbols.
+
+    Returns:
+        Tuple of (expanded_ox_combos, expanded_stoichs, expanded_electronegs).
+    """
     new_ox_combos = []
     new_stoichs = []
     new_electronegs = []
-    for el, ox, count, electrnoeg in zip(elem_symbols, ox_combos, stoichs, electronegs, strict=False):
+    for el, ox, count, electroneg in zip(elem_symbols, ox_combos, stoichs, electronegs, strict=False):
         if el in MIXED_VALENCE_ELEMENTS:
             new_ox_combos.extend([ox] * count[0])
-            new_electronegs.extend([electrnoeg] * count[0])
+            new_electronegs.extend([electroneg] * count[0])
             new_stoichs.extend([(1,)] * count[0])
         else:
             new_ox_combos.append(ox)
-            new_electronegs.append(electrnoeg)
+            new_electronegs.append(electroneg)
             new_stoichs.append(count)
     return new_ox_combos, new_stoichs, new_electronegs
 
