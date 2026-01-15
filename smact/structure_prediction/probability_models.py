@@ -70,8 +70,8 @@ class SubstitutionModel(abc.ABC):
             if s1 != s2:
                 lambda_tab.append((s2, s1, prob))
 
-        df = pd.DataFrame(lambda_tab)
-        return df.pivot_table(index=0, columns=1, values=2)
+        lambda_df = pd.DataFrame(lambda_tab)
+        return lambda_df.pivot_table(index=0, columns=1, values=2)
 
 
 class RadiusModel(SubstitutionModel):
