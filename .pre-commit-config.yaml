@@ -5,7 +5,7 @@ ci:
   autoupdate_commit_msg: pre-commit autoupdate
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
+    rev: v0.14.14
     hooks:
       # Run the linting tool
       - id: ruff
@@ -49,7 +49,7 @@ repos:
         additional_dependencies:
           - prettier
   - repo: https://github.com/kynan/nbstripout
-    rev: 0.8.2
+    rev: 0.9.0
     hooks:
       - id: nbstripout
         args: [--drop-empty-cells, --keep-output]
@@ -62,7 +62,7 @@ repos:
         additional_dependencies:
           - tomli
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.407
+    rev: v1.1.408
     hooks:
       - id: pyright
         args: [--level, error]
