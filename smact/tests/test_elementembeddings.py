@@ -127,9 +127,8 @@ class TestCompositionFeaturiser(unittest.TestCase):
         )
 
     def test_raises_import_error_when_not_installed(self):
-        with patch.dict("sys.modules", {"elementembeddings": None}):
-            with self.assertRaises(ImportError):
-                composition_featuriser(composition_data=["NaCl"])
+        with patch.dict("sys.modules", {"elementembeddings": None}), self.assertRaises(ImportError):
+            composition_featuriser(composition_data=["NaCl"])
 
 
 class TestSpeciesCompositionFeaturiser(unittest.TestCase):
@@ -186,8 +185,7 @@ class TestSpeciesCompositionFeaturiser(unittest.TestCase):
         )
 
     def test_raises_import_error_when_not_installed(self):
-        with patch.dict("sys.modules", {"elementembeddings": None}):
-            with self.assertRaises(ImportError):
-                species_composition_featuriser(
-                    composition_data=[{"Fe2+": 1, "O2-": 1}],
-                )
+        with patch.dict("sys.modules", {"elementembeddings": None}), self.assertRaises(ImportError):
+            species_composition_featuriser(
+                composition_data=[{"Fe2+": 1, "O2-": 1}],
+            )
