@@ -74,7 +74,8 @@ docs = [
     "sphinx_rtd_theme==3.0.2",
     "readthedocs-sphinx-search==0.3.2",
     "sphinx-book-theme==1.1.3",
-    "myst-nb==1.1.2"
+    "myst-nb==1.1.2",
+    "tornado>=6.5"
 ]
 mp = ["mp-api>=0.45.3"]
 crystal_space = ["smact[mp]",
@@ -110,7 +111,6 @@ strict = [
     "pydantic==2.9.2",
     "mp-api==0.45.5",
     "pymatviz==0.15.1",
-    "mp-api==0.45.5",
     "seaborn==0.13.2",
     "pymatgen==2025.4.24",
     "matminer==0.9.3",
@@ -167,6 +167,7 @@ ignore = [
     "B023",    # Function definition does not bind loop variable
     "B028",    # No explicit stacklevel keyword argument found
     "B904",    # Within an except clause, raise exceptions with ...
+    "PD901",   # pandas-df-variable-name
     "C408",    # unnecessary-collection-call
     "D105",    # Missing docstring in magic method
     "D205",    # One blank line required between summary line and description
@@ -177,7 +178,6 @@ ignore = [
     "FBT002",  # Boolean default positional argument in function
     "ISC001",
     "NPY201",  # TODO: enable after migration to NumPy 2.0
-    "PD901",   # pandas-df-variable-name
     "PERF203", # Use of try-except in for/while loop
     "PERF401", # Replace "for" loops with list comprehension
     "PLR0911", # Too many return statements
@@ -363,4 +363,5 @@ dev = [
     "sphinx==8.1.3",
     "sphinx-book-theme==1.1.3",
     "sphinx-rtd-theme==3.0.2",
+    "tornado>=6.5",
 ]
