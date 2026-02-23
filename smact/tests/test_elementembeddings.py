@@ -5,11 +5,12 @@ from __future__ import annotations
 import unittest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from smact.io.elementembeddings import (
     AllowedElementEmbeddings,
     AllowedSpeciesEmbeddings,
     PoolingStats,
-    _check_elementembeddings,
     composition_featuriser,
     species_composition_featuriser,
 )
@@ -55,42 +56,33 @@ class TestEnums(unittest.TestCase):
             self.assertEqual(PoolingStats[name].value, value)
 
 
-class TestCheckElementEmbeddings(unittest.TestCase):
-    """Test _check_elementembeddings helper."""
+class TestHasElementEmbeddingsFlag(unittest.TestCase):
+    """Test the HAS_ELEMENTEMBEDDINGS flag behaviour."""
 
-    def test_raises_import_error_when_not_installed(self):
-        with patch.dict("sys.modules", {"elementembeddings": None}):
-            with self.assertRaises(ImportError) as ctx:
-                _check_elementembeddings()
-            self.assertIn("ElementEmbeddings", str(ctx.exception))
-            self.assertIn("pip install", str(ctx.exception))
+    def test_raises_import_error_when_flag_false(self):
+        with (
+            patch("smact.io.elementembeddings.HAS_ELEMENTEMBEDDINGS", new=False),
+            pytest.raises(ImportError, match="ElementEmbeddings"),
+        ):
+            composition_featuriser(composition_data=["NaCl"])
 
-    def test_passes_when_installed(self):
-        mock_ee = MagicMock()
-        with patch.dict("sys.modules", {"elementembeddings": mock_ee}):
-            # Should not raise
-            _check_elementembeddings()
+    def test_flag_true_does_not_raise(self):
+        mock_featuriser = MagicMock(return_value="result")
+        with (
+            patch("smact.io.elementembeddings.HAS_ELEMENTEMBEDDINGS", new=True),
+            patch("smact.io.elementembeddings.ee_composition_featuriser", mock_featuriser),
+        ):
+            composition_featuriser(composition_data=["NaCl"])
 
 
 class TestCompositionFeaturiser(unittest.TestCase):
     """Test composition_featuriser wrapper."""
 
-    def _setup_mocks(self):
-        """Create mock modules for elementembeddings."""
-        mock_ee = MagicMock()
-        mock_comp_mod = MagicMock()
-        mock_featuriser = MagicMock(return_value="featurised_result")
-        mock_comp_mod.composition_featuriser = mock_featuriser
-        return mock_ee, mock_comp_mod, mock_featuriser
-
     def test_delegates_with_correct_args(self):
-        mock_ee, mock_comp_mod, mock_featuriser = self._setup_mocks()
-        with patch.dict(
-            "sys.modules",
-            {
-                "elementembeddings": mock_ee,
-                "elementembeddings.composition": mock_comp_mod,
-            },
+        mock_featuriser = MagicMock(return_value="featurised_result")
+        with (
+            patch("smact.io.elementembeddings.HAS_ELEMENTEMBEDDINGS", new=True),
+            patch("smact.io.elementembeddings.ee_composition_featuriser", mock_featuriser),
         ):
             result = composition_featuriser(
                 composition_data=["NaCl"],
@@ -109,13 +101,10 @@ class TestCompositionFeaturiser(unittest.TestCase):
         self.assertEqual(result, "featurised_result")
 
     def test_passes_default_args(self):
-        mock_ee, mock_comp_mod, mock_featuriser = self._setup_mocks()
-        with patch.dict(
-            "sys.modules",
-            {
-                "elementembeddings": mock_ee,
-                "elementembeddings.composition": mock_comp_mod,
-            },
+        mock_featuriser = MagicMock(return_value="featurised_result")
+        with (
+            patch("smact.io.elementembeddings.HAS_ELEMENTEMBEDDINGS", new=True),
+            patch("smact.io.elementembeddings.ee_composition_featuriser", mock_featuriser),
         ):
             composition_featuriser(composition_data=["NaCl"])
         mock_featuriser.assert_called_once_with(
@@ -127,29 +116,21 @@ class TestCompositionFeaturiser(unittest.TestCase):
         )
 
     def test_raises_import_error_when_not_installed(self):
-        with patch.dict("sys.modules", {"elementembeddings": None}), self.assertRaises(ImportError):
+        with (
+            patch("smact.io.elementembeddings.HAS_ELEMENTEMBEDDINGS", new=False),
+            pytest.raises(ImportError, match="ElementEmbeddings"),
+        ):
             composition_featuriser(composition_data=["NaCl"])
 
 
 class TestSpeciesCompositionFeaturiser(unittest.TestCase):
     """Test species_composition_featuriser wrapper."""
 
-    def _setup_mocks(self):
-        """Create mock modules for elementembeddings."""
-        mock_ee = MagicMock()
-        mock_comp_mod = MagicMock()
-        mock_featuriser = MagicMock(return_value="species_result")
-        mock_comp_mod.species_composition_featuriser = mock_featuriser
-        return mock_ee, mock_comp_mod, mock_featuriser
-
     def test_delegates_with_correct_args(self):
-        mock_ee, mock_comp_mod, mock_featuriser = self._setup_mocks()
-        with patch.dict(
-            "sys.modules",
-            {
-                "elementembeddings": mock_ee,
-                "elementembeddings.composition": mock_comp_mod,
-            },
+        mock_featuriser = MagicMock(return_value="species_result")
+        with (
+            patch("smact.io.elementembeddings.HAS_ELEMENTEMBEDDINGS", new=True),
+            patch("smact.io.elementembeddings.ee_species_composition_featuriser", mock_featuriser),
         ):
             result = species_composition_featuriser(
                 composition_data=[{"Na+": 1, "Cl-": 1}],
@@ -166,13 +147,10 @@ class TestSpeciesCompositionFeaturiser(unittest.TestCase):
         self.assertEqual(result, "species_result")
 
     def test_passes_default_args(self):
-        mock_ee, mock_comp_mod, mock_featuriser = self._setup_mocks()
-        with patch.dict(
-            "sys.modules",
-            {
-                "elementembeddings": mock_ee,
-                "elementembeddings.composition": mock_comp_mod,
-            },
+        mock_featuriser = MagicMock(return_value="species_result")
+        with (
+            patch("smact.io.elementembeddings.HAS_ELEMENTEMBEDDINGS", new=True),
+            patch("smact.io.elementembeddings.ee_species_composition_featuriser", mock_featuriser),
         ):
             species_composition_featuriser(
                 composition_data=[{"Fe2+": 1, "O2-": 1}],
@@ -185,7 +163,10 @@ class TestSpeciesCompositionFeaturiser(unittest.TestCase):
         )
 
     def test_raises_import_error_when_not_installed(self):
-        with patch.dict("sys.modules", {"elementembeddings": None}), self.assertRaises(ImportError):
+        with (
+            patch("smact.io.elementembeddings.HAS_ELEMENTEMBEDDINGS", new=False),
+            pytest.raises(ImportError, match="ElementEmbeddings"),
+        ):
             species_composition_featuriser(
                 composition_data=[{"Fe2+": 1, "O2-": 1}],
             )

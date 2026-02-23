@@ -11,16 +11,23 @@ if TYPE_CHECKING:
     from elementembeddings.composition import CompositionalEmbedding
     from elementembeddings.core import Embedding
 
+try:
+    from elementembeddings.composition import (
+        composition_featuriser as ee_composition_featuriser,
+    )
+    from elementembeddings.composition import (
+        species_composition_featuriser as ee_species_composition_featuriser,
+    )
 
-def _check_elementembeddings():
-    """Check if ElementEmbeddings is installed and raise a helpful error if not."""
-    try:
-        import elementembeddings  # noqa: F401
-    except ImportError:
-        raise ImportError(
-            "The 'ElementEmbeddings' package is required for this function. "
-            "Install it with: pip install ElementEmbeddings"
-        ) from None
+    HAS_ELEMENTEMBEDDINGS = True
+except ImportError:
+    HAS_ELEMENTEMBEDDINGS = False
+
+    def ee_composition_featuriser(*args, **kwargs):
+        """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
+
+    def ee_species_composition_featuriser(*args, **kwargs):
+        """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
 
 
 # Should be moved to element embeddings codebase
@@ -86,8 +93,11 @@ def composition_featuriser(
     -------
         pd.DataFrame: DataFrame containing the computed feature vectors.
     """
-    _check_elementembeddings()
-    from elementembeddings.composition import composition_featuriser as ee_composition_featuriser
+    if not HAS_ELEMENTEMBEDDINGS:
+        raise ImportError(
+            "The 'ElementEmbeddings' package is required for this function. "
+            "Install it with: pip install ElementEmbeddings"
+        )
 
     return ee_composition_featuriser(
         data=composition_data,
@@ -125,8 +135,11 @@ def species_composition_featuriser(
         Union[pd.DataFrame,list]: A pandas DataFrame containing the feature vector,
         or a list of feature vectors is returned
     """
-    _check_elementembeddings()
-    from elementembeddings.composition import species_composition_featuriser as ee_species_composition_featuriser
+    if not HAS_ELEMENTEMBEDDINGS:
+        raise ImportError(
+            "The 'ElementEmbeddings' package is required for this function. "
+            "Install it with: pip install ElementEmbeddings"
+        )
 
     return ee_species_composition_featuriser(
         data=composition_data,

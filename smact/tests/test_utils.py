@@ -168,7 +168,7 @@ class TestComposition(unittest.TestCase):
     def test_smact_filter_invalid_return_output(self):
         """Test smact_filter raises ValueError for invalid return_output"""
         els = [Element("Li"), Element("O")]
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             smact_filter(els, threshold=2, return_output="invalid")
 
 
