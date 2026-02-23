@@ -2,27 +2,25 @@
 
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING
 
-from elementembeddings.composition import composition_featuriser as ee_composition_featuriser
-from elementembeddings.composition import species_composition_featuriser as ee_species_composition_featuriser
-
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of Python 3.11's StrEnum for Python 3.10."""
-
-        def __str__(self):
-            return str(self.value)
-
+from smact.utils.compat import StrEnum
 
 if TYPE_CHECKING:
     import pandas as pd
     from elementembeddings.composition import CompositionalEmbedding
     from elementembeddings.core import Embedding
+
+
+def _check_elementembeddings():
+    """Check if ElementEmbeddings is installed and raise a helpful error if not."""
+    try:
+        import elementembeddings  # noqa: F401
+    except ImportError:
+        raise ImportError(
+            "The 'ElementEmbeddings' package is required for this function. "
+            "Install it with: pip install ElementEmbeddings"
+        ) from None
 
 
 # Should be moved to element embeddings codebase
@@ -68,7 +66,29 @@ def composition_featuriser(
     stats: PoolingStats | list[PoolingStats] = PoolingStats.mean,
     inplace: bool = False,
 ) -> pd.DataFrame:
-    """Wrapper to `composition_featuriser` in ElementEmbeddings."""
+    """Compute feature vectors for compositions using element embeddings.
+
+    Wrapper around `composition_featuriser` in ElementEmbeddings.
+
+    Args:
+    ----
+        composition_data: Input compositions as a DataFrame, Series,
+            CompositionalEmbedding, or list of formula strings.
+        formula_column (str): Column name containing formulas if input
+            is a DataFrame. Default is "formula".
+        embedding: Element embedding to use for featurisation.
+            Default is MAGPIE.
+        stats: Pooling statistic(s) to compute. Default is mean.
+        inplace (bool): Whether to modify the input DataFrame in place.
+            Default is False.
+
+    Returns:
+    -------
+        pd.DataFrame: DataFrame containing the computed feature vectors.
+    """
+    _check_elementembeddings()
+    from elementembeddings.composition import composition_featuriser as ee_composition_featuriser
+
     return ee_composition_featuriser(
         data=composition_data,
         formula_column=formula_column,
@@ -105,6 +125,9 @@ def species_composition_featuriser(
         Union[pd.DataFrame,list]: A pandas DataFrame containing the feature vector,
         or a list of feature vectors is returned
     """
+    _check_elementembeddings()
+    from elementembeddings.composition import species_composition_featuriser as ee_species_composition_featuriser
+
     return ee_species_composition_featuriser(
         data=composition_data,
         embedding=embedding,

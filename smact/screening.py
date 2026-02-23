@@ -7,7 +7,6 @@ from __future__ import annotations
 import itertools
 import os
 import warnings
-from enum import Enum
 from itertools import combinations
 from typing import TYPE_CHECKING
 
@@ -18,17 +17,8 @@ from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
 )
 from smact.metallicity import metallicity_score
+from smact.utils.compat import StrEnum
 from smact.utils.composition import composition_dict_maker, formula_maker
-
-try:
-    from enum import StrEnum
-except ImportError:
-
-    class StrEnum(str, Enum):
-        """Backport of Python 3.11's StrEnum for Python 3.10."""
-
-        def __str__(self):
-            return str(self.value)
 
 
 if TYPE_CHECKING:
@@ -41,6 +31,30 @@ class SmactFilterOutputs(StrEnum):
     default = "default"
     formula = "formula"
     dict = "dict"
+
+
+def _format_output(
+    compositions: list,
+    return_output: SmactFilterOutputs,
+) -> list:
+    """Format smact_filter compositions according to the requested output type.
+
+    Args:
+        compositions: List of composition tuples from smact_filter.
+        return_output: The desired output format.
+
+    Returns:
+        Formatted list of compositions.
+    """
+    match return_output:
+        case SmactFilterOutputs.default:
+            return compositions
+        case SmactFilterOutputs.formula:
+            return [formula_maker(smact_filter_output=comp) for comp in compositions]
+        case SmactFilterOutputs.dict:
+            return [composition_dict_maker(smact_filter_output=comp) for comp in compositions]
+        case _:
+            raise ValueError(f"Invalid return_output: {return_output}. Must be a SmactFilterOutputs value.")
 
 
 def pauling_test(
@@ -433,26 +447,9 @@ def smact_filter(
                 compositions.append((symbols, ox_states, ratio))
     # Return list depending on whether we are interested in unique species combinations
     # or just unique element combinations.
-    if species_unique:
-        match return_output:
-            case SmactFilterOutputs.default:
-                return compositions
-            case SmactFilterOutputs.formula:
-                return [formula_maker(smact_filter_output=comp) for comp in compositions]
-            case SmactFilterOutputs.dict:
-                return [composition_dict_maker(smact_filter_output=comp) for comp in compositions]
-
-    else:
-        compositions = [(i[0], i[2]) for i in compositions]
-
-        compositions = list(set(compositions))
-        match return_output:
-            case SmactFilterOutputs.default:
-                return compositions
-            case SmactFilterOutputs.formula:
-                return [formula_maker(smact_filter_output=comp) for comp in compositions]
-            case SmactFilterOutputs.dict:
-                return [composition_dict_maker(smact_filter_output=comp) for comp in compositions]
+    if not species_unique:
+        compositions = list({(i[0], i[2]) for i in compositions})
+    return _format_output(compositions, return_output)
 
 
 # ---------------------------------------------------------------------

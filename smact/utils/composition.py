@@ -1,4 +1,4 @@
-"""Utility functioms for handling elements, species, formulas and composition."""
+"""Utility functions for handling elements, species, formulas and composition."""
 
 from __future__ import annotations
 
@@ -100,6 +100,6 @@ def composition_dict_maker(smact_filter_output: tuple[str, int, int] | tuple[str
         smact_filter_output (tuple[str, int, int]): An item in the list returned from smact_filter
 
     Returns:
-        composition_dict (dict[str, float]): An composition dictionary
+        composition_dict (dict[str, float]): A composition dictionary
     """
     return comp_maker(smact_filter_output).as_dict()

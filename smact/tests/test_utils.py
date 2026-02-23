@@ -12,8 +12,8 @@ import requests
 from pymatgen.core import SETTINGS, Composition
 
 from smact import Element
-from smact.screening import smact_filter
-from smact.utils.composition import comp_maker, formula_maker, parse_formula
+from smact.screening import SmactFilterOutputs, smact_filter
+from smact.utils.composition import comp_maker, composition_dict_maker, formula_maker, parse_formula
 from smact.utils.crystal_space import generate_composition_with_smact
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
@@ -93,6 +93,87 @@ class TestComposition(unittest.TestCase):
         self.assertEqual(form1, form2)
         self.assertEqual(form3, "Fe3O4")
         self.assertEqual(form4, "Li10Ge(PS6)2")
+
+    def test_composition_dict_maker(self):
+        """Test the composition_dict_maker function"""
+        # 3-element tuple (symbols, ox_states, stoichs) - returns species keys
+        dict1 = composition_dict_maker(self.mock_filter_output[0])
+        self.assertIsInstance(dict1, dict)
+        self.assertIn("Fe2+", dict1)
+        self.assertIn("O2-", dict1)
+        self.assertEqual(dict1["Fe2+"], 1.0)
+        self.assertEqual(dict1["O2-"], 1.0)
+
+        # 2-element tuple (symbols, stoichs) - returns element keys
+        dict2 = composition_dict_maker(self.mock_filter_output[1])
+        self.assertIsInstance(dict2, dict)
+        self.assertIn("Fe", dict2)
+        self.assertIn("O", dict2)
+
+    def test_smact_filter_return_output_default(self):
+        """Test smact_filter with default return_output returns tuples"""
+        els = [Element("Li"), Element("O")]
+        comps = smact_filter(els, threshold=2)
+        self.assertIsInstance(comps, list)
+        self.assertGreater(len(comps), 0)
+        # Default should return tuples
+        self.assertIsInstance(comps[0], tuple)
+
+    def test_smact_filter_return_output_formula(self):
+        """Test smact_filter with return_output='formula' returns strings"""
+        els = [Element("Li"), Element("O")]
+        comps = smact_filter(
+            els, threshold=2, return_output=SmactFilterOutputs.formula
+        )
+        self.assertIsInstance(comps, list)
+        self.assertGreater(len(comps), 0)
+        for comp in comps:
+            self.assertIsInstance(comp, str)
+        self.assertIn("Li2O", comps)
+
+    def test_smact_filter_return_output_dict(self):
+        """Test smact_filter with return_output='dict' returns dicts"""
+        els = [Element("Li"), Element("O")]
+        comps = smact_filter(
+            els, threshold=2, return_output=SmactFilterOutputs.dict
+        )
+        self.assertIsInstance(comps, list)
+        self.assertGreater(len(comps), 0)
+        for comp in comps:
+            self.assertIsInstance(comp, dict)
+
+    def test_smact_filter_return_output_species_not_unique(self):
+        """Test smact_filter return_output with species_unique=False"""
+        els = [Element("Li"), Element("O")]
+        # Formula output
+        formulas = smact_filter(
+            els,
+            threshold=2,
+            species_unique=False,
+            return_output=SmactFilterOutputs.formula,
+        )
+        self.assertIsInstance(formulas, list)
+        self.assertGreater(len(formulas), 0)
+        for f in formulas:
+            self.assertIsInstance(f, str)
+
+        # Dict output
+        dicts = smact_filter(
+            els,
+            threshold=2,
+            species_unique=False,
+            return_output=SmactFilterOutputs.dict,
+        )
+        self.assertIsInstance(dicts, list)
+        self.assertGreater(len(dicts), 0)
+        for d in dicts:
+            self.assertIsInstance(d, dict)
+
+    def test_smact_filter_invalid_return_output(self):
+        """Test smact_filter raises ValueError for invalid return_output"""
+        els = [Element("Li"), Element("O")]
+        with self.assertRaises(ValueError):
+            smact_filter(els, threshold=2, return_output="invalid")
 
 
 class TestCrystalSpace(unittest.TestCase):
