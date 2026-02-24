@@ -442,6 +442,20 @@ class TestSequenceFunctions(unittest.TestCase):
         finally:
             smact.screening.pauling_test = original_pauling_test
 
+    def test_smact_validity_noble_gases(self):
+        """
+        Test that noble gases with no oxidation states return False cleanly
+        (no TypeError) regardless of which oxidation_states_set is used.
+        """
+        for ox_set in ["smact14", "icsd16", "icsd24", "pymatgen_sp"]:
+            self.assertFalse(
+                smact.screening.smact_validity("NeF2", oxidation_states_set=ox_set),
+                f"NeF2 should be False with oxidation_states_set={ox_set}",
+            )
+        # Xe and Kr have known oxidation states and should still pass
+        self.assertTrue(smact.screening.smact_validity("XeF2"))
+        self.assertTrue(smact.screening.smact_validity("KrF2"))
+
     def test_smact_validity_special_cases(self):
         """
         Test special cases in smact_validity:
