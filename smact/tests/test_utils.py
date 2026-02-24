@@ -132,7 +132,7 @@ class TestComposition(unittest.TestCase):
     def test_smact_filter_return_output_dict(self):
         """Test smact_filter with return_output='dict' returns dicts"""
         els = [Element("Li"), Element("O")]
-        comps = smact_filter(els, threshold=2, return_output=SmactFilterOutputs.dict)
+        comps = smact_filter(els, threshold=2, return_output=SmactFilterOutputs.composition_dict)
         self.assertIsInstance(comps, list)
         self.assertGreater(len(comps), 0)
         for comp in comps:
@@ -158,7 +158,7 @@ class TestComposition(unittest.TestCase):
             els,
             threshold=2,
             species_unique=False,
-            return_output=SmactFilterOutputs.dict,
+            return_output=SmactFilterOutputs.composition_dict,
         )
         self.assertIsInstance(dicts, list)
         self.assertGreater(len(dicts), 0)

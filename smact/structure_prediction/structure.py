@@ -11,7 +11,6 @@ from operator import itemgetter
 
 import numpy as np
 import pymatgen
-from mp_api.client import MPRester as MPResterNew
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.core import SETTINGS
 from pymatgen.core import Structure as pmg_Structure
@@ -114,7 +113,7 @@ class SmactStructure:
         sites_equal = True
         for si, sj in zip(self.sites.values(), other.sites.values(), strict=False):
             for ci, cj in zip(si, sj, strict=False):
-                if not np.allclose(ci, cj, atol=1e-7):
+                if not np.allclose(ci, cj, atol=1e-7, rtol=0):
                     sites_equal = False
                     break
 
@@ -372,6 +371,8 @@ class SmactStructure:
         else:
             # New API routine
             try:
+                from mp_api.client import MPRester as MPResterNew
+
                 with MPResterNew(api_key, use_document_model=False) as m:
                     structs = m.materials.summary.search(formula=formula, fields=["structure"])
             except ImportError:

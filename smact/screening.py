@@ -30,7 +30,7 @@ class SmactFilterOutputs(StrEnum):
 
     default = "default"
     formula = "formula"
-    dict = "dict"
+    composition_dict = "composition_dict"
 
 
 def _format_output(
@@ -51,7 +51,7 @@ def _format_output(
             return compositions
         case SmactFilterOutputs.formula:
             return [formula_maker(smact_filter_output=comp) for comp in compositions]
-        case SmactFilterOutputs.dict:
+        case SmactFilterOutputs.composition_dict:
             return [composition_dict_maker(smact_filter_output=comp) for comp in compositions]
         case _:
             raise ValueError(f"Invalid return_output: {return_output}. Must be a SmactFilterOutputs value.")
@@ -376,7 +376,7 @@ def smact_filter(
         stoichs (list[int]): A selection of valid stoichiometric ratios for each site.
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
         oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'smact14', 'icsd16',"icsd24", 'pymatgen_sp' and 'wiki' for the  2014 SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively. A filepath to an oxidation states text file can also be supplied as well.
-        return_output (SmactFilterOutputs): If set to 'default', the function will return a list of tuples containing the tuples of symbols, oxidation states and stoichiometry values. "Formula" returns a list of formulas and "dict" returns a list of dictionaries.
+        return_output (SmactFilterOutputs): If set to 'default', the function will return a list of tuples containing the tuples of symbols, oxidation states and stoichiometry values. "formula" returns a list of formulas and "composition_dict" returns a list of dictionaries.
 
     Returns:
     -------
