@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from os.path import dirname, exists, join, realpath
 
 import pytest
 from pymatgen.core import Structure
@@ -107,7 +108,7 @@ class TestSequenceFunctions(unittest.TestCase):
     # ---------------- BUILDER ----------------
 
     def test_builder_ZnS(self):
-        ZnS, sys_ZnS = wurtzite(["Zn", "S"])
+        ZnS, _ = wurtzite(["Zn", "S"])
         self.assertEqual((ZnS.sites[0].position[2]), 0)
         self.assertEqual((ZnS.sites[0].position[0]), 2.0 / 3.0)
 
@@ -427,7 +428,6 @@ class TestSequenceFunctions(unittest.TestCase):
         """
         Force the except TypeError block in smact_validity's try/except to be triggered.
         """
-        import smact.screening
 
         original_pauling_test = smact.screening.pauling_test
 
@@ -478,7 +478,6 @@ class TestSequenceFunctions(unittest.TestCase):
             )
 
         # Test with file path
-        from os.path import dirname, join, realpath
 
         files_dir = join(dirname(realpath(__file__)), "files")
         test_ox_states = join(files_dir, "test_oxidation_states.txt")
@@ -512,7 +511,7 @@ class TestSequenceFunctions(unittest.TestCase):
             smact.screening.smact_validity("NaCl", oxidation_states_set="invalid_set")
 
         # Test that wiki set gives warning
-        with pytest.warns(UserWarning):
+        with pytest.warns(UserWarning, match=r"This set of oxidation states is from Wikipedia"):
             smact.screening.smact_validity("NaCl", oxidation_states_set="wiki")
 
     # ---------------- Lattice ----------------
@@ -557,7 +556,6 @@ class TestSequenceFunctions(unittest.TestCase):
         """
         Test that providing a valid file path triggers the file-based combos branch.
         """
-        from os.path import exists
 
         self.assertTrue(exists(TEST_OX_STATES), "TEST_OX_STATES must exist for this test.")
         # Test just the validity

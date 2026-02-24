@@ -147,7 +147,7 @@ def lookup_element_oxidation_states_icsd(symbol, copy=True):
             return _el_ox_states_icsd[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Oxidation states for element {symbol}not found.")
+            print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
 
 
@@ -875,8 +875,8 @@ def lookup_element_magpie_data(symbol: str, copy: bool = True):
     if _element_magpie_data is None:
         _element_magpie_data = {}
 
-        df = pd.read_csv(os.path.join(data_directory, "magpie.csv"))
-        for _index, row in df.iterrows():
+        magpie_df = pd.read_csv(os.path.join(data_directory, "magpie.csv"))
+        for _index, row in magpie_df.iterrows():
             key = row.iloc[0]
 
             dataset = {
@@ -943,8 +943,8 @@ def lookup_element_valence_data(symbol: str, copy: bool = True):
     if _element_valence_data is None:
         _element_valence_data = {}
 
-        df = pd.read_csv(os.path.join(data_directory, "element_valence_modified.csv"))
-        for _index, row in df.iterrows():
+        valence_df = pd.read_csv(os.path.join(data_directory, "element_valence_modified.csv"))
+        for _index, row in valence_df.iterrows():
             key = row.iloc[0]
 
             dataset = {"NValence": int(row.iloc[1])}

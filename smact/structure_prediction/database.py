@@ -14,6 +14,14 @@ except ImportError:
     pathos_available = False
     ParallelPool = None
 
+try:
+    from mp_api.client import MPRester as MPResterNew
+
+    HAS_MP_API = True
+except ImportError:
+    HAS_MP_API = False
+    MPResterNew = None
+
 import os
 import sqlite3
 from typing import TYPE_CHECKING
@@ -147,8 +155,6 @@ class StructureDB:
                         properties=["structure", "material_id"],
                     )
             else:
-                from mp_api.client import MPRester as MPResterNew
-
                 with MPResterNew(mp_api_key, use_document_model=False) as m:
                     data = m.materials.summary.search(theoretical=False, fields=["structure", "material_id"])
 
@@ -319,6 +325,6 @@ def parse_mprest(
     """
     try:
         return SmactStructure.from_py_struct(data["structure"], determine_oxi="BV")
-    except:
+    except Exception:
         # Couldn't decorate with oxidation states
-        logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")
+        logger.warning(f"Couldn't decorate {data['material_id']} with oxidation states.")

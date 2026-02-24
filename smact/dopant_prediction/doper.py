@@ -74,8 +74,8 @@ class Doper:
         elif filepath:
             self.cation_mutator = mutation.CationMutator.from_json(filepath)
         else:
-            # Default to Hautier data-mined lambda values
-            self.cation_mutator = mutation.CationMutator.from_json(filepath)
+            # Default to Hautier data-mined lambda values from pymatgen
+            self.cation_mutator = mutation.CationMutator.from_json()
         self.possible_species = list(self.cation_mutator.specs)
         self.lambda_threshold = self.cation_mutator.alpha("X", "Y")
         self.threshold = 1 / self.cation_mutator.Z * np.exp(self.cation_mutator.alpha("X", "Y"))

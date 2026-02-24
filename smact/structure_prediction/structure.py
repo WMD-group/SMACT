@@ -15,6 +15,14 @@ from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.core import SETTINGS
 from pymatgen.core import Structure as pmg_Structure
 from pymatgen.ext.matproj import MPRester
+
+try:
+    from mp_api.client import MPRester as MPResterNew
+
+    HAS_MP_API = True
+except ImportError:
+    HAS_MP_API = False
+    MPResterNew = None
 from pymatgen.transformations.standard_transformations import (
     OxidationStateDecorationTransformation,
 )
@@ -113,7 +121,7 @@ class SmactStructure:
         sites_equal = True
         for si, sj in zip(self.sites.values(), other.sites.values(), strict=False):
             for ci, cj in zip(si, sj, strict=False):
-                if not np.allclose(ci, cj, atol=1e-7):
+                if not np.allclose(ci, cj, atol=1e-7, rtol=0):
                     sites_equal = False
                     break
 
@@ -126,6 +134,36 @@ class SmactStructure:
                 list(self.sites.keys()) == list(other.sites.keys()),
             ]
         )
+
+    def __hash__(self):
+        """
+        Provide a hash consistent with :meth:`__eq__`.
+
+        The hash is computed from immutable representations of the
+        structure's key attributes. Coordinates are rounded to 1e-7 to
+        match the tolerance used in equality checks (np.allclose with
+        atol=1e-7). Note: mutating a hashed instance (changing sites,
+        species, or lattice) will change its logical identity and can
+        break dictionary/set invariants; prefer using immutable objects
+        as dict keys.
+        """
+        # species is a list of tuples -> make it a tuple of tuples
+        species_t = tuple(tuple(s) for s in self.species)
+
+        # lattice_mat is a numpy array -> convert to tuple of tuples
+        lattice_t = tuple(tuple(row) for row in self.lattice_mat.tolist())
+
+        # sites: preserve insertion/order of keys (constructor enforces order)
+        # Round coordinates to 1e-7 to match __eq__ tolerance
+        sites_t = tuple(
+            (
+                spec,
+                tuple(tuple(round(c, 7) for c in coord) for coord in coords),
+            )
+            for spec, coords in self.sites.items()
+        )
+
+        return hash((species_t, lattice_t, self.lattice_param, sites_t))
 
     @staticmethod
     def _sanitise_species(
@@ -276,7 +314,8 @@ class SmactStructure:
                 bva = BVAnalyzer()
                 struct = bva.get_oxi_state_decorated_structure(structure)
                 print("Oxidation states assigned using bond valence")
-            except ValueError:
+            except Exception:
+                # BVAnalyzer can raise ValueError, RuntimeError, or other exceptions
                 comp = structure.composition
                 oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
                 struct = oxi_transform.apply_transformation(structure)
@@ -338,16 +377,13 @@ class SmactStructure:
                     properties=["structure"],
                 )
 
-        else:
+        elif HAS_MP_API:
             # New API routine
-            try:
-                from mp_api.client import MPRester as MPResterNew
-
-                with MPResterNew(api_key, use_document_model=False) as m:
-                    structs = m.materials.summary.search(formula=formula, fields=["structure"])
-            except ImportError:
-                with MPRester(api_key) as m:
-                    structs = m.get_structures(chemsys_formula=formula)
+            with MPResterNew(api_key, use_document_model=False) as m:
+                structs = m.materials.summary.search(formula=formula, fields=["structure"])
+        else:
+            with MPRester(api_key) as m:
+                structs = m.get_structures(chemsys_formula=formula)
 
         if len(structs) == 0:
             raise ValueError("Could not find composition in Materials Project Database, please supply a structure.")
@@ -382,7 +418,7 @@ class SmactStructure:
                 )
         lattice_mat = struct.lattice.matrix
 
-        lattice_param = 1.0  # TODO Use actual lattice parameter
+        lattice_param = 1.0  # Scaling factor; lattice_mat already contains actual vectors
 
         sites, _ = SmactStructure.__parse_py_sites(struct)
 

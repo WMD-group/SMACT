@@ -150,7 +150,7 @@ def compound_electroneg(
     # Raise each electronegativity to its appropriate power
     # to account for stoichiometry.
     for i in range(len(elementlist)):
-        elementlist[i] = [elementlist[i] ** stoichslist[i]]
+        elementlist[i] = elementlist[i] ** stoichslist[i]
 
     # Calculate geometric mean (n-th root of product)
     prod = np.prod(elementlist)

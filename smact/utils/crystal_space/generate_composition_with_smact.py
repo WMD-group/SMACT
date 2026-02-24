@@ -134,15 +134,15 @@ def generate_composition_with_smact(
     smact_allowed = list(set(smact_allowed))
     print(f"Number of compounds allowed by SMACT: {len(smact_allowed)}")
 
-    df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])
-    df.loc[smact_allowed, "smact_allowed"] = True
+    results_df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])
+    results_df.loc[smact_allowed, "smact_allowed"] = True
 
     if save_path is not None:
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-        df.to_pickle(save_path)
+        results_df.to_pickle(save_path)
         print(f"Saved to {save_path}")
 
-    return df
+    return results_df
 
 
 def generate_composition_with_smact_custom(
@@ -151,7 +151,7 @@ def generate_composition_with_smact_custom(
     max_atomic_num: int = 103,
     num_processes: int | None = None,
     save_path: str | None = None,
-    oxidation_states_set: str | None = None,
+    oxidation_states_set: str = "icsd24",
 ) -> pd.DataFrame:
     """
     Generate all possible compositions of a given number of elements and
@@ -163,7 +163,7 @@ def generate_composition_with_smact_custom(
         max_atomic_num (int): the maximum atomic number. Defaults to 103.
         num_processes (int): the number of processes to use. Defaults to None.
         save_path (str): the path to save the results. Defaults to None.
-        oxidation_states_set (str): the path to the oxidation states file. Defaults to None.
+        oxidation_states_set (str): the path to the oxidation states file. Defaults to "icsd24".
 
     Returns:
         df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
@@ -246,12 +246,12 @@ def generate_composition_with_smact_custom(
     smact_allowed = list(set(smact_allowed))
     print(f"Number of compounds allowed by SMACT: {len(smact_allowed)}")
 
-    df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])
-    df.loc[smact_allowed, "smact_allowed"] = True
+    results_df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])
+    results_df.loc[smact_allowed, "smact_allowed"] = True
 
     if save_path is not None:
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-        df.to_pickle(save_path)
+        results_df.to_pickle(save_path)
         print(f"Saved to {save_path}")
 
-    return df
+    return results_df

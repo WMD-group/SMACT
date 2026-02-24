@@ -70,8 +70,8 @@ class SubstitutionModel(abc.ABC):
             if s1 != s2:
                 lambda_tab.append((s2, s1, prob))
 
-        df = pd.DataFrame(lambda_tab)
-        return df.pivot_table(index=0, columns=1, values=2)
+        lambda_df = pd.DataFrame(lambda_tab)
+        return lambda_df.pivot_table(index=0, columns=1, values=2)
 
 
 class RadiusModel(SubstitutionModel):
@@ -130,5 +130,5 @@ class RadiusModel(SubstitutionModel):
         mean_spec1_r = spec1_rows["ionic_radius"].mean()
         mean_spec2_r = spec2_rows["ionic_radius"].mean()
 
-        # Hooke's law-style probability
-        return 1 - self.k * (mean_spec1_r - mean_spec2_r) ** 2
+        # Hooke's law-style probability, clamped to valid range [0, 1]
+        return max(0.0, 1 - self.k * (mean_spec1_r - mean_spec2_r) ** 2)
