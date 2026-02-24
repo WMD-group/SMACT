@@ -24,28 +24,36 @@ from smact.utils.oxidation import ICSD24OxStatesFilter
 if TYPE_CHECKING:
     import pymatgen
 
-MIXED_VALENCE_ELEMENTS = [
-    "Fe",
-    "Mn",
-    "Co",
-    "Cu",
-    "Ni",
-    "V",
-    "Ti",
-    "Cr",
-    "Nb",
-    "Mo",
-    "W",
-    "Re",
-    "Ru",
-    "Os",
-    "Pd",
-    "Ag",
-    "Au",
-    "Sn",
-    "Sb",
-    "Bi",
-]
+MIXED_VALENCE_ELEMENTS: frozenset[str] = frozenset(
+    {
+        # Transition metals
+        "Fe",
+        "Mn",
+        "Co",
+        "Cu",
+        "Ni",
+        "V",
+        "Ti",
+        "Cr",
+        "Nb",
+        "Mo",
+        "W",
+        "Re",
+        "Ru",
+        "Os",
+        "Pd",
+        "Ag",
+        "Au",
+        "Sn",
+        "Sb",
+        "Bi",
+        # Lanthanides / actinides
+        "Ce",
+        "Eu",
+        "Yb",
+        "U",
+    }
+)
 
 
 class SmactFilterOutputs(StrEnum):
@@ -589,15 +597,34 @@ def smact_validity(
     if ox_valid:
         return True
     elif mixed_valence and any(el in MIXED_VALENCE_ELEMENTS for el in elem_symbols):
-        # treat any potential mixed valence elements as separate species
+        # Guard against combinatorial blow-up before expanding
+        projected = 1
+        for el, ox, count in zip(elem_symbols, ox_combos, stoichs, strict=False):
+            projected *= len(ox) ** count[0] if el in MIXED_VALENCE_ELEMENTS else len(ox)
+        if projected > 1_000_000:
+            warnings.warn(
+                "Mixed-valence expansion would generate too many combinations "
+                f"({projected:,}); skipping to avoid excessive runtime.",
+                stacklevel=2,
+            )
+            return False
+        # Treat each atom of a mixed-valence element as an independent site.
+        # threshold is computed from the original stoichs and remains valid after
+        # expansion: expanded MV sites have stoich (1,) ≤ threshold, and
+        # non-MV sites retain their original stoichs which are also ≤ threshold.
         ox_combos, stoichs, electronegs = _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols)
         return _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
 
     return False
 
 
-def _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols):
-    """Utility function to expand mixed valence elements in the composition."""
+def _expand_mixed_valence_comp(
+    ox_combos: list[list[int]],
+    stoichs: list[tuple[int, ...]],
+    electronegs: list[float | None],
+    elem_symbols: tuple[str, ...],
+) -> tuple[list[list[int]], list[tuple[int, ...]], list[float | None]]:
+    """Expand mixed-valence elements into individual single-stoichiometry sites."""
     new_ox_combos = []
     new_stoichs = []
     new_electronegs = []
@@ -613,8 +640,14 @@ def _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols):
     return new_ox_combos, new_stoichs, new_electronegs
 
 
-def _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test=True):
-    """Utility function to check if there is a valid oxidation state solution."""
+def _is_valid_oxi_state(
+    ox_combos: list[list[int]],
+    stoichs: list[tuple[int, ...]],
+    threshold: int,
+    electronegs: list[float | None],
+    use_pauling_test: bool = True,
+) -> bool:
+    """Return True if any oxidation-state combination satisfies charge neutrality and the Pauling criterion."""
     for ox_states in itertools.product(*ox_combos):
         cn_e, _ = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
 
