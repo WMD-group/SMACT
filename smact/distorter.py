@@ -19,7 +19,7 @@ try:
     from pyspglib import spglib
 except ImportError:
     try:
-        from spglib import spglib
+        import spglib
     except ImportError:
         raise Exception("Could not load spglib")
 
