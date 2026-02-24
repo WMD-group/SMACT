@@ -460,12 +460,20 @@ def smact_filter(
                 stacklevel=2,
             )
     elif os.path.exists(oxidation_states_set):
-        ox_combos = (oxi_custom(e.symbol, oxidation_states_set) for e in els)
+        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
     else:
         raise (
             Exception(
                 f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
             )
+        )
+
+    # Guard: raise early if any element has no oxidation states in the chosen set
+    missing = [e.symbol for e, ox in zip(els, ox_combos, strict=False) if ox is None or len(ox) == 0]
+    if missing:
+        raise ValueError(
+            f"No oxidation states found for {missing} in oxidation_states_set='{oxidation_states_set}'. "
+            "Cannot enumerate charge-neutral compositions."
         )
 
     compositions = []
@@ -578,7 +586,7 @@ def smact_validity(
         ox_combos = [el.oxidation_states_icsd16 for el in smact_elems]
     elif oxidation_states_set == "pymatgen_sp":
         ox_combos = [el.oxidation_states_sp for el in smact_elems]
-    elif oxidation_states_set == "icsd24" or oxidation_states_set is None:
+    elif oxidation_states_set == "icsd24":
         ox_combos = [el.oxidation_states_icsd24 for el in smact_elems]
     elif os.path.exists(oxidation_states_set):
         ox_combos = [oxi_custom(el.symbol, oxidation_states_set) for el in smact_elems]
@@ -590,6 +598,11 @@ def smact_validity(
         ox_combos = [el.oxidation_states_wiki for el in smact_elems]
     else:
         raise ValueError(f"{oxidation_states_set} is not valid. Provide a known set or a valid file path.")
+
+    # Guard: if any element has no oxidation states in the chosen set (e.g. noble
+    # gases in most databases), the composition cannot be charge-balanced.
+    if any(ox is None or len(ox) == 0 for ox in ox_combos):
+        return False
 
     # Check all possible oxidation state combinations
     ox_valid = _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
