@@ -569,14 +569,14 @@ def _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols):
     new_ox_combos = []
     new_stoichs = []
     new_electronegs = []
-    for el, ox, count, electrnoeg in zip(elem_symbols, ox_combos, stoichs, electronegs, strict=False):
+    for el, ox, count, electroneg in zip(elem_symbols, ox_combos, stoichs, electronegs, strict=False):
         if el in MIXED_VALENCE_ELEMENTS:
             new_ox_combos.extend([ox] * count[0])
-            new_electronegs.extend([electrnoeg] * count[0])
+            new_electronegs.extend([electroneg] * count[0])
             new_stoichs.extend([(1,)] * count[0])
         else:
             new_ox_combos.append(ox)
-            new_electronegs.append(electrnoeg)
+            new_electronegs.append(electroneg)
             new_stoichs.append(count)
     return new_ox_combos, new_stoichs, new_electronegs
 
@@ -584,7 +584,7 @@ def _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols):
 def _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test=True):
     """Utility function to check if there is a valid oxidation state solution."""
     for ox_states in itertools.product(*ox_combos):
-        cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
+        cn_e, _ = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
 
         if cn_e:
             if not use_pauling_test:

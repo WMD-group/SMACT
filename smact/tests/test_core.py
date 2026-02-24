@@ -486,14 +486,22 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_smact_validity_mixed_valence(self):
         """Test mixed valence handling in smact_validity."""
-        self.assertFalse(
-            smact.screening.smact_validity("Fe3O4"),
-            "Failed with mixed_valence=False: Fe3O4",
-        )
-        self.assertTrue(
-            smact.screening.smact_validity("Fe3O4", mixed_valence=True),
-            "Failed with mixed_valence=True: Fe3O4",
-        )
+        # Fe3O4: fails without mixed_valence (no single Fe oxidation state works)
+        self.assertFalse(smact.screening.smact_validity("Fe3O4"))
+        # Fe3O4: passes with mixed_valence=True (Fe2+ + 2*Fe3+ + 4*O2-)
+        self.assertTrue(smact.screening.smact_validity("Fe3O4", mixed_valence=True))
+
+        # Mn3O4 (hausmannite): Mn2+Mn3+2O4 — second real mixed-valence compound
+        self.assertTrue(smact.screening.smact_validity("Mn3O4", mixed_valence=True))
+
+        # Compounds with no mixed-valence elements: flag has no effect on valid compounds
+        self.assertTrue(smact.screening.smact_validity("NaCl", mixed_valence=True))
+
+        # Compound with no mixed-valence elements that fails regardless (Li only has +1, can't balance)
+        self.assertFalse(smact.screening.smact_validity("LiF2", mixed_valence=True))
+
+        # Explicit confirmation of default behaviour (mixed_valence=False)
+        self.assertFalse(smact.screening.smact_validity("Fe3O4", mixed_valence=False))
 
     def test_smact_validity_error_handling(self):
         """
