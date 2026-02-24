@@ -122,6 +122,11 @@ strict = [
     "dash==3.3.0",
 ]
 
+[tool.uv]
+# emmet-core >=0.85 is incompatible with the pinned pymatgen/pydantic versions
+# (BandStructure.__init_subclass__ TypeError). Pin until upstream resolves it.
+constraint-dependencies = ["emmet-core<0.85"]
+
 [tool.setuptools]
 include-package-data = true
 
