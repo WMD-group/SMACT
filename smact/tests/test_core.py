@@ -455,6 +455,9 @@ class TestSequenceFunctions(unittest.TestCase):
         # Xe and Kr have known oxidation states and should still pass
         self.assertTrue(smact.screening.smact_validity("XeF2"))
         self.assertTrue(smact.screening.smact_validity("KrF2"))
+        # Also verify the explicit oxidation_states_set path (the reported bug case)
+        self.assertTrue(smact.screening.smact_validity("XeF2", oxidation_states_set="icsd24"))
+        self.assertTrue(smact.screening.smact_validity("KrF2", oxidation_states_set="icsd24"))
 
     def test_smact_validity_special_cases(self):
         """
