@@ -17,10 +17,44 @@ from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
 )
 from smact.metallicity import metallicity_score
+from smact.utils.compat import StrEnum
+from smact.utils.composition import composition_dict_maker, formula_maker
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
 if TYPE_CHECKING:
     import pymatgen
+
+
+class SmactFilterOutputs(StrEnum):
+    """Allowed outputs of the `smact_filter` function."""
+
+    default = "default"
+    formula = "formula"
+    composition_dict = "composition_dict"
+
+
+def _format_output(
+    compositions: list,
+    return_output: SmactFilterOutputs,
+) -> list:
+    """Format smact_filter compositions according to the requested output type.
+
+    Args:
+        compositions: List of composition tuples from smact_filter.
+        return_output: The desired output format.
+
+    Returns:
+        Formatted list of compositions.
+    """
+    match return_output:
+        case SmactFilterOutputs.default:
+            return compositions
+        case SmactFilterOutputs.formula:
+            return [formula_maker(smact_filter_output=comp) for comp in compositions]
+        case SmactFilterOutputs.composition_dict:
+            return [composition_dict_maker(smact_filter_output=comp) for comp in compositions]
+        case _:
+            raise ValueError(f"Invalid return_output: {return_output}. Must be a SmactFilterOutputs value.")
 
 
 def pauling_test(
@@ -325,7 +359,8 @@ def smact_filter(
     stoichs: list[list[int]] | None = None,
     species_unique: bool = True,
     oxidation_states_set: str = "icsd24",
-) -> list[tuple[str, int, int]] | list[tuple[str, int]]:
+    return_output: SmactFilterOutputs = SmactFilterOutputs.default,
+) -> list[tuple[str, int, int]] | list[tuple[str, int]] | list[str] | list[dict]:
     """Function that applies the charge neutrality and electronegativity
     tests in one go for simple application in external scripts that
     wish to apply the general 'smact test'.
@@ -341,6 +376,7 @@ def smact_filter(
         stoichs (list[int]): A selection of valid stoichiometric ratios for each site.
         species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
         oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'smact14', 'icsd16',"icsd24", 'pymatgen_sp' and 'wiki' for the  2014 SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively. A filepath to an oxidation states text file can also be supplied as well.
+        return_output (SmactFilterOutputs): If set to 'default', the function will return a list of tuples containing the tuples of symbols, oxidation states and stoichiometry values. "formula" returns a list of formulas and "composition_dict" returns a list of dictionaries.
 
     Returns:
     -------
@@ -411,11 +447,9 @@ def smact_filter(
                 compositions.append((symbols, ox_states, ratio))
     # Return list depending on whether we are interested in unique species combinations
     # or just unique element combinations.
-    if species_unique:
-        return compositions
-    else:
-        compositions = [(i[0], i[2]) for i in compositions]
-        return list(set(compositions))
+    if not species_unique:
+        compositions = list({(i[0], i[2]) for i in compositions})
+    return _format_output(compositions, return_output)
 
 
 # ---------------------------------------------------------------------

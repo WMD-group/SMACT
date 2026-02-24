@@ -14,11 +14,18 @@ except ImportError:
     pathos_available = False
     ParallelPool = None
 
+try:
+    from mp_api.client import MPRester as MPResterNew
+
+    HAS_MP_API = True
+except ImportError:
+    HAS_MP_API = False
+    MPResterNew = None
+
 import os
 import sqlite3
 from typing import TYPE_CHECKING
 
-from mp_api.client import MPRester as MPResterNew
 from pymatgen.core import SETTINGS
 from pymatgen.ext.matproj import MPRester
 

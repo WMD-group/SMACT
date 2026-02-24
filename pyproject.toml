@@ -74,8 +74,8 @@ docs = [
     "sphinx_rtd_theme==3.0.2",
     "readthedocs-sphinx-search==0.3.2",
     "sphinx-book-theme==1.1.3",
-    "myst-nb==1.3.0",
-    "tornado>=6.5"
+    "tornado>=6.5.3",
+    "myst-nb==1.3.0"
 ]
 mp = ["mp-api>=0.45.3"]
 crystal_space = ["smact[mp]",
@@ -167,7 +167,6 @@ ignore = [
     "B023",    # Function definition does not bind loop variable
     "B028",    # No explicit stacklevel keyword argument found
     "B904",    # Within an except clause, raise exceptions with ...
-    "PD901",   # pandas-df-variable-name
     "C408",    # unnecessary-collection-call
     "D105",    # Missing docstring in magic method
     "D205",    # One blank line required between summary line and description
@@ -364,5 +363,5 @@ dev = [
     "sphinx==8.1.3",
     "sphinx-book-theme==1.1.3",
     "sphinx-rtd-theme==3.0.2",
-    "tornado>=6.5",
+    "tornado>=6.5.3",
 ]
