@@ -514,7 +514,6 @@ def smact_validity(
     Returns:
         bool: True if the composition is valid, False otherwise.
     """
-
     if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):
         warnings.warn(
             "Parameters include_zero, consensus, and commonality are only used when oxidation_states_set is None",
