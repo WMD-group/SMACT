@@ -155,6 +155,10 @@ class Oxidation_state_probability_finder:
         # Define necessary species pairs
         anion = structure[-1]
         cations = [i for i in structure if i.oxidation > 0]
+
+        if not cations:
+            raise ValueError("No cations found in structure. Cannot calculate compound probability.")
+
         species_pairs = [(anion, cation) for cation in cations]
 
         # Reduce down to unique pairs if ignoring stoichiometry

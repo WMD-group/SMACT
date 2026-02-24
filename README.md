@@ -32,7 +32,7 @@ There is a strong demand for functional materials across a wide range of technol
 ## Getting started
 
 Features are accessed through Python scripts, importing classes and functions as needed.
-The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be usede
+The best place to start is looking at [the docs](https://smact.readthedocs.io/en/latest/), which highlight some simple examples of how these classes and functions can be used.
 Use cases are available in our [examples](https://smact.readthedocs.io/en/latest/examples.html) and [tutorials](https://smact.readthedocs.io/en/latest/tutorials.html) folders.
 
 ## Code features

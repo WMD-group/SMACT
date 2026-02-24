@@ -147,7 +147,7 @@ def lookup_element_oxidation_states_icsd(symbol, copy=True):
             return _el_ox_states_icsd[symbol]
     else:
         if _print_warnings:
-            print(f"WARNING: Oxidation states for element {symbol}not found.")
+            print(f"WARNING: Oxidation states for element {symbol} not found.")
         return None
 
 

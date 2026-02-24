@@ -130,5 +130,5 @@ class RadiusModel(SubstitutionModel):
         mean_spec1_r = spec1_rows["ionic_radius"].mean()
         mean_spec2_r = spec2_rows["ionic_radius"].mean()
 
-        # Hooke's law-style probability
-        return 1 - self.k * (mean_spec1_r - mean_spec2_r) ** 2
+        # Hooke's law-style probability, clamped to valid range [0, 1]
+        return max(0.0, 1 - self.k * (mean_spec1_r - mean_spec2_r) ** 2)

@@ -306,7 +306,8 @@ class SmactStructure:
                 bva = BVAnalyzer()
                 struct = bva.get_oxi_state_decorated_structure(structure)
                 print("Oxidation states assigned using bond valence")
-            except ValueError:
+            except Exception:
+                # BVAnalyzer can raise ValueError, RuntimeError, or other exceptions
                 comp = structure.composition
                 oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
                 struct = oxi_transform.apply_transformation(structure)
@@ -412,7 +413,7 @@ class SmactStructure:
                 )
         lattice_mat = struct.lattice.matrix
 
-        lattice_param = 1.0  # TODO Use actual lattice parameter
+        lattice_param = 1.0  # Scaling factor; lattice_mat already contains actual vectors
 
         sites, _ = SmactStructure.__parse_py_sites(struct)
 

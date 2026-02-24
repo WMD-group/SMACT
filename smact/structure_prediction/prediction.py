@@ -132,7 +132,7 @@ class StructurePredictor:
 
                 try:
                     p = diff_sub_probs.loc[alt_spec]
-                except:
+                except KeyError:
                     # Not in the Series
                     continue
 
@@ -234,7 +234,7 @@ class StructurePredictor:
                     p = []
                     for i in range(n_ary):
                         p.append(diff_sub_probs[i].loc[alt_spec[i]])
-                except:
+                except KeyError:
                     # Not in the Series
                     continue
 

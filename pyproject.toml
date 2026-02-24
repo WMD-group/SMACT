@@ -74,8 +74,8 @@ docs = [
     "sphinx_rtd_theme==3.0.2",
     "readthedocs-sphinx-search==0.3.2",
     "sphinx-book-theme==1.1.3",
-    "myst-nb==1.1.2",
-    "tornado>=6.5.3"
+    "tornado>=6.5.3",
+    "myst-nb==1.3.0"
 ]
 mp = ["mp-api>=0.45.3"]
 crystal_space = ["smact[mp]",
@@ -110,7 +110,7 @@ optional = [
 strict = [
     "pydantic==2.9.2",
     "mp-api==0.45.5",
-    "pymatviz==0.15.1",
+    "pymatviz==0.16.0",
     "seaborn==0.13.2",
     "pymatgen==2025.4.24",
     "matminer==0.9.3",
@@ -119,7 +119,7 @@ strict = [
     "ase==3.24.0",
     "numpy",
     "ElementEmbeddings==0.6.1",
-    "dash==3.0.2",
+    "dash==3.3.0",
 ]
 
 [tool.setuptools]
@@ -346,13 +346,14 @@ exclude_also = [
 
 [dependency-groups]
 dev = [
+    "coverage>=7.10.6",
     "jupyter>=1.1.1",
     "jupyter-client>=8.6.3",
     "notebook>=7.3.3",
     "blacken-docs>=1.19.1",
     "codespell>=2.4.1",
     "ipykernel>=6.29.5",
-    "myst-nb==1.1.2",
+    "myst-nb==1.3.0",
     "nbstripout>=0.8.1",
     "pre-commit>=4.2.0",
     "pyright>=1.1.398",
