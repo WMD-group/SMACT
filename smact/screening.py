@@ -591,6 +591,11 @@ def smact_validity(
     else:
         raise ValueError(f"{oxidation_states_set} is not valid. Provide a known set or a valid file path.")
 
+    # Guard: if any element has no oxidation states in the chosen set (e.g. noble
+    # gases in most databases), the composition cannot be charge-balanced.
+    if any(ox is None or len(ox) == 0 for ox in ox_combos):
+        return False
+
     # Check all possible oxidation state combinations
     ox_valid = _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
 
