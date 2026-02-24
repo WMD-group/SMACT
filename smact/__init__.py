@@ -6,6 +6,8 @@ A collection of fast screening tools from elemental data
 
 from __future__ import annotations
 
+__version__ = "4.0.0"
+
 import itertools
 import warnings
 from math import gcd

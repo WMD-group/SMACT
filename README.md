@@ -19,7 +19,7 @@
 - **Documentation:** <https://smact.readthedocs.io/en/latest/>
 - **Examples:** <https://smact.readthedocs.io/en/latest/examples.html>
 
-![A blue interface with the text "SMACT v3" at the top. Below that, there is a label "Materials Search" followed by two radio buttons: "Hi-fi" and "Lo-fi". The "Lo-fi" button is currently selected](SMACT.png)
+![A blue interface with the text "SMACT v4" at the top. Below that, there is a label "Materials Search" followed by two radio buttons: "Hi-fi" and "Lo-fi". The "Lo-fi" button is currently selected](SMACT.png)
 
 _If you torture the data enough, nature will always confess_ - Roland Coase (from 'How should economists choose?')
 
