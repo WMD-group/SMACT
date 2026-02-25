@@ -19,7 +19,7 @@ try:
     from pymatgen.ext.matproj import MPRester
 
     HAS_LEGACY_MPRESTER = True
-except ImportError:
+except ImportError:  # pragma: no cover
     HAS_LEGACY_MPRESTER = False
     MPRester = None
 
@@ -27,7 +27,7 @@ try:
     from mp_api.client import MPRester as MPResterNew
 
     HAS_MP_API = True
-except ImportError:
+except ImportError:  # pragma: no cover
     HAS_MP_API = False
     MPResterNew = None
 from pymatgen.transformations.standard_transformations import (
@@ -375,6 +375,11 @@ class SmactStructure:
 
         if api_key is None:
             api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")
+        if api_key is None:
+            raise ValueError(
+                "No Materials Project API key found. "
+                "Set the MP_API_KEY or PMG_MAPI_KEY environment variable."
+            )
 
         # Legacy API routine
         if len(api_key) != 32:

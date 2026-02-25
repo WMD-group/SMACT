@@ -87,7 +87,7 @@ def _generate_unique_compounds(
 
     compounds = [item for sublist in compounds for item in sublist]
     print(f"Number of generated compounds: {len(compounds)}")
-    compounds = list(set(compounds))
+    compounds = sorted(set(compounds))
     print(f"Number of generated compounds (unique): {len(compounds)}")
     return compounds
 
@@ -221,7 +221,7 @@ def generate_composition_with_smact_custom(
     results = list(
         tqdm(
             pool.imap_unordered(
-                partial(smact_filter, threshold=max_stoich, oxidation_states_set=oxidation_states_set),
+                partial(smact_filter, threshold=max_stoich, oxidation_states_set=ox_filepath),
                 compounds_pauling,
             ),
             total=len(compounds_pauling),

@@ -11,6 +11,7 @@ from itertools import groupby
 
 __all__ = [
     "SKIPSPECIES_COSINE_SIM_PATH",
+    "SKIPSSPECIES_COSINE_SIM_PATH",
     "SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH",
     "SPECIES_M3GNET_MP2023_GAP_COSINE_PATH",
     "Doper",
@@ -35,6 +36,9 @@ SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH = os.path.join(
 SPECIES_M3GNET_MP2023_GAP_COSINE_PATH = os.path.join(
     data_directory, "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-band_gap_cosine_similarity.json"
 )
+
+# Backward-compatible alias — the original name had a double-S typo.
+SKIPSSPECIES_COSINE_SIM_PATH = SKIPSPECIES_COSINE_SIM_PATH
 
 
 class Doper:
@@ -110,20 +114,20 @@ class Doper:
             selectivity = sub_prob / sum_prob
             selectivity = round(selectivity, 2)
             dopants.append(selectivity)
-            if len(dopants) != 5:
+            if len(dopants) != 5:  # pragma: no cover
                 raise RuntimeError(
                     f"Dopant list has unexpected length {len(dopants)} (expected 5). "
                     "This is an internal error; please report it."
                 )
         return data
 
-    def _merge_dicts(self, keys, dopants_list, groupby_list):
+    def _merge_dicts(self, keys, dopants_list, groupby_list, sort_idx: int = 2):
         merged_dict = dict()
         for k, dopants, group in zip(keys, dopants_list, groupby_list, strict=False):
             merged_values = dict()
             merged_values["sorted"] = dopants
             for key, value in group.items():
-                merged_values[key] = sorted(value, key=lambda x: x[2], reverse=True)
+                merged_values[key] = sorted(value, key=lambda x: x[sort_idx], reverse=True)
             merged_dict[k] = merged_values
         return merged_dict
 
@@ -189,7 +193,7 @@ class Doper:
                     cations.append(ion)
                 elif charge < 0:
                     anions.append(ion)
-            except AttributeError:
+            except (AttributeError, ValueError):
                 warnings.warn(f"Could not parse charge for ion '{ion}'; skipping.", stacklevel=2)
 
         CM = self.cation_mutator
@@ -199,11 +203,15 @@ class Doper:
 
         n_type_cat, p_type_cat, n_type_an, p_type_an = [], [], [], []
 
-        # When use_probability=False, filter and rank by raw lambda value instead
-        def _above_threshold(ion_a, ion_b):
+        # When use_probability=False, filter and rank by raw lambda value instead.
+        # Returns (prob, lam) if the pair passes the threshold, else None —
+        # so callers avoid computing the scores a second time.
+        def _scores_if_above_threshold(ion_a, ion_b):
+            prob = CM.sub_prob(ion_a, ion_b)
+            lam = CM.get_lambda(ion_a, ion_b)
             if self.use_probability:
-                return CM.sub_prob(ion_a, ion_b) > self.threshold
-            return CM.get_lambda(ion_a, ion_b) > self.lambda_threshold
+                return (prob, lam) if prob > self.threshold else None
+            return (prob, lam) if lam > self.lambda_threshold else None
 
         for cation in cations:
             cation_charge = utilities.parse_spec(cation)[1]
@@ -212,28 +220,16 @@ class Doper:
                 n_specie_charge = utilities.parse_spec(n_specie)[1]
                 if cation_charge >= n_specie_charge:
                     continue
-                if _above_threshold(cation, n_specie):
-                    n_type_cat.append(
-                        [
-                            n_specie,
-                            cation,
-                            self.cation_mutator.sub_prob(cation, n_specie),
-                            self.cation_mutator.get_lambda(cation, n_specie),
-                        ]
-                    )
+                scores = _scores_if_above_threshold(cation, n_specie)
+                if scores is not None:
+                    n_type_cat.append([n_specie, cation, *scores])
             for p_specie in poss_p_type_cat:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if cation_charge <= p_specie_charge:
                     continue
-                if _above_threshold(cation, p_specie):
-                    p_type_cat.append(
-                        [
-                            p_specie,
-                            cation,
-                            self.cation_mutator.sub_prob(cation, p_specie),
-                            self.cation_mutator.get_lambda(cation, p_specie),
-                        ],
-                    )
+                scores = _scores_if_above_threshold(cation, p_specie)
+                if scores is not None:
+                    p_type_cat.append([p_specie, cation, *scores])
         for anion in anions:
             anion_charge = utilities.parse_spec(anion)[1]
 
@@ -241,28 +237,16 @@ class Doper:
                 n_specie_charge = utilities.parse_spec(n_specie)[1]
                 if anion_charge >= n_specie_charge:
                     continue
-                if _above_threshold(anion, n_specie):
-                    n_type_an.append(
-                        [
-                            n_specie,
-                            anion,
-                            self.cation_mutator.sub_prob(anion, n_specie),
-                            self.cation_mutator.get_lambda(anion, n_specie),
-                        ]
-                    )
+                scores = _scores_if_above_threshold(anion, n_specie)
+                if scores is not None:
+                    n_type_an.append([n_specie, anion, *scores])
             for p_specie in poss_p_type_an:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if anion_charge <= p_specie_charge:
                     continue
-                if _above_threshold(anion, p_specie):
-                    p_type_an.append(
-                        [
-                            p_specie,
-                            anion,
-                            self.cation_mutator.sub_prob(anion, p_specie),
-                            self.cation_mutator.get_lambda(anion, p_specie),
-                        ]
-                    )
+                scores = _scores_if_above_threshold(anion, p_specie)
+                if scores is not None:
+                    p_type_an.append([p_specie, anion, *scores])
         dopants_lists = [n_type_cat, p_type_cat, n_type_an, p_type_an]
 
         # sort by probability or lambda depending on use_probability flag
@@ -312,7 +296,10 @@ class Doper:
             "p-type anion substitutions",
         ]
 
-        self.results = self._merge_dicts(keys, dopants_lists, groupby_lists)
+        # When selectivity is computed the final sort is by combined score (idx 5);
+        # otherwise use the same probability-vs-lambda index as the outer sort.
+        effective_sort_idx = 5 if get_selectivity else sort_idx
+        self.results = self._merge_dicts(keys, dopants_lists, groupby_lists, effective_sort_idx)
 
         # return the top (num_dopants) results for each case
         return self.results
@@ -335,10 +322,7 @@ class Doper:
             raise RuntimeError("Dopants are not calculated. Run get_dopants first.")
 
         for dopants in self.results.values():
-            # due to selectivity option
-            if self.len_list == 3:
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, y in dopants.get("sorted")}
-            elif plot_value == "probability":
+            if plot_value == "probability":
                 dict_results = {utilities.parse_spec(x)[0]: y for x, _, y, _, _, _ in dopants.get("sorted")}
             elif plot_value == "similarity":
                 dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, y, _, _ in dopants.get("sorted")}

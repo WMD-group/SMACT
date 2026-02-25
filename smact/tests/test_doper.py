@@ -84,3 +84,71 @@ class DopantPredictionTest(unittest.TestCase):
 
         self.assertEqual(test._format_number(2), "2+")
         self.assertEqual(test._format_number(-2), "2-")
+
+    def test_unparseable_ion_warning(self):
+        """Lines 196-197: ion whose string has no element symbol emits a warning and is skipped."""
+        import warnings
+
+        # "1+" starts with a digit so _parse_spec_old raises ValueError → caught, warning emitted
+        test = doper.Doper(("Cu+", "1+", "S2-"))
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            result = test.get_dopants()
+        self.assertIsInstance(result, dict)
+        self.assertTrue(any("Could not parse" in str(w.message) for w in caught))
+
+    def test_plot_dopants_not_called_before_get_dopants(self):
+        """Lines 321-322: plot_dopants raises RuntimeError when results is None."""
+        test = doper.Doper(("Cu+", "Ga3+", "S2-"))
+        with pytest.raises(RuntimeError, match="get_dopants first"):
+            test.plot_dopants()
+
+    def test_to_table_no_results(self):
+        """Lines 358-360: to_table prints 'No data available' when results is None."""
+        import io
+        import sys
+
+        test = doper.Doper(("Cu+", "Ga3+", "S2-"))
+        buf = io.StringIO()
+        sys.stdout = buf
+        try:
+            test.to_table  # property access, no results yet
+        finally:
+            sys.stdout = sys.__stdout__
+        self.assertIn("No data available", buf.getvalue())
+
+    def test_to_table_with_results(self):
+        """Lines 361-374: to_table prints tabulated data after get_dopants."""
+        import io
+        import sys
+
+        test = doper.Doper(("Cu+", "Ga3+", "S2-"))
+        test.get_dopants(num_dopants=2)
+
+        buf = io.StringIO()
+        sys.stdout = buf
+        try:
+            test.to_table
+        finally:
+            sys.stdout = sys.__stdout__
+        out = buf.getvalue()
+        self.assertIn("n-type cation substitutions", out)
+
+    def test_plot_dopants_branches(self):
+        """Lines 325-332: plot_dopants with similarity, selectivity, and combined plot_value."""
+        from unittest.mock import patch
+
+        test = doper.Doper(("Cu+", "Ga3+", "S2-"))
+        test.get_dopants(num_dopants=3)
+
+        for plot_value in ("probability", "similarity", "selectivity", "combined"):
+            with patch("pymatgen.util.plotting.periodic_table_heatmap"):
+                test.plot_dopants(plot_value=plot_value)
+
+    def test_anion_substitution_continue_paths(self):
+        """Lines 239 and 246: continue when dopant charge equals anion charge."""
+        # Use a compound with two anions so that n-type candidates for one anion
+        # have the same charge as the other anion → triggers the continue guard.
+        test = doper.Doper(("Cu+", "S2-", "Cl1-"))
+        result = test.get_dopants()
+        self.assertIsInstance(result, dict)

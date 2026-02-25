@@ -122,6 +122,8 @@ strict = [
     "numpy",
     "ElementEmbeddings==0.6.1",
     "dash==3.3.0",
+    "tabulate==0.9.0",
+    "tqdm==4.67.1",
 ]
 
 [tool.uv]

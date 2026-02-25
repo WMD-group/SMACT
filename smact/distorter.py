@@ -24,8 +24,8 @@ try:
 except ImportError:
     try:
         import spglib
-    except ImportError:
-        raise ImportError("Could not load spglib. Install it with: pip install spglib")
+    except ImportError as e:  # pragma: no cover
+        raise ImportError("Could not load spglib. Install it with: pip install spglib") from e
 
 from ase.spacegroup import Spacegroup
 

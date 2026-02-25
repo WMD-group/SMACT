@@ -11,7 +11,7 @@ try:
     from mp_api.client import MPRester as MPResterNew
 
     HAS_MP_API = True
-except ImportError:
+except ImportError:  # pragma: no cover
     HAS_MP_API = False
     MPResterNew = None
 
@@ -147,6 +147,11 @@ class StructureDB:
                         properties=["structure", "material_id"],
                     )
             else:
+                if not HAS_MP_API or MPResterNew is None:
+                    raise ImportError(
+                        "mp-api is required for 32-character Materials Project API keys. "
+                        "Install it with: pip install mp-api"
+                    )
                 with MPResterNew(mp_api_key, use_document_model=False) as m:
                     data = m.materials.summary.search(theoretical=False, fields=["structure", "material_id"])
         else:

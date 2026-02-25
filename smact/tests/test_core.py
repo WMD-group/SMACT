@@ -578,3 +578,302 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertTrue(exists(TEST_OX_STATES), "TEST_OX_STATES must exist for this test.")
         # Test just the validity
         self.assertTrue(smact.screening.smact_validity("NaCl", oxidation_states_set=TEST_OX_STATES))
+
+    # --------- Properties branch coverage ---------
+
+    def test_eneg_mulliken_branches(self):
+        """eneg_mulliken: str input, Element input, and invalid type."""
+        from smact.properties import eneg_mulliken
+
+        # str input (line 32)
+        val_str = eneg_mulliken("Fe")
+        self.assertIsInstance(val_str, float)
+
+        # Element input (line 36)
+        val_el = eneg_mulliken(smact.Element("Fe"))
+        self.assertAlmostEqual(val_str, val_el)
+
+        # Invalid type raises TypeError (lines 33-34)
+        with pytest.raises(TypeError):
+            eneg_mulliken(42)
+
+    def test_harrison_gap_verbose(self):
+        """band_gap_Harrison with verbose=True hits lines 89-92."""
+        import io
+        import sys
+
+        buf = io.StringIO()
+        sys.stdout = buf
+        try:
+            band_gap_Harrison("Mg", "Cl", verbose=True, distance=2.67)
+        finally:
+            sys.stdout = sys.__stdout__
+        out = buf.getvalue()
+        self.assertIn("V1_bar", out)
+        self.assertIn("V2", out)
+        self.assertIn("alpha_m", out)
+        self.assertIn("V3", out)
+
+    def test_compound_electroneg_element_objects(self):
+        """compound_electroneg with Element objects (lines 133-134) and verbose (155, 167)."""
+        Fe = smact.Element("Fe")
+        O = smact.Element("O")
+
+        # Element list input (lines 133-134) + Mulliken (line 145)
+        val = compound_electroneg(elements=[Fe, O], stoichs=[1, 1], source="Mulliken")
+        self.assertIsInstance(val, float)
+
+        # Invalid element type raises TypeError (lines 135-136)
+        with pytest.raises(TypeError):
+            compound_electroneg(elements=[42, 43], stoichs=[1, 1])
+
+        # Invalid source raises ValueError (line 150)
+        with pytest.raises(ValueError):
+            compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1], source="BadSource")
+
+        # verbose=True covers lines 155 and 167
+        import io
+        import sys
+
+        buf = io.StringIO()
+        sys.stdout = buf
+        try:
+            compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1], verbose=True)
+        finally:
+            sys.stdout = sys.__stdout__
+        out = buf.getvalue()
+        self.assertIn("Electronegativities", out)
+        self.assertIn("Geometric mean", out)
+
+    # --------- Builder branch coverage ---------
+
+    def test_cubic_perovskite(self):
+        """cubic_perovskite was never tested; covers builder.py lines 41-58."""
+        from smact.builder import cubic_perovskite
+
+        lattice, system = cubic_perovskite(["Ba", "Ti", "O"])
+        self.assertEqual(len(lattice.sites), 5)  # 1 Ba + 1 Ti + 3 O
+        self.assertIsNotNone(system)
+
+    # --------- Oxidation-states branch coverage ---------
+
+    def test_oxidation_states_error_branches(self):
+        """OxidationStateProbabilityFinder error paths (lines 80, 88, 151, 161, 182)."""
+        ox = smact.oxidation_states.OxidationStateProbabilityFinder()
+
+        # Both positive → ValueError (line 80)
+        with pytest.raises(ValueError, match="cation and one anion"):
+            ox._generate_lookup_key(Species("Fe", 3), Species("Cu", 2))
+
+        # Both negative → ValueError (line 80)
+        with pytest.raises(ValueError, match="cation and one anion"):
+            ox._generate_lookup_key(Species("O", -2), Species("S", -2))
+
+        # Species not in table → NameError (line 88)
+        # Fe+5 is a valid smact Species but is absent from the Hautier probability table
+        with pytest.raises(NameError):
+            ox._generate_lookup_key(Species("Fe", 5), Species("O", -2))
+
+        # Invalid input type → TypeError (line 151)
+        with pytest.raises(TypeError):
+            ox.compound_probability("NaCl_string")
+
+        # No cations in list → ValueError (line 161)
+        with pytest.raises(ValueError, match="No cations"):
+            ox.compound_probability([Species("O", -2), Species("S", -2)])
+
+        # Unknown module attribute → AttributeError (line 182)
+        with pytest.raises(AttributeError):
+            _ = smact.oxidation_states.does_not_exist
+
+    def test_oxidation_states_pymatgen_species_input(self):
+        """compound_probability with pymatgen Species list (lines 134-138, 142)."""
+        from pymatgen.core import Lattice as PmgLattice
+        from pymatgen.core import Structure
+        from pymatgen.core.periodic_table import Specie as PmgSpecie
+
+        ox = smact.oxidation_states.OxidationStateProbabilityFinder()
+
+        # List of pymatgen Species (lines 134-136)
+        result = ox.compound_probability([PmgSpecie("Fe", 3), PmgSpecie("O", -2)])
+        self.assertIsInstance(result, float)
+
+        # List with mixed/invalid pymatgen species (line 138) — a list mixing types
+        with pytest.raises(TypeError):
+            ox.compound_probability([PmgSpecie("Fe", 3), "not_a_species"])
+
+        # pymatgen Structure without oxidation states → TypeError (line 142)
+        struct = Structure.from_spacegroup(
+            "Fm-3m", PmgLattice.cubic(5.6), ["Na", "Cl"], [[0, 0, 0], [0.5, 0.5, 0.5]]
+        )
+        with pytest.raises(TypeError, match="oxidation states"):
+            ox.compound_probability(struct)
+
+    # --------- Screening branch coverage ---------
+
+    def test_pauling_test_threshold_branches(self):
+        """pauling_test lines 139 (repeat+threshold) and 150 (no-repeat+threshold)."""
+        Sn, S = smact.Element("Sn"), smact.Element("S")
+
+        # Both repeats=True with threshold != 0 → line 139
+        result = smact.screening.pauling_test(
+            (+2, -2),
+            (Sn.pauling_eneg, S.pauling_eneg),
+            repeat_anions=True,
+            repeat_cations=True,
+            threshold=0.5,
+        )
+        self.assertIsInstance(result, bool)
+
+        # repeat_anions=False, repeat_cations=False, distinct symbols, threshold != 0
+        # → _no_repeats line 179 returns True → pauling_test line 150
+        result2 = smact.screening.pauling_test(
+            (-2, +2),
+            (S.pauling_eneg, Sn.pauling_eneg),
+            symbols=("S", "Sn"),
+            repeat_anions=False,
+            repeat_cations=False,
+            threshold=0.5,
+        )
+        self.assertIsInstance(result2, bool)
+
+    def test_no_repeats_line_179(self):
+        """_no_repeats line 179: repeat_anions=False AND repeat_cations=False → len check."""
+        Sn, S = smact.Element("Sn"), smact.Element("S")
+
+        # Both repeat flags False, distinct symbols → _no_repeats line 179 → True → line 148
+        result = smact.screening.pauling_test(
+            (-2, +2),
+            (S.pauling_eneg, Sn.pauling_eneg),
+            symbols=("S", "Sn"),
+            repeat_anions=False,
+            repeat_cations=False,
+            threshold=0.0,
+        )
+        self.assertIsInstance(result, bool)
+
+    def test_pauling_test_old_edge_cases(self):
+        """pauling_test_old: None in paul (236), all-positive (263), equal max/min (265)."""
+        Sn, S = smact.Element("Sn"), smact.Element("S")
+
+        # None in pauling array → returns False immediately (line 236)
+        with pytest.warns(DeprecationWarning):
+            result = smact.screening.pauling_test_old(
+                (+2, -2), (None, S.pauling_eneg), symbols=("Sn", "S")
+            )
+        self.assertFalse(result)
+
+        # All-positive oxidation states → len(negative)==0 → False (line 263)
+        with pytest.warns(DeprecationWarning):
+            result2 = smact.screening.pauling_test_old(
+                (+2, +3), (Sn.pauling_eneg, 2.0), symbols=("Sn", "Fe")
+            )
+        self.assertFalse(result2)
+
+        # max(positive) == min(negative) → False (line 265)
+        with pytest.warns(DeprecationWarning):
+            result3 = smact.screening.pauling_test_old(
+                (+2, -2), (1.8, 1.8), symbols=("Sn", "S")
+            )
+        self.assertFalse(result3)
+
+    def test_ml_rep_generator_no_stoichs(self):
+        """ml_rep_generator without explicit stoichs triggers default-stoichs path (line 403)."""
+        result = smact.screening.ml_rep_generator(["Na", "Cl"])
+        self.assertEqual(len(result), 103)
+        self.assertAlmostEqual(sum(result), 1.0)
+        # Each element contributes equally when stoichs default to 1
+        Na_idx = int(smact.Element("Na").number) - 1
+        Cl_idx = int(smact.Element("Cl").number) - 1
+        self.assertAlmostEqual(result[Na_idx], 0.5)
+        self.assertAlmostEqual(result[Cl_idx], 0.5)
+
+    def test_smact_filter_wiki_warning(self):
+        """smact_filter with wiki oxidation_states_set emits a warning (line 487)."""
+        Na, Cl = smact.Element("Na"), smact.Element("Cl")
+        with pytest.warns(UserWarning, match="Wikipedia"):
+            smact.screening.smact_filter([Na, Cl], threshold=2, oxidation_states_set="wiki")
+
+    def test_smact_filter_invalid_set_raises(self):
+        """smact_filter with unknown set string raises ValueError (line 494)."""
+        Na, Cl = smact.Element("Na"), smact.Element("Cl")
+        with pytest.raises(ValueError):
+            smact.screening.smact_filter([Na, Cl], oxidation_states_set="nonexistent_set")
+
+    def test_smact_filter_missing_oxidation_states_raises(self):
+        """smact_filter raises ValueError when element has no ox states in chosen set (line 501)."""
+        # Argon has no oxidation states in icsd24
+        Ar, Na = smact.Element("Ar"), smact.Element("Na")
+        with pytest.raises(ValueError, match="No oxidation states"):
+            smact.screening.smact_filter([Na, Ar], threshold=2, oxidation_states_set="icsd24")
+
+    def test_smact_validity_filter_params_warning(self):
+        """smact_validity warns when filtering params used with explicit oxidation_states_set (line 561)."""
+        with pytest.warns(UserWarning, match="include_zero"):
+            smact.screening.smact_validity("NaCl", oxidation_states_set="icsd24", include_zero=True)
+
+    def test_smact_validity_element_not_in_consensus_set(self):
+        """smact_validity returns False when element absent from consensus ICSD24 filter (line 609)."""
+        # Noble gas with no ICSD entries: Ar not expected in consensus filter
+        result = smact.screening.smact_validity("ArNa", oxidation_states_set=None)
+        self.assertFalse(result)
+
+    # --------- distorter coverage ---------
+
+    def test_distorter_functions(self):
+        """distorter get_sg, build_sub_lattice, get_inequivalent_sites, make_substitution (lines 44-47, 69-87, 105-114, 132-140).
+
+        Newer spglib dropped direct ASE Atoms support (returns None), so we patch
+        spglib.get_spacegroup to return the canonical Fm-3m string for NaCl.
+        """
+        from unittest.mock import patch
+
+        from ase.spacegroup import Spacegroup
+        from ase.spacegroup import crystal as ase_crystal
+
+        import smact.distorter as distorter
+
+        # NaCl rocksalt: spacegroup 225 (Fm-3m)
+        nacl = ase_crystal(
+            ["Na", "Cl"],
+            [(0, 0, 0), (0.5, 0.5, 0.5)],
+            spacegroup=225,
+            cellpar=[5.6, 5.6, 5.6, 90, 90, 90],
+        )
+
+        with patch.object(distorter.spglib, "get_spacegroup", return_value="Fm-3m (225)"):
+            # get_sg (lines 44-47)
+            sg = distorter.get_sg(nacl)
+            self.assertIsInstance(sg, Spacegroup)
+            self.assertEqual(sg.no, 225)
+
+            # build_sub_lattice (lines 132-140) — does not use spglib
+            sub_lat = distorter.build_sub_lattice(nacl, "Na")
+            self.assertGreater(len(sub_lat), 0)
+            self.assertEqual(len(sub_lat[0]), 3)
+
+            # get_inequivalent_sites (lines 69-87) — calls get_sg internally
+            ineq = distorter.get_inequivalent_sites(sub_lat, nacl)
+            self.assertGreater(len(ineq), 0)
+
+            # make_substitution (lines 105-114) — does not use spglib
+            new_lattice = distorter.make_substitution(nacl, sub_lat[0], "K")
+            self.assertIn("K", new_lattice.get_chemical_symbols())
+
+            # get_inequivalent_sites line 77: duplicate site → new_site = False
+            # Passing the same site twice makes the second pass find a match
+            ineq_dup = distorter.get_inequivalent_sites([sub_lat[0], sub_lat[0]], nacl)
+            self.assertEqual(len(ineq_dup), 1)
+
+    def test_smact_validity_mixed_valence_blowup_warning(self):
+        """smact_validity warns and returns False when MV expansion exceeds 1M combinations (lines 645-650).
+
+        Fe8O17: gcd(8,17)=1 so the formula is irreducible → stoich=(8,17).
+        8*x + 17*(-2) = 0 requires x=4.25 (non-integer), so standard check fails.
+        projected = len(Fe_smact14_ox)^8 * len(O_smact14_ox) = 8^8 * 2 ≈ 33M > 1M.
+        """
+        with pytest.warns(UserWarning, match="too many combinations"):
+            result = smact.screening.smact_validity(
+                "Fe8O17", mixed_valence=True, oxidation_states_set="smact14"
+            )
+        self.assertFalse(result)

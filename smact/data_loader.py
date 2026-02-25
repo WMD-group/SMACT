@@ -689,6 +689,6 @@ def lookup_element_valence_data(symbol: str, copy: bool = True):
     """
     data = _load_valence_data()
     if symbol in data:
-        return data[symbol]
+        return data[symbol].copy() if copy else data[symbol]
     _warn(f"Valence data for element {symbol} not found.")
     return None

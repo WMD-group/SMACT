@@ -9,6 +9,7 @@ Prediction - DOI: 10.1039/C8FD00032H.
 from __future__ import annotations
 
 import json
+import warnings
 from os import path
 
 from numpy import mean
@@ -170,5 +171,12 @@ class OxidationStateProbabilityFinder:
         return mean(pair_probs)
 
 
-# Deprecated alias — use OxidationStateProbabilityFinder instead.
-Oxidation_state_probability_finder = OxidationStateProbabilityFinder
+def __getattr__(name: str):
+    if name == "Oxidation_state_probability_finder":
+        warnings.warn(
+            "Oxidation_state_probability_finder is deprecated; use OxidationStateProbabilityFinder instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return OxidationStateProbabilityFinder
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

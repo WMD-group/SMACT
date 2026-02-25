@@ -403,3 +403,93 @@ class OxidationStatesTest(unittest.TestCase):
         self.assertEqual(species_occurrences_df.shape, (490, 4))
         self.assertEqual(species_occurrences_df.iloc[0]["species"], "O2-")
         self.assertEqual(species_occurrences_df.iloc[0]["results_count"], 116910)
+
+
+class TestSpeciesParsing(unittest.TestCase):
+    """Branch coverage for smact/utils/species.py _parse_spec_old."""
+
+    def setUp(self):
+        from smact.utils.species import _parse_spec_old
+
+        self._parse_spec_old = _parse_spec_old
+
+    def test_parse_spec_old_no_element_symbol_raises(self):
+        """Line 38: string starting with digit has no element symbol → ValueError."""
+        with pytest.raises(ValueError, match="Invalid species string"):
+            self._parse_spec_old("123")
+
+    def test_parse_spec_old_negative_ox_state(self):
+        """Line 45: '-' in species with a digit → ox_state *= -1."""
+        # "Fe(-2)": main regex fails (parens), _parse_spec_old finds digit '2' and '-'
+        ele, charge = self._parse_spec_old("Fe(-2)")
+        self.assertEqual(ele, "Fe")
+        self.assertEqual(charge, -2)
+
+    def test_parse_spec_old_zero_with_digit_zero(self):
+        """Line 51: ox_state==0 and '0' in species → stays 0."""
+        # "Fe0": no sign → main regex fails → _parse_spec_old
+        from smact.utils.species import parse_spec
+
+        ele, charge = parse_spec("Fe0")
+        self.assertEqual(ele, "Fe")
+        self.assertEqual(charge, 0)
+
+    def test_parse_spec_old_bare_plus(self):
+        """Line 53: '+' in species with no digit → ox_state=1."""
+        # "Fe(+)": parens block main regex match; no digit; '+' present
+        ele, charge = self._parse_spec_old("Fe(+)")
+        self.assertEqual(ele, "Fe")
+        self.assertEqual(charge, 1)
+
+    def test_parse_spec_old_bare_minus(self):
+        """Line 55: '-' in species, no digit, no '+', no '0' → ox_state=-1."""
+        # "Fe(-)": parens block main regex; no digit; '-' present
+        ele, charge = self._parse_spec_old("Fe(-)")
+        self.assertEqual(ele, "Fe")
+        self.assertEqual(charge, -1)
+
+
+class TestDataLoaderWarnings(unittest.TestCase):
+    """Branch coverage for smact/data_loader.py warning and missing-symbol paths."""
+
+    def tearDown(self):
+        # Always reset warnings to off after each test
+        from smact.data_loader import set_warnings
+
+        set_warnings(False)
+
+    def test_enable_warnings_and_warn_on_missing(self):
+        """Lines 62 and 68: set_warnings(True) then lookup missing element emits warning."""
+        import warnings
+
+        from smact.data_loader import lookup_element_oxidation_states_custom, set_warnings
+
+        test_file = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "files", "test_oxidation_states.txt"
+        )
+        set_warnings(True)  # line 62
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            result = lookup_element_oxidation_states_custom("Xx", test_file)  # line 68 + 200-201
+        self.assertIsNone(result)
+        self.assertTrue(any("not found" in str(w.message) for w in caught))
+
+    def test_shannon_radii_extendedML_found_and_missing(self):
+        """Lines 381-398 (loader body), 447-451 (missing symbol path)."""
+        from smact.data_loader import lookup_element_shannon_radius_data_extendedML
+
+        # Valid element: exercises _load_shannon_radii_extendedML (lines 381-398)
+        data = lookup_element_shannon_radius_data_extendedML("Fe")
+        self.assertIsNotNone(data)
+        self.assertIsInstance(data, list)
+
+        # Unknown element: exercises missing-symbol warning path (lines 447-451)
+        result = lookup_element_shannon_radius_data_extendedML("Xx")
+        self.assertIsNone(result)
+
+    def test_sse2015_missing_symbol(self):
+        """Lines 560-561: lookup_element_sse2015_data with unknown symbol returns None."""
+        from smact.data_loader import lookup_element_sse2015_data
+
+        result = lookup_element_sse2015_data("Xx")
+        self.assertIsNone(result)

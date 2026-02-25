@@ -17,11 +17,10 @@ def parse_spec(species: str) -> tuple[str, int]:
     """
     try:
         ele, oxi_state = re.match(r"([A-Za-z]+)([0-9]*[\+\-])", species).groups()
-        if oxi_state[-1] in ["+", "-"]:
-            charge = (int(oxi_state[:-1] or 1)) * (-1 if "-" in oxi_state else 1)
-            return ele, charge
-        else:
-            return ele, 0
+        # The regex guarantees oxi_state ends in '+' or '-', so this branch
+        # is always taken; the else clause is unreachable by construction.
+        charge = (int(oxi_state[:-1] or 1)) * (-1 if "-" in oxi_state else 1)
+        return ele, charge
     except AttributeError:
         return _parse_spec_old(species)
 
@@ -34,7 +33,10 @@ def _parse_spec_old(species: str) -> tuple[str, int]:
     :return: a tuple of the atomic symbol and oxidation state
 
     """
-    ele = re.match(r"[A-Za-z]+", species).group(0)
+    match = re.match(r"[A-Za-z]+", species)
+    if match is None:
+        raise ValueError(f"Invalid species string (no element symbol found): {species!r}")
+    ele = match.group(0)
 
     charge_match = re.search(r"\d+", species)
     ox_state = int(charge_match.group(0)) if charge_match else 0
@@ -42,15 +44,13 @@ def _parse_spec_old(species: str) -> tuple[str, int]:
     if "-" in species:
         ox_state *= -1
 
-    # Handle cases of X+ or X- (instead of X1+ or X1-)
-    # as well as X0+ and X0-
-
+    # Handle cases of X+ or X- (instead of X1+ or X1-) as well as X0+ / X0-.
+    # Short-circuit order matters: "0" wins over bare "+" or "-" so that "X0+"
+    # correctly returns 0 rather than +1.
     if ox_state == 0 and "0" in species:
         ox_state = 0
-
     elif "+" in species and ox_state == 0:
         ox_state = 1
-
     elif ox_state == 0 and "-" in species:
         ox_state = -1
 

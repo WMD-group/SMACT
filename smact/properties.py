@@ -53,10 +53,10 @@ def band_gap_Harrison(
     ----
         anion (str): Element symbol of the dominant anion in the system
         cation (str): Element symbol of the the dominant cation in the system
-        distance (float or str): Nuclear separation between anion and cation,
-            i.e. sum of ionic radii (in Angstroms). Default: 2.0.
         verbose (bool) : An optional True/False flag. If True, additional
             information is printed to the standard output. [Default: False]
+        distance (float or str): Nuclear separation between anion and cation,
+            i.e. sum of ionic radii (in Angstroms). Default: 2.0.
 
     Returns:
     -------
