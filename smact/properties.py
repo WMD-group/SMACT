@@ -7,6 +7,13 @@ import numpy as np
 import smact
 from smact.utils.composition import parse_formula
 
+__all__ = [
+    "band_gap_Harrison",
+    "compound_electroneg",
+    "eneg_mulliken",
+    "valence_electron_count",
+]
+
 
 def eneg_mulliken(element: smact.Element | str) -> float:
     """
@@ -33,7 +40,7 @@ def band_gap_Harrison(
     anion: str,
     cation: str,
     verbose: bool = False,
-    distance: float | str | None = None,
+    distance: float | str = 2.0,
 ) -> float:
     """
     Estimates the band gap from elemental data.
@@ -46,8 +53,8 @@ def band_gap_Harrison(
     ----
         anion (str): Element symbol of the dominant anion in the system
         cation (str): Element symbol of the the dominant cation in the system
-        distance (float or str): Nuclear separation between anion and cation
-                i.e. sum of ionic radii
+        distance (float or str): Nuclear separation between anion and cation,
+            i.e. sum of ionic radii (in Angstroms). Default: 2.0.
         verbose (bool) : An optional True/False flag. If True, additional
             information is printed to the standard output. [Default: False]
 

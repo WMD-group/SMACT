@@ -19,7 +19,7 @@ from pymatgen.core.periodic_table import get_el_sp
 from smact import Species, data_directory
 
 
-class Oxidation_state_probability_finder:
+class OxidationStateProbabilityFinder:
     """
     Uses the model developed in the Faraday Discussions Paper (DOI:10.1039/C8FD00032H)
     to compute the likelihood of metal species existing in solids in the presence of certain anions.
@@ -168,3 +168,7 @@ class Oxidation_state_probability_finder:
         # Do the maths
         pair_probs = [self.pair_probability(pair[0], pair[1]) for pair in species_pairs]
         return mean(pair_probs)
+
+
+# Deprecated alias — use OxidationStateProbabilityFinder instead.
+Oxidation_state_probability_finder = OxidationStateProbabilityFinder

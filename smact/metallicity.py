@@ -3,6 +3,15 @@
 from __future__ import annotations
 
 import numpy as np
+
+__all__ = [
+    "get_d_block_element_fraction",
+    "get_distinct_metal_count",
+    "get_element_fraction",
+    "get_metal_fraction",
+    "get_pauling_test_mismatch",
+    "metallicity_score",
+]
 from pymatgen.core import Composition
 
 import smact

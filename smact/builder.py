@@ -8,12 +8,21 @@
 # Implement Structure class, c.f. dev_docs.
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from ase.spacegroup import crystal
+
+if TYPE_CHECKING:
+    from ase import Atoms
 
 from smact.lattice import Lattice, Site
 
 
-def cubic_perovskite(species, cell_par=None, repetitions=None):
+def cubic_perovskite(
+    species: list[str],
+    cell_par: list[float] | None = None,
+    repetitions: list[int] | None = None,
+) -> tuple[Lattice, Atoms]:
     """
     Build a perovskite cell using the crystal function in ASE.
 
@@ -49,7 +58,11 @@ def cubic_perovskite(species, cell_par=None, repetitions=None):
     return Lattice(sites_list, oxidation_states), system
 
 
-def wurtzite(species, cell_par=None, repetitions=None):
+def wurtzite(
+    species: list[str],
+    cell_par: list[float] | None = None,
+    repetitions: list[int] | None = None,
+) -> tuple[Lattice, Atoms]:
     """
     Build a wurzite cell using the crystal function in ASE.
 

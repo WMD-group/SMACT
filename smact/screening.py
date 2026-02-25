@@ -24,6 +24,17 @@ from smact.utils.oxidation import ICSD24OxStatesFilter
 if TYPE_CHECKING:
     import pymatgen
 
+__all__ = [
+    "MIXED_VALENCE_ELEMENTS",
+    "SmactFilterOutputs",
+    "eneg_states_test",
+    "eneg_states_test_threshold",
+    "ml_rep_generator",
+    "pauling_test",
+    "smact_filter",
+    "smact_validity",
+]
+
 MIXED_VALENCE_ELEMENTS: frozenset[str] = frozenset(
     {
         # Transition metals
@@ -193,6 +204,10 @@ def pauling_test_old(
     This function should give the same results as pauling_test but is
     not optimised for speed.
 
+    .. deprecated::
+        Use :func:`pauling_test` instead, which is faster and has a
+        consistent parameter naming convention.
+
     Args:
     ----
         ox (list):  oxidation states of the compound
@@ -212,6 +227,12 @@ def pauling_test_old(
             cations, otherwise False
 
     """
+    warnings.warn(
+        "pauling_test_old is deprecated and will be removed in a future release. "
+        "Use pauling_test instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if None in paul:
         return False
     positive = []
@@ -321,6 +342,9 @@ def eneg_states_test_alternate(ox_states: list[int], enegs: list[float]):
     This implementation appears to be slightly slower than
     eneg_states_test, but further testing is needed.
 
+    .. deprecated::
+        Use :func:`eneg_states_test` instead.
+
     Args:
     ----
         ox_states (list): oxidation states corresponding to species
@@ -334,6 +358,12 @@ def eneg_states_test_alternate(ox_states: list[int], enegs: list[float]):
                cations, otherwise False
 
     """
+    warnings.warn(
+        "eneg_states_test_alternate is deprecated and will be removed in a future release. "
+        "Use eneg_states_test instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     min_cation_eneg, max_anion_eneg = 10, 0
     for ox_state, eneg in zip(ox_states, enegs, strict=False):
         if ox_state < 1:
@@ -421,7 +451,7 @@ def smact_filter(
         >>> els = (Element("Cs"), Element("Pb"), Element("I"))
         >>> comps = smact_filter(els, threshold=5)
         >>> for comp in comps:
-        >>>     print(comp)
+        ...     print(comp)
         [('Cs', 'Pb', 'I'), (1, -4, -1), (5, 1, 1)]
         [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 1, 3)]
         [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 2, 5)]
@@ -434,7 +464,7 @@ def smact_filter(
         >>> from smact import Element
         >>> comps = smact_filter(els, stoichs=[[1], [1], [3]])
         >>> for comp in comps:
-        >>>     print(comp)
+        ...     print(comp)
         [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 1, 3)]
 
 
@@ -464,7 +494,7 @@ def smact_filter(
     else:
         raise (
             Exception(
-                f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
+                f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd16", "icsd24", "pymatgen_sp", "wiki" or a filepath to a textfile of oxidation states.'
             )
         )
 
@@ -575,7 +605,7 @@ def smact_validity(
         }
         ox_combos = []
         for el in smact_elems:
-            ox_el = oxidation_dict.get(el.symbol, None)
+            ox_el = oxidation_dict.get(el.symbol)
             if ox_el is not None:
                 ox_combos.append(ox_el)
             else:

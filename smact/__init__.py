@@ -8,6 +8,21 @@ from __future__ import annotations
 
 __version__ = "4.0.0"
 
+__all__ = [
+    "Element",
+    "Species",
+    "__version__",
+    "anions",
+    "are_eq",
+    "d_block",
+    "element_dictionary",
+    "lattices_are_same",
+    "metals",
+    "neutral_ratios",
+    "neutral_ratios_iter",
+    "ordered_elements",
+]
+
 import itertools
 import warnings
 from math import gcd
@@ -472,7 +487,7 @@ def _isneutral(oxidations: tuple[int, ...], stoichs: tuple[int, ...]):
 
 def neutral_ratios_iter(
     oxidations: list[int],
-    stoichs: bool | list[list[int]] = False,
+    stoichs: list[list[int]] | None = None,
     threshold: int | None = 5,
 ):
     """
@@ -494,7 +509,7 @@ def neutral_ratios_iter(
         tuple: ratio that gives neutrality
 
     """
-    if not stoichs:
+    if stoichs is None:
         stoichs = [list(range(1, threshold + 1))] * len(oxidations)
 
     # First filter: remove combinations which have a common denominator
@@ -509,7 +524,7 @@ def neutral_ratios_iter(
 
 def neutral_ratios(
     oxidations: list[int],
-    stoichs: bool | list[list[int]] = False,
+    stoichs: list[list[int]] | None = None,
     threshold=5,
 ):
     """

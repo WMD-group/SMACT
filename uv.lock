@@ -4385,6 +4385,8 @@ dependencies = [
     { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "spglib" },
+    { name = "tabulate" },
+    { name = "tqdm" },
     { name = "typing-extensions" },
 ]
 
@@ -4545,7 +4547,9 @@ requires-dist = [
     { name = "sphinx", marker = "extra == 'docs'", specifier = "==8.1.3" },
     { name = "sphinx-book-theme", marker = "extra == 'docs'", specifier = "==1.1.3" },
     { name = "sphinx-rtd-theme", marker = "extra == 'docs'", specifier = "==3.0.2" },
+    { name = "tabulate" },
     { name = "tornado", marker = "extra == 'docs'", specifier = ">=6.5.3" },
+    { name = "tqdm" },
     { name = "typing-extensions" },
     { name = "umap-learn", marker = "extra == 'crystal-space'", specifier = "==0.5.7" },
     { name = "umap-learn", marker = "extra == 'strict'", specifier = "==0.5.7" },

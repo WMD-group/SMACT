@@ -7,7 +7,7 @@ from os import path
 import pandas as pd
 
 from smact import Element, data_directory, ordered_elements
-from smact.structure_prediction.utilities import unparse_spec
+from smact.utils.species import unparse_spec
 
 
 class ICSD24OxStatesFilter:

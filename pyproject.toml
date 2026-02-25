@@ -47,6 +47,8 @@ dependencies = [
     "pymatgen>=2024.2.20",
     "scipy",
     "spglib>=2.6.0",
+    "tabulate",
+    "tqdm",
     "typing-extensions",
 ]
 license = "MIT"
@@ -223,7 +225,7 @@ docstring-code-format = true
 "smact/tests/*" = ["D"]
 
 [tool.pyright]
-typeCheckingMode = "off"
+typeCheckingMode = "basic"
 reportPossiblyUnboundVariable = true
 reportUnboundVariable = true
 

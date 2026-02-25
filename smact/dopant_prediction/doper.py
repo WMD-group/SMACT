@@ -8,6 +8,13 @@ from __future__ import annotations
 import os
 from itertools import groupby
 
+__all__ = [
+    "SKIPSPECIES_COSINE_SIM_PATH",
+    "SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH",
+    "SPECIES_M3GNET_MP2023_GAP_COSINE_PATH",
+    "Doper",
+]
+
 import numpy as np
 from pymatgen.util import plotting
 from tabulate import tabulate
@@ -16,7 +23,7 @@ import smact
 from smact import data_directory
 from smact.structure_prediction import mutation, utilities
 
-SKIPSSPECIES_COSINE_SIM_PATH = os.path.join(
+SKIPSPECIES_COSINE_SIM_PATH = os.path.join(
     data_directory,
     "species_rep/skipspecies_20221028_319ion_dim200_cosine_similarity.json",
 )
@@ -66,7 +73,7 @@ class Doper:
         ]:
             raise ValueError(f"Embedding {embedding} is not supported")
         if embedding == "skipspecies":
-            self.cation_mutator = mutation.CationMutator.from_json(SKIPSSPECIES_COSINE_SIM_PATH)
+            self.cation_mutator = mutation.CationMutator.from_json(SKIPSPECIES_COSINE_SIM_PATH)
         elif embedding == "M3GNet-MP-2023.11.1-oxi-Eform":
             self.cation_mutator = mutation.CationMutator.from_json(SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH)
         elif embedding == "M3GNet-MP-2023.11.1-oxi-band_gap":
@@ -102,7 +109,11 @@ class Doper:
             selectivity = sub_prob / sum_prob
             selectivity = round(selectivity, 2)
             dopants.append(selectivity)
-            assert len(dopants) == 5
+            if len(dopants) != 5:
+                raise RuntimeError(
+                    f"Dopant list has unexpected length {len(dopants)} (expected 5). "
+                    "This is an internal error; please report it."
+                )
         return data
 
     def _merge_dicts(self, keys, dopants_list, groupby_list):
@@ -186,6 +197,13 @@ class Doper:
         poss_n_type_an, poss_p_type_an = self._get_dopants(anions, "anion")
 
         n_type_cat, p_type_cat, n_type_an, p_type_an = [], [], [], []
+
+        # When use_probability=False, filter and rank by raw lambda value instead
+        def _above_threshold(ion_a, ion_b):
+            if self.use_probability:
+                return CM.sub_prob(ion_a, ion_b) > self.threshold
+            return CM.get_lambda(ion_a, ion_b) > self.lambda_threshold
+
         for cation in cations:
             cation_charge = utilities.parse_spec(cation)[1]
 
@@ -193,7 +211,7 @@ class Doper:
                 n_specie_charge = utilities.parse_spec(n_specie)[1]
                 if cation_charge >= n_specie_charge:
                     continue
-                if CM.sub_prob(cation, n_specie) > self.threshold:
+                if _above_threshold(cation, n_specie):
                     n_type_cat.append(
                         [
                             n_specie,
@@ -206,7 +224,7 @@ class Doper:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if cation_charge <= p_specie_charge:
                     continue
-                if CM.sub_prob(cation, p_specie) > self.threshold:
+                if _above_threshold(cation, p_specie):
                     p_type_cat.append(
                         [
                             p_specie,
@@ -222,7 +240,7 @@ class Doper:
                 n_specie_charge = utilities.parse_spec(n_specie)[1]
                 if anion_charge >= n_specie_charge:
                     continue
-                if CM.sub_prob(anion, n_specie) > self.threshold:
+                if _above_threshold(anion, n_specie):
                     n_type_an.append(
                         [
                             n_specie,
@@ -235,7 +253,7 @@ class Doper:
                 p_specie_charge = utilities.parse_spec(p_specie)[1]
                 if anion_charge <= p_specie_charge:
                     continue
-                if CM.sub_prob(anion, p_specie) > self.threshold:
+                if _above_threshold(anion, p_specie):
                     p_type_an.append(
                         [
                             p_specie,
@@ -246,9 +264,10 @@ class Doper:
                     )
         dopants_lists = [n_type_cat, p_type_cat, n_type_an, p_type_an]
 
-        # sort by probability
+        # sort by probability or lambda depending on use_probability flag
+        sort_idx = 2 if self.use_probability else 3
         for dopants_list in dopants_lists:
-            dopants_list.sort(key=lambda x: x[2], reverse=True)
+            dopants_list.sort(key=lambda x: x[sort_idx], reverse=True)
 
         self.len_list = 4
         if get_selectivity:
@@ -311,7 +330,8 @@ class Doper:
             None
 
         """
-        assert self.results, "Dopants are not calculated. Run get_dopants first."
+        if not self.results:
+            raise RuntimeError("Dopants are not calculated. Run get_dopants first.")
 
         for dopants in self.results.values():
             # due to selectivity option
@@ -353,11 +373,6 @@ class Doper:
         if not self.results:
             print("No data available")
             return
-        # if self.use_probability:
-        #     headers = ["Rank", "Dopant", "Host", "Probability", "Selectivity", "Combined"]
-        # else:
-        #     headers = ["Rank", "Dopant", "Host", "Similarity", "Selectivity", "Combined"]
-
         headers = ["Rank", "Dopant", "Host", "Probability", "Similarity", "Selectivity", "Combined"]
 
         for dopant_type, dopants in self.results.items():

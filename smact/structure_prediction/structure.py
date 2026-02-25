@@ -14,7 +14,14 @@ import pymatgen
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.core import SETTINGS
 from pymatgen.core import Structure as pmg_Structure
-from pymatgen.ext.matproj import MPRester
+
+try:
+    from pymatgen.ext.matproj import MPRester
+
+    HAS_LEGACY_MPRESTER = True
+except ImportError:
+    HAS_LEGACY_MPRESTER = False
+    MPRester = None
 
 try:
     from mp_api.client import MPRester as MPResterNew
@@ -371,6 +378,11 @@ class SmactStructure:
 
         # Legacy API routine
         if len(api_key) != 32:
+            if not HAS_LEGACY_MPRESTER:
+                raise ImportError(
+                    "pymatgen legacy MPRester is not available. "
+                    "Install pymatgen >= 2022.1 with legacy MP API support or use mp-api."
+                )
             with MPRester(api_key) as m:
                 structs = m.query(
                     criteria={"reduced_cell_formula": formula},
@@ -382,6 +394,11 @@ class SmactStructure:
             with MPResterNew(api_key, use_document_model=False) as m:
                 structs = m.materials.summary.search(formula=formula, fields=["structure"])
         else:
+            if not HAS_LEGACY_MPRESTER:
+                raise ImportError(
+                    "Neither mp-api nor pymatgen legacy MPRester is available. "
+                    "Install mp-api: `pip install mp-api`."
+                )
             with MPRester(api_key) as m:
                 structs = m.get_structures(chemsys_formula=formula)
 

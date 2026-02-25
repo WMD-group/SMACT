@@ -5,14 +5,7 @@ from __future__ import annotations
 import itertools
 from operator import itemgetter
 
-try:
-    from pathos.pools import ParallelPool
-
-    pathos_available = True
-
-except ImportError:
-    pathos_available = False
-    ParallelPool = None
+from pathos.pools import ParallelPool
 
 try:
     from mp_api.client import MPRester as MPResterNew
@@ -141,13 +134,12 @@ class StructureDB:
             The number of structs added.
 
         """
-        if mp_api_key is None:
-            # Try to get the API key from the environment
-            mp_api_key = SETTINGS.get("PMG_MAPI_KEY") or os.environ.get("MP_API_KEY")
-        if mp_api_key is None:
-            raise ValueError("No Materials Project API key provided.")
-
         if mp_data is None:  # pragma: no cover
+            if mp_api_key is None:
+                # Try to get the API key from the environment
+                mp_api_key = SETTINGS.get("PMG_MAPI_KEY") or os.environ.get("MP_API_KEY")
+            if mp_api_key is None:
+                raise ValueError("No Materials Project API key provided.")
             if len(mp_api_key) != 32:
                 with MPRester(mp_api_key) as m:
                     data = m.query(
@@ -157,17 +149,13 @@ class StructureDB:
             else:
                 with MPResterNew(mp_api_key, use_document_model=False) as m:
                     data = m.materials.summary.search(theoretical=False, fields=["structure", "material_id"])
-
         else:
             data = mp_data
 
         self.add_table(table)
 
-        if pathos_available:
-            pool = ParallelPool()
-            parse_iter = pool.uimap(parse_mprest, data)
-        else:  # pragma: no cover
-            parse_iter = map(parse_mprest, data)
+        pool = ParallelPool()
+        parse_iter = pool.uimap(parse_mprest, data)
 
         return self.add_structs(parse_iter, table, commit_after_each=True)
 

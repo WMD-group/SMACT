@@ -12,8 +12,12 @@ for equivalence.
 from __future__ import annotations
 
 import copy
+from typing import TYPE_CHECKING
 
 import smact
+
+if TYPE_CHECKING:
+    from ase import Atoms
 
 try:
     from pyspglib import spglib
@@ -26,7 +30,7 @@ except ImportError:
 from ase.spacegroup import Spacegroup
 
 
-def get_sg(lattice):
+def get_sg(lattice: Atoms) -> Spacegroup:
     """
     Get the space-group of the system.
 
@@ -43,7 +47,10 @@ def get_sg(lattice):
     return Spacegroup(int(spg_num))
 
 
-def get_inequivalent_sites(sub_lattice, lattice):
+def get_inequivalent_sites(
+    sub_lattice: list[list[float]],
+    lattice: Atoms,
+) -> list[list[float]]:
     """
     Given a sub lattice, returns symmetry unique sites for substitutions.
 
@@ -80,7 +87,7 @@ def get_inequivalent_sites(sub_lattice, lattice):
     return inequivalent_sites
 
 
-def make_substitution(lattice, site, new_species):
+def make_substitution(lattice: Atoms, site: list[float], new_species: str) -> Atoms:
     """
     Change atomic species on lattice site to new_species.
 
@@ -107,7 +114,7 @@ def make_substitution(lattice, site, new_species):
     return new_lattice
 
 
-def build_sub_lattice(lattice, symbol):
+def build_sub_lattice(lattice: Atoms, symbol: str) -> list[list[float]]:
     """
     Generate a sub-lattice of the lattice based on equivalent atomic species.
 
