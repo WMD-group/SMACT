@@ -296,9 +296,7 @@ class StructureTest(unittest.TestCase):
         """__parse_py_sites assigns charge=0 when species string has no digits (lines 282-283)."""
         # A plain (undecorated) Structure used with determine_oxi='predecorated'
         # yields species_string = 'Fe' (no digits) → else branch
-        fe_struct = pymatgen.core.Structure(
-            pymatgen.core.Lattice.cubic(2.87), ["Fe"], [[0, 0, 0]]
-        )
+        fe_struct = pymatgen.core.Structure(pymatgen.core.Lattice.cubic(2.87), ["Fe"], [[0, 0, 0]])
         with ignore_warnings(smact.structure_prediction.logger):
             s = SmactStructure.from_py_struct(fe_struct, determine_oxi="predecorated")
         self.assertIsInstance(s, SmactStructure)
@@ -430,9 +428,9 @@ class StructureTest(unittest.TestCase):
             patch.object(sp_struct, "MPRester", mock_rester),
             patch.object(sp_struct, "HAS_MP_API", False),
             patch.object(sp_struct, "HAS_LEGACY_MPRESTER", True),
+            ignore_warnings(smact.structure_prediction.logger),
         ):
-            with ignore_warnings(smact.structure_prediction.logger):
-                s = SmactStructure.from_mp(species, api_key="x" * 32)
+            s = SmactStructure.from_mp(species, api_key="x" * 32)
         self.assertIsInstance(s, SmactStructure)
 
     def test_from_mp_determine_oxi_branches(self):
@@ -456,16 +454,18 @@ class StructureTest(unittest.TestCase):
         api_key_32 = "x" * 32
 
         # comp_ICSD branch (lines 420-424)
-        with patch.object(sp_struct, "MPResterNew", make_mock_rester(real_struct)), patch.object(
-            sp_struct, "HAS_MP_API", True
+        with (
+            patch.object(sp_struct, "MPResterNew", make_mock_rester(real_struct)),
+            patch.object(sp_struct, "HAS_MP_API", True),
         ):
             with ignore_warnings(smact.structure_prediction.logger):
                 s = SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="comp_ICSD")
             self.assertIsInstance(s, SmactStructure)
 
         # both branch — BV succeeds (lines 426-430)
-        with patch.object(sp_struct, "MPResterNew", make_mock_rester(real_struct)), patch.object(
-            sp_struct, "HAS_MP_API", True
+        with (
+            patch.object(sp_struct, "MPResterNew", make_mock_rester(real_struct)),
+            patch.object(sp_struct, "HAS_MP_API", True),
         ):
             with ignore_warnings(smact.structure_prediction.logger):
                 s = SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="both")
@@ -484,11 +484,12 @@ class StructureTest(unittest.TestCase):
             self.assertIsInstance(s, SmactStructure)
 
         # invalid determine_oxi → ValueError (lines 436-439)
-        with patch.object(sp_struct, "MPResterNew", make_mock_rester(real_struct)), patch.object(
-            sp_struct, "HAS_MP_API", True
+        with (
+            patch.object(sp_struct, "MPResterNew", make_mock_rester(real_struct)),
+            patch.object(sp_struct, "HAS_MP_API", True),
+            pytest.raises(ValueError, match="determine_oxi"),
         ):
-            with pytest.raises(ValueError, match="determine_oxi"):
-                SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="invalid_oxi")
+            SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="invalid_oxi")
 
     def test_from_mp_empty_result_raises(self):
         """from_mp raises ValueError when API returns no structures (line 409-410)."""

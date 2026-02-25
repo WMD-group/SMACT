@@ -703,9 +703,7 @@ class TestSequenceFunctions(unittest.TestCase):
             ox.compound_probability([PmgSpecie("Fe", 3), "not_a_species"])
 
         # pymatgen Structure without oxidation states → TypeError (line 142)
-        struct = Structure.from_spacegroup(
-            "Fm-3m", PmgLattice.cubic(5.6), ["Na", "Cl"], [[0, 0, 0], [0.5, 0.5, 0.5]]
-        )
+        struct = Structure.from_spacegroup("Fm-3m", PmgLattice.cubic(5.6), ["Na", "Cl"], [[0, 0, 0], [0.5, 0.5, 0.5]])
         with pytest.raises(TypeError, match="oxidation states"):
             ox.compound_probability(struct)
 
@@ -758,23 +756,17 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # None in pauling array → returns False immediately (line 236)
         with pytest.warns(DeprecationWarning):
-            result = smact.screening.pauling_test_old(
-                (+2, -2), (None, S.pauling_eneg), symbols=("Sn", "S")
-            )
+            result = smact.screening.pauling_test_old((+2, -2), (None, S.pauling_eneg), symbols=("Sn", "S"))
         self.assertFalse(result)
 
         # All-positive oxidation states → len(negative)==0 → False (line 263)
         with pytest.warns(DeprecationWarning):
-            result2 = smact.screening.pauling_test_old(
-                (+2, +3), (Sn.pauling_eneg, 2.0), symbols=("Sn", "Fe")
-            )
+            result2 = smact.screening.pauling_test_old((+2, +3), (Sn.pauling_eneg, 2.0), symbols=("Sn", "Fe"))
         self.assertFalse(result2)
 
         # max(positive) == min(negative) → False (line 265)
         with pytest.warns(DeprecationWarning):
-            result3 = smact.screening.pauling_test_old(
-                (+2, -2), (1.8, 1.8), symbols=("Sn", "S")
-            )
+            result3 = smact.screening.pauling_test_old((+2, -2), (1.8, 1.8), symbols=("Sn", "S"))
         self.assertFalse(result3)
 
     def test_ml_rep_generator_no_stoichs(self):
@@ -831,7 +823,7 @@ class TestSequenceFunctions(unittest.TestCase):
         from ase.spacegroup import Spacegroup
         from ase.spacegroup import crystal as ase_crystal
 
-        import smact.distorter as distorter
+        from smact import distorter
 
         # NaCl rocksalt: spacegroup 225 (Fm-3m)
         nacl = ase_crystal(
@@ -873,7 +865,5 @@ class TestSequenceFunctions(unittest.TestCase):
         projected = len(Fe_smact14_ox)^8 * len(O_smact14_ox) = 8^8 * 2 ≈ 33M > 1M.
         """
         with pytest.warns(UserWarning, match="too many combinations"):
-            result = smact.screening.smact_validity(
-                "Fe8O17", mixed_valence=True, oxidation_states_set="smact14"
-            )
+            result = smact.screening.smact_validity("Fe8O17", mixed_valence=True, oxidation_states_set="smact14")
         self.assertFalse(result)

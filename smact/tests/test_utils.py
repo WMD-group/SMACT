@@ -464,9 +464,7 @@ class TestDataLoaderWarnings(unittest.TestCase):
 
         from smact.data_loader import lookup_element_oxidation_states_custom, set_warnings
 
-        test_file = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "files", "test_oxidation_states.txt"
-        )
+        test_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files", "test_oxidation_states.txt")
         set_warnings(True)  # line 62
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")

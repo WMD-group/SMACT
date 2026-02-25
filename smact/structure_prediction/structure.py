@@ -377,8 +377,7 @@ class SmactStructure:
             api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")
         if api_key is None:
             raise ValueError(
-                "No Materials Project API key found. "
-                "Set the MP_API_KEY or PMG_MAPI_KEY environment variable."
+                "No Materials Project API key found. Set the MP_API_KEY or PMG_MAPI_KEY environment variable."
             )
 
         # Legacy API routine
