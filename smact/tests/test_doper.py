@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import io
 import os
+import sys
 import unittest
+import warnings
+from unittest.mock import patch
 
 import pytest
 
@@ -87,8 +91,6 @@ class DopantPredictionTest(unittest.TestCase):
 
     def test_unparseable_ion_warning(self):
         """Lines 196-197: ion whose string has no element symbol emits a warning and is skipped."""
-        import warnings
-
         # "1+" starts with a digit so _parse_spec_old raises ValueError → caught, warning emitted
         test = doper.Doper(("Cu+", "1+", "S2-"))
         with warnings.catch_warnings(record=True) as caught:
@@ -105,30 +107,24 @@ class DopantPredictionTest(unittest.TestCase):
 
     def test_to_table_no_results(self):
         """Lines 358-360: to_table prints 'No data available' when results is None."""
-        import io
-        import sys
-
         test = doper.Doper(("Cu+", "Ga3+", "S2-"))
         buf = io.StringIO()
         sys.stdout = buf
         try:
-            test.to_table  # property access, no results yet
+            _ = test.to_table  # property access, no results yet
         finally:
             sys.stdout = sys.__stdout__
         self.assertIn("No data available", buf.getvalue())
 
     def test_to_table_with_results(self):
         """Lines 361-374: to_table prints tabulated data after get_dopants."""
-        import io
-        import sys
-
         test = doper.Doper(("Cu+", "Ga3+", "S2-"))
         test.get_dopants(num_dopants=2)
 
         buf = io.StringIO()
         sys.stdout = buf
         try:
-            test.to_table
+            _ = test.to_table
         finally:
             sys.stdout = sys.__stdout__
         out = buf.getvalue()
@@ -136,8 +132,6 @@ class DopantPredictionTest(unittest.TestCase):
 
     def test_plot_dopants_branches(self):
         """Lines 325-332: plot_dopants with similarity, selectivity, and combined plot_value."""
-        from unittest.mock import patch
-
         test = doper.Doper(("Cu+", "Ga3+", "S2-"))
         test.get_dopants(num_dopants=3)
 

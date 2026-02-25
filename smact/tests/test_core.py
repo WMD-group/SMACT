@@ -1,25 +1,31 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import io
 import os
+import sys
 import unittest
 from os.path import dirname, exists, join, realpath
+from unittest.mock import patch
 
 import pytest
+from ase.spacegroup import Spacegroup
+from ase.spacegroup import crystal as ase_crystal
+from pymatgen.core import Lattice as PmgLattice
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
 
 import smact
-import smact.distorter
 import smact.lattice
 import smact.lattice_parameters
 import smact.oxidation_states
 import smact.screening
-from smact import Species
-from smact.builder import wurtzite
+from smact import Species, distorter
+from smact.builder import cubic_perovskite, wurtzite
 from smact.properties import (
     band_gap_Harrison,
     compound_electroneg,
+    eneg_mulliken,
     valence_electron_count,
 )
 
@@ -583,8 +589,6 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_eneg_mulliken_branches(self):
         """eneg_mulliken: str input, Element input, and invalid type."""
-        from smact.properties import eneg_mulliken
-
         # str input (line 32)
         val_str = eneg_mulliken("Fe")
         self.assertIsInstance(val_str, float)
@@ -599,9 +603,6 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_harrison_gap_verbose(self):
         """band_gap_Harrison with verbose=True hits lines 89-92."""
-        import io
-        import sys
-
         buf = io.StringIO()
         sys.stdout = buf
         try:
@@ -632,9 +633,6 @@ class TestSequenceFunctions(unittest.TestCase):
             compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1], source="BadSource")
 
         # verbose=True covers lines 155 and 167
-        import io
-        import sys
-
         buf = io.StringIO()
         sys.stdout = buf
         try:
@@ -649,8 +647,6 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_cubic_perovskite(self):
         """cubic_perovskite was never tested; covers builder.py lines 41-58."""
-        from smact.builder import cubic_perovskite
-
         lattice, system = cubic_perovskite(["Ba", "Ti", "O"])
         self.assertEqual(len(lattice.sites), 5)  # 1 Ba + 1 Ti + 3 O
         self.assertIsNotNone(system)
@@ -688,19 +684,15 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_oxidation_states_pymatgen_species_input(self):
         """compound_probability with pymatgen Species list (lines 134-138, 142)."""
-        from pymatgen.core import Lattice as PmgLattice
-        from pymatgen.core import Structure
-        from pymatgen.core.periodic_table import Specie as PmgSpecie
-
         ox = smact.oxidation_states.OxidationStateProbabilityFinder()
 
         # List of pymatgen Species (lines 134-136)
-        result = ox.compound_probability([PmgSpecie("Fe", 3), PmgSpecie("O", -2)])
+        result = ox.compound_probability([Specie("Fe", 3), Specie("O", -2)])
         self.assertIsInstance(result, float)
 
         # List with mixed/invalid pymatgen species (line 138) — a list mixing types
         with pytest.raises(TypeError):
-            ox.compound_probability([PmgSpecie("Fe", 3), "not_a_species"])
+            ox.compound_probability([Specie("Fe", 3), "not_a_species"])
 
         # pymatgen Structure without oxidation states → TypeError (line 142)
         struct = Structure.from_spacegroup("Fm-3m", PmgLattice.cubic(5.6), ["Na", "Cl"], [[0, 0, 0], [0.5, 0.5, 0.5]])
@@ -755,17 +747,17 @@ class TestSequenceFunctions(unittest.TestCase):
         Sn, S = smact.Element("Sn"), smact.Element("S")
 
         # None in pauling array → returns False immediately (line 236)
-        with pytest.warns(DeprecationWarning):
+        with pytest.warns(DeprecationWarning, match="deprecated"):
             result = smact.screening.pauling_test_old((+2, -2), (None, S.pauling_eneg), symbols=("Sn", "S"))
         self.assertFalse(result)
 
         # All-positive oxidation states → len(negative)==0 → False (line 263)
-        with pytest.warns(DeprecationWarning):
+        with pytest.warns(DeprecationWarning, match="deprecated"):
             result2 = smact.screening.pauling_test_old((+2, +3), (Sn.pauling_eneg, 2.0), symbols=("Sn", "Fe"))
         self.assertFalse(result2)
 
         # max(positive) == min(negative) → False (line 265)
-        with pytest.warns(DeprecationWarning):
+        with pytest.warns(DeprecationWarning, match="deprecated"):
             result3 = smact.screening.pauling_test_old((+2, -2), (1.8, 1.8), symbols=("Sn", "S"))
         self.assertFalse(result3)
 
@@ -818,13 +810,6 @@ class TestSequenceFunctions(unittest.TestCase):
         Newer spglib dropped direct ASE Atoms support (returns None), so we patch
         spglib.get_spacegroup to return the canonical Fm-3m string for NaCl.
         """
-        from unittest.mock import patch
-
-        from ase.spacegroup import Spacegroup
-        from ase.spacegroup import crystal as ase_crystal
-
-        from smact import distorter
-
         # NaCl rocksalt: spacegroup 225 (Fm-3m)
         nacl = ase_crystal(
             ["Na", "Cl"],
