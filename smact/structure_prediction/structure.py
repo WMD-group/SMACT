@@ -396,8 +396,7 @@ class SmactStructure:
         else:
             if not HAS_LEGACY_MPRESTER:
                 raise ImportError(
-                    "Neither mp-api nor pymatgen legacy MPRester is available. "
-                    "Install mp-api: `pip install mp-api`."
+                    "Neither mp-api nor pymatgen legacy MPRester is available. Install mp-api: `pip install mp-api`."
                 )
             with MPRester(api_key) as m:
                 structs = m.get_structures(chemsys_formula=formula)

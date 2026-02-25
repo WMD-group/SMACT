@@ -228,8 +228,7 @@ def pauling_test_old(
 
     """
     warnings.warn(
-        "pauling_test_old is deprecated and will be removed in a future release. "
-        "Use pauling_test instead.",
+        "pauling_test_old is deprecated and will be removed in a future release. Use pauling_test instead.",
         DeprecationWarning,
         stacklevel=2,
     )
