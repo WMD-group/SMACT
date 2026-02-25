@@ -6,6 +6,7 @@ in multi-component solids. The search and ranking process is based on electronic
 from __future__ import annotations
 
 import os
+import warnings
 from itertools import groupby
 
 __all__ = [
@@ -188,8 +189,8 @@ class Doper:
                     cations.append(ion)
                 elif charge < 0:
                     anions.append(ion)
-            except Exception as e:
-                print(f"{e}: charge is not defined for {ion}!")
+            except AttributeError:
+                warnings.warn(f"Could not parse charge for ion '{ion}'; skipping.", stacklevel=2)
 
         CM = self.cation_mutator
 

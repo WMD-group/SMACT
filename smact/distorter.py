@@ -25,7 +25,7 @@ except ImportError:
     try:
         import spglib
     except ImportError:
-        raise Exception("Could not load spglib")
+        raise ImportError("Could not load spglib. Install it with: pip install spglib")
 
 from ase.spacegroup import Spacegroup
 

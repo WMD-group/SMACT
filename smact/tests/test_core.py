@@ -332,6 +332,7 @@ class TestSequenceFunctions(unittest.TestCase):
             0.0,
             0.0,
             0.0,
+            0.0,  # element 103 (Lr)
         ]
         self.assertEqual(smact.screening.ml_rep_generator(["Pb", "O"], [1, 2]), PbO2_ml)
         self.assertEqual(smact.screening.ml_rep_generator([Pb, O], [1, 2]), PbO2_ml)

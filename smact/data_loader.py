@@ -73,7 +73,7 @@ def _get_data_rows(filename):
     with open(filename) as file:
         for line in file:
             line = line.strip()
-            if line[0] != "#" and any(char.isdigit() for char in line):
+            if line and line[0] != "#" and any(char.isdigit() for char in line):
                 yield line.split()
 
 
@@ -227,7 +227,7 @@ def _load_hhis() -> dict[str, tuple[float, float]]:
     with open(os.path.join(data_directory, "hhi.txt")) as file:
         for line in file:
             line = line.strip()
-            if line[0] != "#":
+            if line and line[0] != "#":
                 items = line.split()
                 data[items[0]] = (float(items[1]), float(items[2]))
     return data

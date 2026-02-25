@@ -147,7 +147,7 @@ def compound_electroneg(
     elif source == "Pauling":
         elementlist = [(2.86 * el.pauling_eneg) for el in elementlist]
     else:
-        raise Exception(f"Electronegativity type '{source}'", "is not recognised")
+        raise ValueError(f"Electronegativity type '{source}' is not recognised")
 
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.

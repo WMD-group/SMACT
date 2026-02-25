@@ -402,7 +402,7 @@ def ml_rep_generator(
     if stoichs is None:
         stoichs = [1 for i, el in enumerate(composition)]
 
-    ML_rep = [0 for i in range(1, 103)]
+    ML_rep = [0 for i in range(103)]
     if isinstance(composition[0], Element):
         for element, stoich in zip(composition, stoichs, strict=False):
             ML_rep[int(element.number) - 1] += stoich
@@ -491,10 +491,8 @@ def smact_filter(
     elif os.path.exists(oxidation_states_set):
         ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
     else:
-        raise (
-            Exception(
-                f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd16", "icsd24", "pymatgen_sp", "wiki" or a filepath to a textfile of oxidation states.'
-            )
+        raise ValueError(
+            f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd16", "icsd24", "pymatgen_sp", "wiki" or a filepath to a textfile of oxidation states.'
         )
 
     # Guard: raise early if any element has no oxidation states in the chosen set
