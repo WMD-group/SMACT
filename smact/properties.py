@@ -205,12 +205,9 @@ def valence_electron_count(compound: str) -> float:
     total_valence = 0
     total_stoich = 0
     for element, stoich in element_stoich.items():
-        try:
-            valence = get_element_valence(element)
-            total_valence += stoich * valence
-            total_stoich += stoich
-        except TypeError:
-            raise ValueError(f"No valence information for element {element}")
+        valence = get_element_valence(element)
+        total_valence += stoich * valence
+        total_stoich += stoich
 
     if total_stoich == 0:
         return 0.0

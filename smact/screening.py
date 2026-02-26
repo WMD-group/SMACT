@@ -7,6 +7,7 @@ from __future__ import annotations
 import itertools
 import os
 import warnings
+from enum import StrEnum
 from itertools import combinations
 from typing import TYPE_CHECKING, cast
 
@@ -20,7 +21,6 @@ from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
 )
 from smact.metallicity import metallicity_score
-from smact.utils.compat import StrEnum
 from smact.utils.composition import composition_dict_maker, formula_maker
 from smact.utils.oxidation import ICSD24OxStatesFilter
 

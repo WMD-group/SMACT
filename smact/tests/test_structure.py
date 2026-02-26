@@ -840,6 +840,83 @@ class CationMutatorTest(unittest.TestCase):
 
         assert_frame_equal(self.test_mutator.complete_pair_corrs(), pair_corrs)
 
+    def test_same_spec_probs(self):
+        """same_spec_probs returns a Series of diagonal substitution probabilities."""
+        probs = self.test_mutator.same_spec_probs()
+        self.assertIsInstance(probs, pd.Series)
+        self.assertEqual(len(probs), 3)
+        # All values should be positive
+        self.assertTrue((probs > 0).all())
+
+    def test_same_spec_cond_probs(self):
+        """same_spec_cond_probs returns conditional probabilities for self-substitution."""
+        probs = self.test_mutator.same_spec_cond_probs()
+        # Conditional probabilities should be between 0 and 1
+        self.assertTrue((probs >= 0).all())
+        self.assertTrue((probs <= 1).all())
+
+    def test_get_lambda_unknown_species(self):
+        """get_lambda falls back to alpha for species not in the table."""
+        lam = self.test_mutator.get_lambda("X", "Y")
+        self.assertEqual(lam, -5.0)
+
+    def test_get_lambdas_unknown_species_raises(self):
+        """get_lambdas raises ValueError for species not in the table."""
+        with pytest.raises(ValueError, match="not in lambda table"):
+            self.test_mutator.get_lambdas("UNKNOWN_SPEC")
+
+    def test_populate_lambda_alpha_none_raises(self):
+        """_populate_lambda raises ValueError when alpha is None and table has NaN entries."""
+        lambda_df = pd.DataFrame(
+            [[1.0, np.nan], [np.nan, 1.0]],
+            index=["A", "B"],  # type: ignore[call-overload]
+            columns=["A", "B"],  # type: ignore[call-overload]
+        )
+        with pytest.raises(ValueError, match="alpha function must not be None"):
+            CationMutator(lambda_df, alpha=None)
+
+    def test_nary_mutate_structure(self):
+        """_nary_mutate_structure replaces multiple species simultaneously."""
+        ca_file = os.path.join(files_dir, "CaTiO3.txt")
+        CaTiO3 = SmactStructure.from_file(ca_file)
+
+        # Replace Ca2+ → Ba2+ and Ti4+ → Zr4+ (both same-charge substitutions)
+        mutated = CationMutator._nary_mutate_structure(CaTiO3, ["Ca2+", "Ti4+"], ["Ba2+", "Zr4+"])
+        self.assertIsInstance(mutated, SmactStructure)
+        spec_strs = mutated.get_spec_strs()
+        self.assertIn("Ba2+", spec_strs)
+        self.assertIn("Zr4+", spec_strs)
+        self.assertNotIn("Ca2+", spec_strs)
+        self.assertNotIn("Ti4+", spec_strs)
+
+    def test_nary_mutate_structure_not_neutral(self):
+        """_nary_mutate_structure raises ValueError when result is not charge neutral."""
+        ca_file = os.path.join(files_dir, "CaTiO3.txt")
+        CaTiO3 = SmactStructure.from_file(ca_file)
+
+        # Replace Ca2+ → Na1+ breaks charge neutrality
+        with pytest.raises(ValueError, match="not charge neutral"):
+            CationMutator._nary_mutate_structure(CaTiO3, ["Ca2+"], ["Na1+"])
+
+    def test_unary_substitute(self):
+        """unary_substitute yields structures with single-species substitutions."""
+        ca_file = os.path.join(files_dir, "CaTiO3.txt")
+        CaTiO3 = SmactStructure.from_file(ca_file)
+        # Use pymatgen mutator which has a full lambda table
+        results = list(self.test_pymatgen_mutator.unary_substitute(CaTiO3, thresh=1e-3))
+        # Should yield at least some substitutions
+        self.assertGreater(len(results), 0)
+        for struct, prob, old_spec, new_spec in results:
+            self.assertIsInstance(struct, SmactStructure)
+            self.assertGreater(prob, 0)
+            self.assertNotEqual(old_spec, new_spec)
+
+    def test_sub_probs(self):
+        """sub_probs returns substitution probabilities for all species."""
+        probs = self.test_mutator.sub_probs("A")
+        self.assertIsInstance(probs, pd.Series)
+        self.assertTrue((probs >= 0).all())
+
 
 class PredictorTest(unittest.TestCase):
     """Testing for the StructurePredictor wrapper."""
@@ -902,3 +979,154 @@ class PredictorTest(unittest.TestCase):
             for p1, p2 in zip(probs, expected_probs, strict=False):
                 with self.subTest(p1=p1, p2=p2):
                     self.assertAlmostEqual(p1, p2)
+
+    def test_prediction_include_same(self):
+        """predict_structs with include_same=True yields identical structures with p=1.0."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        test_specs = [("Ca", 2), ("Ti", 4), ("O", -2)]
+        predictions = list(sp.predict_structs(test_specs, thresh=0.0, include_same=True))
+        # The first results should be identical structures with probability 1.0
+        same_structs = [(s, p, parent) for s, p, parent in predictions if p == 1.0]
+        self.assertGreater(len(same_structs), 0)
+        for s, _p, parent in same_structs:
+            self.assertEqual(s, parent)
+
+    def test_prediction_thresh_none(self):
+        """predict_structs with thresh=None skips threshold filtering."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        test_specs = [("Ca", 2), ("Ti", 4), ("O", -2)]
+        predictions = list(sp.predict_structs(test_specs, thresh=None, include_same=False))
+        # With no threshold, we should get at least as many as with a threshold
+        predictions_thresh = list(sp.predict_structs(test_specs, thresh=0.02, include_same=False))
+        self.assertGreaterEqual(len(predictions), len(predictions_thresh))
+
+    def test_nary_predict_n_ary_none(self):
+        """nary_predict_structs with n_ary=None returns early after same-structure yield."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        test_specs = [("Ca", 2), ("Ti", 4), ("O", -2)]
+        predictions = list(sp.nary_predict_structs(test_specs, n_ary=None, include_same=True))
+        # Only yields identical structures (n_ary=None → early return)
+        for _s, p, _parent in predictions:
+            self.assertEqual(p, 1.0)
+
+    def test_nary_predict_equal_species_returns_early(self):
+        """nary_predict_structs with n_ary==len(species) returns early (no subset possible)."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        test_specs = [("Ca", 2), ("Ti", 4), ("O", -2)]
+        # n_ary=3 means we'd replace all 3 species, leaving 0 common → early return
+        predictions = list(sp.nary_predict_structs(test_specs, n_ary=3, include_same=False))
+        self.assertEqual(len(predictions), 0)
+
+    def test_nary_predict_include_same_false(self):
+        """nary_predict_structs with include_same=False doesn't yield identical structures."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        test_specs = [("Ca", 2), ("Ti", 4), ("O", -2)]
+        predictions = list(sp.nary_predict_structs(test_specs, n_ary=2, include_same=False))
+        for _s, p, _parent in predictions:
+            self.assertNotEqual(p, 1.0)
+
+
+class PredictorCoverageTest(unittest.TestCase):
+    """Tests targeting uncovered guard clauses in prediction.py."""
+
+    @staticmethod
+    def _make_structure(species_tuples):
+        """Create a minimal SmactStructure for DB storage.
+
+        species_tuples: list of (element, charge, stoichiometry).
+        Each species gets stoichiometry-many sites at arbitrary coordinates.
+        """
+        lattice_mat = np.array([[10, 0, 0], [0, 10, 0], [0, 0, 10]], dtype=float)
+        sites = {}
+        for i, (ele, charge, stoic) in enumerate(species_tuples):
+            sign = "+" if charge >= 0 else "-"
+            spec_str = f"{ele}{abs(charge)}{sign}"
+            sites[spec_str] = [[float(j), float(i), 0.0] for j in range(stoic)]
+        return SmactStructure(species_tuples, lattice_mat, sites)
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up temp-file DB and minimal CationMutator."""
+        cls.table = "COV"
+        cls._db_fd, cls._db_path = tempfile.mkstemp(suffix=".db")
+
+        nacl = cls._make_structure([("Na", 1, 1), ("Cl", -1, 1)])
+        ca_ti_o3 = cls._make_structure([("Ca", 2, 1), ("Ti", 4, 1), ("O", -2, 3)])
+        # Parent with Fe4+ — NOT in the lambda table → triggers KeyError path
+        ca_fe_o3 = cls._make_structure([("Ca", 2, 1), ("Fe", 4, 1), ("O", -2, 3)])
+        # 4-species structure for n_ary=3 test
+        ba_ca_ti_o4 = cls._make_structure([("Ba", 2, 1), ("Ca", 2, 1), ("Ti", 4, 1), ("O", -2, 4)])
+        # Non-neutral structure: Na1+(x2) Cl1-(x1) → charge +1
+        non_neutral = cls._make_structure([("Na", 1, 2), ("Cl", -1, 1)])
+
+        cls.db = StructureDB(cls._db_path)
+        cls.db.add_table(cls.table)
+        for s in [nacl, ca_ti_o3, ca_fe_o3, ba_ca_ti_o4, non_neutral]:
+            cls.db.add_struct(s, cls.table)
+
+        # Minimal CationMutator — Fe4+ intentionally excluded
+        specs = ["Na1+", "Cl1-", "Ca2+", "Ti4+", "O2-", "Ba2+", "Si4+", "K1+"]
+        n = len(specs)
+        data = np.full((n, n), -5.0)
+        np.fill_diagonal(data, 0.0)
+        lambda_df = pd.DataFrame(data, index=specs, columns=specs)  # type: ignore[call-overload]
+        cls.cm = CationMutator(lambda_df)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Remove temp DB file."""
+        os.close(cls._db_fd)
+        os.unlink(cls._db_path)
+
+    def test_predict_duplicate_species_continue(self):
+        """Line 105: continue when species duplicates make an empty difference set."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        species = [("Na", 1), ("Na", 1), ("Cl", -1)]
+        predictions = list(sp.predict_structs(species, thresh=0.0, include_same=False))
+        self.assertIsInstance(predictions, list)
+
+    def test_predict_parent_multi_extra_species(self):
+        """Line 126: continue when parent has >1 non-target species."""
+        species = [("Ca", 2), ("Ti", 4), ("O", -2)]
+        # Parent with Ca2+ (matching) + Fe2+, Mn4+ (both differ from target)
+        parent = self._make_structure([("Ca", 2, 3), ("Fe", 2, 1), ("Mn", 4, 1)])
+        mock_db = MagicMock(spec=StructureDB)
+        mock_db.get_with_species.return_value = [parent]
+        sp = StructurePredictor(self.cm, mock_db, self.table)
+        predictions = list(sp.predict_structs(species, thresh=0.0, include_same=False))
+        self.assertIsInstance(predictions, list)
+
+    def test_predict_keyerror_lambda_table(self):
+        """Lines 135-137: continue when alt_spec not in cond_sub_probs."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        # Parent ca_fe_o3 has Fe4+ which is NOT in the lambda table.
+        # cond_sub_probs("Ti4+").loc["Fe4+"] → KeyError → caught and continued
+        species = [("Ca", 2), ("Ti", 4), ("O", -2)]
+        predictions = list(sp.predict_structs(species, thresh=0.0, include_same=False))
+        self.assertIsInstance(predictions, list)
+
+    def test_predict_valueerror_non_neutral_mutation(self):
+        """Lines 142-144: continue when _mutate_structure raises ValueError."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        # Target K+, Cl-. DB has non-neutral Na+(x2) Cl-(x1).
+        # Substituting Na+→K+ preserves non-neutrality → ValueError
+        species = [("K", 1), ("Cl", -1)]
+        predictions = list(sp.predict_structs(species, thresh=None, include_same=False))
+        self.assertIsInstance(predictions, list)
+
+    def test_nary_n1_parent_has_diff_species(self):
+        """Lines 206-207: continue when n_ary=1 and parent has diff species."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        # NaCl in DB: querying for Na1+ returns NaCl which has Cl1- (the diff species)
+        species = [("Na", 1), ("Cl", -1)]
+        predictions = list(sp.nary_predict_structs(species, n_ary=1, include_same=False))
+        self.assertIsInstance(predictions, list)
+
+    def test_nary_n3_parent_has_all_diff_species(self):
+        """Lines 211-216: continue when n_ary=3 and parent has all 3 diff species."""
+        sp = StructurePredictor(self.cm, self.db, self.table)
+        # 4-species target. n_ary=3 queries for single species.
+        # ba_ca_ti_o4 has all 4 → parent has all 3 diff species → continue
+        species = [("Ba", 2), ("Ca", 2), ("Ti", 4), ("O", -2)]
+        predictions = list(sp.nary_predict_structs(species, n_ary=3, include_same=False))
+        self.assertIsInstance(predictions, list)

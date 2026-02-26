@@ -5,6 +5,7 @@ import shutil
 import sys
 import unittest
 from importlib.util import find_spec
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -18,6 +19,7 @@ from smact.data_loader import (
     lookup_element_sse2015_data,
 )
 from smact.screening import SmactFilterOutputs, smact_filter
+from smact.structure_prediction.database import _validate_table_name
 from smact.utils.composition import comp_maker, composition_dict_maker, formula_maker, parse_formula
 from smact.utils.crystal_space import download_compounds_with_mp_api, generate_composition_with_smact
 from smact.utils.oxidation import ICSD24OxStatesFilter
@@ -409,6 +411,77 @@ class OxidationStatesTest(unittest.TestCase):
         self.assertEqual(species_occurrences_df.shape, (490, 4))
         self.assertEqual(species_occurrences_df.iloc[0]["species"], "O2-")  # type: ignore[union-attr]
         self.assertEqual(species_occurrences_df.iloc[0]["results_count"], 116910)  # type: ignore[union-attr]
+
+
+class TestCompositionEdgeCases(unittest.TestCase):
+    """Edge case coverage for smact/utils/composition.py."""
+
+    def test_parse_formula_invalid_chars(self):
+        """_get_sym_dict raises ValueError for invalid formula (line 49-50)."""
+        with pytest.raises(ValueError, match="invalid formula"):
+            parse_formula("123invalid")
+
+    def test_parse_formula_empty_string(self):
+        """parse_formula with empty string returns empty dict."""
+        result = parse_formula("")
+        self.assertEqual(result, {})
+
+
+class TestOxidationEdgeCases(unittest.TestCase):
+    """Edge case coverage for ICSD24OxStatesFilter."""
+
+    def setUp(self):
+        self.ox_filter = ICSD24OxStatesFilter()
+
+    def test_commonality_type_error(self):
+        """filter raises TypeError for invalid commonality type (line 53)."""
+        with pytest.raises(TypeError, match="commonality must be"):
+            self.ox_filter.filter(commonality=[1, 2, 3])  # type: ignore[arg-type]
+
+    def test_get_species_occurrences_unsorted(self):
+        """get_species_occurrences_df with sort_by_occurrences=False (line 157)."""
+        df = self.ox_filter.get_species_occurrences_df(sort_by_occurrences=False)
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertGreater(len(df), 0)  # type: ignore[arg-type]
+
+    def test_filter_numeric_commonality(self):
+        """filter with a numeric commonality threshold (line 51)."""
+        df = self.ox_filter.filter(commonality=25.0)
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertGreater(len(df), 0)
+
+    def test_get_species_occurrences_include_zero(self):
+        """get_species_occurrences_df with include_zero=True (line 138)."""
+        df = self.ox_filter.get_species_occurrences_df(include_zero=True)
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertGreater(len(df), 0)  # type: ignore[arg-type]
+
+    def test_get_species_list_value_error_path(self):
+        """get_species_list skips species whose ox_state can't be parsed (lines 113-114)."""
+        # Inject a corrupted row where oxidation_state is a non-integer string.
+        # The code splits on spaces, so use a single token that fails int().
+        corrupted_df = pd.DataFrame(
+            {
+                "element": ["Na", "Na"],
+                "oxidation_state": ["bad", "1"],
+            }
+        )
+        with patch.object(self.ox_filter, "filter", return_value=corrupted_df):
+            species_list = self.ox_filter.get_species_list()
+
+        # int("bad") → ValueError → skipped via continue
+        # Only "Na1+" from the second row should appear
+        self.assertEqual(len(species_list), 1)
+        self.assertIn("Na+", species_list)
+
+
+class TestDatabaseEdgeCases(unittest.TestCase):
+    """Edge case coverage for database.py _validate_table_name."""
+
+    def test_invalid_table_name(self):
+        """_validate_table_name raises ValueError for SQL-unsafe names (line 46)."""
+        with pytest.raises(ValueError, match="Invalid table name"):
+            _validate_table_name("DROP TABLE; --")
 
 
 class TestSpeciesParsing(unittest.TestCase):

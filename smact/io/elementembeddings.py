@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import TYPE_CHECKING
-
-from smact.utils.compat import StrEnum
 
 if TYPE_CHECKING:
     import pandas as pd

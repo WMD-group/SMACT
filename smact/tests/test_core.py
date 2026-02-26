@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import unittest
 from os.path import dirname, exists, join, realpath
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -753,6 +754,132 @@ class TestSequenceFunctions(unittest.TestCase):
             # Passing the same site twice makes the second pass find a match
             ineq_dup = distorter.get_inequivalent_sites([sub_lat[0], sub_lat[0]], nacl)
             self.assertEqual(len(ineq_dup), 1)
+
+    # --------- __init__.py edge case coverage ---------
+
+    def test_element_custom_oxi_bad_file(self):
+        """Element with bad oxi_states_custom_filepath warns and sets None (line 173-175)."""
+        with (
+            patch(
+                "smact.data_loader.lookup_element_oxidation_states_custom",
+                side_effect=TypeError("mocked"),
+            ),
+            pytest.warns(UserWarning, match="Custom oxidation states file not found"),
+        ):
+            el = smact.Element("Fe", oxi_states_custom_filepath="dummy.txt")
+        self.assertIsNone(el.oxidation_states_custom)
+
+    def test_species_extended_radii(self):
+        """Species with radii_source='extended' loads ML Shannon radii."""
+        sp = Species("Fe", 3, coordination=6, radii_source="extended")
+        self.assertIsNotNone(sp.shannon_radius)
+
+    def test_species_invalid_radii_source(self):
+        """Species with invalid radii_source raises ValueError."""
+        with pytest.raises(ValueError, match="not recognised"):
+            Species("Fe", 3, radii_source="invalid_source")
+
+    def test_species_sse_2015_property(self):
+        """Species SSE_2015 is set when data exists (e.g. Fe3+)."""
+        sp = Species("Fe", 3)
+        # Fe3+ should have SSE_2015 data
+        self.assertIsNotNone(sp.SSE_2015)
+
+    def test_species_no_sse_2015(self):
+        """Species SSE_2015 is None when no data exists."""
+        # Oxidation state 0 for noble gas — no SSE_2015 data
+        sp = Species("Fe", 0)
+        self.assertIsNone(sp.SSE_2015)
+
+    def test_are_eq_different_lengths(self):
+        """are_eq returns False for arrays of different lengths."""
+        self.assertFalse(smact.are_eq([1.0, 2.0], [1.0, 2.0, 3.0]))
+
+    def test_neutral_ratios_iter_no_threshold(self):
+        """neutral_ratios_iter raises ValueError when both stoichs and threshold are None."""
+        with pytest.raises(ValueError, match="threshold must be an int"):
+            list(smact.neutral_ratios_iter([1, -2], stoichs=None, threshold=None))
+
+    def test_site_default_oxidation_states(self):
+        """Site with no oxidation_states defaults to [0]."""
+        site = smact.lattice.Site([0, 0, 0])
+        self.assertEqual(site.oxidation_states, [0])
+
+    # --------- Properties edge cases ---------
+
+    def test_compound_electroneg_none_elements(self):
+        """compound_electroneg raises TypeError when elements is None."""
+        with pytest.raises(TypeError, match="supply a list of element"):
+            compound_electroneg(elements=None, stoichs=[1])
+
+    def test_compound_electroneg_none_stoichs(self):
+        """compound_electroneg raises TypeError when stoichs is None."""
+        with pytest.raises(TypeError, match="supply stoichiometries"):
+            compound_electroneg(elements=["Fe"], stoichs=None)
+
+    def test_compound_electroneg_empty_list(self):
+        """compound_electroneg raises TypeError for empty element list."""
+        with pytest.raises(TypeError, match="non-empty"):
+            compound_electroneg(elements=[], stoichs=[])
+
+    def test_compound_electroneg_pauling_source(self):
+        """compound_electroneg with Pauling source works for elements with Pauling data."""
+        val = compound_electroneg(elements=["Na", "Cl"], stoichs=[1, 1], source="Pauling")
+        self.assertIsInstance(val, float)
+        self.assertGreater(val, 0)
+
+    def test_compound_electroneg_length_mismatch(self):
+        """compound_electroneg raises ValueError when elements and stoichs differ in length."""
+        with pytest.raises(ValueError, match="same length"):
+            compound_electroneg(elements=["Fe", "O"], stoichs=[1])
+
+    # --------- lattices_are_same coverage ---------
+
+    def test_lattices_are_same(self):
+        """lattices_are_same compares ASE-like lattice objects (lines 447-455)."""
+        site_a = SimpleNamespace(symbol="Na", position=[0.0, 0.0, 0.0])
+        site_b = SimpleNamespace(symbol="Cl", position=[0.5, 0.5, 0.5])
+        lattice1 = [site_a, site_b]
+
+        # Same lattice
+        site_a2 = SimpleNamespace(symbol="Na", position=[0.0, 0.0, 0.0])
+        site_b2 = SimpleNamespace(symbol="Cl", position=[0.5, 0.5, 0.5])
+        lattice2 = [site_a2, site_b2]
+
+        self.assertTrue(smact.lattices_are_same(lattice1, lattice2))
+
+        # Different lattice
+        site_c = SimpleNamespace(symbol="K", position=[0.0, 0.0, 0.0])
+        lattice3 = [site_c, site_b2]
+        self.assertFalse(smact.lattices_are_same(lattice1, lattice3))
+
+    def test_gcd_recursive_single_arg(self):
+        """_gcd_recursive with single argument returns that value (line 461)."""
+        self.assertEqual(smact._gcd_recursive(7), 7)
+
+    def test_species_no_sse2015_data(self):
+        """Species SSE_2015 else branch when element has no SSE_2015 data at all (line 360)."""
+        sp = Species("He", 0)
+        self.assertIsNone(sp.SSE_2015)
+
+    # --------- Properties: Pauling with missing eneg, VEC TypeError ---------
+
+    def test_compound_electroneg_pauling_missing_eneg(self):
+        """compound_electroneg Pauling source raises ValueError when element lacks Pauling eneg (line 157)."""
+        with pytest.raises(ValueError, match="no Pauling electronegativity"):
+            compound_electroneg(elements=["He", "Ne"], stoichs=[1, 1], source="Pauling")
+
+    def test_valence_electron_count_none_valence(self):
+        """valence_electron_count raises ValueError via TypeError when valence is None (line 213)."""
+        with pytest.raises(ValueError, match="Valence data not found"):
+            valence_electron_count("Lr")
+
+    # --------- Screening: eneg_states_test_threshold with None ---------
+
+    def test_eneg_states_test_threshold_none_eneg(self):
+        """eneg_states_test_threshold returns False when an electronegativity is None."""
+        result = smact.screening.eneg_states_test_threshold([1, -1], [None, 3.16], threshold=0)
+        self.assertFalse(result)
 
     def test_smact_validity_mixed_valence_blowup_warning(self):
         """smact_validity warns and returns False when MV expansion exceeds 1M combinations (lines 645-650).
