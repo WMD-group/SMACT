@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -10,6 +11,8 @@ from plotly.subplots import make_subplots
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 def update_layout(
@@ -96,7 +99,7 @@ def plot_reducers_embeddings(
 
     for i, embedding_name in enumerate(embedding_names):
         for j, reducer in enumerate(reducers):
-            print(f"processing {i} {j}...")
+            logger.info("processing %d %d...", i, j)
             embedding_data = pd.read_pickle(
                 embedding_dir / f"{reducer}_{embedding_name}.pkl",
             )
@@ -154,6 +157,6 @@ def plot_reducers_embeddings(
             fig.write_html(save_path)
         else:
             fig.write_image(save_path, scale=6)
-        print(f"Save to {save_path}")
+        logger.info("Save to %s", save_path)
 
     return fig

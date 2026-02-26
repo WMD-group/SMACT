@@ -3,10 +3,6 @@ smact.distorter: Module for generating symmetry-unique substitutions on a given 
 
 As input it takes the ASE crystal object (as built by smact.builder)
 and the sub-lattice on which substitutions are to be made.
-There is an example of how to use the code in Example_distort.py
-
-TODO: Add a functionality to check two Atoms objects against one another
-for equivalence.
 """
 
 from __future__ import annotations
@@ -73,15 +69,15 @@ def get_inequivalent_sites(
         # Check against the existing members of the list of inequivalent sites
         if len(inequivalent_sites) > 0:
             for inequiv_site in inequivalent_sites:
-                if smact.are_eq(site, inequiv_site) is True:
+                if smact.are_eq(site, inequiv_site):
                     new_site = False
                 # Check against symmetry related members of the list of inequivalent sites
                 equiv_inequiv_sites, _ = sg.equivalent_sites(inequiv_site)
                 for equiv_inequiv_site in equiv_inequiv_sites:
-                    if smact.are_eq(site, equiv_inequiv_site) is True:
+                    if smact.are_eq(site, equiv_inequiv_site):
                         new_site = False
 
-        if new_site is True:
+        if new_site:
             inequivalent_sites.append(site)
 
     return inequivalent_sites
@@ -102,15 +98,12 @@ def make_substitution(lattice: Atoms, site: list[float], new_species: str) -> At
         lattice
 
     """
-    i = 0
-    # NBNBNBNB  It is necessary to use deepcopy for objects, otherwise changes applied to a clone
-    # will also apply to the parent object.
+    # deepcopy is necessary, otherwise changes applied to the clone also apply to the parent object.
     new_lattice = copy.deepcopy(lattice)
     lattice_sites = new_lattice.get_scaled_positions()
-    for lattice_site in lattice_sites:
+    for i, lattice_site in enumerate(lattice_sites):
         if smact.are_eq(lattice_site, site):
             new_lattice[i].symbol = new_species  # type: ignore[assignment]
-        i = i + 1
     return new_lattice
 
 
@@ -130,11 +123,9 @@ def build_sub_lattice(lattice: Atoms, symbol: str) -> list[list[float]]:
 
     """
     sub_lattice = []
-    i = 0
     atomic_labels = lattice.get_chemical_symbols()
     positions = lattice.get_scaled_positions()
-    for atom in atomic_labels:
+    for atom, pos in zip(atomic_labels, positions, strict=False):
         if atom == symbol:
-            sub_lattice.append(positions[i])
-        i = i + 1
+            sub_lattice.append(pos)
     return sub_lattice

@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import csv
 import functools
+import logging
 import os
-import warnings
 
 import pandas as pd
 
@@ -38,34 +38,14 @@ __all__ = [
     "lookup_element_sse_data",
     "lookup_element_sse_pauling_data",
     "lookup_element_valence_data",
-    "set_warnings",
 ]
 
-# Module-level switch: emit verbose warning messages about missing data.
-_print_warnings = False
-
-
-def set_warnings(enable=True):
-    """
-    Set verbose warning messages on and off.
-
-    In order to see any of the warnings, this function needs to be
-    called _before_ the first call to the smact.Element()
-    constructor.
-
-    Args:
-    ----
-    enable (bool) : print verbose warning messages.
-
-    """
-    global _print_warnings
-    _print_warnings = enable
+logger = logging.getLogger(__name__)
 
 
 def _warn(message: str) -> None:
-    """Emit a warning through the warnings module when verbose mode is on."""
-    if _print_warnings:
-        warnings.warn(message, stacklevel=3)
+    """Emit a debug log message about missing data."""
+    logger.debug(message)
 
 
 def _get_data_rows(filename):

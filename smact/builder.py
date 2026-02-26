@@ -1,11 +1,4 @@
 """A collection of functions for building certain lattice types."""
-# Using the ase spacegroup module this can build the structure, from
-# the composition, as defined in the smact_lattice module.
-# TODO:
-# Estimate the cell parameters based on radii from tables.
-# Add further types, Spinnel, Flourite, Delafossite ....
-
-# Implement Structure class, c.f. dev_docs.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

@@ -123,7 +123,8 @@ class CationMutator:
 
         def add_alpha(s1, s2):
             """Add an alpha value to the lambda table at both coordinates."""
-            assert self.alpha is not None, "alpha function must not be None"
+            if self.alpha is None:
+                raise ValueError("alpha function must not be None")
             a = self.alpha(s1, s2)
             self.lambda_tab.loc[s1, s2] = a
             self.lambda_tab.loc[s2, s1] = a

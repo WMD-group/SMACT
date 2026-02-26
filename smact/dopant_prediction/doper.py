@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "SKIPSPECIES_COSINE_SIM_PATH",
-    "SKIPSSPECIES_COSINE_SIM_PATH",
     "SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH",
     "SPECIES_M3GNET_MP2023_GAP_COSINE_PATH",
     "Doper",
@@ -283,7 +282,7 @@ class Doper:
                 dopants_list.sort(key=lambda x: x[_COMBINED_SCORE_INDEX], reverse=True)
 
         # if groupby
-        groupby_lists = [dict()] * _NUM_DOPANT_TYPES  # create list of empty dict (n-cat, p-cat, n-an, p-an)
+        groupby_lists = [dict() for _ in range(_NUM_DOPANT_TYPES)]  # create list of empty dict (n-cat, p-cat, n-an, p-an)
         # in case group_by_charge = False
         if group_by_charge:
             for i, dl in enumerate(dopants_lists):

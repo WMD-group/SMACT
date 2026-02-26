@@ -7,6 +7,25 @@ from __future__ import annotations
 
 import numpy as np
 
+# Wurtzite geometry: tetrahedral bond angle ~ 109.47 deg = 2*arccos(-1/3)
+_TETRAHEDRAL_HALF_ANGLE_SIN = 0.817  # sin(109.47 deg / 2)
+_TETRAHEDRAL_COMPLEMENT_SIN = 0.335  # sin(109.47 deg - 90 deg)
+
+# Body-centred tetragonal: empirical a/r ratio (β-Sn structure)
+_BCT_A_FACTOR = 3.86
+
+# Litharge (B10, PbO-type) empirical factors
+_LITHARGE_SUM_FACTOR = 1.31
+_LITHARGE_C_OVER_A = 1.26  # c/a from PbO data (http://www.mindat.org/min-2466.html)
+
+
+def _check_positive(values: list[float] | float, name: str = "radius") -> None:
+    """Raise ValueError if any radius value is not positive."""
+    if isinstance(values, (int, float)):
+        values = [values]
+    if any(v <= 0 for v in values):
+        raise ValueError(f"All {name} values must be positive, got {values}")
+
 
 def cubic_perovskite(
     shannon_radius: list[float],
@@ -25,6 +44,7 @@ def cubic_perovskite(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radius)
     limiting_factors = [2 * sum(shannon_radius[1:])]
     a = max(limiting_factors)
     b = a
@@ -53,7 +73,8 @@ def wurtzite(
            angles (a, b, c, alpha, beta, gamma)
 
     """
-    shannon_radius.sort(reverse=True)  # Geometry assumes atom A is larger
+    _check_positive(shannon_radius)
+    shannon_radius = sorted(shannon_radius, reverse=True)  # Geometry assumes atom A is larger
     # "Ideal" wurtzite structure
     # c/a = 1.633, u = 0.375
     #
@@ -64,16 +85,15 @@ def wurtzite(
     # Scenario A: A atoms are touching
     #   i.e. height is that of two tetrahegons with side length a
     #    = 2 * sqrt(2/3) * a
-    if shannon_radius[0] > 0.817 * (shannon_radius[0] + shannon_radius[1]):
+    if shannon_radius[0] > _TETRAHEDRAL_HALF_ANGLE_SIN * (shannon_radius[0] + shannon_radius[1]):
         a = 2 * shannon_radius[0]
         b = a
         c = 2 * np.sqrt(2.0 / 3.0) * a
     else:
         # Scenario B: regular wurtzite, similar sizes
-        # 0.817 is sin(109.6/2)
-        a = 2 * 0.817 * (shannon_radius[0] + shannon_radius[1])
+        a = 2 * _TETRAHEDRAL_HALF_ANGLE_SIN * (shannon_radius[0] + shannon_radius[1])
         b = a
-        c = (shannon_radius[0] + shannon_radius[1]) * (2 + 2 * 0.335)  # 0.335 is sin(109.6-90)
+        c = (shannon_radius[0] + shannon_radius[1]) * (2 + 2 * _TETRAHEDRAL_COMPLEMENT_SIN)
     #    inner_space = a * (6**0.5) - (4*shannon_radius[0])
     return a, b, c, alpha, beta, gamma
 
@@ -96,6 +116,7 @@ def fcc(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(covalent_radius)
     a = 2 * 2**0.5 * covalent_radius
     b = 2 * 2**0.5 * covalent_radius
     c = 2 * 2**0.5 * covalent_radius
@@ -123,6 +144,7 @@ def bcc(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(covalent_radius)
     a = 4 * covalent_radius / np.sqrt(3)
     b = a
     c = a
@@ -150,6 +172,7 @@ def hcp(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(covalent_radius)
     a = 2 * covalent_radius
     b = a
     c = (4.0 / 3.0) * 6**0.5 * covalent_radius
@@ -177,6 +200,7 @@ def diamond(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(covalent_radius)
     a = 8 * covalent_radius / np.sqrt(3)
     b = a
     c = a
@@ -204,7 +228,8 @@ def bct(
            angles (a, b, c, alpha, beta, gamma)
 
     """
-    a = 3.86 * covalent_radius
+    _check_positive(covalent_radius)
+    a = _BCT_A_FACTOR * covalent_radius
     b = a
     c = 2 * covalent_radius
     alpha = 90
@@ -231,6 +256,7 @@ def rocksalt(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radius)
     limiting_factors = [
         2 * 2**0.2 * shannon_radius[0],
         2 * 2**0.2 * shannon_radius[1],
@@ -263,6 +289,7 @@ def b2(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radius)
     limiting_factors = [
         2 * (shannon_radius[0] + shannon_radius[0]) / np.sqrt(3),
         2 * shannon_radius[1],
@@ -295,6 +322,7 @@ def zincblende(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radius)
     limiting_factors = [
         2 * (max(shannon_radius) * np.sqrt(2)),
         4 * (shannon_radius[0] + shannon_radius[1]) ** (1.0 / 3.0),
@@ -331,13 +359,14 @@ def b10(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radius)
     limiting_factors = [
         4 * (max(shannon_radius)) / np.sqrt(2),
-        sum(shannon_radius) * 1.31,
-    ]  # Explained below.
+        sum(shannon_radius) * _LITHARGE_SUM_FACTOR,
+    ]
     a = max(limiting_factors)
     b = a
-    c = a * 1.26  # Value taken for PbO http://www.mindat.org/min-2466.html#
+    c = a * _LITHARGE_C_OVER_A
     alpha = 90
     beta = 90
     gamma = 90
@@ -361,6 +390,7 @@ def stuffed_wurtzite(
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radii)
     rac = shannon_radii[2] + shannon_radii[1]
     x = rac * np.sin(np.radians(19.5))
     c = 2 * rac + x

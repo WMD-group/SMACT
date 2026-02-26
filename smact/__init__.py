@@ -30,6 +30,8 @@ from operator import mul as multiply
 from os import path
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
@@ -212,56 +214,33 @@ class Element:
         valence_data = data_loader.lookup_element_valence_data(symbol)
         num_valence_modified = valence_data["NValence"] if valence_data else None
 
-        for attribute, value in (
-            ("coord_envs", coord_envs),
-            ("covalent_radius", dataset["r_cov"]),
-            ("crustal_abundance", dataset["Abundance"]),
-            ("e_affinity", dataset["e_affinity"]),
-            ("eig", dataset["p_eig"]),
-            ("eig_s", dataset["s_eig"]),
-            ("HHI_p", HHI_scores[0]),
-            ("HHI_r", HHI_scores[1]),
-            ("ionpot", dataset["ion_pot"]),
-            ("mass", dataset["Mass"]),
-            ("name", dataset["Name"]),
-            ("number", dataset["Z"]),
-            (
-                "oxidation_states",
-                data_loader.lookup_element_oxidation_states_icsd24(symbol),
-            ),
-            (
-                "oxidation_states_smact14",
-                data_loader.lookup_element_oxidation_states(symbol),
-            ),
-            (
-                "oxidation_states_icsd16",
-                data_loader.lookup_element_oxidation_states_icsd(symbol),
-            ),
-            (
-                "oxidation_states_sp",
-                data_loader.lookup_element_oxidation_states_sp(symbol),
-            ),
-            (
-                "oxidation_states_wiki",
-                data_loader.lookup_element_oxidation_states_wiki(symbol),
-            ),
-            (
-                "oxidation_states_icsd24",
-                data_loader.lookup_element_oxidation_states_icsd24(symbol),
-            ),
-            ("dipol", dataset["dipol"]),
-            ("pauling_eneg", dataset["el_neg"]),
-            ("SSE", sse),
-            ("SSEPauling", sse_Pauling),
-            ("symbol", symbol),
-            ("mendeleev", mendeleev),
-            ("AtomicWeight", AtomicWeight),
-            ("MeltingT", MeltingT),
-            ("num_valence", num_valence),
-            ("num_valence_modified", num_valence_modified),
-            # ('vdw_radius', dataset['RVdW']),
-        ):
-            setattr(self, attribute, value)
+        self.coord_envs = coord_envs
+        self.covalent_radius = dataset["r_cov"]
+        self.crustal_abundance = dataset["Abundance"]
+        self.e_affinity = dataset["e_affinity"]
+        self.eig = dataset["p_eig"]
+        self.eig_s = dataset["s_eig"]
+        self.HHI_p = HHI_scores[0]
+        self.HHI_r = HHI_scores[1]
+        self.ionpot = dataset["ion_pot"]
+        self.mass = dataset["Mass"]
+        self.name = dataset["Name"]
+        self.number = dataset["Z"]
+        self.oxidation_states = data_loader.lookup_element_oxidation_states_icsd24(symbol)
+        self.oxidation_states_smact14 = data_loader.lookup_element_oxidation_states(symbol)
+        self.oxidation_states_icsd16 = data_loader.lookup_element_oxidation_states_icsd(symbol)
+        self.oxidation_states_sp = data_loader.lookup_element_oxidation_states_sp(symbol)
+        self.oxidation_states_wiki = data_loader.lookup_element_oxidation_states_wiki(symbol)
+        self.oxidation_states_icsd24 = data_loader.lookup_element_oxidation_states_icsd24(symbol)
+        self.dipol = dataset["dipol"]
+        self.pauling_eneg = dataset["el_neg"]
+        self.SSE = sse
+        self.SSEPauling = sse_Pauling
+        self.mendeleev = mendeleev
+        self.AtomicWeight = AtomicWeight
+        self.MeltingT = MeltingT
+        self.num_valence = num_valence
+        self.num_valence_modified = num_valence_modified
 
 
 class Species(Element):
@@ -337,29 +316,21 @@ class Species(Element):
         # Get shannon radius for the oxidation state and coordination.
 
         self.shannon_radius = None
+        self.ionic_radius = None
 
         if radii_source == "shannon":
             shannon_data = data_loader.lookup_element_shannon_radius_data(symbol)
-
         elif radii_source == "extended":
             shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(symbol)
-
         else:
-            shannon_data = None
-            print("Data source not recognised. Please select 'shannon' or 'extended'. ")
+            raise ValueError(f"Data source {radii_source!r} not recognised. Choose 'shannon' or 'extended'.")
 
         if shannon_data:
             for dataset in shannon_data:
                 if dataset["charge"] == oxidation and str(coordination) == dataset["coordination"].split("_")[0]:
                     self.shannon_radius = dataset["crystal_radius"]
-
-        # Get ionic radius
-        self.ionic_radius = None
-
-        if shannon_data:
-            for dataset in shannon_data:
-                if dataset["charge"] == oxidation and str(coordination) == dataset["coordination"].split("_")[0]:
                     self.ionic_radius = dataset["ionic_radius"]
+                    break
 
         # Get the average shannon and ionic radii
         self.average_shannon_radius = None
@@ -442,31 +413,20 @@ def element_dictionary(
         return {symbol: Element(symbol) for symbol in elements}
 
 
-def are_eq(A: Sequence[float], B: Sequence[float], tolerance: float = 1e-4):
-    """
-    Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3].
+def are_eq(A: Sequence[float], B: Sequence[float], tolerance: float = 1e-4) -> bool:
+    """Check two arrays for approximate element-wise equality.
 
     Args:
-    ----
-        A (list): 1-D list of values for approximate equality comparison
-        B (list): 1-D list of values for approximate equality comparison
-        tolerance (float): numerical precision for equality condition
+        A: 1-D sequence of values.
+        B: 1-D sequence of values.
+        tolerance: Absolute tolerance for equality.
 
     Returns:
-    -------
-        boolean
-
+        True if arrays are element-wise equal within tolerance, False otherwise.
     """
-    are_eq = True
     if len(A) != len(B):
-        are_eq = False
-    else:
-        i = 0
-        while i < len(A):
-            if abs(A[i] - B[i]) > tolerance:
-                are_eq = False
-            i = i + 1
-    return are_eq
+        return False
+    return bool(np.allclose(A, B, atol=tolerance, rtol=0))
 
 
 def lattices_are_same(lattice1: Sequence, lattice2: Sequence, tolerance: float = 1e-4):
@@ -560,18 +520,14 @@ def neutral_ratios(
     oxidations: Sequence[int],
     stoichs: Sequence[Sequence[int]] | None = None,
     threshold: int | None = 5,
-):
+) -> list[tuple[int, ...]]:
     """
     Get a list of charge-neutral compounds.
 
-    Given a list of oxidation states of arbitrary length, yield ratios in which
+    Given a list of oxidation states of arbitrary length, return ratios in which
     these form a charge-neutral compound. Stoichiometries may be provided as a
     set of legal stoichiometries per site (e.g. a known family of compounds);
     otherwise all unique ratios are tried up to a threshold coefficient.
-
-    Given a list of oxidation states of arbitrary length it searches for
-    neutral ratios in a given ratio of sites (stoichs) or up to a given
-    threshold.
 
     Args:
     ----
@@ -584,18 +540,11 @@ def neutral_ratios(
 
     Returns:
     -------
-        (exists, allowed_ratios) (tuple):
-
-        exists *bool*:
-            True ifc any ratio exists, otherwise False
-
-        allowed_ratios *list of tuples*:
-            Ratios of atoms in given oxidation
-            states which yield a charge-neutral structure
+        list of tuples: Ratios of atoms in given oxidation states which yield
+            a charge-neutral structure. Empty list if no ratios exist.
 
     """
-    allowed_ratios = list(neutral_ratios_iter(oxidations, stoichs=stoichs, threshold=threshold))
-    return (len(allowed_ratios) > 0, allowed_ratios)
+    return list(neutral_ratios_iter(oxidations, stoichs=stoichs, threshold=threshold))
 
 
 # List of metals

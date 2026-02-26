@@ -394,7 +394,8 @@ class SmactStructure:
                     "pymatgen legacy MPRester is not available. "
                     "Install pymatgen >= 2022.1 with legacy MP API support or use mp-api."
                 )
-            assert MPRester is not None
+            if MPRester is None:  # pragma: no cover
+                raise ImportError("pymatgen legacy MPRester is not available.")
             with MPRester(api_key) as m:
                 structs = m.query(
                     criteria={"reduced_cell_formula": formula},
@@ -403,7 +404,8 @@ class SmactStructure:
 
         elif HAS_MP_API:
             # New API routine
-            assert MPResterNew is not None
+            if MPResterNew is None:  # pragma: no cover
+                raise ImportError("mp-api MPRester is not available.")
             with MPResterNew(api_key, use_document_model=False) as m:
                 structs = m.materials.summary.search(formula=formula, fields=["structure"])
         else:
@@ -411,7 +413,8 @@ class SmactStructure:
                 raise ImportError(
                     "Neither mp-api nor pymatgen legacy MPRester is available. Install mp-api: `pip install mp-api`."
                 )
-            assert MPRester is not None
+            if MPRester is None:  # pragma: no cover
+                raise ImportError("pymatgen legacy MPRester is not available.")
             with MPRester(api_key) as m:
                 structs = m.get_structures(chemsys_formula=formula)
 

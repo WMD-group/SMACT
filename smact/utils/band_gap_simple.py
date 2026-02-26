@@ -31,7 +31,6 @@ if __name__ == "__main__":
 
     print(
         band_gap_Harrison(
-            verbose=args.verbose,
             anion=args.anion,
             cation=args.cation,
             distance=args.distance,

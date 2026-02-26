@@ -226,3 +226,28 @@ class TestBct:
         a, b, c, *_ = result
         assert a == b
         assert c != a
+
+
+class TestInputValidation:
+    """All lattice parameter functions reject non-positive radii."""
+
+    @pytest.mark.parametrize(
+        ("func", "args"),
+        [
+            (cubic_perovskite, [[1.0, -0.5, 0.3]]),
+            (wurtzite, [[0.0, 1.0]]),
+            (fcc, [-1.0]),
+            (bcc, [0.0]),
+            (hcp, [-0.5]),
+            (diamond, [-1.0]),
+            (bct, [0.0]),
+            (rocksalt, [[-0.1, 1.0]]),
+            (b2, [[1.0, -1.0]]),
+            (zincblende, [[0.0, 1.0]]),
+            (b10, [[-1.0, 1.0]]),
+            (stuffed_wurtzite, [[1.0, -0.5, 0.3]]),
+        ],
+    )
+    def test_negative_or_zero_radius_raises(self, func, args):
+        with pytest.raises(ValueError, match="positive"):
+            func(*args)

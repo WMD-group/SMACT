@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import pickle
+import sqlite3
 import tempfile
 import unittest
 from contextlib import contextmanager
@@ -553,7 +554,7 @@ class StructureDBTest(unittest.TestCase):
         with self.subTest(msg="Adding table."):
             try:
                 self.db.add_table(self.TEST_TABLE)
-            except Exception as e:
+            except (sqlite3.Error, ValueError, OSError) as e:
                 self.fail(e)
 
         struct_file = os.path.join(files_dir, "CaTiO3.txt")
@@ -562,7 +563,7 @@ class StructureDBTest(unittest.TestCase):
         with self.subTest(msg="Adding structure to table."):
             try:
                 self.db.add_struct(struct, self.TEST_TABLE)
-            except Exception as e:
+            except (sqlite3.Error, ValueError, OSError) as e:
                 self.fail(e)
 
         with self.subTest(msg="Getting structure from table."):
@@ -576,7 +577,7 @@ class StructureDBTest(unittest.TestCase):
         with self.subTest(msg="Adding multiple structures to table."):
             try:
                 self.db.add_structs(structs, self.TEST_TABLE)
-            except Exception as e:
+            except (sqlite3.Error, ValueError, OSError) as e:
                 self.fail(e)
 
         test_with_species_args = [
@@ -869,7 +870,7 @@ class PredictorTest(unittest.TestCase):
         with self.subTest(msg="Acquiring predictions"):
             try:
                 predictions = list(sp.predict_structs(test_specs, thresh=0.02, include_same=False))
-            except Exception as e:
+            except (sqlite3.Error, ValueError, OSError) as e:
                 self.fail(e)
 
         expected_comps = [

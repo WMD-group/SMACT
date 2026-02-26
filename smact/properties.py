@@ -43,7 +43,6 @@ def eneg_mulliken(element: smact.Element | str) -> float:
 def band_gap_Harrison(
     anion: str,
     cation: str,
-    verbose: bool = False,
     distance: float | str = 2.0,
 ) -> float:
     """
@@ -57,8 +56,6 @@ def band_gap_Harrison(
     ----
         anion (str): Element symbol of the dominant anion in the system
         cation (str): Element symbol of the the dominant cation in the system
-        verbose (bool) : An optional True/False flag. If True, additional
-            information is printed to the standard output. [Default: False]
         distance (float or str): Nuclear separation between anion and cation,
             i.e. sum of ionic radii (in Angstroms). Default: 2.0.
 
@@ -89,17 +86,15 @@ def band_gap_Harrison(
 
     # Calculate Band gap [(3-43) Harrison 1980 ]
     Band_gap = (3.60 / 3.0) * (np.sqrt(V2**2 + V3**2)) * (1 - alpha_m)
-    if verbose:
-        logger.debug("V1_bar = %s", V1_bar)
-        logger.debug("V2 = %s", V2)
-        logger.debug("alpha_m = %s", alpha_m)
-        logger.debug("V3 = %s", V3)
+    logger.debug("V1_bar = %s", V1_bar)
+    logger.debug("V2 = %s", V2)
+    logger.debug("alpha_m = %s", alpha_m)
+    logger.debug("V3 = %s", V3)
 
     return Band_gap
 
 
 def compound_electroneg(
-    verbose: bool = False,
     elements: list[str | smact.Element] | None = None,
     stoichs: list[int | float] | None = None,
     source: str = "Mulliken",
@@ -121,8 +116,6 @@ def compound_electroneg(
     ----
         elements (list) : Elements given as standard elemental symbols.
         stoichs (list) : Stoichiometries, given as integers or floats.
-        verbose (bool) : An optional True/False flag. If True, additional information
-            is printed to the standard output. [Default: False]
         source: String 'Mulliken' or 'Pauling'; type of Electronegativity to
             use. Note that in SMACT, Pauling electronegativities are
             rescaled to a Mulliken-like scale.
@@ -165,22 +158,17 @@ def compound_electroneg(
     else:
         raise ValueError(f"Electronegativity type '{source}' is not recognised")
 
-    # Print optional list of element electronegativities.
-    # This may be a useful sanity check in case of a suspicious result.
-    if verbose:
-        logger.debug("Electronegativities of elements= %s", eneg_list)
+    logger.debug("Electronegativities of elements= %s", eneg_list)
 
     # Raise each electronegativity to its appropriate power
     # to account for stoichiometry.
-    for i in range(len(eneg_list)):
-        eneg_list[i] = eneg_list[i] ** stoichslist[i]
+    eneg_list = [eneg**stoich for eneg, stoich in zip(eneg_list, stoichslist, strict=False)]
 
     # Calculate geometric mean (n-th root of product)
     prod = np.prod(eneg_list)
     compelectroneg = (prod) ** (1.0 / (sum(stoichslist)))
 
-    if verbose:
-        logger.debug("Geometric mean = Compound 'electronegativity'= %s", compelectroneg)
+    logger.debug("Geometric mean = Compound 'electronegativity'= %s", compelectroneg)
 
     return float(compelectroneg)
 

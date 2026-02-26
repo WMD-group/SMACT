@@ -27,7 +27,6 @@ from smact.utils.oxidation import ICSD24OxStatesFilter
 _NUM_ELEMENTS = 103
 
 __all__ = [
-    "MIXED_VALENCE_ELEMENTS",
     "SmactFilterOutputs",
     "eneg_states_test",
     "eneg_states_test_threshold",
@@ -235,81 +234,6 @@ def _no_repeats(
         )
 
 
-def pauling_test_old(
-    ox: Sequence[int],
-    paul: Sequence[float | None],
-    symbols: Sequence[str],
-    repeat_anions: bool = True,
-    repeat_cations: bool = True,
-    threshold: float = 0.0,
-):
-    """
-    Check if a combination of ions makes chemical sense,
-    (i.e. positive ions should be of lower Pauling electronegativity).
-    This function should give the same results as pauling_test but is
-    not optimised for speed.
-
-    .. deprecated::
-        Use :func:`pauling_test` instead, which is faster and has a
-        consistent parameter naming convention.
-
-    Args:
-    ----
-        ox (list):  oxidation states of the compound
-        paul (list): the corresponding  Pauling electronegativities
-            of the elements in the compound
-        symbols (list) :  chemical symbols of each site.
-        threshold (float): a tolerance for the allowed deviation from
-            the Pauling criterion
-        repeat_anions : boolean, allow an anion to repeat in different
-            oxidation states in the same compound.
-        repeat_cations : as above, but for cations.
-
-    Returns:
-    -------
-        (bool):
-            True if anions are more electronegative than
-            cations, otherwise False
-
-    """
-    warnings.warn(
-        "pauling_test_old is deprecated and will be removed in a future release. Use pauling_test instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    if None in paul:
-        return False
-    positive = []
-    negative = []
-    pos_ele = []
-    neg_ele = []
-    for i, state in enumerate(ox):
-        if state > 0:
-            if repeat_cations:
-                positive.append(paul[i])
-            elif symbols[i] in pos_ele:  # Reject materials where the same
-                # cation occupies two sites.
-                return False
-            else:
-                positive.append(paul[i])
-                pos_ele.append(symbols[i])
-
-        if state < 0:
-            if repeat_anions:
-                negative.append(paul[i])
-            elif symbols[i] in neg_ele:  # Reject materials where the same
-                # anion occupies two sites.
-                return False
-            else:
-                negative.append(paul[i])
-                neg_ele.append(symbols[i])
-
-    if len(positive) == 0 or len(negative) == 0:
-        return False
-    if max(positive) == min(negative):
-        return False
-    return not max(positive) - min(negative) > threshold
-
 
 def eneg_states_test(ox_states: Sequence[int], enegs: Sequence[float | None]):
     """
@@ -318,7 +242,7 @@ def eneg_states_test(ox_states: Sequence[int], enegs: Sequence[float | None]):
     This implementation is fast as it 'short-circuits' as soon as it
     finds an invalid combination. However it may be that in some cases
     redundant comparisons are made. Performance is very close between
-    this method and eneg_states_test_alternate.
+    this method and alternatives.
 
     Args:
     ----
@@ -351,7 +275,7 @@ def eneg_states_test_threshold(ox_states: Sequence[int], enegs: Sequence[float |
     This implementation is fast as it 'short-circuits' as soon as it
     finds an invalid combination. However it may be that in some cases
     redundant comparisons are made. Performance is very close between
-    this method and eneg_states_test_alternate.
+    this method and alternatives.
 
     A 'threshold' option is added so that this constraint may be
     relaxed somewhat.
@@ -380,45 +304,6 @@ def eneg_states_test_threshold(ox_states: Sequence[int], enegs: Sequence[float |
             return False
     return True
 
-
-def eneg_states_test_alternate(ox_states: Sequence[int], enegs: Sequence[float | None]):
-    """
-    Internal function for checking electronegativity criterion.
-
-    This implementation appears to be slightly slower than
-    eneg_states_test, but further testing is needed.
-
-    .. deprecated::
-        Use :func:`eneg_states_test` instead.
-
-    Args:
-    ----
-        ox_states (list): oxidation states corresponding to species
-            in compound
-        enegs (list): Electronegativities corresponding to species in
-            compound
-
-    Returns:
-    -------
-        bool : True if anions are more electronegative than
-               cations, otherwise False
-
-    """
-    warnings.warn(
-        "eneg_states_test_alternate is deprecated and will be removed in a future release. "
-        "Use eneg_states_test instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    min_cation_eneg, max_anion_eneg = 10, 0
-    for ox_state, eneg in zip(ox_states, enegs, strict=False):
-        if eneg is None:
-            return False
-        if ox_state < 1:
-            min_cation_eneg = min(eneg, min_cation_eneg)
-        else:
-            max_anion_eneg = max(eneg, max_anion_eneg)
-    return min_cation_eneg > max_anion_eneg
 
 
 def ml_rep_generator(
@@ -449,9 +334,9 @@ def ml_rep_generator(
 
     """
     if stoichs is None:
-        stoichs = [1 for i, el in enumerate(composition)]
+        stoichs = [1] * len(composition)
 
-    ML_rep = [0 for i in range(_NUM_ELEMENTS)]
+    ML_rep = [0] * _NUM_ELEMENTS
     if isinstance(composition[0], Element):
         for element, stoich in zip(composition, stoichs, strict=False):
             ML_rep[int(element.number) - 1] += stoich  # type: ignore[union-attr]
@@ -538,9 +423,9 @@ def smact_filter(
     compositions = []
     for ox_states in itertools.product(*ox_combos_typed):
         # Test for charge balance
-        cn_e, cn_r = neutral_ratios(list(ox_states), stoichs=stoichs, threshold=threshold)
+        cn_r = neutral_ratios(list(ox_states), stoichs=stoichs, threshold=threshold)
         # Electronegativity test
-        if cn_e and pauling_test(ox_states, electronegs):
+        if cn_r and pauling_test(ox_states, electronegs):
             for ratio in cn_r:
                 compositions.append((symbols, ox_states, ratio))
     # Return list depending on whether we are interested in unique species combinations
@@ -710,9 +595,9 @@ def _is_valid_oxi_state(
 ) -> bool:
     """Return True if any oxidation-state combination satisfies charge neutrality and the Pauling criterion."""
     for ox_states in itertools.product(*ox_combos):
-        cn_e, _ = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
+        cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
 
-        if cn_e:
+        if cn_r:
             if not use_pauling_test:
                 return True
 

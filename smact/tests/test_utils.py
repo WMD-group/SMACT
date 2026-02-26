@@ -4,7 +4,6 @@ import os
 import shutil
 import sys
 import unittest
-import warnings
 from importlib.util import find_spec
 
 import pandas as pd
@@ -17,7 +16,6 @@ from smact.data_loader import (
     lookup_element_oxidation_states_custom,
     lookup_element_shannon_radius_data_extendedML,
     lookup_element_sse2015_data,
-    set_warnings,
 )
 from smact.screening import SmactFilterOutputs, smact_filter
 from smact.utils.composition import comp_maker, composition_dict_maker, formula_maker, parse_formula
@@ -456,19 +454,13 @@ class TestSpeciesParsing(unittest.TestCase):
 class TestDataLoaderWarnings(unittest.TestCase):
     """Branch coverage for smact/data_loader.py warning and missing-symbol paths."""
 
-    def tearDown(self):
-        # Always reset warnings to off after each test
-        set_warnings(False)
-
-    def test_enable_warnings_and_warn_on_missing(self):
-        """Lines 62 and 68: set_warnings(True) then lookup missing element emits warning."""
+    def test_warn_on_missing_logs_debug(self):
+        """_warn logs a debug message for missing element lookups."""
         test_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files", "test_oxidation_states.txt")
-        set_warnings(True)  # line 62
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            result = lookup_element_oxidation_states_custom("Xx", test_file)  # line 68 + 200-201
+        with self.assertLogs("smact.data_loader", level="DEBUG") as cm:
+            result = lookup_element_oxidation_states_custom("Xx", test_file)
         self.assertIsNone(result)
-        self.assertTrue(any("not found" in str(w.message) for w in caught))
+        self.assertTrue(any("not found" in msg for msg in cm.output))
 
     def test_shannon_radii_extendedML_found_and_missing(self):
         """Lines 381-398 (loader body), 447-451 (missing symbol path)."""

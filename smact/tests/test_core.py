@@ -72,8 +72,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_neutral_ratios(self):
         ox = [1, -2, 1]
-        is_neutral, neutral_combos = smact.neutral_ratios(ox)
-        self.assertTrue(is_neutral)
+        neutral_combos = smact.neutral_ratios(ox)
         self.assertEqual(len(neutral_combos), 9)
         self.assertTrue((3, 2, 1) in neutral_combos)
 
@@ -87,7 +86,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_harrison_gap_MgCl(self):
         self.assertAlmostEqual(
-            band_gap_Harrison("Mg", "Cl", verbose=False, distance=2.67),
+            band_gap_Harrison("Mg", "Cl", distance=2.67),
             3.545075110572662,
         )
 
@@ -160,55 +159,6 @@ class TestSequenceFunctions(unittest.TestCase):
             )
         )
 
-    def test_pauling_test_old(self):
-        Sn, S = (smact.Element(label) for label in ("Sn", "S"))
-        self.assertTrue(
-            smact.screening.pauling_test_old(
-                (+2, -2),
-                (Sn.pauling_eneg, S.pauling_eneg),
-                symbols=("S", "S", "Sn"),
-            )
-        )
-        self.assertFalse(
-            smact.screening.pauling_test_old(
-                (-2, +2),
-                (Sn.pauling_eneg, S.pauling_eneg),
-                symbols=("S", "S", "Sn"),
-            )
-        )
-        self.assertFalse(
-            smact.screening.pauling_test_old(
-                (-2, -2, +2),
-                (S.pauling_eneg, S.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "S", "Sn"),
-                repeat_anions=False,
-            )
-        )
-        self.assertTrue(
-            smact.screening.pauling_test_old(
-                (-2, -2, +2),
-                (S.pauling_eneg, S.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "S", "Sn"),
-                repeat_cations=False,
-            )
-        )
-        self.assertFalse(
-            smact.screening.pauling_test_old(
-                (-2, +2, +2),
-                (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "Sn", "Sn"),
-                repeat_cations=False,
-            )
-        )
-        self.assertTrue(
-            smact.screening.pauling_test_old(
-                (-2, +2, +2),
-                (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "Sn", "Sn"),
-                repeat_anions=False,
-            )
-        )
-
     def test_eneg_states_test(self):
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
         self.assertTrue(
@@ -216,15 +166,6 @@ class TestSequenceFunctions(unittest.TestCase):
         )
         self.assertFalse(
             smact.screening.eneg_states_test([-1, 3, 1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
-        )
-
-    def test_eneg_states_test_alternate(self):
-        Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
-        self.assertTrue(
-            smact.screening.eneg_states_test_alternate([1, 3, -1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
-        )
-        self.assertFalse(
-            smact.screening.eneg_states_test_alternate([-1, 3, 1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
         )
 
     def test_eneg_states_test_threshold(self):
@@ -599,10 +540,10 @@ class TestSequenceFunctions(unittest.TestCase):
         with pytest.raises(TypeError):
             eneg_mulliken(42)  # type: ignore[arg-type]
 
-    def test_harrison_gap_verbose(self):
-        """band_gap_Harrison with verbose=True hits lines 89-92."""
+    def test_harrison_gap_logging(self):
+        """band_gap_Harrison always logs debug info."""
         with self.assertLogs("smact.properties", level="DEBUG") as cm:
-            band_gap_Harrison("Mg", "Cl", verbose=True, distance=2.67)
+            band_gap_Harrison("Mg", "Cl", distance=2.67)
         log_output = "\n".join(cm.output)
         self.assertIn("V1_bar", log_output)
         self.assertIn("V2", log_output)
@@ -610,25 +551,25 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertIn("V3", log_output)
 
     def test_compound_electroneg_element_objects(self):
-        """compound_electroneg with Element objects (lines 133-134) and verbose (155, 167)."""
+        """compound_electroneg with Element objects and logging."""
         Fe = smact.Element("Fe")
         O = smact.Element("O")
 
-        # Element list input (lines 133-134) + Mulliken (line 145)
+        # Element list input + Mulliken
         val = compound_electroneg(elements=[Fe, O], stoichs=[1, 1], source="Mulliken")
         self.assertIsInstance(val, float)
 
-        # Invalid element type raises TypeError (lines 135-136)
+        # Invalid element type raises TypeError
         with pytest.raises(TypeError):
             compound_electroneg(elements=[42, 43], stoichs=[1, 1])  # type: ignore[arg-type]
 
-        # Invalid source raises ValueError (line 150)
+        # Invalid source raises ValueError
         with pytest.raises(ValueError):
             compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1], source="BadSource")
 
-        # verbose=True covers logging lines
+        # Always logs debug info now
         with self.assertLogs("smact.properties", level="DEBUG") as cm:
-            compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1], verbose=True)
+            compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1])
         log_output = "\n".join(cm.output)
         self.assertIn("Electronegativities", log_output)
         self.assertIn("Geometric mean", log_output)
@@ -731,25 +672,6 @@ class TestSequenceFunctions(unittest.TestCase):
             threshold=0.0,
         )
         self.assertIsInstance(result, bool)
-
-    def test_pauling_test_old_edge_cases(self):
-        """pauling_test_old: None in paul (236), all-positive (263), equal max/min (265)."""
-        Sn, S = smact.Element("Sn"), smact.Element("S")
-
-        # None in pauling array → returns False immediately (line 236)
-        with pytest.warns(DeprecationWarning, match="deprecated"):
-            result = smact.screening.pauling_test_old((+2, -2), (None, S.pauling_eneg), symbols=("Sn", "S"))
-        self.assertFalse(result)
-
-        # All-positive oxidation states → len(negative)==0 → False (line 263)
-        with pytest.warns(DeprecationWarning, match="deprecated"):
-            result2 = smact.screening.pauling_test_old((+2, +3), (Sn.pauling_eneg, 2.0), symbols=("Sn", "Fe"))
-        self.assertFalse(result2)
-
-        # max(positive) == min(negative) → False (line 265)
-        with pytest.warns(DeprecationWarning, match="deprecated"):
-            result3 = smact.screening.pauling_test_old((+2, -2), (1.8, 1.8), symbols=("Sn", "S"))
-        self.assertFalse(result3)
 
     def test_ml_rep_generator_no_stoichs(self):
         """ml_rep_generator without explicit stoichs triggers default-stoichs path (line 403)."""

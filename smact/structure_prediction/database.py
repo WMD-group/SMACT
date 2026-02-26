@@ -16,6 +16,7 @@ except ImportError:  # pragma: no cover
     MPResterNew = None
 
 import os
+import re
 import sqlite3
 from typing import TYPE_CHECKING
 
@@ -30,6 +31,23 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from pymatgen.core import Structure as pmg_Structure
+
+
+_VALID_TABLE_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _validate_table_name(table: str) -> str:
+    """Validate and return a safe SQLite table name.
+
+    Raises:
+        ValueError: If the table name contains invalid characters.
+    """
+    if not _VALID_TABLE_NAME_RE.match(table):
+        raise ValueError(
+            f"Invalid table name {table!r}. "
+            "Table names must start with a letter or underscore and contain only alphanumerics and underscores."
+        )
+    return table
 
 
 class StructureDB:
@@ -177,6 +195,7 @@ class StructureDB:
             table: The name of the table to add
 
         """
+        table = _validate_table_name(table)
         with self as c:
             c.execute(
                 f"""CREATE TABLE {table}
@@ -193,6 +212,7 @@ class StructureDB:
             table: The name of the table to add the structure to.
 
         """
+        table = _validate_table_name(table)
         entry = (struct.composition(), struct.as_poscar())
 
         with self as c:
@@ -223,6 +243,7 @@ class StructureDB:
             The number of structures added.
 
         """
+        table = _validate_table_name(table)
         with self as c:
             num = 0
             for struct in structs:
@@ -253,6 +274,7 @@ class StructureDB:
             A list of :class:`~.SmactStructure` s.
 
         """
+        table = _validate_table_name(table)
         with self as c:
             c.execute(
                 f"SELECT structure FROM {table} WHERE composition = ?",
@@ -279,6 +301,8 @@ class StructureDB:
             A list of :class:`SmactStructure` s in the table that contain the species.
 
         """
+        table = _validate_table_name(table)
+
         glob = "*".join("{}_*_{}{}" for _ in range(len(species)))
         glob = f"*{glob}*"
 

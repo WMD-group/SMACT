@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import itertools
 import json
+import logging
 import string
 import time
 from collections import defaultdict
@@ -12,6 +13,8 @@ from pathlib import Path
 from mp_api.client import MPRester
 from pymatgen.core import Composition
 from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 
 def download_mp_data(
@@ -62,7 +65,7 @@ def download_mp_data(
     e_hull_dict = defaultdict(lambda: float("inf"))
 
     for formula_anonymous in tqdm(formula_anonymous_list):
-        print(f"Downloading data for {formula_anonymous}...")
+        logger.info("Downloading data for %s...", formula_anonymous)
         # download data from MP
         with MPRester(mp_api_key) as mpr:
             docs = mpr.materials.summary.search(
