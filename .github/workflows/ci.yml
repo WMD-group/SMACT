@@ -50,7 +50,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --extra optional --dev
+          uv sync --extra optional --extra property_prediction --dev
 
       - name: Log the environment
         run: uv pip freeze

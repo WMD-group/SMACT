@@ -26,6 +26,7 @@ Features of :mod:`smact` include:
 - Filters for oxidation states and charge balancing
 - Structure predcition from chemical composition
 - Composition probability prediction
+- Property prediction from composition using pre-trained ROOST models
 
 Install
 =======

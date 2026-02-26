@@ -93,6 +93,10 @@ visualisation = [
     "dash>=2.18.2",
 ]
 ml = ["xgboost","shap","smact[featurisers]"]
+property_prediction = [
+    "aviary-models>=1.2.0",
+    "torch>=2.0.0",
+]
 optional = [
     "pydantic>=2.9.2",
     "smact[mp]",
@@ -142,7 +146,7 @@ include = ["smact","smact.*"]
 
 [tool.pytest.ini_options]
 minversion = 6.0
-testpaths = ["smact/tests"]
+testpaths = ["smact/tests", "smact/property_prediction/tests"]
 
 [tool.ruff]
 target-version = "py311"
@@ -224,6 +228,11 @@ docstring-code-format = true
 
 [tool.ruff.lint.per-file-ignores]
 "smact/tests/*" = ["D"]
+"smact/property_prediction/tests/*" = ["D"]
+# TC rules want runtime imports moved to TYPE_CHECKING blocks, but they are used at runtime
+# PLC0415 wants imports at top-level, but we use lazy imports for heavy dependencies (aviary, torch)
+# SIM108 suggests ternary operators but if-else is clearer for complex expressions
+"smact/property_prediction/*" = ["TC001", "TC002", "TC003", "PLC0415", "SIM108"]
 
 [tool.pyright]
 typeCheckingMode = "basic"

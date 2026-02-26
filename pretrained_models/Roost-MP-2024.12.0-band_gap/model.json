@@ -1,0 +1,50 @@
+{
+    "@class": "Roost",
+    "@module": "aviary.roost.model",
+    "@model_version": 1,
+    "metadata": {
+        "property": "band_gap",
+        "dataset": "MP-103K",
+        "fidelity": null,
+        "unit": "eV",
+        "training_date": "2025-12-19",
+        "test_mae": 0.2826,
+        "test_rmse": 0.5988,
+        "val_mae": 0.2816,
+        "n_train": 82914,
+        "n_val": 10365,
+        "n_test": 10365,
+        "epochs_trained": 232,
+        "description": "ROOST model trained on 103K Materials Project DFT band gaps",
+        "normalizer_mean": 1.3035643100738525,
+        "normalizer_std": 1.6364068984985352
+    },
+    "kwargs": {
+        "elem_embedding": "matscholar200",
+        "elem_fea_len": 64,
+        "n_graph": 3,
+        "elem_heads": 3,
+        "elem_gate": [
+            256
+        ],
+        "elem_msg": [
+            256
+        ],
+        "cry_heads": 3,
+        "cry_gate": [
+            256
+        ],
+        "cry_msg": [
+            256
+        ],
+        "trunk_hidden": [
+            1024,
+            512
+        ],
+        "out_hidden": [
+            256,
+            128,
+            64
+        ]
+    }
+}

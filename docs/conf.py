@@ -388,4 +388,9 @@ epub_exclude_files = ["search.html"]
 # If false, no index is generated.
 # epub_use_index = True
 
-# Mock out spglib and ase modules to avoid import failures
+# Mock out modules to avoid import failures in docs build
+autodoc_mock_imports = [
+    "torch",
+    "aviary",
+    "requests",
+]
