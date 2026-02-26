@@ -80,7 +80,7 @@ Use cases are available in our [examples](https://smact.readthedocs.io/en/latest
 
 ## Requirements
 
-The main language is Python 3 and has been tested using Python 3.10 - 3.13 (Windows is not officially supported for Python 3.13 as of yet).
+The main language is Python 3 and has been tested using Python 3.11 - 3.13.
 Core dependencies include NumPy, SciPy, pandas, [pymatgen](https://pymatgen.org), [ASE](https://wiki.fysik.dtu.dk/ase), and [spglib](http://atztogo.github.io/spglib). A full list is in [`pyproject.toml`](pyproject.toml).
 
 ## Installation
