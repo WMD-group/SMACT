@@ -429,30 +429,23 @@ def are_eq(A: Sequence[float], B: Sequence[float], tolerance: float = 1e-4) -> b
     return bool(np.allclose(A, B, atol=tolerance, rtol=0))
 
 
-def lattices_are_same(lattice1: Sequence, lattice2: Sequence, tolerance: float = 1e-4):
-    """
-    Checks for the equivalence of two lattices.
+def lattices_are_same(lattice1: Sequence, lattice2: Sequence, tolerance: float = 1e-4) -> bool:
+    """Check whether two ASE lattices contain the same sites.
 
     Args:
-    ----
-        lattice1: ASE crystal class
-        lattice2: ASE crystal class
-        tolerance (float): numerical precision for equality condition
+        lattice1: ASE crystal class.
+        lattice2: ASE crystal class.
+        tolerance: Absolute tolerance for position equality.
 
     Returns:
-    -------
-        boolean
-
+        True if every site in *lattice1* has a matching site in *lattice2*.
     """
-    lattices_are_same = False
-    i = 0
+    matches = 0
     for site1 in lattice1:
         for site2 in lattice2:
             if site1.symbol == site2.symbol and are_eq(site1.position, site2.position, tolerance=tolerance):
-                i += 1
-    if i == len(lattice1):
-        lattices_are_same = True
-    return lattices_are_same
+                matches += 1
+    return matches == len(lattice1)
 
 
 def _gcd_recursive(*args: int) -> int:
