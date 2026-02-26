@@ -10,11 +10,4 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 5
-    target-branch: develop
-
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
-    target-branch: develop
+    target-branch: master
