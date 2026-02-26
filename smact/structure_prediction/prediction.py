@@ -136,7 +136,7 @@ class StructurePredictor:
                     # Not in the Series
                     continue
 
-                if thresh is not None and p > thresh:
+                if thresh is None or p > thresh:
                     try:
                         self.cm._mutate_structure(parent, alt_spec, diff_spec_str)
                     except ValueError:
@@ -242,7 +242,7 @@ class StructurePredictor:
 
                 p = np.prod(p)
 
-                if thresh is not None and p > thresh:
+                if thresh is None or p > thresh:
                     try:
                         self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str)
 

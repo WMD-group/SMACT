@@ -502,7 +502,7 @@ def lookup_element_sse_data(symbol):
     """
     data = _load_sse_data()
     if symbol in data:
-        return data[symbol]
+        return data[symbol].copy()
     _warn(f"Solid-state energy data for element {symbol} not found.")
     return None
 

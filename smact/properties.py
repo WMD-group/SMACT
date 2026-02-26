@@ -132,6 +132,8 @@ def compound_electroneg(
         raise TypeError("Please supply a list of element symbols or SMACT Element objects")
     if stoichs is None:
         raise TypeError("Please supply stoichiometries")
+    if not elements:
+        raise TypeError("Please supply a non-empty list of elements")
 
     if isinstance(elements[0], str):
         elementlist: list[smact.Element] = [smact.Element(i) for i in elements]  # type: ignore[arg-type]
@@ -143,6 +145,8 @@ def compound_electroneg(
     stoichslist: list[int | float] = list(stoichs)
     # Convert stoichslist from string to float
     stoichslist = list(map(float, stoichslist))
+    if len(elementlist) != len(stoichslist):
+        raise ValueError("elements and stoichs must have the same length")
 
     # Get electronegativity values for each element
 

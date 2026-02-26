@@ -161,8 +161,12 @@ class StructureDB:
 
         pool = ParallelPool()
         parse_iter = pool.uimap(parse_mprest, data)
+        results = list(parse_iter)
+        pool.close()
+        pool.join()
+        pool.clear()
 
-        return self.add_structs(list(parse_iter), table, commit_after_each=True)
+        return self.add_structs(results, table, commit_after_each=True)
 
     def add_table(self, table: str):
         """
@@ -317,7 +321,7 @@ def parse_mprest(
 
     """
     try:
-        return SmactStructure.from_py_struct(data["structure"], determine_oxi="BV")  # type: ignore[arg-type]
+        return SmactStructure.from_py_struct(data["structure"], determine_oxi=determine_oxi)  # type: ignore[arg-type]
     except Exception:
         # Couldn't decorate with oxidation states
         logger.warning(f"Couldn't decorate {data['material_id']} with oxidation states.")

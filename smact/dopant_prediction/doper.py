@@ -326,13 +326,13 @@ class Doper:
 
         for dopants in self.results.values():
             if plot_value == "probability":
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, y, _, _, _ in dopants.get("sorted")}
+                dict_results = {utilities.parse_spec(row[0])[0]: row[2] for row in dopants.get("sorted")}
             elif plot_value == "similarity":
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, y, _, _ in dopants.get("sorted")}
+                dict_results = {utilities.parse_spec(row[0])[0]: row[3] for row in dopants.get("sorted")}
             elif plot_value == "selectivity":
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, _, y, _ in dopants.get("sorted")}
+                dict_results = {utilities.parse_spec(row[0])[0]: row[4] for row in dopants.get("sorted")}
             else:
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, _, _, y in dopants.get("sorted")}
+                dict_results = {utilities.parse_spec(row[0])[0]: row[5] for row in dopants.get("sorted")}
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
                 cmap=cmap,

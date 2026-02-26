@@ -497,10 +497,11 @@ def lattices_are_same(lattice1, lattice2, tolerance: float = 1e-4):
 
 def _gcd_recursive(*args: int) -> int:
     """Get the greatest common denominator among any number of ints."""
+    if len(args) == 1:
+        return args[0]
     if len(args) == 2:
         return gcd(*args)
-    else:
-        return gcd(args[0], _gcd_recursive(*args[1:]))
+    return gcd(args[0], _gcd_recursive(*args[1:]))
 
 
 def _isneutral(oxidations: Sequence[int], stoichs: Sequence[int]) -> bool:
