@@ -75,9 +75,9 @@ def _generate_unique_compounds(
     pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     compounds = list(
         tqdm(
-            pool.imap_unordered(
+            pool.imap_unordered(  # type: ignore[misc]
                 partial(convert_formula, num_elements=num_elements, max_stoich=max_stoich),
-                combinations,
+                combinations,  # type: ignore[arg-type]
             ),
             total=len(combinations),
         )
@@ -117,7 +117,7 @@ def _build_results_df(
     smact_allowed = list(set(smact_allowed))
     print(f"Number of compounds allowed by SMACT: {len(smact_allowed)}")
 
-    results_df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])
+    results_df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])  # type: ignore[call-overload]
     results_df.loc[smact_allowed, "smact_allowed"] = True
 
     if save_path is not None:
@@ -164,9 +164,9 @@ def generate_composition_with_smact(
     pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     results = list(
         tqdm(
-            pool.imap_unordered(
+            pool.imap_unordered(  # type: ignore[misc]
                 partial(smact_filter, threshold=max_stoich, oxidation_states_set=oxidation_states_set),
-                compounds_pauling,
+                compounds_pauling,  # type: ignore[arg-type]
             ),
             total=len(compounds_pauling),
         )
@@ -208,21 +208,22 @@ def generate_composition_with_smact_custom(
 
     ox_filepath = _NAMED_OX_SETS.get(oxidation_states_set, oxidation_states_set)
     ox_states_custom = lookup_element_oxidation_states_custom("all", ox_filepath, copy=False)
+    fr_eneg = Element("Fr").pauling_eneg
     elements_pauling = [
         Element(element)
         for element in ordered_elements(1, max_atomic_num)
-        if element in ox_states_custom
+        if ox_states_custom is not None and element in ox_states_custom  # type: ignore[operator]
         and Element(element).pauling_eneg is not None
-        and Element(element).pauling_eneg >= Element("Fr").pauling_eneg
+        and (fr_eneg is None or Element(element).pauling_eneg >= fr_eneg)  # type: ignore[operator]
     ]
     compounds_pauling = list(itertools.combinations(elements_pauling, num_elements))
 
     pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     results = list(
         tqdm(
-            pool.imap_unordered(
+            pool.imap_unordered(  # type: ignore[misc]
                 partial(smact_filter, threshold=max_stoich, oxidation_states_set=ox_filepath),
-                compounds_pauling,
+                compounds_pauling,  # type: ignore[arg-type]
             ),
             total=len(compounds_pauling),
         )

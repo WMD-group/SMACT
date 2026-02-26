@@ -35,10 +35,10 @@ class DopantPredictionTest(unittest.TestCase):
                 self.assertIs(type(v), list)
 
         # Assert: (cation) higher charges for n-type and lower charges for p-type
-        n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")
-        p_sub_list_cat = result.get("p-type cation substitutions").get("sorted")
-        n_sub_list_an = result.get("n-type anion substitutions").get("sorted")
-        p_sub_list_an = result.get("p-type anion substitutions").get("sorted")
+        n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")  # type: ignore[union-attr]
+        p_sub_list_cat = result.get("p-type cation substitutions").get("sorted")  # type: ignore[union-attr]
+        n_sub_list_an = result.get("n-type anion substitutions").get("sorted")  # type: ignore[union-attr]
+        p_sub_list_an = result.get("p-type anion substitutions").get("sorted")  # type: ignore[union-attr]
 
         for n_atom, p_atom in zip(n_sub_list_cat, p_sub_list_cat, strict=False):
             self.assertGreater(utilities.parse_spec(n_atom[0])[1], cat_charge)
@@ -59,10 +59,10 @@ class DopantPredictionTest(unittest.TestCase):
         test = doper.Doper(test_specie, embedding="skipspecies", use_probability=False)
         result = test.get_dopants()
 
-        n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")
-        p_sub_list_cat = result.get("p-type cation substitutions").get("sorted")
-        n_sub_list_an = result.get("n-type anion substitutions").get("sorted")
-        p_sub_list_an = result.get("p-type anion substitutions").get("sorted")
+        n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")  # type: ignore[union-attr]
+        p_sub_list_cat = result.get("p-type cation substitutions").get("sorted")  # type: ignore[union-attr]
+        n_sub_list_an = result.get("n-type anion substitutions").get("sorted")  # type: ignore[union-attr]
+        p_sub_list_an = result.get("p-type anion substitutions").get("sorted")  # type: ignore[union-attr]
 
         # Create a list of the results
         results = [n_sub_list_cat, p_sub_list_cat, n_sub_list_an, p_sub_list_an]

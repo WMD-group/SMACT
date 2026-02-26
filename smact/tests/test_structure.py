@@ -70,12 +70,12 @@ def generate_test_structure(comp: str) -> bool:
     return True
 
 
-@contextmanager
-def ignore_warnings(logger: logging.Logger) -> int:
+@contextmanager  # type: ignore[arg-type]
+def ignore_warnings(logger: logging.Logger) -> int:  # type: ignore[return]
     """Ignore logging warnings."""
     log_lvl_buff = logger.getEffectiveLevel()
     logger.setLevel(logging.ERROR)
-    yield log_lvl_buff
+    yield log_lvl_buff  # type: ignore[return]
     logger.setLevel(log_lvl_buff)
 
 
@@ -104,7 +104,7 @@ class StructureTest(unittest.TestCase):
 
         for si, sj in zip(s1.sites, s2.sites, strict=False):
             for c1, c2 in zip(si, sj, strict=False):
-                self.assertAlmostEqual(c1, c2, places=places)
+                self.assertAlmostEqual(c1, c2, places=places)  # type: ignore[arg-type]
 
     def test_as_poscar(self):
         """Test POSCAR generation."""
@@ -146,9 +146,9 @@ class StructureTest(unittest.TestCase):
         """Test generation of SmactStructure from a pymatgen Structure."""
         with open(TEST_PY_STRUCT) as f:
             d = json.load(f)
-            py_structure = pymatgen.core.Structure.from_dict(d)
+            py_structure = pymatgen.core.Structure.from_dict(d)  # type: ignore[attr-defined]
 
-        with ignore_warnings(smact.structure_prediction.logger):
+        with ignore_warnings(smact.structure_prediction.logger):  # type: ignore[attr-defined]
             s1 = SmactStructure.from_py_struct(py_structure)
 
         s2 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
@@ -159,9 +159,9 @@ class StructureTest(unittest.TestCase):
         """Test generation of SmactStructure from a pymatgen Structure using ICSD statistics to determine oxidation states."""
         with open(TEST_PY_STRUCT) as f:
             d = json.load(f)
-            py_structure = pymatgen.core.Structure.from_dict(d)
+            py_structure = pymatgen.core.Structure.from_dict(d)  # type: ignore[attr-defined]
 
-        with ignore_warnings(smact.structure_prediction.logger):
+        with ignore_warnings(smact.structure_prediction.logger):  # type: ignore[attr-defined]
             s1 = SmactStructure.from_py_struct(py_structure, determine_oxi="comp_ICSD")
 
         s2 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
@@ -251,7 +251,7 @@ class StructureTest(unittest.TestCase):
             with self.subTest(comp=comp):
                 comp_file = os.path.join(files_dir, f"{comp}.txt")
                 local_struct = SmactStructure.from_file(comp_file)
-                mp_struct = SmactStructure.from_mp(species, api_key)
+                mp_struct = SmactStructure.from_mp(species, api_key)  # type: ignore[arg-type]
                 self.assertEqual(local_struct, mp_struct)
 
     def test_hash(self):
@@ -267,28 +267,28 @@ class StructureTest(unittest.TestCase):
     def test_sanitise_species_error_branches(self):
         """_sanitise_species validation error branches (lines 199, 201, 203, 211, 223)."""
         with pytest.raises(TypeError):  # line 199: not a list
-            SmactStructure._sanitise_species("not_a_list")
+            SmactStructure._sanitise_species("not_a_list")  # type: ignore[arg-type]
         with pytest.raises(ValueError):  # line 201: empty list
             SmactStructure._sanitise_species([])
         with pytest.raises(TypeError):  # line 203: list of non-tuples
-            SmactStructure._sanitise_species(["not_a_tuple"])
+            SmactStructure._sanitise_species(["not_a_tuple"])  # type: ignore[arg-type]
         with pytest.raises(ValueError):  # line 211: tuple has wrong length
-            SmactStructure._sanitise_species([("a", "b", "c", "d")])
+            SmactStructure._sanitise_species([("a", "b", "c", "d")])  # type: ignore[arg-type]
         with pytest.raises(TypeError):  # line 223: first element is not str or Species
-            SmactStructure._sanitise_species([(42, 2, 1)])
+            SmactStructure._sanitise_species([(42, 2, 1)])  # type: ignore[arg-type]
 
     def test_parse_py_sites_type_error(self):
         """SmactStructure.__parse_py_sites raises TypeError for non-Structure input (line 250)."""
         with pytest.raises(TypeError, match=r"pymatgen\.core\.Structure"):
-            SmactStructure._SmactStructure__parse_py_sites("not_a_structure")
+            SmactStructure._SmactStructure__parse_py_sites("not_a_structure")  # type: ignore[attr-defined]
 
     def test_parse_py_sites_unit_charge(self):
         """__parse_py_sites inserts '1' for unit-charge species like Na+ (line 262)."""
         # NaCl decorated by BV gives Na+ and Cl- — unit charges trigger line 262
-        nacl = pymatgen.core.Structure.from_spacegroup(
-            "Fm-3m", pymatgen.core.Lattice.cubic(5.6), ["Na", "Cl"], [[0, 0, 0], [0.5, 0.5, 0.5]]
+        nacl = pymatgen.core.Structure.from_spacegroup(  # type: ignore[attr-defined]
+            "Fm-3m", pymatgen.core.Lattice.cubic(5.6), ["Na", "Cl"], [[0, 0, 0], [0.5, 0.5, 0.5]]  # type: ignore[attr-defined]
         )
-        with ignore_warnings(smact.structure_prediction.logger):
+        with ignore_warnings(smact.structure_prediction.logger):  # type: ignore[attr-defined]
             s = SmactStructure.from_py_struct(nacl, determine_oxi="BV")
         self.assertIsInstance(s, SmactStructure)
         # Confirm Na+1 and Cl-1 are present
@@ -300,8 +300,8 @@ class StructureTest(unittest.TestCase):
         """__parse_py_sites assigns charge=0 when species string has no digits (lines 282-283)."""
         # A plain (undecorated) Structure used with determine_oxi='predecorated'
         # yields species_string = 'Fe' (no digits) → else branch
-        fe_struct = pymatgen.core.Structure(pymatgen.core.Lattice.cubic(2.87), ["Fe"], [[0, 0, 0]])
-        with ignore_warnings(smact.structure_prediction.logger):
+        fe_struct = pymatgen.core.Structure(pymatgen.core.Lattice.cubic(2.87), ["Fe"], [[0, 0, 0]])  # type: ignore[attr-defined]
+        with ignore_warnings(smact.structure_prediction.logger):  # type: ignore[attr-defined]
             s = SmactStructure.from_py_struct(fe_struct, determine_oxi="predecorated")
         self.assertIsInstance(s, SmactStructure)
         self.assertEqual(s.species[0][1], 0)  # charge = 0
@@ -309,24 +309,24 @@ class StructureTest(unittest.TestCase):
     def test_from_py_struct_type_error(self):
         """from_py_struct raises TypeError when given a non-Structure (line 307)."""
         with pytest.raises(TypeError, match=r"pymatgen\.core\.Structure"):
-            SmactStructure.from_py_struct("not_a_structure")
+            SmactStructure.from_py_struct("not_a_structure")  # type: ignore[arg-type]
 
     def test_from_py_struct_both_success(self):
         """from_py_struct with determine_oxi='both' where BV succeeds (lines 319-323)."""
         with open(TEST_PY_STRUCT) as f:
-            py_structure = pymatgen.core.Structure.from_dict(json.load(f))
-        with ignore_warnings(smact.structure_prediction.logger):
+            py_structure = pymatgen.core.Structure.from_dict(json.load(f))  # type: ignore[attr-defined]
+        with ignore_warnings(smact.structure_prediction.logger):  # type: ignore[attr-defined]
             s = SmactStructure.from_py_struct(py_structure, determine_oxi="both")
         self.assertIsInstance(s, SmactStructure)
 
     def test_from_py_struct_both_bv_fallback(self):
         """from_py_struct with determine_oxi='both' falls back to comp_ICSD when BV fails (lines 324-329)."""
         with open(TEST_PY_STRUCT) as f:
-            py_structure = pymatgen.core.Structure.from_dict(json.load(f))
+            py_structure = pymatgen.core.Structure.from_dict(json.load(f))  # type: ignore[attr-defined]
 
         with (
             patch.object(BVAnalyzer, "get_oxi_state_decorated_structure", side_effect=ValueError("BV failed")),
-            ignore_warnings(smact.structure_prediction.logger),
+            ignore_warnings(smact.structure_prediction.logger),  # type: ignore[attr-defined]
         ):
             s = SmactStructure.from_py_struct(py_structure, determine_oxi="both")
         self.assertIsInstance(s, SmactStructure)
@@ -334,16 +334,16 @@ class StructureTest(unittest.TestCase):
     def test_from_py_struct_predecorated(self):
         """from_py_struct with determine_oxi='predecorated' uses structure as-is (line 331)."""
         with open(TEST_PY_STRUCT) as f:
-            py_structure = pymatgen.core.Structure.from_dict(json.load(f))
+            py_structure = pymatgen.core.Structure.from_dict(json.load(f))  # type: ignore[attr-defined]
         decorated = BVAnalyzer().get_oxi_state_decorated_structure(py_structure)
-        with ignore_warnings(smact.structure_prediction.logger):
+        with ignore_warnings(smact.structure_prediction.logger):  # type: ignore[attr-defined]
             s = SmactStructure.from_py_struct(decorated, determine_oxi="predecorated")
         self.assertIsInstance(s, SmactStructure)
 
     def test_from_py_struct_invalid_determine_oxi(self):
         """from_py_struct raises ValueError for unknown determine_oxi (lines 333-336)."""
         with open(TEST_PY_STRUCT) as f:
-            py_structure = pymatgen.core.Structure.from_dict(json.load(f))
+            py_structure = pymatgen.core.Structure.from_dict(json.load(f))  # type: ignore[attr-defined]
         with pytest.raises(ValueError, match="determine_oxi"):
             SmactStructure.from_py_struct(py_structure, determine_oxi="unknown")
 
@@ -366,7 +366,7 @@ class StructureTest(unittest.TestCase):
     def test_from_mp_mocked_new_api(self):
         """from_mp via mocked MPResterNew covers lines 399-446."""
         with open(TEST_PY_STRUCT) as f:
-            real_struct = pymatgen.core.Structure.from_dict(json.load(f))
+            real_struct = pymatgen.core.Structure.from_dict(json.load(f))  # type: ignore[attr-defined]
 
         mock_cm = MagicMock()
         mock_cm.materials.summary.search.return_value = [real_struct]
@@ -378,15 +378,15 @@ class StructureTest(unittest.TestCase):
         with (
             patch.object(sp_struct, "MPResterNew", new=mock_rester),
             patch.object(sp_struct, "HAS_MP_API", new=True),
-            ignore_warnings(smact.structure_prediction.logger),
+            ignore_warnings(smact.structure_prediction.logger),  # type: ignore[attr-defined]
         ):
-            s = SmactStructure.from_mp(species, api_key="x" * 32)
+            s = SmactStructure.from_mp(species, api_key="x" * 32)  # type: ignore[arg-type]
         self.assertIsInstance(s, SmactStructure)
 
     def test_from_mp_mocked_legacy_api(self):
         """from_mp via mocked legacy MPRester covers lines 391-395."""
         with open(TEST_PY_STRUCT) as f:
-            real_struct = pymatgen.core.Structure.from_dict(json.load(f))
+            real_struct = pymatgen.core.Structure.from_dict(json.load(f))  # type: ignore[attr-defined]
 
         mock_cm = MagicMock()
         mock_cm.query.return_value = [{"structure": real_struct}]
@@ -398,15 +398,15 @@ class StructureTest(unittest.TestCase):
         with (
             patch.object(sp_struct, "MPRester", new=mock_rester),
             patch.object(sp_struct, "HAS_LEGACY_MPRESTER", new=True),
-            ignore_warnings(smact.structure_prediction.logger),
+            ignore_warnings(smact.structure_prediction.logger),  # type: ignore[attr-defined]
         ):
-            s = SmactStructure.from_mp(species, api_key="short_key")
+            s = SmactStructure.from_mp(species, api_key="short_key")  # type: ignore[arg-type]
         self.assertIsInstance(s, SmactStructure)
 
     def test_from_mp_mocked_legacy_32char(self):
         """from_mp with 32-char key + no mp_api + legacy MPRester covers lines 406-407."""
         with open(TEST_PY_STRUCT) as f:
-            real_struct = pymatgen.core.Structure.from_dict(json.load(f))
+            real_struct = pymatgen.core.Structure.from_dict(json.load(f))  # type: ignore[attr-defined]
 
         mock_cm = MagicMock()
         mock_cm.get_structures.return_value = [real_struct]
@@ -419,15 +419,15 @@ class StructureTest(unittest.TestCase):
             patch.object(sp_struct, "MPRester", new=mock_rester),
             patch.object(sp_struct, "HAS_MP_API", new=False),
             patch.object(sp_struct, "HAS_LEGACY_MPRESTER", new=True),
-            ignore_warnings(smact.structure_prediction.logger),
+            ignore_warnings(smact.structure_prediction.logger),  # type: ignore[attr-defined]
         ):
-            s = SmactStructure.from_mp(species, api_key="x" * 32)
+            s = SmactStructure.from_mp(species, api_key="x" * 32)  # type: ignore[arg-type]
         self.assertIsInstance(s, SmactStructure)
 
     def test_from_mp_determine_oxi_branches(self):
         """from_mp with comp_ICSD, both, and invalid determine_oxi (lines 420-437)."""
         with open(TEST_PY_STRUCT) as f:
-            real_struct = pymatgen.core.Structure.from_dict(json.load(f))
+            real_struct = pymatgen.core.Structure.from_dict(json.load(f))  # type: ignore[attr-defined]
 
         def make_mock_rester(return_val):
             mock_cm = MagicMock()
@@ -444,18 +444,18 @@ class StructureTest(unittest.TestCase):
         with (
             patch.object(sp_struct, "MPResterNew", new=make_mock_rester(real_struct)),
             patch.object(sp_struct, "HAS_MP_API", new=True),
-            ignore_warnings(smact.structure_prediction.logger),
+            ignore_warnings(smact.structure_prediction.logger),  # type: ignore[attr-defined]
         ):
-            s = SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="comp_ICSD")
+            s = SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="comp_ICSD")  # type: ignore[arg-type]
             self.assertIsInstance(s, SmactStructure)
 
         # both branch — BV succeeds (lines 426-430)
         with (
             patch.object(sp_struct, "MPResterNew", new=make_mock_rester(real_struct)),
             patch.object(sp_struct, "HAS_MP_API", new=True),
-            ignore_warnings(smact.structure_prediction.logger),
+            ignore_warnings(smact.structure_prediction.logger),  # type: ignore[attr-defined]
         ):
-            s = SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="both")
+            s = SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="both")  # type: ignore[arg-type]
             self.assertIsInstance(s, SmactStructure)
 
         # both branch — BV fails, falls back to comp_ICSD (lines 431-435)
@@ -463,9 +463,9 @@ class StructureTest(unittest.TestCase):
             patch.object(sp_struct, "MPResterNew", new=make_mock_rester(real_struct)),
             patch.object(sp_struct, "HAS_MP_API", new=True),
             patch.object(BVAnalyzer, "get_oxi_state_decorated_structure", side_effect=ValueError("BV failed")),
-            ignore_warnings(smact.structure_prediction.logger),
+            ignore_warnings(smact.structure_prediction.logger),  # type: ignore[attr-defined]
         ):
-            s = SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="both")
+            s = SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="both")  # type: ignore[arg-type]
             self.assertIsInstance(s, SmactStructure)
 
         # invalid determine_oxi → ValueError (lines 436-439)
@@ -474,7 +474,7 @@ class StructureTest(unittest.TestCase):
             patch.object(sp_struct, "HAS_MP_API", new=True),
             pytest.raises(ValueError, match="determine_oxi"),
         ):
-            SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="invalid_oxi")
+            SmactStructure.from_mp(species, api_key=api_key_32, determine_oxi="invalid_oxi")  # type: ignore[arg-type]
 
     def test_from_mp_empty_result_raises(self):
         """from_mp raises ValueError when API returns no structures (line 409-410)."""
@@ -498,7 +498,7 @@ class StructureTest(unittest.TestCase):
             patch.object(sp_struct, "HAS_LEGACY_MPRESTER", new=False),
             pytest.raises(ImportError, match="pymatgen legacy MPRester is not available"),
         ):
-            SmactStructure.from_mp(species, api_key="short_key")
+            SmactStructure.from_mp(species, api_key="short_key")  # type: ignore[arg-type]
 
     def test_from_mp_no_legacy_mprester_no_mp_api(self):
         """from_mp raises ImportError when HAS_LEGACY_MPRESTER=False, HAS_MP_API=False, 32-char key (lines 402-405)."""
@@ -509,14 +509,14 @@ class StructureTest(unittest.TestCase):
             patch.object(sp_struct, "HAS_MP_API", new=False),
             pytest.raises(ImportError, match="Neither mp-api nor pymatgen legacy MPRester"),
         ):
-            SmactStructure.from_mp(species, api_key=api_key_32)
+            SmactStructure.from_mp(species, api_key=api_key_32)  # type: ignore[arg-type]
 
     def test_as_py_struct(self):
         s1 = SmactStructure.from_file(os.path.join(files_dir, "CaTiO3.txt"))
         s1_pym = s1.as_py_struct()
         with open(TEST_PY_STRUCT) as f:
             d = json.load(f)
-        py_structure = pymatgen.core.Structure.from_dict(d)
+        py_structure = pymatgen.core.Structure.from_dict(d)  # type: ignore[attr-defined]
 
         self.assertEqual(s1_pym, py_structure)
 
@@ -603,7 +603,7 @@ class StructureDBTest(unittest.TestCase):
                 self.assertEqual(self.db.get_with_species(spec, self.TEST_TABLE), expected)
 
         mp_strucs = [
-            pymatgen.core.Structure.from_file(os.path.join(files_dir, f))
+            pymatgen.core.Structure.from_file(os.path.join(files_dir, f))  # type: ignore[attr-defined]
             for f in ["CaTiO3.json", "NaCl.json", "Fe3O4.json"]
         ]
         mp_data = [
@@ -644,7 +644,7 @@ class StructureDBTest(unittest.TestCase):
             db = StructureDB(db_path)
             db.add_table("test_none")
             struct = SmactStructure.from_file(os.path.join(files_dir, "NaCl.txt"))
-            added = db.add_structs([None, struct, None], "test_none")
+            added = db.add_structs([None, struct, None], "test_none")  # type: ignore[arg-type]
             self.assertEqual(added, 1)
         finally:
             os.remove(db_path)
@@ -681,7 +681,7 @@ class CationMutatorTest(unittest.TestCase):
         ]
         labels = ["A", "B", "C"]
 
-        exp_lambda = pd.DataFrame(lambda_dat, index=labels, columns=labels)
+        exp_lambda = pd.DataFrame(lambda_dat, index=labels, columns=labels)  # type: ignore[call-overload]
 
         assert_frame_equal(
             self.test_mutator.lambda_tab,

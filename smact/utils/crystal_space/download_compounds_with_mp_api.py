@@ -18,7 +18,7 @@ def download_mp_data(
     mp_api_key: str | None = None,
     num_elements: int = 2,
     max_stoich: int = 8,
-    save_dir: str = "data/binary/mp_api",
+    save_dir: str | Path = "data/binary/mp_api",
     request_interval: float = 0.1,
 ):
     """

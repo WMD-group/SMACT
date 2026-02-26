@@ -20,10 +20,10 @@ if TYPE_CHECKING:
     from ase import Atoms
 
 try:
-    from pyspglib import spglib
+    from pyspglib import spglib  # type: ignore[import-untyped]
 except ImportError:
     try:
-        import spglib
+        import spglib  # type: ignore[import-untyped]
     except ImportError as e:  # pragma: no cover
         raise ImportError("Could not load spglib. Install it with: pip install spglib") from e
 
@@ -41,8 +41,8 @@ def get_sg(lattice: Atoms) -> Spacegroup:
         sg (int): integer number of the spacegroup
 
     """
-    spacegroup = spglib.get_spacegroup(lattice, symprec=1e-5)
-    space_split = spacegroup.split()
+    spacegroup = spglib.get_spacegroup(lattice, symprec=1e-5)  # type: ignore[arg-type]
+    space_split = spacegroup.split()  # type: ignore[union-attr]
     spg_num = space_split[1].replace("(", "").replace(")", "")
     return Spacegroup(int(spg_num))
 
@@ -109,7 +109,7 @@ def make_substitution(lattice: Atoms, site: list[float], new_species: str) -> At
     lattice_sites = new_lattice.get_scaled_positions()
     for lattice_site in lattice_sites:
         if smact.are_eq(lattice_site, site):
-            new_lattice[i].symbol = new_species
+            new_lattice[i].symbol = new_species  # type: ignore[assignment]
         i = i + 1
     return new_lattice
 

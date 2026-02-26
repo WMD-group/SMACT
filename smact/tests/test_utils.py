@@ -82,7 +82,7 @@ class TestComposition(unittest.TestCase):
         comp1 = comp_maker(self.mock_filter_output[0])
         comp2 = comp_maker(self.mock_filter_output[1])
         comp3 = comp_maker(self.mock_filter_output[2])
-        comp4 = comp_maker(self.smact_filter_output[1])
+        comp4 = comp_maker(self.smact_filter_output[1])  # type: ignore[arg-type]
         for comp in [comp1, comp2, comp3, comp4]:
             self.assertIsInstance(comp, Composition)
         self.assertEqual(Composition("FeO"), comp2)
@@ -95,7 +95,7 @@ class TestComposition(unittest.TestCase):
         form1 = formula_maker(self.mock_filter_output[0])
         form2 = formula_maker(self.mock_filter_output[1])
         form3 = formula_maker(self.mock_filter_output[2])
-        form4 = formula_maker(self.smact_filter_output[1])
+        form4 = formula_maker(self.smact_filter_output[1])  # type: ignore[arg-type]
         self.assertEqual(form1, "FeO")
         self.assertEqual(form2, "FeO")
         self.assertEqual(form1, form2)
@@ -177,7 +177,7 @@ class TestComposition(unittest.TestCase):
         """Test smact_filter raises ValueError for invalid return_output"""
         els = [Element("Li"), Element("O")]
         with pytest.raises(ValueError):
-            smact_filter(els, threshold=2, return_output="invalid")
+            smact_filter(els, threshold=2, return_output="invalid")  # type: ignore[arg-type]
 
 
 class TestCrystalSpace(unittest.TestCase):
@@ -377,12 +377,12 @@ class OxidationStatesTest(unittest.TestCase):
 
         # Get the original dataframe for comparison
         df_main = self.ox_filter.get_species_occurrences_df()
-        max_proportions = df_main.groupby("element")["species_proportion (%)"].max()
+        max_proportions = df_main.groupby("element")["species_proportion (%)"].max()  # type: ignore[union-attr]
 
         # Verify that only species with maximum proportion for each element are included
         for species in species_list_main:
             element = species.split("+")[0].split("-")[0].rstrip("0123456789")  # Extract element from species string
-            species_proportion = df_main[df_main["species"] == species]["species_proportion (%)"].iloc[0]
+            species_proportion = df_main[df_main["species"] == species]["species_proportion (%)"].iloc[0]  # type: ignore[union-attr]
             self.assertEqual(species_proportion, max_proportions[element])
 
         # Test specific commonality threshold
@@ -393,7 +393,7 @@ class OxidationStatesTest(unittest.TestCase):
         # Verify that all species meet the threshold requirement
         df_threshold = self.ox_filter.get_species_occurrences_df()
         for species in species_list_threshold:
-            proportion = df_threshold[df_threshold["species"] == species]["species_proportion (%)"].iloc[0]
+            proportion = df_threshold[df_threshold["species"] == species]["species_proportion (%)"].iloc[0]  # type: ignore[union-attr]
             self.assertGreaterEqual(proportion, threshold)
 
         # Test that "main" returns different results than threshold-based filtering
@@ -405,12 +405,12 @@ class OxidationStatesTest(unittest.TestCase):
         species_occurrences_df = self.ox_filter.get_species_occurrences_df(consensus=1)
         self.assertIsInstance(species_occurrences_df, pd.DataFrame)
         self.assertEqual(
-            species_occurrences_df.columns.tolist(),
+            species_occurrences_df.columns.tolist(),  # type: ignore[union-attr]
             ["element", "species", "results_count", "species_proportion (%)"],
         )
         self.assertEqual(species_occurrences_df.shape, (490, 4))
-        self.assertEqual(species_occurrences_df.iloc[0]["species"], "O2-")
-        self.assertEqual(species_occurrences_df.iloc[0]["results_count"], 116910)
+        self.assertEqual(species_occurrences_df.iloc[0]["species"], "O2-")  # type: ignore[union-attr]
+        self.assertEqual(species_occurrences_df.iloc[0]["results_count"], 116910)  # type: ignore[union-attr]
 
 
 class TestSpeciesParsing(unittest.TestCase):

@@ -8,7 +8,10 @@ import itertools
 import os
 import warnings
 from itertools import combinations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 from pymatgen.core import Composition
 
@@ -20,9 +23,6 @@ from smact.metallicity import metallicity_score
 from smact.utils.compat import StrEnum
 from smact.utils.composition import composition_dict_maker, formula_maker
 from smact.utils.oxidation import ICSD24OxStatesFilter
-
-if TYPE_CHECKING:
-    import pymatgen
 
 __all__ = [
     "MIXED_VALENCE_ELEMENTS",
@@ -100,9 +100,9 @@ def _format_output(
 
 
 def pauling_test(
-    oxidation_states: list[int],
-    electronegativities: list[float],
-    symbols: list[str] | None = None,
+    oxidation_states: Sequence[int],
+    electronegativities: Sequence[float | None],
+    symbols: Sequence[str] | None = None,
     repeat_anions: bool = True,
     repeat_cations: bool = True,
     threshold: float = 0.0,
@@ -153,8 +153,8 @@ def pauling_test(
 
 
 def _no_repeats(
-    oxidation_states: list[int],
-    symbols: list[str],
+    oxidation_states: Sequence[int],
+    symbols: Sequence[str],
     repeat_anions: bool = False,
     repeat_cations: bool = False,
 ):
@@ -191,9 +191,9 @@ def _no_repeats(
 
 
 def pauling_test_old(
-    ox: list[int],
-    paul: list[float],
-    symbols: list[str],
+    ox: Sequence[int],
+    paul: Sequence[float | None],
+    symbols: Sequence[str],
     repeat_anions: bool = True,
     repeat_cations: bool = True,
     threshold: float = 0.0,
@@ -266,7 +266,7 @@ def pauling_test_old(
     return not max(positive) - min(negative) > threshold
 
 
-def eneg_states_test(ox_states: list[int], enegs: list[float]):
+def eneg_states_test(ox_states: Sequence[int], enegs: Sequence[float | None]):
     """
     Internal function for checking electronegativity criterion.
 
@@ -299,7 +299,7 @@ def eneg_states_test(ox_states: list[int], enegs: list[float]):
     return True
 
 
-def eneg_states_test_threshold(ox_states: list[int], enegs: list[float], threshold: float | None = 0):
+def eneg_states_test_threshold(ox_states: Sequence[int], enegs: Sequence[float | None], threshold: float = 0):
     """
     Internal function for checking electronegativity criterion.
 
@@ -327,6 +327,8 @@ def eneg_states_test_threshold(ox_states: list[int], enegs: list[float], thresho
 
     """
     for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=False)), 2):
+        if eneg1 is None or eneg2 is None:
+            return False
         if ((ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold)) or (
             (ox1 < 0) and (ox2 > 0) and (eneg2 - eneg1) > threshold
         ):
@@ -334,7 +336,7 @@ def eneg_states_test_threshold(ox_states: list[int], enegs: list[float], thresho
     return True
 
 
-def eneg_states_test_alternate(ox_states: list[int], enegs: list[float]):
+def eneg_states_test_alternate(ox_states: Sequence[int], enegs: Sequence[float | None]):
     """
     Internal function for checking electronegativity criterion.
 
@@ -365,6 +367,8 @@ def eneg_states_test_alternate(ox_states: list[int], enegs: list[float]):
     )
     min_cation_eneg, max_anion_eneg = 10, 0
     for ox_state, eneg in zip(ox_states, enegs, strict=False):
+        if eneg is None:
+            return False
         if ox_state < 1:
             min_cation_eneg = min(eneg, min_cation_eneg)
         else:
@@ -405,10 +409,10 @@ def ml_rep_generator(
     ML_rep = [0 for i in range(103)]
     if isinstance(composition[0], Element):
         for element, stoich in zip(composition, stoichs, strict=False):
-            ML_rep[int(element.number) - 1] += stoich
+            ML_rep[int(element.number) - 1] += stoich  # type: ignore[union-attr]
     else:
         for element, stoich in zip(composition, stoichs, strict=False):
-            ML_rep[int(Element(element).number) - 1] += stoich
+            ML_rep[int(Element(element).number) - 1] += stoich  # type: ignore[arg-type]
 
     return [float(i) / sum(ML_rep) for i in ML_rep]
 
@@ -503,10 +507,13 @@ def smact_filter(
             "Cannot enumerate charge-neutral compositions."
         )
 
+    # After the guard, ox_combos contains only non-None, non-empty lists of ints
+    ox_combos_typed = cast("list[list[int]]", ox_combos)
+
     compositions = []
-    for ox_states in itertools.product(*ox_combos):
+    for ox_states in itertools.product(*ox_combos_typed):
         # Test for charge balance
-        cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
+        cn_e, cn_r = neutral_ratios(list(ox_states), stoichs=stoichs, threshold=threshold)
         # Electronegativity test
         if cn_e and pauling_test(ox_states, electronegs):
             for ratio in cn_r:
@@ -524,7 +531,7 @@ def smact_filter(
 
 
 def smact_validity(
-    composition: pymatgen.core.Composition | str,
+    composition: Composition | str,
     use_pauling_test: bool = True,
     include_alloys: bool = True,
     check_metallicity: bool = False,
@@ -598,7 +605,7 @@ def smact_validity(
         ox_filter = ICSD24OxStatesFilter()
         filtered_df = ox_filter.filter(consensus=consensus, include_zero=include_zero, commonality=commonality)
         oxidation_dict = {
-            row["element"]: [int(x) for x in row["oxidation_state"].split()] for _, row in filtered_df.iterrows()
+            row["element"]: [int(x) for x in str(row["oxidation_state"]).split()] for _, row in filtered_df.iterrows()
         }
         ox_combos = []
         for el in smact_elems:
@@ -631,15 +638,18 @@ def smact_validity(
     if any(ox is None or len(ox) == 0 for ox in ox_combos):
         return False
 
+    # After the guard, ox_combos contains only non-None, non-empty lists of ints
+    ox_combos_valid = cast("list[list[int]]", ox_combos)
+
     # Check all possible oxidation state combinations
-    ox_valid = _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
+    ox_valid = _is_valid_oxi_state(ox_combos_valid, stoichs, threshold, electronegs, use_pauling_test)
 
     if ox_valid:
         return True
     elif mixed_valence and any(el in MIXED_VALENCE_ELEMENTS for el in elem_symbols):
         # Guard against combinatorial blow-up before expanding
         projected = 1
-        for el, ox, count in zip(elem_symbols, ox_combos, stoichs, strict=False):
+        for el, ox, count in zip(elem_symbols, ox_combos_valid, stoichs, strict=False):
             projected *= len(ox) ** count[0] if el in MIXED_VALENCE_ELEMENTS else len(ox)
         if projected > 1_000_000:
             warnings.warn(
@@ -652,8 +662,10 @@ def smact_validity(
         # threshold is computed from the original stoichs and remains valid after
         # expansion: expanded MV sites have stoich (1,) ≤ threshold, and
         # non-MV sites retain their original stoichs which are also ≤ threshold.
-        ox_combos, stoichs, electronegs = _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols)
-        return _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
+        ox_combos_valid, stoichs, electronegs = _expand_mixed_valence_comp(
+            ox_combos_valid, stoichs, electronegs, elem_symbols
+        )
+        return _is_valid_oxi_state(ox_combos_valid, stoichs, threshold, electronegs, use_pauling_test)
 
     return False
 
@@ -682,7 +694,7 @@ def _expand_mixed_valence_comp(
 
 def _is_valid_oxi_state(
     ox_combos: list[list[int]],
-    stoichs: list[tuple[int, ...]],
+    stoichs: Sequence[Sequence[int]],
     threshold: int,
     electronegs: list[float | None],
     use_pauling_test: bool = True,

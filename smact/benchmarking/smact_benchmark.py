@@ -17,7 +17,7 @@ class MutatorBenchmarker:
         self.__pair_corr()
 
     @timeit
-    def __cm_setup(self) -> CationMutator:
+    def __cm_setup(self):
         """Create a CationMutator."""
         self.cm = CationMutator.from_json()
 

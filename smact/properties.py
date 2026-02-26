@@ -128,45 +128,53 @@ def compound_electroneg(
         Electronegativity (float) : Estimated electronegativity (no units).
 
     """
+    if elements is None:
+        raise TypeError("Please supply a list of element symbols or SMACT Element objects")
+    if stoichs is None:
+        raise TypeError("Please supply stoichiometries")
+
     if isinstance(elements[0], str):
-        elementlist = [smact.Element(i) for i in elements]
+        elementlist: list[smact.Element] = [smact.Element(i) for i in elements]  # type: ignore[arg-type]
     elif isinstance(elements[0], smact.Element):
-        elementlist = elements
+        elementlist = list(elements)  # type: ignore[arg-type]
     else:
         raise TypeError("Please supply a list of element symbols or SMACT Element objects")
 
-    stoichslist = stoichs
+    stoichslist: list[int | float] = list(stoichs)
     # Convert stoichslist from string to float
     stoichslist = list(map(float, stoichslist))
 
     # Get electronegativity values for each element
 
+    eneg_list: list[float]
     if source == "Mulliken":
-        elementlist = [(el.ionpot + el.e_affinity) / 2.0 for el in elementlist]
+        eneg_list = [(el.ionpot + el.e_affinity) / 2.0 for el in elementlist]
 
     elif source == "Pauling":
-        elementlist = [(2.86 * el.pauling_eneg) for el in elementlist]
+        eneg_list = [(2.86 * el.pauling_eneg) for el in elementlist if el.pauling_eneg is not None]
+        if len(eneg_list) != len(elementlist):
+            raise ValueError("Some elements have no Pauling electronegativity; cannot use Pauling source.")
     else:
         raise ValueError(f"Electronegativity type '{source}' is not recognised")
 
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.
     if verbose:
-        print("Electronegativities of elements=", elementlist)
+        print("Electronegativities of elements=", eneg_list)
 
     # Raise each electronegativity to its appropriate power
     # to account for stoichiometry.
-    for i in range(len(elementlist)):
-        elementlist[i] = elementlist[i] ** stoichslist[i]
+    for i in range(len(eneg_list)):
+        eneg_list[i] = eneg_list[i] ** stoichslist[i]
 
     # Calculate geometric mean (n-th root of product)
-    prod = np.prod(elementlist)
+    prod = np.prod(eneg_list)
     compelectroneg = (prod) ** (1.0 / (sum(stoichslist)))
 
     if verbose:
         print("Geometric mean = Compound 'electronegativity'=", compelectroneg)
 
-    return compelectroneg
+    return float(compelectroneg)
 
 
 def valence_electron_count(compound: str) -> float:
@@ -189,9 +197,12 @@ def valence_electron_count(compound: str) -> float:
 
     def get_element_valence(element: str) -> int:
         try:
-            return smact.Element(element).num_valence_modified
+            val = smact.Element(element).num_valence_modified
         except NameError:
             raise ValueError(f"Valence data not found for element: {element}") from None
+        if val is None:
+            raise ValueError(f"Valence data not found for element: {element}")
+        return val
 
     element_stoich = parse_formula(compound)
 

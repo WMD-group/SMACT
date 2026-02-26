@@ -112,7 +112,7 @@ class OxidationStateProbabilityFinder:
         """Returns a list of species for which there exists data in the probability table used."""
         return self._included_species
 
-    def compound_probability(self, structure: Structure, ignore_stoichiometry: bool = True) -> float:
+    def compound_probability(self, structure: Structure | list, ignore_stoichiometry: bool = True) -> float:
         """
         Calculate overall probability for structure or composition.
 
@@ -133,7 +133,7 @@ class OxidationStateProbabilityFinder:
             if all(isinstance(i, Species) for i in structure):
                 pass
             elif all(isinstance(i, pmgSpecies) for i in structure):
-                structure = [Species(i.symbol, i.oxi_state) for i in structure]
+                structure = [Species(i.symbol, int(i.oxi_state)) for i in structure]  # type: ignore[union-attr]
             else:
                 raise TypeError("Input requires a list of SMACT or Pymatgen species.")
         elif isinstance(structure, Structure):
@@ -143,7 +143,7 @@ class OxidationStateProbabilityFinder:
             structure = [
                 Species(
                     get_el_sp(i.species_string).symbol,
-                    get_el_sp(i.species_string).oxi_state,
+                    int(get_el_sp(i.species_string).oxi_state or 0),  # type: ignore[arg-type]
                 )
                 for i in structure
             ]
@@ -168,7 +168,7 @@ class OxidationStateProbabilityFinder:
 
         # Do the maths
         pair_probs = [self.pair_probability(pair[0], pair[1]) for pair in species_pairs]
-        return mean(pair_probs)
+        return float(mean(pair_probs))
 
 
 def __getattr__(name: str):

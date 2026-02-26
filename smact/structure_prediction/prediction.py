@@ -136,7 +136,7 @@ class StructurePredictor:
                     # Not in the Series
                     continue
 
-                if p > thresh:
+                if thresh is not None and p > thresh:
                     try:
                         self.cm._mutate_structure(parent, alt_spec, diff_spec_str)
                     except ValueError:
@@ -177,8 +177,10 @@ class StructurePredictor:
                 yield (identical, 1.0, identical)
 
         # Ensure that we can obtain a subset of species of the target compound
+        if n_ary is None:
+            return
         if len(species) - n_ary == 0:
-            return None
+            return
         sub_species = itertools.combinations(species, len(species) - n_ary)
         sub_species = list(map(list, sub_species))
 
@@ -221,9 +223,9 @@ class StructurePredictor:
                 # Get species to be substituted
                 # Ensure n species are obtained
 
-                if len(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species)) != n_ary:
+                if len(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species)) != n_ary:  # type: ignore[operator]
                     continue
-                alt_spec = list(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species))
+                alt_spec = list(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species))  # type: ignore[operator]
 
                 # Need to consider p(A,X)p(B,Y) and p(A,Y)p(B,X)
                 # if utilities.parse_spec(alt_spec_1)[1] != diff_species_1[1] and utilities.parse_spec(alt_spec_2)[1] != diff_species_2[1] :
@@ -232,7 +234,7 @@ class StructurePredictor:
 
                 try:
                     p = []
-                    for i in range(n_ary):
+                    for i in range(n_ary):  # type: ignore[arg-type]
                         p.append(diff_sub_probs[i].loc[alt_spec[i]])
                 except KeyError:
                     # Not in the Series
@@ -240,7 +242,7 @@ class StructurePredictor:
 
                 p = np.prod(p)
 
-                if p > thresh:
+                if thresh is not None and p > thresh:
                     try:
                         self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str)
 
@@ -249,6 +251,6 @@ class StructurePredictor:
                         continue
                     yield (
                         self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str),
-                        p,
+                        float(p),
                         parent,
                     )

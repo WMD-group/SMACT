@@ -59,7 +59,7 @@ class ICSD24OxStatesFilter:
 
         filtered_df = filtered_df[
             (filtered_df["results_count"] >= consensus) & (filtered_df["results_count"] != 0)
-        ].reset_index(drop=True)
+        ].reset_index(drop=True)  # type: ignore[union-attr]
 
         element_totals = filtered_df.groupby("element")["results_count"].transform("sum")
         filtered_df["species_proportion (%)"] = filtered_df["results_count"] / element_totals * 100
@@ -67,9 +67,9 @@ class ICSD24OxStatesFilter:
         if commonality == "main":
             filtered_df = (
                 filtered_df.loc[filtered_df.groupby("element")["species_proportion (%)"].idxmax()]
-            ).reset_index(drop=True)
+            ).reset_index(drop=True)  # type: ignore[union-attr]
         else:
-            filtered_df = filtered_df[filtered_df["species_proportion (%)"] >= commonality_threshold].reset_index(
+            filtered_df = filtered_df[filtered_df["species_proportion (%)"] >= commonality_threshold].reset_index(  # type: ignore[union-attr]
                 drop=True
             )
 
@@ -85,7 +85,7 @@ class ICSD24OxStatesFilter:
         consensus: int = 3,
         include_zero: bool = False,
         include_one_oxidation_state: bool = False,
-        commonality: str = "low",
+        commonality: str | float = "low",
     ):
         """Get the filtered ICSD 24 oxidation states list as a list of species.
 
@@ -101,12 +101,12 @@ class ICSD24OxStatesFilter:
         filtered_df = self.filter(consensus, include_zero, commonality)
         species_list = []
         for _, row in filtered_df.iterrows():
-            ox_states = row["oxidation_state"].split(" ")
+            ox_states = str(row["oxidation_state"]).split(" ")
             for ox_state in ox_states:
                 try:
                     species_list.append(
                         unparse_spec(
-                            (row["element"], int(ox_state)),
+                            (str(row["element"]), int(ox_state)),
                             include_one=include_one_oxidation_state,
                         )
                     )
@@ -139,7 +139,7 @@ class ICSD24OxStatesFilter:
 
         species_occurrences_df = species_occurrences_df[
             (species_occurrences_df.results_count >= consensus)
-        ].reset_index(drop=True)
+        ].reset_index(drop=True)  # type: ignore[union-attr]
         species_occurrences_df["species"] = species_occurrences_df.apply(
             lambda x: unparse_spec(
                 (x["element"], x["oxidation_state"]),
@@ -148,12 +148,12 @@ class ICSD24OxStatesFilter:
             axis=1,
         )
         species_occurrences_df = species_occurrences_df[["element", "species", "results_count"]]
-        element_totals = species_occurrences_df.groupby("element")["results_count"].transform("sum")
+        element_totals = species_occurrences_df.groupby("element")["results_count"].transform("sum")  # type: ignore[union-attr]
         species_occurrences_df["species_proportion (%)"] = (
             species_occurrences_df["results_count"] / element_totals * 100
         )
         if sort_by_occurrences:
-            return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)
+            return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)  # type: ignore[union-attr]
         return species_occurrences_df
 
     def write(
@@ -200,7 +200,7 @@ class ICSD24OxStatesFilter:
             for line in final_summary:
                 f.write(line + "\n")
 
-    def _filter_oxidation_states(self, group: pd.DataFrame.groupby, threshold: int):
+    def _filter_oxidation_states(self, group: pd.DataFrame, threshold: int):
         """Filter the oxidation states list by a threshold."""
         filtered_states = group[group["results_count"] >= threshold]
 

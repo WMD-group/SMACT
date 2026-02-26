@@ -21,7 +21,6 @@ import numpy as np
 from pymatgen.util import plotting
 from tabulate import tabulate
 
-import smact
 from smact import data_directory
 from smact.structure_prediction import mutation, utilities
 
@@ -89,15 +88,19 @@ class Doper:
             # Default to Hautier data-mined lambda values from pymatgen
             self.cation_mutator = mutation.CationMutator.from_json()
         self.possible_species = list(self.cation_mutator.specs)
-        self.lambda_threshold = self.cation_mutator.alpha("X", "Y")
-        self.threshold = 1 / self.cation_mutator.Z * np.exp(self.cation_mutator.alpha("X", "Y"))
+        if self.cation_mutator.alpha is not None:
+            self.lambda_threshold = self.cation_mutator.alpha("X", "Y")
+            self.threshold = 1 / self.cation_mutator.Z * np.exp(self.cation_mutator.alpha("X", "Y"))
+        else:
+            self.lambda_threshold = -5.0
+            self.threshold = 1 / self.cation_mutator.Z * np.exp(-5.0)
         self.use_probability = use_probability
         self.results = None
 
     def _get_selectivity(
         self,
-        data_list: list[smact.Element],
-        cations: list[smact.Element],
+        data_list: list[list],
+        cations: list[str],
         sub,
     ):
         data = data_list.copy()

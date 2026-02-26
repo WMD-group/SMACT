@@ -84,8 +84,8 @@ def plot_reducers_embeddings(
     )
 
     # updatee the font size of subplot titles
-    for i in fig["layout"]["annotations"]:
-        i["font"] = dict(size=25)
+    for i in fig["layout"]["annotations"]:  # type: ignore[index]
+        i["font"] = dict(size=25)  # type: ignore[index]
 
     legend_colors = {
         "unlikely": "#D9D9D9",
@@ -111,7 +111,7 @@ def plot_reducers_embeddings(
                     mode="markers",
                     marker=dict(
                         size=8,
-                        color=df_plot["label"].map(legend_colors),
+                        color=df_plot["label"].map(legend_colors),  # type: ignore[arg-type]
                         opacity=0.8,
                         symbol=symbol,
                         line=dict(width=0.5, color="DarkSlateGrey"),

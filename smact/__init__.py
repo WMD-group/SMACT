@@ -30,15 +30,15 @@ from operator import mul as multiply
 from os import path
 from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
 import pandas as pd
 
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, "data")
 # get correct path for datafiles when called from another directory
 from smact import data_loader  # noqa: E402
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
 
 class Element:
@@ -120,6 +120,37 @@ class Element:
 
     """
 
+    # Instance attribute annotations for static type checking
+    coord_envs: list[str] | None
+    covalent_radius: float
+    crustal_abundance: float
+    e_affinity: float
+    eig: float
+    eig_s: float
+    HHI_p: float | None
+    HHI_r: float | None
+    ionpot: float
+    mass: float
+    name: str
+    number: int
+    oxidation_states: list[int] | None
+    oxidation_states_smact14: list[int] | None
+    oxidation_states_icsd16: list[int] | None
+    oxidation_states_sp: list[int] | None
+    oxidation_states_wiki: list[int] | None
+    oxidation_states_icsd24: list[int] | None
+    oxidation_states_custom: list[int] | None
+    dipol: float
+    pauling_eneg: float | None
+    SSE: float | None
+    SSEPauling: float | None
+    symbol: str
+    mendeleev: int | None
+    AtomicWeight: float | None
+    MeltingT: float | None
+    num_valence: int | None
+    num_valence_modified: int | None
+
     def __init__(self, symbol: str, oxi_states_custom_filepath: str | None = None):
         """
         Initialise Element class.
@@ -136,7 +167,7 @@ class Element:
                 self._oxidation_states_custom = data_loader.lookup_element_oxidation_states_custom(
                     symbol, oxi_states_custom_filepath
                 )
-                self.oxidation_states_custom = self._oxidation_states_custom
+                self.oxidation_states_custom = self._oxidation_states_custom  # type: ignore[assignment]
             except TypeError:
                 warnings.warn("Custom oxidation states file not found. Please check the file path.")
                 self.oxidation_states_custom = None
@@ -464,7 +495,7 @@ def lattices_are_same(lattice1, lattice2, tolerance: float = 1e-4):
     return lattices_are_same
 
 
-def _gcd_recursive(*args: Iterable[int]):
+def _gcd_recursive(*args: int) -> int:
     """Get the greatest common denominator among any number of ints."""
     if len(args) == 2:
         return gcd(*args)
@@ -472,7 +503,7 @@ def _gcd_recursive(*args: Iterable[int]):
         return gcd(args[0], _gcd_recursive(*args[1:]))
 
 
-def _isneutral(oxidations: tuple[int, ...], stoichs: tuple[int, ...]):
+def _isneutral(oxidations: Sequence[int], stoichs: Sequence[int]) -> bool:
     """
     Check if set of oxidation states is neutral in given stoichiometry.
 
@@ -486,8 +517,8 @@ def _isneutral(oxidations: tuple[int, ...], stoichs: tuple[int, ...]):
 
 
 def neutral_ratios_iter(
-    oxidations: list[int],
-    stoichs: list[list[int]] | None = None,
+    oxidations: Sequence[int],
+    stoichs: Sequence[Sequence[int]] | None = None,
     threshold: int | None = 5,
 ):
     """
@@ -510,6 +541,8 @@ def neutral_ratios_iter(
 
     """
     if stoichs is None:
+        if threshold is None:
+            raise ValueError("threshold must be an int when stoichs is not provided")
         stoichs = [list(range(1, threshold + 1))] * len(oxidations)
 
     # First filter: remove combinations which have a common denominator
@@ -523,9 +556,9 @@ def neutral_ratios_iter(
 
 
 def neutral_ratios(
-    oxidations: list[int],
-    stoichs: list[list[int]] | None = None,
-    threshold=5,
+    oxidations: Sequence[int],
+    stoichs: Sequence[Sequence[int]] | None = None,
+    threshold: int | None = 5,
 ):
     """
     Get a list of charge-neutral compounds.

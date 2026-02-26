@@ -5,10 +5,10 @@ from __future__ import annotations
 from enum import Enum
 
 try:
-    from enum import StrEnum
+    from enum import StrEnum  # type: ignore[assignment]
 except ImportError:
 
-    class StrEnum(str, Enum):
+    class StrEnum(str, Enum):  # type: ignore[assignment]
         """Backport of Python 3.11's StrEnum for Python 3.10."""
 
         def __str__(self):

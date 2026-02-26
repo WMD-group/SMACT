@@ -16,7 +16,7 @@ def parse_spec(species: str) -> tuple[str, int]:
 
     """
     try:
-        ele, oxi_state = re.match(r"([A-Za-z]+)([0-9]*[\+\-])", species).groups()
+        ele, oxi_state = re.match(r"([A-Za-z]+)([0-9]*[\+\-])", species).groups()  # type: ignore[union-attr]
         # The regex guarantees oxi_state ends in '+' or '-', so this branch
         # is always taken; the else clause is unreachable by construction.
         charge = (int(oxi_state[:-1] or 1)) * (-1 if "-" in oxi_state else 1)

@@ -361,7 +361,7 @@ class TestSequenceFunctions(unittest.TestCase):
             with self.subTest(ox_state_set=ox_state_set):
                 output = smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=ox_state_set)
                 self.assertEqual(
-                    [(r[0], r[1], r[2]) for r in output],
+                    [(r[0], r[1], r[2]) for r in output],  # type: ignore[misc]
                     oxidation_states_sets_results[ox_state_set]["thresh_2"],
                 )
 
@@ -389,7 +389,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
         result = smact.screening.smact_filter([Na, Fe, Cl], stoichs=[[1], [1], [4]], oxidation_states_set="smact14")
         self.assertEqual(
-            [(r[0], r[1], r[2]) for r in result],
+            [(r[0], r[1], r[2]) for r in result],  # type: ignore[misc]
             [
                 (("Na", "Fe", "Cl"), (1, 3, -1), (1, 1, 4)),
             ],
@@ -599,7 +599,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # Invalid type raises TypeError (lines 33-34)
         with pytest.raises(TypeError):
-            eneg_mulliken(42)
+            eneg_mulliken(42)  # type: ignore[arg-type]
 
     def test_harrison_gap_verbose(self):
         """band_gap_Harrison with verbose=True hits lines 89-92."""
@@ -626,7 +626,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # Invalid element type raises TypeError (lines 135-136)
         with pytest.raises(TypeError):
-            compound_electroneg(elements=[42, 43], stoichs=[1, 1])
+            compound_electroneg(elements=[42, 43], stoichs=[1, 1])  # type: ignore[arg-type]
 
         # Invalid source raises ValueError (line 150)
         with pytest.raises(ValueError):
@@ -672,7 +672,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # Invalid input type → TypeError (line 151)
         with pytest.raises(TypeError):
-            ox.compound_probability("NaCl_string")
+            ox.compound_probability("NaCl_string")  # type: ignore[arg-type]
 
         # No cations in list → ValueError (line 161)
         with pytest.raises(ValueError, match="No cations"):

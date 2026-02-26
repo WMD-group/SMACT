@@ -29,7 +29,7 @@ from .utilities import get_sign
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    import pymatgen
+    from pymatgen.core import Structure as pmg_Structure
 
 
 class StructureDB:
@@ -109,7 +109,7 @@ class StructureDB:
     def add_mp_icsd(
         self,
         table: str,
-        mp_data: list[dict[str, pymatgen.core.Structure | str]] | None = None,
+        mp_data: list[dict[str, pmg_Structure | str]] | None = None,
         mp_api_key: str | None = None,
     ) -> int:
         """
@@ -162,7 +162,7 @@ class StructureDB:
         pool = ParallelPool()
         parse_iter = pool.uimap(parse_mprest, data)
 
-        return self.add_structs(parse_iter, table, commit_after_each=True)
+        return self.add_structs(list(parse_iter), table, commit_after_each=True)
 
     def add_table(self, table: str):
         """
@@ -196,7 +196,7 @@ class StructureDB:
 
     def add_structs(
         self,
-        structs: Sequence[SmactStructure],
+        structs: Sequence[SmactStructure | None],
         table: str,
         commit_after_each: bool | None = False,
     ) -> int:
@@ -297,9 +297,9 @@ class StructureDB:
 
 
 def parse_mprest(
-    data: dict[str, pymatgen.core.Structure | str],
+    data: dict[str, pmg_Structure | str],
     determine_oxi: str = "BV",
-) -> SmactStructure:
+) -> SmactStructure | None:
     """
     Parse MPRester query data to generate structures.
 
@@ -317,7 +317,8 @@ def parse_mprest(
 
     """
     try:
-        return SmactStructure.from_py_struct(data["structure"], determine_oxi="BV")
+        return SmactStructure.from_py_struct(data["structure"], determine_oxi="BV")  # type: ignore[arg-type]
     except Exception:
         # Couldn't decorate with oxidation states
         logger.warning(f"Couldn't decorate {data['material_id']} with oxidation states.")
+        return None
