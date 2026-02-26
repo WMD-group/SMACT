@@ -81,7 +81,7 @@ docs = [
 mp = ["mp-api>=0.45.3"]
 crystal_space = ["smact[mp]",
 "ElementEmbeddings>=0.4",
-"umap-learn==0.5.7",
+"umap-learn==0.5.11",
 "kaleido>=0.2.1",]
 featurisers = [
     "matminer",
@@ -115,7 +115,7 @@ strict = [
     "seaborn==0.13.2",
     "pymatgen==2025.4.24",
     "matminer==0.9.3",
-    "umap-learn==0.5.7",
+    "umap-learn==0.5.11",
     "kaleido==0.2.1",
     "ase==3.24.0",
     "numpy",
