@@ -212,7 +212,8 @@ def generate_composition_with_smact_custom(
     elements_pauling = [
         Element(element)
         for element in ordered_elements(1, max_atomic_num)
-        if ox_states_custom is not None and element in ox_states_custom  # type: ignore[operator]
+        if ox_states_custom is not None
+        and element in ox_states_custom  # type: ignore[operator]
         and Element(element).pauling_eneg is not None
         and (fr_eneg is None or Element(element).pauling_eneg >= fr_eneg)  # type: ignore[operator]
     ]

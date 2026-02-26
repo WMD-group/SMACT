@@ -286,7 +286,10 @@ class StructureTest(unittest.TestCase):
         """__parse_py_sites inserts '1' for unit-charge species like Na+ (line 262)."""
         # NaCl decorated by BV gives Na+ and Cl- — unit charges trigger line 262
         nacl = pymatgen.core.Structure.from_spacegroup(  # type: ignore[attr-defined]
-            "Fm-3m", pymatgen.core.Lattice.cubic(5.6), ["Na", "Cl"], [[0, 0, 0], [0.5, 0.5, 0.5]]  # type: ignore[attr-defined]
+            "Fm-3m",
+            pymatgen.core.Lattice.cubic(5.6),
+            ["Na", "Cl"],
+            [[0, 0, 0], [0.5, 0.5, 0.5]],  # type: ignore[attr-defined]
         )
         with ignore_warnings(smact.structure_prediction.logger):  # type: ignore[attr-defined]
             s = SmactStructure.from_py_struct(nacl, determine_oxi="BV")
