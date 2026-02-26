@@ -426,7 +426,7 @@ class SmactStructure:
 
             elif determine_oxi == "comp_ICSD":
                 comp = struct.composition
-                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])
+                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])  # type: ignore[union-attr]
                 struct = oxi_transform.apply_transformation(struct)
                 print("Charge assigned based on ICSD statistics")
 
@@ -437,14 +437,14 @@ class SmactStructure:
                     print("Oxidation states assigned using bond valence")
                 except ValueError:
                     comp = struct.composition
-                    oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])
+                    oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])  # type: ignore[union-attr]
                     struct = oxi_transform.apply_transformation(struct)
                     print("Oxidation states assigned based on ICSD statistics")
             else:
                 raise ValueError(
                     f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either 'BV','comp_ICSD' or 'both'."
                 )
-        lattice_mat = struct.lattice.matrix
+        lattice_mat = struct.lattice.matrix  # type: ignore[union-attr]
 
         lattice_param = 1.0  # Scaling factor; lattice_mat already contains actual vectors
 

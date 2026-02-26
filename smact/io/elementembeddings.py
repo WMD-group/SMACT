@@ -12,10 +12,10 @@ if TYPE_CHECKING:
     from elementembeddings.core import Embedding  # type: ignore[import-untyped]
 
 try:
-    from elementembeddings.composition import (  # type: ignore[import-untyped]
+    from elementembeddings.composition import (  # type: ignore[import-untyped, assignment]
         composition_featuriser as ee_composition_featuriser,
     )
-    from elementembeddings.composition import (  # type: ignore[import-untyped]
+    from elementembeddings.composition import (  # type: ignore[import-untyped, assignment]
         species_composition_featuriser as ee_species_composition_featuriser,
     )
 

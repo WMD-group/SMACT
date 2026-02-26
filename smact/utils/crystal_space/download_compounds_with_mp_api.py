@@ -86,11 +86,11 @@ def download_mp_data(
             )
         # save data with lowest energy above hull
         for doc in docs:
-            formula_pretty = doc.formula_pretty
-            energy_above_hull = doc.energy_above_hull
+            formula_pretty = doc.formula_pretty  # type: ignore[attr-defined]
+            energy_above_hull = doc.energy_above_hull  # type: ignore[attr-defined]
 
-            if (energy_above_hull) < e_hull_dict[formula_pretty]:
-                e_hull_dict[formula_pretty] = energy_above_hull
+            if (energy_above_hull) < e_hull_dict[formula_pretty]:  # type: ignore[operator]
+                e_hull_dict[formula_pretty] = energy_above_hull  # type: ignore[arg-type]
                 with open(save_dir / f"{formula_pretty}.json", "w") as f:
-                    json.dump(doc.dict(), f)
+                    json.dump(doc.dict(), f)  # type: ignore[attr-defined]
         time.sleep(request_interval)
