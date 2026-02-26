@@ -122,7 +122,7 @@ Python code and original data tables are licensed under the MIT License.
 
 ### Bugs, features and questions
 
-Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact Anthony Onwuli (maintainer) by [e-mail](mailto:anthony.onwuli16@imperial.ac.uk).
+Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact Kinga Mastej (maintainer) by [e-mail](mailto:k.mastej24@imperial.ac.uk).
 
 ### Code contributions
 
