@@ -440,7 +440,7 @@ class SmactStructure:
                     bva = BVAnalyzer()
                     struct = bva.get_oxi_state_decorated_structure(struct)
                     logger.info("Oxidation states assigned using bond valence")
-                except ValueError:
+                except (ValueError, RuntimeError):
                     comp = struct.composition
                     oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])  # type: ignore[union-attr]
                     struct = oxi_transform.apply_transformation(struct)
