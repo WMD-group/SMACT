@@ -22,17 +22,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra optional --dev
 
-      - name: Run ruff check
-        run: uv run ruff check smact/
-
-      - name: Run ruff format check
-        run: uv run ruff format --check smact/
-
-      - name: Run pyright
-        run: uv run pyright smact/
-
-      - name: Run codespell
-        run: uv run codespell
+      - name: Run pre-commit hooks
+        run: uv run pre-commit run --all-files
 
   test:
     strategy:
