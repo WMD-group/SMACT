@@ -31,13 +31,13 @@ The steps for a new piece of work can be summarised as follows:
    pre-commit install # Install pre-commit hooks
    ```
 
-7. Create a branch from master, with a sensible name that relates to the issue.
+6. Create a branch from master, with a sensible name that relates to the issue.
 
    ```bash
    git checkout -b <branch-name> # should be run from the master branch
    ```
 
-8. Do the work and commit changes to the branch. Push the branch
+7. Do the work and commit changes to the branch. Push the branch
    regularly to GitHub to make sure no work is accidentally lost.
 
    ```bash
@@ -46,16 +46,16 @@ The steps for a new piece of work can be summarised as follows:
    git push origin <branch-name>
    ```
 
-9. Write or update unit tests for the code you work on.
-10. When you are finished with the work, run the full CI pipeline locally to catch issues before pushing:
+8. Write or update unit tests for the code you work on.
+9. When you are finished with the work, run the full CI pipeline locally to catch issues before pushing:
 
-    ```bash
-    make ci-local # runs lint, type check, and tests
-    ```
+   ```bash
+   make ci-local # runs lint, type check, and tests
+   ```
 
-11. Open a pull request [on the pull request page](https://github.com/WMD-group/SMACT/pulls).
-12. If nobody acknowledges your pull request promptly, feel free to poke one of the main developers into action.
-13. For keeping your repository up to date with the master repository, you can add it as a remote to your local repository.
+10. Open a pull request [on the pull request page](https://github.com/WMD-group/SMACT/pulls).
+11. If nobody acknowledges your pull request promptly, feel free to poke one of the main developers into action.
+12. For keeping your repository up to date with the master repository, you can add it as a remote to your local repository.
 
 ```bash
 git remote add upstream https://github.com/WMD-group/SMACT.git
