@@ -282,7 +282,9 @@ class Doper:
                 dopants_list.sort(key=lambda x: x[_COMBINED_SCORE_INDEX], reverse=True)
 
         # if groupby
-        groupby_lists = [dict() for _ in range(_NUM_DOPANT_TYPES)]  # create list of empty dict (n-cat, p-cat, n-an, p-an)
+        groupby_lists = [
+            dict() for _ in range(_NUM_DOPANT_TYPES)
+        ]  # create list of empty dict (n-cat, p-cat, n-an, p-an)
         # in case group_by_charge = False
         if group_by_charge:
             for i, dl in enumerate(dopants_lists):

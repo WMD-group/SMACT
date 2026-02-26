@@ -234,7 +234,6 @@ def _no_repeats(
         )
 
 
-
 def eneg_states_test(ox_states: Sequence[int], enegs: Sequence[float | None]):
     """
     Internal function for checking electronegativity criterion.
@@ -303,7 +302,6 @@ def eneg_states_test_threshold(ox_states: Sequence[int], enegs: Sequence[float |
         ):
             return False
     return True
-
 
 
 def ml_rep_generator(

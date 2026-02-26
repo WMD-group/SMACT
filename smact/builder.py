@@ -1,4 +1,5 @@
 """A collection of functions for building certain lattice types."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
