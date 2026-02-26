@@ -18,18 +18,14 @@ class Lattice:
 
     Attributes:
     ----------
-        basis_sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
+        sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
         comprising the basis sites in Cartesian coordinates
 
         space_group: Integer space group number according to the
         International Tables for Crystallography.
 
-        structurbericht:
-        Structurbericht identity, if applicable (e.g. 'B1')
-
-    Methods:
-    -------
-        lattice_vector_calc():
+        strukturbericht:
+        Strukturbericht identity, if applicable (e.g. 'B1')
 
     """
 

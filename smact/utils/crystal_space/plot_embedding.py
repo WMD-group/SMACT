@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -10,6 +11,8 @@ from plotly.subplots import make_subplots
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 def update_layout(
@@ -84,8 +87,8 @@ def plot_reducers_embeddings(
     )
 
     # updatee the font size of subplot titles
-    for i in fig["layout"]["annotations"]:
-        i["font"] = dict(size=25)
+    for i in fig["layout"]["annotations"]:  # type: ignore[index]
+        i["font"] = dict(size=25)  # type: ignore[index]
 
     legend_colors = {
         "unlikely": "#D9D9D9",
@@ -96,7 +99,7 @@ def plot_reducers_embeddings(
 
     for i, embedding_name in enumerate(embedding_names):
         for j, reducer in enumerate(reducers):
-            print(f"processing {i} {j}...")
+            logger.info("processing %d %d...", i, j)
             embedding_data = pd.read_pickle(
                 embedding_dir / f"{reducer}_{embedding_name}.pkl",
             )
@@ -111,7 +114,7 @@ def plot_reducers_embeddings(
                     mode="markers",
                     marker=dict(
                         size=8,
-                        color=df_plot["label"].map(legend_colors),
+                        color=df_plot["label"].map(legend_colors),  # type: ignore[arg-type]
                         opacity=0.8,
                         symbol=symbol,
                         line=dict(width=0.5, color="DarkSlateGrey"),
@@ -154,6 +157,6 @@ def plot_reducers_embeddings(
             fig.write_html(save_path)
         else:
             fig.write_image(save_path, scale=6)
-        print(f"Save to {save_path}")
+        logger.info("Save to %s", save_path)
 
     return fig

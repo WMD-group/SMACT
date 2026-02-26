@@ -6,6 +6,23 @@ A collection of fast screening tools from elemental data
 
 from __future__ import annotations
 
+__version__ = "4.0.0"
+
+__all__ = [
+    "Element",
+    "Species",
+    "__version__",
+    "anions",
+    "are_eq",
+    "d_block",
+    "element_dictionary",
+    "lattices_are_same",
+    "metals",
+    "neutral_ratios",
+    "neutral_ratios_iter",
+    "ordered_elements",
+]
+
 import itertools
 import warnings
 from math import gcd
@@ -13,15 +30,17 @@ from operator import mul as multiply
 from os import path
 from typing import TYPE_CHECKING
 
+import numpy as np
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
 import pandas as pd
 
 module_directory = path.abspath(path.dirname(__file__))
 data_directory = path.join(module_directory, "data")
 # get correct path for datafiles when called from another directory
 from smact import data_loader  # noqa: E402
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
 
 class Element:
@@ -103,6 +122,37 @@ class Element:
 
     """
 
+    # Instance attribute annotations for static type checking
+    coord_envs: list[str] | None
+    covalent_radius: float
+    crustal_abundance: float
+    e_affinity: float
+    eig: float
+    eig_s: float
+    HHI_p: float | None
+    HHI_r: float | None
+    ionpot: float
+    mass: float
+    name: str
+    number: int
+    oxidation_states: list[int] | None
+    oxidation_states_smact14: list[int] | None
+    oxidation_states_icsd16: list[int] | None
+    oxidation_states_sp: list[int] | None
+    oxidation_states_wiki: list[int] | None
+    oxidation_states_icsd24: list[int] | None
+    oxidation_states_custom: list[int] | None
+    dipol: float
+    pauling_eneg: float | None
+    SSE: float | None
+    SSEPauling: float | None
+    symbol: str
+    mendeleev: int | None
+    AtomicWeight: float | None
+    MeltingT: float | None
+    num_valence: int | None
+    num_valence_modified: int | None
+
     def __init__(self, symbol: str, oxi_states_custom_filepath: str | None = None):
         """
         Initialise Element class.
@@ -119,7 +169,7 @@ class Element:
                 self._oxidation_states_custom = data_loader.lookup_element_oxidation_states_custom(
                     symbol, oxi_states_custom_filepath
                 )
-                self.oxidation_states_custom = self._oxidation_states_custom
+                self.oxidation_states_custom = self._oxidation_states_custom  # type: ignore[assignment]
             except TypeError:
                 warnings.warn("Custom oxidation states file not found. Please check the file path.")
                 self.oxidation_states_custom = None
@@ -164,56 +214,33 @@ class Element:
         valence_data = data_loader.lookup_element_valence_data(symbol)
         num_valence_modified = valence_data["NValence"] if valence_data else None
 
-        for attribute, value in (
-            ("coord_envs", coord_envs),
-            ("covalent_radius", dataset["r_cov"]),
-            ("crustal_abundance", dataset["Abundance"]),
-            ("e_affinity", dataset["e_affinity"]),
-            ("eig", dataset["p_eig"]),
-            ("eig_s", dataset["s_eig"]),
-            ("HHI_p", HHI_scores[0]),
-            ("HHI_r", HHI_scores[1]),
-            ("ionpot", dataset["ion_pot"]),
-            ("mass", dataset["Mass"]),
-            ("name", dataset["Name"]),
-            ("number", dataset["Z"]),
-            (
-                "oxidation_states",
-                data_loader.lookup_element_oxidation_states_icsd24(symbol),
-            ),
-            (
-                "oxidation_states_smact14",
-                data_loader.lookup_element_oxidation_states(symbol),
-            ),
-            (
-                "oxidation_states_icsd16",
-                data_loader.lookup_element_oxidation_states_icsd(symbol),
-            ),
-            (
-                "oxidation_states_sp",
-                data_loader.lookup_element_oxidation_states_sp(symbol),
-            ),
-            (
-                "oxidation_states_wiki",
-                data_loader.lookup_element_oxidation_states_wiki(symbol),
-            ),
-            (
-                "oxidation_states_icsd24",
-                data_loader.lookup_element_oxidation_states_icsd24(symbol),
-            ),
-            ("dipol", dataset["dipol"]),
-            ("pauling_eneg", dataset["el_neg"]),
-            ("SSE", sse),
-            ("SSEPauling", sse_Pauling),
-            ("symbol", symbol),
-            ("mendeleev", mendeleev),
-            ("AtomicWeight", AtomicWeight),
-            ("MeltingT", MeltingT),
-            ("num_valence", num_valence),
-            ("num_valence_modified", num_valence_modified),
-            # ('vdw_radius', dataset['RVdW']),
-        ):
-            setattr(self, attribute, value)
+        self.coord_envs = coord_envs
+        self.covalent_radius = dataset["r_cov"]
+        self.crustal_abundance = dataset["Abundance"]
+        self.e_affinity = dataset["e_affinity"]
+        self.eig = dataset["p_eig"]
+        self.eig_s = dataset["s_eig"]
+        self.HHI_p = HHI_scores[0]
+        self.HHI_r = HHI_scores[1]
+        self.ionpot = dataset["ion_pot"]
+        self.mass = dataset["Mass"]
+        self.name = dataset["Name"]
+        self.number = dataset["Z"]
+        self.oxidation_states = data_loader.lookup_element_oxidation_states_icsd24(symbol)
+        self.oxidation_states_smact14 = data_loader.lookup_element_oxidation_states(symbol)
+        self.oxidation_states_icsd16 = data_loader.lookup_element_oxidation_states_icsd(symbol)
+        self.oxidation_states_sp = data_loader.lookup_element_oxidation_states_sp(symbol)
+        self.oxidation_states_wiki = data_loader.lookup_element_oxidation_states_wiki(symbol)
+        self.oxidation_states_icsd24 = data_loader.lookup_element_oxidation_states_icsd24(symbol)
+        self.dipol = dataset["dipol"]
+        self.pauling_eneg = dataset["el_neg"]
+        self.SSE = sse
+        self.SSEPauling = sse_Pauling
+        self.mendeleev = mendeleev
+        self.AtomicWeight = AtomicWeight
+        self.MeltingT = MeltingT
+        self.num_valence = num_valence
+        self.num_valence_modified = num_valence_modified
 
 
 class Species(Element):
@@ -289,29 +316,21 @@ class Species(Element):
         # Get shannon radius for the oxidation state and coordination.
 
         self.shannon_radius = None
+        self.ionic_radius = None
 
         if radii_source == "shannon":
             shannon_data = data_loader.lookup_element_shannon_radius_data(symbol)
-
         elif radii_source == "extended":
             shannon_data = data_loader.lookup_element_shannon_radius_data_extendedML(symbol)
-
         else:
-            shannon_data = None
-            print("Data source not recognised. Please select 'shannon' or 'extended'. ")
+            raise ValueError(f"Data source {radii_source!r} not recognised. Choose 'shannon' or 'extended'.")
 
         if shannon_data:
             for dataset in shannon_data:
                 if dataset["charge"] == oxidation and str(coordination) == dataset["coordination"].split("_")[0]:
                     self.shannon_radius = dataset["crystal_radius"]
-
-        # Get ionic radius
-        self.ionic_radius = None
-
-        if shannon_data:
-            for dataset in shannon_data:
-                if dataset["charge"] == oxidation and str(coordination) == dataset["coordination"].split("_")[0]:
                     self.ionic_radius = dataset["ionic_radius"]
+                    break
 
         # Get the average shannon and ionic radii
         self.average_shannon_radius = None
@@ -394,68 +413,51 @@ def element_dictionary(
         return {symbol: Element(symbol) for symbol in elements}
 
 
-def are_eq(A: list, B: list, tolerance: float = 1e-4):
-    """
-    Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3].
+def are_eq(A: Sequence[float], B: Sequence[float], tolerance: float = 1e-4) -> bool:
+    """Check two arrays for approximate element-wise equality.
 
     Args:
-    ----
-        A (list): 1-D list of values for approximate equality comparison
-        B (list): 1-D list of values for approximate equality comparison
-        tolerance (float): numerical precision for equality condition
+        A: 1-D sequence of values.
+        B: 1-D sequence of values.
+        tolerance: Absolute tolerance for equality.
 
     Returns:
-    -------
-        boolean
-
+        True if arrays are element-wise equal within tolerance, False otherwise.
     """
-    are_eq = True
     if len(A) != len(B):
-        are_eq = False
-    else:
-        i = 0
-        while i < len(A):
-            if abs(A[i] - B[i]) > tolerance:
-                are_eq = False
-            i = i + 1
-    return are_eq
+        return False
+    return bool(np.allclose(A, B, atol=tolerance, rtol=0))
 
 
-def lattices_are_same(lattice1, lattice2, tolerance: float = 1e-4):
-    """
-    Checks for the equivalence of two lattices.
+def lattices_are_same(lattice1: Sequence, lattice2: Sequence, tolerance: float = 1e-4) -> bool:
+    """Check whether two ASE lattices contain the same sites.
 
     Args:
-    ----
-        lattice1: ASE crystal class
-        lattice2: ASE crystal class
-        tolerance (float): numerical precision for equality condition
+        lattice1: ASE crystal class.
+        lattice2: ASE crystal class.
+        tolerance: Absolute tolerance for position equality.
 
     Returns:
-    -------
-        boolean
-
+        True if every site in *lattice1* has a matching site in *lattice2*.
     """
-    lattices_are_same = False
-    i = 0
+    matches = 0
     for site1 in lattice1:
         for site2 in lattice2:
             if site1.symbol == site2.symbol and are_eq(site1.position, site2.position, tolerance=tolerance):
-                i += 1
-    if i == len(lattice1):
-        lattices_are_same = True
-    return lattices_are_same
+                matches += 1
+    return matches == len(lattice1)
 
 
-def _gcd_recursive(*args: Iterable[int]):
+def _gcd_recursive(*args: int) -> int:
     """Get the greatest common denominator among any number of ints."""
+    if len(args) == 1:
+        return args[0]
     if len(args) == 2:
         return gcd(*args)
-    else:
-        return gcd(args[0], _gcd_recursive(*args[1:]))
+    return gcd(args[0], _gcd_recursive(*args[1:]))
 
 
-def _isneutral(oxidations: tuple[int, ...], stoichs: tuple[int, ...]):
+def _isneutral(oxidations: Sequence[int], stoichs: Sequence[int]) -> bool:
     """
     Check if set of oxidation states is neutral in given stoichiometry.
 
@@ -469,8 +471,8 @@ def _isneutral(oxidations: tuple[int, ...], stoichs: tuple[int, ...]):
 
 
 def neutral_ratios_iter(
-    oxidations: list[int],
-    stoichs: bool | list[list[int]] = False,
+    oxidations: Sequence[int],
+    stoichs: Sequence[Sequence[int]] | None = None,
     threshold: int | None = 5,
 ):
     """
@@ -492,7 +494,9 @@ def neutral_ratios_iter(
         tuple: ratio that gives neutrality
 
     """
-    if not stoichs:
+    if stoichs is None:
+        if threshold is None:
+            raise ValueError("threshold must be an int when stoichs is not provided")
         stoichs = [list(range(1, threshold + 1))] * len(oxidations)
 
     # First filter: remove combinations which have a common denominator
@@ -506,21 +510,17 @@ def neutral_ratios_iter(
 
 
 def neutral_ratios(
-    oxidations: list[int],
-    stoichs: bool | list[list[int]] = False,
-    threshold=5,
-):
+    oxidations: Sequence[int],
+    stoichs: Sequence[Sequence[int]] | None = None,
+    threshold: int | None = 5,
+) -> list[tuple[int, ...]]:
     """
     Get a list of charge-neutral compounds.
 
-    Given a list of oxidation states of arbitrary length, yield ratios in which
+    Given a list of oxidation states of arbitrary length, return ratios in which
     these form a charge-neutral compound. Stoichiometries may be provided as a
     set of legal stoichiometries per site (e.g. a known family of compounds);
     otherwise all unique ratios are tried up to a threshold coefficient.
-
-    Given a list of oxidation states of arbitrary length it searches for
-    neutral ratios in a given ratio of sites (stoichs) or up to a given
-    threshold.
 
     Args:
     ----
@@ -533,18 +533,11 @@ def neutral_ratios(
 
     Returns:
     -------
-        (exists, allowed_ratios) (tuple):
-
-        exists *bool*:
-            True ifc any ratio exists, otherwise False
-
-        allowed_ratios *list of tuples*:
-            Ratios of atoms in given oxidation
-            states which yield a charge-neutral structure
+        list of tuples: Ratios of atoms in given oxidation states which yield
+            a charge-neutral structure. Empty list if no ratios exist.
 
     """
-    allowed_ratios = list(neutral_ratios_iter(oxidations, stoichs=stoichs, threshold=threshold))
-    return (len(allowed_ratios) > 0, allowed_ratios)
+    return list(neutral_ratios_iter(oxidations, stoichs=stoichs, threshold=threshold))
 
 
 # List of metals

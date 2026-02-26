@@ -18,37 +18,26 @@ The steps for a new piece of work can be summarised as follows:
    cd SMACT
    ```
 
-4. Install the [uv package manager](https://github.com/astral-sh/uv).
+4. Install the [uv package manager](https://docs.astral.sh/uv/getting-started/installation/).
 
    ```bash
-   pip install uv # installs uv package manager
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-5. Create a virtual environment for SMACT.
-
-   Using `uv`:
+5. Install SMACT with all development and optional dependencies. This creates a virtual environment automatically and installs the package in editable mode.
 
    ```bash
-   uv create venv # A virtual environment will be created in the current directory
-   source .venv/bin/activate # Activate the virtual environment
-   ```
-
-   N.B. A virtual environment can also be created using [mamba](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) for those more familiar with mamba/conda.
-
-6. Install the package in editable mode with the development, documentation and optional dependencies.
-
-   ```bash
-   uv pip install -e ".[dev,docs,optional]"
+   uv sync --extra optional --dev
    pre-commit install # Install pre-commit hooks
    ```
 
-7. Create a branch from master, with a sensible name that relates to the issue.
+6. Create a branch from master, with a sensible name that relates to the issue.
 
    ```bash
    git checkout -b <branch-name> # should be run from the master branch
    ```
 
-8. Do the work and commit changes to the branch. Push the branch
+7. Do the work and commit changes to the branch. Push the branch
    regularly to GitHub to make sure no work is accidentally lost.
 
    ```bash
@@ -57,12 +46,16 @@ The steps for a new piece of work can be summarised as follows:
    git push origin <branch-name>
    ```
 
-9. Write or update unit tests for the code you work on.
-10. When you are finished with the work, ensure that all of the unit tests pass on your own machine by running `pytest -v` in the root directory of the repository.
+8. Write or update unit tests for the code you work on.
+9. When you are finished with the work, run the full CI pipeline locally to catch issues before pushing:
 
-11. Open a pull request [on the pull request page](https://github.com/WMD-group/SMACT/pulls).
-12. If nobody acknowledges your pull request promptly, feel free to poke one of the main developers into action.
-13. For keeping your repository up to date with the master repository, you can add it as a remote to your local repository.
+   ```bash
+   make ci-local # runs pre-commit hooks and tests
+   ```
+
+10. Open a pull request [on the pull request page](https://github.com/WMD-group/SMACT/pulls).
+11. If nobody acknowledges your pull request promptly, feel free to poke one of the main developers into action.
+12. For keeping your repository up to date with the master repository, you can add it as a remote to your local repository.
 
 ```bash
 git remote add upstream https://github.com/WMD-group/SMACT.git
@@ -90,28 +83,41 @@ Recommended reading: [How to Write the Perfect Pull Request](https://github.blog
 
 ## Dev requirements
 
-When developing locally, it is recommended to install the python packages for development and documentation.
+All development dependencies are managed in `pyproject.toml`. To install them:
 
 ```bash
-pip install -e ".[dev,docs]" # Should be ran from the root of the repository
+uv sync --extra optional --dev
 ```
 
-This will allow you to run the tests locally with pytest as described in the main README,
-as well as run pre-commit hooks to automatically format python files with [ruff](https://docs.astral.sh/ruff/).
-To install the pre-commit hooks (only needs to be done once):
+### Pre-commit hooks
+
+Pre-commit hooks automatically run [ruff](https://docs.astral.sh/ruff/) (lint and format), [codespell](https://github.com/codespell-project/codespell), and [pyright](https://github.com/microsoft/pyright) when you commit changes. To install (only needs to be done once):
 
 ```bash
 pre-commit install
 pre-commit run --all-files # optionally run hooks on all files
 ```
 
-Pre-commit hooks will check all files when you commit changes, automatically fixing any files which are not formatted correctly. Those files will need to be staged again before re-attempting the commit.
+Files auto-fixed by hooks will need to be re-staged before re-attempting the commit.
 
-To render the documentation locally, you can use the following command:
+### Makefile targets
+
+The Makefile provides convenient shortcuts for common tasks:
+
+```bash
+make install    # install all dependencies
+make pre-commit # run all pre-commit hooks (ruff, pyright, codespell, prettier, etc.)
+make test       # run pytest with coverage
+make ci-local   # run pre-commit + test (matches CI)
+```
+
+### Documentation
+
+To render the documentation locally:
 
 ```bash
 cd docs
 sphinx-build -nW --keep-going -b html . _build/html/
 ```
 
-You should then be able to view the documentation by opening `_build/html/index.html` in a web browser. You should inspect the documentation to ensure that it is correctly formatted, any docstrings are present and that the code examples are correct.
+Then open `_build/html/index.html` in a browser to inspect formatting, docstrings, and code examples.

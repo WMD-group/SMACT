@@ -7,8 +7,12 @@ from __future__ import annotations
 import itertools
 import os
 import warnings
+from enum import StrEnum
 from itertools import combinations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 from pymatgen.core import Composition
 
@@ -17,12 +21,20 @@ from smact.data_loader import (
     lookup_element_oxidation_states_custom as oxi_custom,
 )
 from smact.metallicity import metallicity_score
-from smact.utils.compat import StrEnum
 from smact.utils.composition import composition_dict_maker, formula_maker
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
-if TYPE_CHECKING:
-    import pymatgen
+_NUM_ELEMENTS = 103
+
+__all__ = [
+    "SmactFilterOutputs",
+    "eneg_states_test",
+    "eneg_states_test_threshold",
+    "ml_rep_generator",
+    "pauling_test",
+    "smact_filter",
+    "smact_validity",
+]
 
 MIXED_VALENCE_ELEMENTS: frozenset[str] = frozenset(
     {
@@ -88,10 +100,53 @@ def _format_output(
             raise ValueError(f"Invalid return_output: {return_output}. Must be a SmactFilterOutputs value.")
 
 
+_OXI_SET_ATTR_MAP: dict[str, str] = {
+    "smact14": "oxidation_states_smact14",
+    "icsd16": "oxidation_states_icsd16",
+    "icsd24": "oxidation_states_icsd24",
+    "pymatgen_sp": "oxidation_states_sp",
+    "wiki": "oxidation_states_wiki",
+}
+
+
+def _get_oxidation_states(
+    elements: Sequence[Element],
+    oxidation_states_set: str,
+) -> list[list[int] | None]:
+    """Look up oxidation states for each element from the named set or a custom file.
+
+    Args:
+        elements: Sequence of smact.Element objects.
+        oxidation_states_set: Name of a built-in set or a filepath to a custom file.
+
+    Returns:
+        List of oxidation state lists (may contain None for missing elements).
+
+    Raises:
+        ValueError: If the oxidation_states_set is not recognised and is not a valid filepath.
+    """
+    if oxidation_states_set in _OXI_SET_ATTR_MAP:
+        attr = _OXI_SET_ATTR_MAP[oxidation_states_set]
+        if oxidation_states_set == "wiki":
+            warnings.warn(
+                "This set of oxidation states is sourced from Wikipedia. The results from using this set could be "
+                "questionable and should not be used unless you know what you are doing and have inspected the "
+                "oxidation states.",
+                stacklevel=3,
+            )
+        return [getattr(e, attr) for e in elements]
+    if os.path.exists(oxidation_states_set):
+        return cast("list[list[int] | None]", [oxi_custom(e.symbol, oxidation_states_set) for e in elements])
+    raise ValueError(
+        f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd16", "icsd24", '
+        '"pymatgen_sp", "wiki" or a filepath to a textfile of oxidation states.'
+    )
+
+
 def pauling_test(
-    oxidation_states: list[int],
-    electronegativities: list[float],
-    symbols: list[str] | None = None,
+    oxidation_states: Sequence[int],
+    electronegativities: Sequence[float | None],
+    symbols: Sequence[str] | None = None,
     repeat_anions: bool = True,
     repeat_cations: bool = True,
     threshold: float = 0.0,
@@ -142,8 +197,8 @@ def pauling_test(
 
 
 def _no_repeats(
-    oxidation_states: list[int],
-    symbols: list[str],
+    oxidation_states: Sequence[int],
+    symbols: Sequence[str],
     repeat_anions: bool = False,
     repeat_cations: bool = False,
 ):
@@ -179,81 +234,14 @@ def _no_repeats(
         )
 
 
-def pauling_test_old(
-    ox: list[int],
-    paul: list[float],
-    symbols: list[str],
-    repeat_anions: bool = True,
-    repeat_cations: bool = True,
-    threshold: float = 0.0,
-):
-    """
-    Check if a combination of ions makes chemical sense,
-    (i.e. positive ions should be of lower Pauling electronegativity).
-    This function should give the same results as pauling_test but is
-    not optimised for speed.
-
-    Args:
-    ----
-        ox (list):  oxidation states of the compound
-        paul (list): the corresponding  Pauling electronegativities
-            of the elements in the compound
-        symbols (list) :  chemical symbols of each site.
-        threshold (float): a tolerance for the allowed deviation from
-            the Pauling criterion
-        repeat_anions : boolean, allow an anion to repeat in different
-            oxidation states in the same compound.
-        repeat_cations : as above, but for cations.
-
-    Returns:
-    -------
-        (bool):
-            True if anions are more electronegative than
-            cations, otherwise False
-
-    """
-    if None in paul:
-        return False
-    positive = []
-    negative = []
-    pos_ele = []
-    neg_ele = []
-    for i, state in enumerate(ox):
-        if state > 0:
-            if repeat_cations:
-                positive.append(paul[i])
-            elif symbols[i] in pos_ele:  # Reject materials where the same
-                # cation occupies two sites.
-                return False
-            else:
-                positive.append(paul[i])
-                pos_ele.append(symbols[i])
-
-        if state < 0:
-            if repeat_anions:
-                negative.append(paul[i])
-            elif symbols[i] in neg_ele:  # Reject materials where the same
-                # anion occupies two sites.
-                return False
-            else:
-                negative.append(paul[i])
-                neg_ele.append(symbols[i])
-
-    if len(positive) == 0 or len(negative) == 0:
-        return False
-    if max(positive) == min(negative):
-        return False
-    return not max(positive) - min(negative) > threshold
-
-
-def eneg_states_test(ox_states: list[int], enegs: list[float]):
+def eneg_states_test(ox_states: Sequence[int], enegs: Sequence[float | None]):
     """
     Internal function for checking electronegativity criterion.
 
     This implementation is fast as it 'short-circuits' as soon as it
     finds an invalid combination. However it may be that in some cases
     redundant comparisons are made. Performance is very close between
-    this method and eneg_states_test_alternate.
+    this method and alternatives.
 
     Args:
     ----
@@ -279,14 +267,14 @@ def eneg_states_test(ox_states: list[int], enegs: list[float]):
     return True
 
 
-def eneg_states_test_threshold(ox_states: list[int], enegs: list[float], threshold: float | None = 0):
+def eneg_states_test_threshold(ox_states: Sequence[int], enegs: Sequence[float | None], threshold: float = 0):
     """
     Internal function for checking electronegativity criterion.
 
     This implementation is fast as it 'short-circuits' as soon as it
     finds an invalid combination. However it may be that in some cases
     redundant comparisons are made. Performance is very close between
-    this method and eneg_states_test_alternate.
+    this method and alternatives.
 
     A 'threshold' option is added so that this constraint may be
     relaxed somewhat.
@@ -307,40 +295,13 @@ def eneg_states_test_threshold(ox_states: list[int], enegs: list[float], thresho
 
     """
     for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=False)), 2):
+        if eneg1 is None or eneg2 is None:
+            return False
         if ((ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold)) or (
             (ox1 < 0) and (ox2 > 0) and (eneg2 - eneg1) > threshold
         ):
             return False
     return True
-
-
-def eneg_states_test_alternate(ox_states: list[int], enegs: list[float]):
-    """
-    Internal function for checking electronegativity criterion.
-
-    This implementation appears to be slightly slower than
-    eneg_states_test, but further testing is needed.
-
-    Args:
-    ----
-        ox_states (list): oxidation states corresponding to species
-            in compound
-        enegs (list): Electronegativities corresponding to species in
-            compound
-
-    Returns:
-    -------
-        bool : True if anions are more electronegative than
-               cations, otherwise False
-
-    """
-    min_cation_eneg, max_anion_eneg = 10, 0
-    for ox_state, eneg in zip(ox_states, enegs, strict=False):
-        if ox_state < 1:
-            min_cation_eneg = min(eneg, min_cation_eneg)
-        else:
-            max_anion_eneg = max(eneg, max_anion_eneg)
-    return min_cation_eneg > max_anion_eneg
 
 
 def ml_rep_generator(
@@ -371,15 +332,15 @@ def ml_rep_generator(
 
     """
     if stoichs is None:
-        stoichs = [1 for i, el in enumerate(composition)]
+        stoichs = [1] * len(composition)
 
-    ML_rep = [0 for i in range(1, 103)]
+    ML_rep = [0] * _NUM_ELEMENTS
     if isinstance(composition[0], Element):
         for element, stoich in zip(composition, stoichs, strict=False):
-            ML_rep[int(element.number) - 1] += stoich
+            ML_rep[int(element.number) - 1] += stoich  # type: ignore[union-attr]
     else:
         for element, stoich in zip(composition, stoichs, strict=False):
-            ML_rep[int(Element(element).number) - 1] += stoich
+            ML_rep[int(Element(element).number) - 1] += stoich  # type: ignore[arg-type]
 
     return [float(i) / sum(ML_rep) for i in ML_rep]
 
@@ -421,7 +382,7 @@ def smact_filter(
         >>> els = (Element("Cs"), Element("Pb"), Element("I"))
         >>> comps = smact_filter(els, threshold=5)
         >>> for comp in comps:
-        >>>     print(comp)
+        ...     print(comp)
         [('Cs', 'Pb', 'I'), (1, -4, -1), (5, 1, 1)]
         [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 1, 3)]
         [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 2, 5)]
@@ -434,7 +395,7 @@ def smact_filter(
         >>> from smact import Element
         >>> comps = smact_filter(els, stoichs=[[1], [1], [3]])
         >>> for comp in comps:
-        >>>     print(comp)
+        ...     print(comp)
         [('Cs', 'Pb', 'I'), (1, 2, -1), (1, 1, 3)]
 
 
@@ -444,29 +405,7 @@ def smact_filter(
     electronegs = [e.pauling_eneg for e in els]
 
     # Select the specified oxidation states set:
-    oxi_set = {
-        "smact14": [e.oxidation_states_smact14 for e in els],
-        "icsd16": [e.oxidation_states_icsd16 for e in els],
-        "icsd24": [e.oxidation_states_icsd24 for e in els],
-        "pymatgen_sp": [e.oxidation_states_sp for e in els],
-        "wiki": [e.oxidation_states_wiki for e in els],
-    }
-
-    if oxidation_states_set in oxi_set:
-        ox_combos = oxi_set[oxidation_states_set]
-        if oxidation_states_set == "wiki":
-            warnings.warn(
-                "This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.",
-                stacklevel=2,
-            )
-    elif os.path.exists(oxidation_states_set):
-        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
-    else:
-        raise (
-            Exception(
-                f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd", "pymatgen","wiki" or a filepath to a textfile of oxidation states.'
-            )
-        )
+    ox_combos = _get_oxidation_states(els, oxidation_states_set)
 
     # Guard: raise early if any element has no oxidation states in the chosen set
     missing = [e.symbol for e, ox in zip(els, ox_combos, strict=False) if ox is None or len(ox) == 0]
@@ -476,12 +415,15 @@ def smact_filter(
             "Cannot enumerate charge-neutral compositions."
         )
 
+    # After the guard, ox_combos contains only non-None, non-empty lists of ints
+    ox_combos_typed = cast("list[list[int]]", ox_combos)
+
     compositions = []
-    for ox_states in itertools.product(*ox_combos):
+    for ox_states in itertools.product(*ox_combos_typed):
         # Test for charge balance
-        cn_e, cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
+        cn_r = neutral_ratios(list(ox_states), stoichs=stoichs, threshold=threshold)
         # Electronegativity test
-        if cn_e and pauling_test(ox_states, electronegs):
+        if cn_r and pauling_test(ox_states, electronegs):
             for ratio in cn_r:
                 compositions.append((symbols, ox_states, ratio))
     # Return list depending on whether we are interested in unique species combinations
@@ -497,7 +439,7 @@ def smact_filter(
 
 
 def smact_validity(
-    composition: pymatgen.core.Composition | str,
+    composition: Composition | str,
     use_pauling_test: bool = True,
     include_alloys: bool = True,
     check_metallicity: bool = False,
@@ -571,48 +513,35 @@ def smact_validity(
         ox_filter = ICSD24OxStatesFilter()
         filtered_df = ox_filter.filter(consensus=consensus, include_zero=include_zero, commonality=commonality)
         oxidation_dict = {
-            row["element"]: [int(x) for x in row["oxidation_state"].split()] for _, row in filtered_df.iterrows()
+            row["element"]: [int(x) for x in str(row["oxidation_state"]).split()] for _, row in filtered_df.iterrows()
         }
         ox_combos = []
         for el in smact_elems:
-            ox_el = oxidation_dict.get(el.symbol, None)
+            ox_el = oxidation_dict.get(el.symbol)
             if ox_el is not None:
                 ox_combos.append(ox_el)
             else:
                 return False
-    elif oxidation_states_set == "smact14":
-        ox_combos = [el.oxidation_states_smact14 for el in smact_elems]
-    elif oxidation_states_set == "icsd16":
-        ox_combos = [el.oxidation_states_icsd16 for el in smact_elems]
-    elif oxidation_states_set == "pymatgen_sp":
-        ox_combos = [el.oxidation_states_sp for el in smact_elems]
-    elif oxidation_states_set == "icsd24":
-        ox_combos = [el.oxidation_states_icsd24 for el in smact_elems]
-    elif os.path.exists(oxidation_states_set):
-        ox_combos = [oxi_custom(el.symbol, oxidation_states_set) for el in smact_elems]
-    elif oxidation_states_set == "wiki":
-        warnings.warn(
-            "This set of oxidation states is from Wikipedia. Use with caution.",
-            stacklevel=2,
-        )
-        ox_combos = [el.oxidation_states_wiki for el in smact_elems]
     else:
-        raise ValueError(f"{oxidation_states_set} is not valid. Provide a known set or a valid file path.")
+        ox_combos = _get_oxidation_states(smact_elems, oxidation_states_set)
 
     # Guard: if any element has no oxidation states in the chosen set (e.g. noble
     # gases in most databases), the composition cannot be charge-balanced.
     if any(ox is None or len(ox) == 0 for ox in ox_combos):
         return False
 
+    # After the guard, ox_combos contains only non-None, non-empty lists of ints
+    ox_combos_valid = cast("list[list[int]]", ox_combos)
+
     # Check all possible oxidation state combinations
-    ox_valid = _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
+    ox_valid = _is_valid_oxi_state(ox_combos_valid, stoichs, threshold, electronegs, use_pauling_test)
 
     if ox_valid:
         return True
     elif mixed_valence and any(el in MIXED_VALENCE_ELEMENTS for el in elem_symbols):
         # Guard against combinatorial blow-up before expanding
         projected = 1
-        for el, ox, count in zip(elem_symbols, ox_combos, stoichs, strict=False):
+        for el, ox, count in zip(elem_symbols, ox_combos_valid, stoichs, strict=False):
             projected *= len(ox) ** count[0] if el in MIXED_VALENCE_ELEMENTS else len(ox)
         if projected > 1_000_000:
             warnings.warn(
@@ -625,8 +554,10 @@ def smact_validity(
         # threshold is computed from the original stoichs and remains valid after
         # expansion: expanded MV sites have stoich (1,) ≤ threshold, and
         # non-MV sites retain their original stoichs which are also ≤ threshold.
-        ox_combos, stoichs, electronegs = _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols)
-        return _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
+        ox_combos_valid, stoichs, electronegs = _expand_mixed_valence_comp(
+            ox_combos_valid, stoichs, electronegs, elem_symbols
+        )
+        return _is_valid_oxi_state(ox_combos_valid, stoichs, threshold, electronegs, use_pauling_test)
 
     return False
 
@@ -655,16 +586,16 @@ def _expand_mixed_valence_comp(
 
 def _is_valid_oxi_state(
     ox_combos: list[list[int]],
-    stoichs: list[tuple[int, ...]],
+    stoichs: Sequence[Sequence[int]],
     threshold: int,
     electronegs: list[float | None],
     use_pauling_test: bool = True,
 ) -> bool:
     """Return True if any oxidation-state combination satisfies charge neutrality and the Pauling criterion."""
     for ox_states in itertools.product(*ox_combos):
-        cn_e, _ = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
+        cn_r = neutral_ratios(ox_states, stoichs=stoichs, threshold=threshold)
 
-        if cn_e:
+        if cn_r:
             if not use_pauling_test:
                 return True
 

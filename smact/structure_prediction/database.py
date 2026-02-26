@@ -5,24 +5,18 @@ from __future__ import annotations
 import itertools
 from operator import itemgetter
 
-try:
-    from pathos.pools import ParallelPool
-
-    pathos_available = True
-
-except ImportError:
-    pathos_available = False
-    ParallelPool = None
+from pathos.pools import ParallelPool
 
 try:
     from mp_api.client import MPRester as MPResterNew
 
     HAS_MP_API = True
-except ImportError:
+except ImportError:  # pragma: no cover
     HAS_MP_API = False
     MPResterNew = None
 
 import os
+import re
 import sqlite3
 from typing import TYPE_CHECKING
 
@@ -36,7 +30,24 @@ from .utilities import get_sign
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    import pymatgen
+    from pymatgen.core import Structure as pmg_Structure
+
+
+_VALID_TABLE_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _validate_table_name(table: str) -> str:
+    """Validate and return a safe SQLite table name.
+
+    Raises:
+        ValueError: If the table name contains invalid characters.
+    """
+    if not _VALID_TABLE_NAME_RE.match(table):
+        raise ValueError(
+            f"Invalid table name {table!r}. "
+            "Table names must start with a letter or underscore and contain only alphanumerics and underscores."
+        )
+    return table
 
 
 class StructureDB:
@@ -116,7 +127,7 @@ class StructureDB:
     def add_mp_icsd(
         self,
         table: str,
-        mp_data: list[dict[str, pymatgen.core.Structure | str]] | None = None,
+        mp_data: list[dict[str, pmg_Structure | str]] | None = None,
         mp_api_key: str | None = None,
     ) -> int:
         """
@@ -141,13 +152,12 @@ class StructureDB:
             The number of structs added.
 
         """
-        if mp_api_key is None:
-            # Try to get the API key from the environment
-            mp_api_key = SETTINGS.get("PMG_MAPI_KEY") or os.environ.get("MP_API_KEY")
-        if mp_api_key is None:
-            raise ValueError("No Materials Project API key provided.")
-
         if mp_data is None:  # pragma: no cover
+            if mp_api_key is None:
+                # Try to get the API key from the environment
+                mp_api_key = SETTINGS.get("PMG_MAPI_KEY") or os.environ.get("MP_API_KEY")
+            if mp_api_key is None:
+                raise ValueError("No Materials Project API key provided.")
             if len(mp_api_key) != 32:
                 with MPRester(mp_api_key) as m:
                     data = m.query(
@@ -155,21 +165,26 @@ class StructureDB:
                         properties=["structure", "material_id"],
                     )
             else:
+                if not HAS_MP_API or MPResterNew is None:
+                    raise ImportError(
+                        "mp-api is required for 32-character Materials Project API keys. "
+                        "Install it with: pip install mp-api"
+                    )
                 with MPResterNew(mp_api_key, use_document_model=False) as m:
                     data = m.materials.summary.search(theoretical=False, fields=["structure", "material_id"])
-
         else:
             data = mp_data
 
         self.add_table(table)
 
-        if pathos_available:
-            pool = ParallelPool()
-            parse_iter = pool.uimap(parse_mprest, data)
-        else:  # pragma: no cover
-            parse_iter = map(parse_mprest, data)
+        pool = ParallelPool()
+        parse_iter = pool.uimap(parse_mprest, data)
+        results = list(parse_iter)
+        pool.close()
+        pool.join()
+        pool.clear()
 
-        return self.add_structs(parse_iter, table, commit_after_each=True)
+        return self.add_structs(results, table, commit_after_each=True)
 
     def add_table(self, table: str):
         """
@@ -180,6 +195,7 @@ class StructureDB:
             table: The name of the table to add
 
         """
+        table = _validate_table_name(table)
         with self as c:
             c.execute(
                 f"""CREATE TABLE {table}
@@ -196,6 +212,7 @@ class StructureDB:
             table: The name of the table to add the structure to.
 
         """
+        table = _validate_table_name(table)
         entry = (struct.composition(), struct.as_poscar())
 
         with self as c:
@@ -203,7 +220,7 @@ class StructureDB:
 
     def add_structs(
         self,
-        structs: Sequence[SmactStructure],
+        structs: Sequence[SmactStructure | None],
         table: str,
         commit_after_each: bool | None = False,
     ) -> int:
@@ -226,6 +243,7 @@ class StructureDB:
             The number of structures added.
 
         """
+        table = _validate_table_name(table)
         with self as c:
             num = 0
             for struct in structs:
@@ -256,6 +274,7 @@ class StructureDB:
             A list of :class:`~.SmactStructure` s.
 
         """
+        table = _validate_table_name(table)
         with self as c:
             c.execute(
                 f"SELECT structure FROM {table} WHERE composition = ?",
@@ -282,6 +301,8 @@ class StructureDB:
             A list of :class:`SmactStructure` s in the table that contain the species.
 
         """
+        table = _validate_table_name(table)
+
         glob = "*".join("{}_*_{}{}" for _ in range(len(species)))
         glob = f"*{glob}*"
 
@@ -304,9 +325,9 @@ class StructureDB:
 
 
 def parse_mprest(
-    data: dict[str, pymatgen.core.Structure | str],
+    data: dict[str, pmg_Structure | str],
     determine_oxi: str = "BV",
-) -> SmactStructure:
+) -> SmactStructure | None:
     """
     Parse MPRester query data to generate structures.
 
@@ -324,7 +345,8 @@ def parse_mprest(
 
     """
     try:
-        return SmactStructure.from_py_struct(data["structure"], determine_oxi="BV")
-    except Exception:
+        return SmactStructure.from_py_struct(data["structure"], determine_oxi=determine_oxi)  # type: ignore[arg-type]
+    except (ValueError, RuntimeError, TypeError):
         # Couldn't decorate with oxidation states
-        logger.warning(f"Couldn't decorate {data['material_id']} with oxidation states.")
+        logger.warning(f"Couldn't decorate {data.get('material_id', 'unknown')} with oxidation states.")
+        return None

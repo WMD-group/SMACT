@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import itertools
+import logging
 import multiprocessing
+import os
 import warnings
 from functools import partial
 from pathlib import Path
@@ -12,9 +14,20 @@ import pandas as pd
 from pymatgen.core import Composition
 from tqdm import tqdm
 
-from smact import Element, ordered_elements
+from smact import Element, data_directory, ordered_elements
 from smact.data_loader import lookup_element_oxidation_states_custom
 from smact.screening import smact_filter
+
+logger = logging.getLogger(__name__)
+
+# Map short names used in smact_filter to their underlying data files so that
+# generate_composition_with_smact_custom can accept the same named sets.
+_NAMED_OX_SETS: dict[str, str] = {
+    "smact14": os.path.join(data_directory, "oxidation_states.txt"),
+    "icsd16": os.path.join(data_directory, "oxidation_states_icsd.txt"),
+    "icsd24": os.path.join(data_directory, "oxidation_states_icsd24_filtered.txt"),
+    "pymatgen_sp": os.path.join(data_directory, "oxidation_states_SP.txt"),
+}
 
 warnings.simplefilter(action="ignore", category=UserWarning)
 
@@ -37,6 +50,85 @@ def convert_formula(combinations: list, num_elements: int, max_stoich: int) -> l
         formula = Composition(formula_dict).reduced_formula
         local_compounds.append(formula)
     return local_compounds
+
+
+def _generate_unique_compounds(
+    num_elements: int,
+    max_stoich: int,
+    max_atomic_num: int,
+    num_processes: int | None,
+) -> list[str]:
+    """Steps 1 & 2: generate all unique reduced formulas.
+
+    Args:
+        num_elements: number of elements per compound.
+        max_stoich: maximum stoichiometric coefficient.
+        max_atomic_num: maximum atomic number to include.
+        num_processes: number of worker processes (None = cpu_count).
+
+    Returns:
+        Deduplicated list of reduced chemical formulas.
+    """
+    logger.info("#1. Generating all possible combinations of elements...")
+    elements = [Element(element) for element in ordered_elements(1, max_atomic_num)]
+    combinations = list(itertools.combinations(elements, num_elements))
+    logger.info("Number of generated combinations: %d", len(combinations))
+
+    logger.info("#2. Generating all possible stoichiometric combinations...")
+    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
+    compounds = list(
+        tqdm(
+            pool.imap_unordered(  # type: ignore[misc]
+                partial(convert_formula, num_elements=num_elements, max_stoich=max_stoich),
+                combinations,  # type: ignore[arg-type]
+            ),
+            total=len(combinations),
+        )
+    )
+    pool.close()
+    pool.join()
+
+    compounds = [item for sublist in compounds for item in sublist]
+    logger.info("Number of generated compounds: %d", len(compounds))
+    compounds = sorted(set(compounds))
+    logger.info("Number of generated compounds (unique): %d", len(compounds))
+    return compounds
+
+
+def _build_results_df(
+    compounds: list[str],
+    smact_results: list,
+    save_path: str | None,
+) -> pd.DataFrame:
+    """Step 4: build and optionally persist the results DataFrame.
+
+    Args:
+        compounds: full list of candidate reduced formulas.
+        smact_results: raw output from pool.imap_unordered over smact_filter.
+        save_path: optional file path to pickle the DataFrame.
+
+    Returns:
+        DataFrame indexed by formula with a boolean ``smact_allowed`` column.
+    """
+    logger.info("#4. Making data frame of results...")
+    smact_allowed = []
+    for result in smact_results:
+        for res in result:
+            symbols_stoich = zip(res[0], res[2], strict=False)
+            composition_dict = dict(symbols_stoich)
+            smact_allowed.append(Composition(composition_dict).reduced_formula)
+    smact_allowed = list(set(smact_allowed))
+    logger.info("Number of compounds allowed by SMACT: %d", len(smact_allowed))
+
+    results_df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])  # type: ignore[call-overload]
+    results_df.loc[smact_allowed, "smact_allowed"] = True
+
+    if save_path is not None:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        results_df.to_pickle(save_path)
+        logger.info("Saved to %s", save_path)
+
+    return results_df
 
 
 def generate_composition_with_smact(
@@ -63,42 +155,10 @@ def generate_composition_with_smact(
         df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
 
     """
-    # 1. generate all possible combinations of elements
-    print("#1. Generating all possible combinations of elements...")
-
-    elements = [Element(element) for element in ordered_elements(1, max_atomic_num)]
-    combinations = list(itertools.combinations(elements, num_elements))
-    print(f"Number of generated combinations: {len(list(combinations))}")
-
-    # 2. generate all possible stoichiometric combinations
-    print("#2. Generating all possible stoichiometric combinations...")
-
-    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
-    compounds = list(
-        tqdm(
-            pool.imap_unordered(
-                partial(
-                    convert_formula,
-                    num_elements=num_elements,
-                    max_stoich=max_stoich,
-                ),
-                combinations,
-            ),
-            total=len(combinations),
-        )
-    )
-
-    pool.close()
-    pool.join()
-    # Flatten the list of lists into a single list
-    compounds = [item for sublist in compounds for item in sublist]
-
-    print(f"Number of generated compounds: {len(compounds)}")
-    compounds = list(set(compounds))
-    print(f"Number of generated compounds (unique): {len(compounds)}")
+    compounds = _generate_unique_compounds(num_elements, max_stoich, max_atomic_num, num_processes)
 
     # 3. filter compounds with smact
-    print("#3. Filtering compounds with SMACT...")
+    logger.info("#3. Filtering compounds with SMACT...")
     elements_pauling = [
         Element(element) for element in ordered_elements(1, max_atomic_num) if Element(element).pauling_eneg is not None
     ]  # omit elements without Pauling electronegativity (e.g., He, Ne, Ar, ...)
@@ -107,13 +167,9 @@ def generate_composition_with_smact(
     pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     results = list(
         tqdm(
-            pool.imap_unordered(
-                partial(
-                    smact_filter,
-                    threshold=max_stoich,
-                    oxidation_states_set=oxidation_states_set,
-                ),
-                compounds_pauling,
+            pool.imap_unordered(  # type: ignore[misc]
+                partial(smact_filter, threshold=max_stoich, oxidation_states_set=oxidation_states_set),
+                compounds_pauling,  # type: ignore[arg-type]
             ),
             total=len(compounds_pauling),
         )
@@ -121,28 +177,7 @@ def generate_composition_with_smact(
     pool.close()
     pool.join()
 
-    # 4. make data frame of results
-    print("#4. Making data frame of results...")
-    # make dataframework with index is compound and columns are boolean smact results
-    smact_allowed = []
-
-    for result in results:
-        for res in result:
-            symbols_stoich = zip(res[0], res[2], strict=False)
-            composition_dict = dict(symbols_stoich)
-            smact_allowed.append(Composition(composition_dict).reduced_formula)
-    smact_allowed = list(set(smact_allowed))
-    print(f"Number of compounds allowed by SMACT: {len(smact_allowed)}")
-
-    results_df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])
-    results_df.loc[smact_allowed, "smact_allowed"] = True
-
-    if save_path is not None:
-        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-        results_df.to_pickle(save_path)
-        print(f"Saved to {save_path}")
-
-    return results_df
+    return _build_results_df(compounds, results, save_path)
 
 
 def generate_composition_with_smact_custom(
@@ -169,63 +204,30 @@ def generate_composition_with_smact_custom(
         df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
 
     """
-    # 1. generate all possible combinations of elements
-    print("#1. Generating all possible combinations of elements...")
-
-    elements = [Element(element) for element in ordered_elements(1, max_atomic_num)]
-    combinations = list(itertools.combinations(elements, num_elements))
-    print(f"Number of generated combinations: {len(combinations)}")
-
-    # 2. generate all possible stoichiometric combinations
-    print("#2. Generating all possible stoichiometric combinations...")
-
-    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
-    compounds = list(
-        tqdm(
-            pool.imap_unordered(
-                partial(
-                    convert_formula,
-                    num_elements=num_elements,
-                    max_stoich=max_stoich,
-                ),
-                combinations,
-            ),
-            total=len(combinations),
-        )
-    )
-
-    pool.close()
-    pool.join()
-    # Flatten the list of lists into a single list
-    compounds = [item for sublist in compounds for item in sublist]
-
-    print(f"Number of generated compounds: {len(compounds)}")
-    compounds = list(set(compounds))
-    print(f"Number of generated compounds (unique): {len(compounds)}")
+    compounds = _generate_unique_compounds(num_elements, max_stoich, max_atomic_num, num_processes)
 
     # 3. filter compounds with smact
-    print("#3. Filtering compounds with SMACT...")
+    logger.info("#3. Filtering compounds with SMACT...")
 
-    ox_states_custom = lookup_element_oxidation_states_custom("all", oxidation_states_set, copy=False)
+    ox_filepath = _NAMED_OX_SETS.get(oxidation_states_set, oxidation_states_set)
+    ox_states_custom = lookup_element_oxidation_states_custom("all", ox_filepath, copy=False)
+    fr_eneg = Element("Fr").pauling_eneg
     elements_pauling = [
         Element(element)
         for element in ordered_elements(1, max_atomic_num)
-        if element in ox_states_custom
+        if ox_states_custom is not None
+        and element in ox_states_custom  # type: ignore[operator]
         and Element(element).pauling_eneg is not None
-        and Element(element).pauling_eneg >= Element("Fr").pauling_eneg
+        and (fr_eneg is None or Element(element).pauling_eneg >= fr_eneg)  # type: ignore[operator]
     ]
     compounds_pauling = list(itertools.combinations(elements_pauling, num_elements))
 
     pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     results = list(
         tqdm(
-            pool.imap_unordered(
-                partial(
-                    smact_filter,
-                    threshold=max_stoich,
-                    oxidation_states_set=oxidation_states_set,
-                ),
-                compounds_pauling,
+            pool.imap_unordered(  # type: ignore[misc]
+                partial(smact_filter, threshold=max_stoich, oxidation_states_set=ox_filepath),
+                compounds_pauling,  # type: ignore[arg-type]
             ),
             total=len(compounds_pauling),
         )
@@ -233,25 +235,4 @@ def generate_composition_with_smact_custom(
     pool.close()
     pool.join()
 
-    # 4. make data frame of results
-    print("#4. Making data frame of results...")
-    # make dataframework with index is compound and columns are boolean smact results
-    smact_allowed = []
-
-    for result in results:
-        for res in result:
-            symbols_stoich = zip(res[0], res[2], strict=False)
-            composition_dict = dict(symbols_stoich)
-            smact_allowed.append(Composition(composition_dict).reduced_formula)
-    smact_allowed = list(set(smact_allowed))
-    print(f"Number of compounds allowed by SMACT: {len(smact_allowed)}")
-
-    results_df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])
-    results_df.loc[smact_allowed, "smact_allowed"] = True
-
-    if save_path is not None:
-        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-        results_df.to_pickle(save_path)
-        print(f"Saved to {save_path}")
-
-    return results_df
+    return _build_results_df(compounds, results, save_path)

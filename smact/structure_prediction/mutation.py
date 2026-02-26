@@ -123,6 +123,8 @@ class CationMutator:
 
         def add_alpha(s1, s2):
             """Add an alpha value to the lambda table at both coordinates."""
+            if self.alpha is None:
+                raise ValueError("alpha function must not be None")
             a = self.alpha(s1, s2)
             self.lambda_tab.loc[s1, s2] = a
             self.lambda_tab.loc[s2, s1] = a
@@ -175,7 +177,9 @@ class CationMutator:
         if {s1, s2} <= self.specs:
             return self.lambda_tab.loc[s1, s2]
 
-        return self.alpha(s1, s2)
+        if self.alpha is not None:
+            return self.alpha(s1, s2)
+        return -5.0
 
     def get_lambdas(self, species: str) -> pd.Series:
         """
@@ -239,19 +243,17 @@ class CationMutator:
 
         final_spec_tup = parse_spec(final_species)
 
-        # Replace species tuple
-        struct_buff.species[spec_loc] = (
-            *final_spec_tup,
-            struct_buff.species[spec_loc][2],
-        )
+        # Replace species tuple (struct_buff.species is always list[tuple[str, int, int]] after sanitisation)
+        old_stoic = struct_buff.species[spec_loc][2]  # type: ignore[misc]
+        struct_buff.species[spec_loc] = (*final_spec_tup, old_stoic)  # type: ignore[assignment]
 
         # Check for charge neutrality
-        if sum(x[1] * x[2] for x in struct_buff.species) != 0:
+        if sum(x[1] * x[2] for x in struct_buff.species) != 0:  # type: ignore[misc]
             raise ValueError("New structure is not charge neutral.")
 
         # Sort species again
-        struct_buff.species.sort(key=itemgetter(1), reverse=True)
-        struct_buff.species.sort(key=itemgetter(0))
+        struct_buff.species.sort(key=itemgetter(1), reverse=True)  # type: ignore[misc]
+        struct_buff.species.sort(key=itemgetter(0))  # type: ignore[misc]
 
         # Replace sites
         struct_buff.sites[final_species] = struct_buff.sites.pop(init_species)
@@ -290,19 +292,17 @@ class CationMutator:
 
         final_spec_tup_list = [parse_spec(i) for i in final_species]
 
-        # Replace species tuple
+        # Replace species tuple (struct_buff.species is always list[tuple[str, int, int]] after sanitisation)
         for i in range(n):
-            struct_buff.species[spec_loc[i]] = (
-                *final_spec_tup_list[i],
-                struct_buff.species[spec_loc[i]][2],
-            )
+            old_stoic = struct_buff.species[spec_loc[i]][2]  # type: ignore[misc]
+            struct_buff.species[spec_loc[i]] = (*final_spec_tup_list[i], old_stoic)  # type: ignore[assignment]
 
         # Check for charge neutrality
-        if sum(x[1] * x[2] for x in struct_buff.species) != 0:
+        if sum(x[1] * x[2] for x in struct_buff.species) != 0:  # type: ignore[misc]
             raise ValueError("New structure is not charge neutral")
 
         # Sort species again
-        struct_buff.species.sort(key=itemgetter(1), reverse=True)
+        struct_buff.species.sort(key=itemgetter(1), reverse=True)  # type: ignore[misc]
         struct_buff.species.sort(key=itemgetter(0))
 
         # Replace sites
@@ -400,7 +400,7 @@ class CationMutator:
         self,
         structure: SmactStructure,
         thresh: float | None = 1e-5,
-    ) -> Generator[tuple[SmactStructure, float], None, None]:
+    ) -> Generator[tuple[SmactStructure, float, str, str], None, None]:
         """
         Find all structures with 1 substitution with probability above a threshold.
 

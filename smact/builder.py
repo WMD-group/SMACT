@@ -1,19 +1,22 @@
 """A collection of functions for building certain lattice types."""
-# Using the ase spacegroup module this can build the structure, from
-# the composition, as defined in the smact_lattice module.
-# TODO:
-# Estimate the cell parameters based on radii from tables.
-# Add further types, Spinnel, Flourite, Delafossite ....
 
-# Implement Structure class, c.f. dev_docs.
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from ase.spacegroup import crystal
+
+if TYPE_CHECKING:
+    from ase import Atoms
 
 from smact.lattice import Lattice, Site
 
 
-def cubic_perovskite(species, cell_par=None, repetitions=None):
+def cubic_perovskite(
+    species: list[str],
+    cell_par: list[float] | None = None,
+    repetitions: list[int] | None = None,
+) -> tuple[Lattice, Atoms]:
     """
     Build a perovskite cell using the crystal function in ASE.
 
@@ -46,10 +49,14 @@ def cubic_perovskite(species, cell_par=None, repetitions=None):
     for site in zip(system.get_scaled_positions(), oxidation_states, strict=False):
         sites_list.append(Site(site[0], site[1]))
 
-    return Lattice(sites_list, oxidation_states), system
+    return Lattice(sites_list), system
 
 
-def wurtzite(species, cell_par=None, repetitions=None):
+def wurtzite(
+    species: list[str],
+    cell_par: list[float] | None = None,
+    repetitions: list[int] | None = None,
+) -> tuple[Lattice, Atoms]:
     """
     Build a wurzite cell using the crystal function in ASE.
 
@@ -82,4 +89,4 @@ def wurtzite(species, cell_par=None, repetitions=None):
 
     for site in zip(system.get_scaled_positions(), oxidation_states, strict=False):
         sites_list.append(Site(site[0], site[1]))
-    return Lattice(sites_list, oxidation_states), system
+    return Lattice(sites_list), system

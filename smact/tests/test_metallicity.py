@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import unittest
 
 import pytest
@@ -156,6 +157,24 @@ class TestMetallicity(unittest.TestCase):
                 score < 0.5,
                 msg=f"Expected low metallicity score (<0.5) for {formula}, but got {score:.2f}",
             )
+
+    def test_pauling_mismatch_none_electronegativity(self):
+        """get_pauling_test_mismatch returns NaN when element lacks Pauling eneg (line 108)."""
+        # He has no Pauling electronegativity
+        result = get_pauling_test_mismatch(Composition("HeNe"))
+        self.assertTrue(math.isnan(result))
+
+    def test_metallicity_score_vec_value_error(self):
+        """metallicity_score handles ValueError from VEC (line 143-144)."""
+        # Lr has no valence data, triggering ValueError in VEC → vec_factor=0.5 fallback
+        score = metallicity_score("LrFe")
+        self.assertTrue(0.0 <= score <= 1.0)
+
+    def test_metallicity_score_pauling_nan_path(self):
+        """metallicity_score handles NaN Pauling mismatch (line 149)."""
+        # He has no Pauling eneg → pauling_mismatch is NaN → pauling_term=0.5
+        score = metallicity_score("HeFe")
+        self.assertTrue(0.0 <= score <= 1.0)
 
     def test_edge_cases(self):
         """Test edge cases and error handling."""

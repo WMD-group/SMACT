@@ -5,18 +5,37 @@ in multi-component solids. The search and ranking process is based on electronic
 
 from __future__ import annotations
 
+import logging
 import os
+import warnings
 from itertools import groupby
 
 import numpy as np
 from pymatgen.util import plotting
 from tabulate import tabulate
 
-import smact
 from smact import data_directory
 from smact.structure_prediction import mutation, utilities
 
-SKIPSSPECIES_COSINE_SIM_PATH = os.path.join(
+logger = logging.getLogger(__name__)
+
+__all__ = [
+    "SKIPSPECIES_COSINE_SIM_PATH",
+    "SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH",
+    "SPECIES_M3GNET_MP2023_GAP_COSINE_PATH",
+    "Doper",
+]
+
+_DEFAULT_LAMBDA_THRESHOLD = -5.0
+_SELECTIVITY_WEIGHT = 0.25
+_SIMILARITY_WEIGHT = 1 - _SELECTIVITY_WEIGHT
+_PROBABILITY_INDEX = 2
+_SIMILARITY_INDEX = 3
+_SELECTIVITY_INDEX = 4
+_COMBINED_SCORE_INDEX = 5
+_NUM_DOPANT_TYPES = 4
+
+SKIPSPECIES_COSINE_SIM_PATH = os.path.join(
     data_directory,
     "species_rep/skipspecies_20221028_319ion_dim200_cosine_similarity.json",
 )
@@ -27,6 +46,9 @@ SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH = os.path.join(
 SPECIES_M3GNET_MP2023_GAP_COSINE_PATH = os.path.join(
     data_directory, "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-band_gap_cosine_similarity.json"
 )
+
+# Backward-compatible alias — the original name had a double-S typo.
+SKIPSSPECIES_COSINE_SIM_PATH = SKIPSPECIES_COSINE_SIM_PATH
 
 
 class Doper:
@@ -66,7 +88,7 @@ class Doper:
         ]:
             raise ValueError(f"Embedding {embedding} is not supported")
         if embedding == "skipspecies":
-            self.cation_mutator = mutation.CationMutator.from_json(SKIPSSPECIES_COSINE_SIM_PATH)
+            self.cation_mutator = mutation.CationMutator.from_json(SKIPSPECIES_COSINE_SIM_PATH)
         elif embedding == "M3GNet-MP-2023.11.1-oxi-Eform":
             self.cation_mutator = mutation.CationMutator.from_json(SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH)
         elif embedding == "M3GNet-MP-2023.11.1-oxi-band_gap":
@@ -77,15 +99,19 @@ class Doper:
             # Default to Hautier data-mined lambda values from pymatgen
             self.cation_mutator = mutation.CationMutator.from_json()
         self.possible_species = list(self.cation_mutator.specs)
-        self.lambda_threshold = self.cation_mutator.alpha("X", "Y")
-        self.threshold = 1 / self.cation_mutator.Z * np.exp(self.cation_mutator.alpha("X", "Y"))
+        if self.cation_mutator.alpha is not None:
+            self.lambda_threshold = self.cation_mutator.alpha("X", "Y")
+            self.threshold = 1 / self.cation_mutator.Z * np.exp(self.cation_mutator.alpha("X", "Y"))
+        else:
+            self.lambda_threshold = _DEFAULT_LAMBDA_THRESHOLD
+            self.threshold = 1 / self.cation_mutator.Z * np.exp(_DEFAULT_LAMBDA_THRESHOLD)
         self.use_probability = use_probability
         self.results = None
 
     def _get_selectivity(
         self,
-        data_list: list[smact.Element],
-        cations: list[smact.Element],
+        data_list: list[list],
+        cations: list[str],
         sub,
     ):
         data = data_list.copy()
@@ -102,16 +128,20 @@ class Doper:
             selectivity = sub_prob / sum_prob
             selectivity = round(selectivity, 2)
             dopants.append(selectivity)
-            assert len(dopants) == 5
+            if len(dopants) != _SELECTIVITY_INDEX + 1:  # pragma: no cover
+                raise RuntimeError(
+                    f"Dopant list has unexpected length {len(dopants)} (expected {_SELECTIVITY_INDEX + 1}). "
+                    "This is an internal error; please report it."
+                )
         return data
 
-    def _merge_dicts(self, keys, dopants_list, groupby_list):
+    def _merge_dicts(self, keys, dopants_list, groupby_list, sort_idx: int = 2):
         merged_dict = dict()
         for k, dopants, group in zip(keys, dopants_list, groupby_list, strict=False):
             merged_values = dict()
             merged_values["sorted"] = dopants
             for key, value in group.items():
-                merged_values[key] = sorted(value, key=lambda x: x[2], reverse=True)
+                merged_values[key] = sorted(value, key=lambda x: x[sort_idx], reverse=True)
             merged_dict[k] = merged_values
         return merged_dict
 
@@ -153,6 +183,43 @@ class Doper:
 
         return list(poss_n_type), list(poss_p_type)
 
+    def _collect_dopants(
+        self,
+        host_ions: list[str],
+        candidates: list[str],
+        cation_mutator: mutation.CationMutator,
+        charge_comparison: str,
+    ) -> list:
+        """Collect dopants that pass the threshold filter.
+
+        Args:
+            host_ions: Host ions to substitute.
+            candidates: Candidate dopant species.
+            cation_mutator: The CationMutator instance for scoring.
+            charge_comparison: "n_type" (candidate charge > host) or "p_type" (candidate charge < host).
+
+        Returns:
+            List of [dopant_species, host_ion, probability, lambda] entries.
+        """
+        results = []
+        for host in host_ions:
+            host_charge = utilities.parse_spec(host)[1]
+            for candidate in candidates:
+                candidate_charge = utilities.parse_spec(candidate)[1]
+                if charge_comparison == "n_type" and host_charge >= candidate_charge:
+                    continue
+                if charge_comparison == "p_type" and host_charge <= candidate_charge:
+                    continue
+                prob = cation_mutator.sub_prob(host, candidate)
+                lam = cation_mutator.get_lambda(host, candidate)
+                if self.use_probability:
+                    if prob <= self.threshold:
+                        continue
+                elif lam <= self.lambda_threshold:
+                    continue
+                results.append([candidate, host, prob, lam])
+        return results
+
     def get_dopants(self, num_dopants: int = 5, get_selectivity=True, group_by_charge=True) -> dict:
         """
         Get the top n dopants for each case.
@@ -177,82 +244,26 @@ class Doper:
                     cations.append(ion)
                 elif charge < 0:
                     anions.append(ion)
-            except Exception as e:
-                print(f"{e}: charge is not defined for {ion}!")
-
-        CM = self.cation_mutator
+            except (AttributeError, ValueError):
+                warnings.warn(f"Could not parse charge for ion '{ion}'; skipping.", stacklevel=2)
 
         poss_n_type_cat, poss_p_type_cat = self._get_dopants(cations, "cation")
         poss_n_type_an, poss_p_type_an = self._get_dopants(anions, "anion")
 
-        n_type_cat, p_type_cat, n_type_an, p_type_an = [], [], [], []
-        for cation in cations:
-            cation_charge = utilities.parse_spec(cation)[1]
-
-            for _i, n_specie in enumerate(poss_n_type_cat):
-                n_specie_charge = utilities.parse_spec(n_specie)[1]
-                if cation_charge >= n_specie_charge:
-                    continue
-                if CM.sub_prob(cation, n_specie) > self.threshold:
-                    n_type_cat.append(
-                        [
-                            n_specie,
-                            cation,
-                            self.cation_mutator.sub_prob(cation, n_specie),
-                            self.cation_mutator.get_lambda(cation, n_specie),
-                        ]
-                    )
-            for p_specie in poss_p_type_cat:
-                p_specie_charge = utilities.parse_spec(p_specie)[1]
-                if cation_charge <= p_specie_charge:
-                    continue
-                if CM.sub_prob(cation, p_specie) > self.threshold:
-                    p_type_cat.append(
-                        [
-                            p_specie,
-                            cation,
-                            self.cation_mutator.sub_prob(cation, p_specie),
-                            self.cation_mutator.get_lambda(cation, p_specie),
-                        ],
-                    )
-        for anion in anions:
-            anion_charge = utilities.parse_spec(anion)[1]
-
-            for n_specie in poss_n_type_an:
-                n_specie_charge = utilities.parse_spec(n_specie)[1]
-                if anion_charge >= n_specie_charge:
-                    continue
-                if CM.sub_prob(anion, n_specie) > self.threshold:
-                    n_type_an.append(
-                        [
-                            n_specie,
-                            anion,
-                            self.cation_mutator.sub_prob(anion, n_specie),
-                            self.cation_mutator.get_lambda(anion, n_specie),
-                        ]
-                    )
-            for p_specie in poss_p_type_an:
-                p_specie_charge = utilities.parse_spec(p_specie)[1]
-                if anion_charge <= p_specie_charge:
-                    continue
-                if CM.sub_prob(anion, p_specie) > self.threshold:
-                    p_type_an.append(
-                        [
-                            p_specie,
-                            anion,
-                            self.cation_mutator.sub_prob(anion, p_specie),
-                            self.cation_mutator.get_lambda(anion, p_specie),
-                        ]
-                    )
+        n_type_cat = self._collect_dopants(cations, poss_n_type_cat, self.cation_mutator, "n_type")
+        p_type_cat = self._collect_dopants(cations, poss_p_type_cat, self.cation_mutator, "p_type")
+        n_type_an = self._collect_dopants(anions, poss_n_type_an, self.cation_mutator, "n_type")
+        p_type_an = self._collect_dopants(anions, poss_p_type_an, self.cation_mutator, "p_type")
         dopants_lists = [n_type_cat, p_type_cat, n_type_an, p_type_an]
 
-        # sort by probability
+        # sort by probability or lambda depending on use_probability flag
+        sort_idx = _PROBABILITY_INDEX if self.use_probability else _SIMILARITY_INDEX
         for dopants_list in dopants_lists:
-            dopants_list.sort(key=lambda x: x[2], reverse=True)
+            dopants_list.sort(key=lambda x: x[sort_idx], reverse=True)
 
-        self.len_list = 4
+        self.len_list = _NUM_DOPANT_TYPES
         if get_selectivity:
-            self.len_list = 6
+            self.len_list = _NUM_DOPANT_TYPES + 2
             for i in range(len(dopants_lists)):
                 sub = "cation"
                 if i > 1:
@@ -261,17 +272,19 @@ class Doper:
 
             for dopants_list in dopants_lists:
                 for dopant in dopants_list:
-                    similarity = dopant[3]
-                    selectivity = dopant[4]
+                    similarity = dopant[_SIMILARITY_INDEX]
+                    selectivity = dopant[_SELECTIVITY_INDEX]
                     combined_score = self._calculate_combined_score(similarity, selectivity)
                     dopant.append(combined_score)
 
             # sort by combined score
             for dopants_list in dopants_lists:
-                dopants_list.sort(key=lambda x: x[5], reverse=True)
+                dopants_list.sort(key=lambda x: x[_COMBINED_SCORE_INDEX], reverse=True)
 
         # if groupby
-        groupby_lists = [dict()] * 4  # create list of empty dict length of 4 (n-cat, p-cat, n-an, p-an)
+        groupby_lists = [
+            dict() for _ in range(_NUM_DOPANT_TYPES)
+        ]  # create list of empty dict (n-cat, p-cat, n-an, p-an)
         # in case group_by_charge = False
         if group_by_charge:
             for i, dl in enumerate(dopants_lists):
@@ -292,7 +305,10 @@ class Doper:
             "p-type anion substitutions",
         ]
 
-        self.results = self._merge_dicts(keys, dopants_lists, groupby_lists)
+        # When selectivity is computed the final sort is by combined score (idx 5);
+        # otherwise use the same probability-vs-lambda index as the outer sort.
+        effective_sort_idx = _COMBINED_SCORE_INDEX if get_selectivity else sort_idx
+        self.results = self._merge_dicts(keys, dopants_lists, groupby_lists, effective_sort_idx)
 
         # return the top (num_dopants) results for each case
         return self.results
@@ -311,20 +327,17 @@ class Doper:
             None
 
         """
-        assert self.results, "Dopants are not calculated. Run get_dopants first."
+        if not self.results:
+            raise RuntimeError("Dopants are not calculated. Run get_dopants first.")
 
+        _plot_value_index = {
+            "probability": _PROBABILITY_INDEX,
+            "similarity": _SIMILARITY_INDEX,
+            "selectivity": _SELECTIVITY_INDEX,
+        }
         for dopants in self.results.values():
-            # due to selectivity option
-            if self.len_list == 3:
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, y in dopants.get("sorted")}
-            elif plot_value == "probability":
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, y, _, _, _ in dopants.get("sorted")}
-            elif plot_value == "similarity":
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, y, _, _ in dopants.get("sorted")}
-            elif plot_value == "selectivity":
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, _, y, _ in dopants.get("sorted")}
-            else:
-                dict_results = {utilities.parse_spec(x)[0]: y for x, _, _, _, _, y in dopants.get("sorted")}
+            idx = _plot_value_index.get(plot_value, _COMBINED_SCORE_INDEX)
+            dict_results = {utilities.parse_spec(row[0])[0]: row[idx] for row in dopants.get("sorted")}
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
                 cmap=cmap,
@@ -338,39 +351,36 @@ class Doper:
         return f"{abs(num)}{sign}"
 
     def _calculate_combined_score(self, similarity: float, selectivity: float) -> float:
-        return (1 - 0.25) * similarity + 0.25 * selectivity
+        return _SIMILARITY_WEIGHT * similarity + _SELECTIVITY_WEIGHT * selectivity
 
     @property
-    def to_table(self):
+    def to_table(self) -> str:
         """
-        Print the dopant suggestions in a tabular format.
+        Format the dopant suggestions as a table string.
 
         Returns:
         -------
-            None
+            str: Formatted table of dopant suggestions.
 
         """
         if not self.results:
-            print("No data available")
-            return
-        # if self.use_probability:
-        #     headers = ["Rank", "Dopant", "Host", "Probability", "Selectivity", "Combined"]
-        # else:
-        #     headers = ["Rank", "Dopant", "Host", "Similarity", "Selectivity", "Combined"]
-
+            logger.warning("No data available")
+            return ""
         headers = ["Rank", "Dopant", "Host", "Probability", "Similarity", "Selectivity", "Combined"]
 
+        parts: list[str] = []
         for dopant_type, dopants in self.results.items():
-            print("\033[91m" + str(dopant_type) + "\033[0m")
+            parts.append("\033[91m" + str(dopant_type) + "\033[0m")
             for k, v in dopants.items():
                 kind = k if k == "sorted" else self._format_number(k)
-                print("\033[96m" + str(kind) + "\033[0m")
+                parts.append("\033[96m" + str(kind) + "\033[0m")
                 enumerated_data = [[i + 1, *sublist] for i, sublist in enumerate(v)]
-                print(
+                parts.append(
                     tabulate(
                         enumerated_data,
                         headers=headers[: self.len_list + 1],
                         tablefmt="grid",
-                    ),
-                    end="\n\n",
+                    )
                 )
+                parts.append("")
+        return "\n".join(parts)

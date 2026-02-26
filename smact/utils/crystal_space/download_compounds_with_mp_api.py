@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import itertools
 import json
+import logging
 import string
 import time
 from collections import defaultdict
@@ -13,12 +14,14 @@ from mp_api.client import MPRester
 from pymatgen.core import Composition
 from tqdm import tqdm
 
+logger = logging.getLogger(__name__)
+
 
 def download_mp_data(
     mp_api_key: str | None = None,
     num_elements: int = 2,
     max_stoich: int = 8,
-    save_dir: str = "data/binary/mp_api",
+    save_dir: str | Path = "data/binary/mp_api",
     request_interval: float = 0.1,
 ):
     """
@@ -62,7 +65,7 @@ def download_mp_data(
     e_hull_dict = defaultdict(lambda: float("inf"))
 
     for formula_anonymous in tqdm(formula_anonymous_list):
-        print(f"Downloading data for {formula_anonymous}...")
+        logger.info("Downloading data for %s...", formula_anonymous)
         # download data from MP
         with MPRester(mp_api_key) as mpr:
             docs = mpr.materials.summary.search(
@@ -86,11 +89,11 @@ def download_mp_data(
             )
         # save data with lowest energy above hull
         for doc in docs:
-            formula_pretty = doc.formula_pretty
-            energy_above_hull = doc.energy_above_hull
+            formula_pretty = doc.formula_pretty  # type: ignore[attr-defined]
+            energy_above_hull = doc.energy_above_hull  # type: ignore[attr-defined]
 
-            if (energy_above_hull) < e_hull_dict[formula_pretty]:
-                e_hull_dict[formula_pretty] = energy_above_hull
+            if (energy_above_hull) < e_hull_dict[formula_pretty]:  # type: ignore[operator]
+                e_hull_dict[formula_pretty] = energy_above_hull  # type: ignore[arg-type]
                 with open(save_dir / f"{formula_pretty}.json", "w") as f:
-                    json.dump(doc.dict(), f)
+                    json.dump(doc.dict(), f)  # type: ignore[attr-defined]
         time.sleep(request_interval)

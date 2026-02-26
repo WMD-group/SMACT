@@ -2,7 +2,21 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
+
+if TYPE_CHECKING:
+    from collections.abc import Collection
+
+__all__ = [
+    "get_d_block_element_fraction",
+    "get_distinct_metal_count",
+    "get_element_fraction",
+    "get_metal_fraction",
+    "get_pauling_test_mismatch",
+    "metallicity_score",
+]
 from pymatgen.core import Composition
 
 import smact
@@ -35,7 +49,7 @@ def _ensure_composition(composition: str | Composition) -> Composition:
     return composition
 
 
-def get_element_fraction(composition: str | Composition, element_set: set[str]) -> float:
+def get_element_fraction(composition: str | Composition, element_set: Collection[str]) -> float:
     """Calculate the fraction of elements from a given set in a composition.
     This helper function is used to avoid code duplication in functions that
     calculate fractions of specific element types (e.g., metals, d-block elements).
@@ -92,16 +106,15 @@ def get_pauling_test_mismatch(composition: str | Composition) -> float:
     # If any element lacks a known electronegativity, return NaN
     if None in electronegativities:
         return float("nan")
-    else:
-        mismatches = []
-        for i, (_el1, eneg1) in enumerate(zip(elements, electronegativities, strict=False)):
-            for _el2, eneg2 in zip(elements[i + 1 :], electronegativities[i + 1 :], strict=False):
-                # Always use absolute difference
-                mismatch = abs(eneg1 - eneg2)
-                mismatches.append(mismatch)
 
-        # Return average mismatch across all unique pairs
-        return np.mean(mismatches) if mismatches else 0.0
+    eneg_values: list[float] = [e for e in electronegativities if e is not None]
+    mismatches: list[float] = []
+    for i, eneg1 in enumerate(eneg_values):
+        for eneg2 in eneg_values[i + 1 :]:
+            mismatches.append(abs(eneg1 - eneg2))
+
+    # Return average mismatch across all unique pairs
+    return float(np.mean(mismatches)) if mismatches else 0.0
 
 
 def metallicity_score(composition: str | Composition) -> float:

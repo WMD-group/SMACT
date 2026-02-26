@@ -2,32 +2,33 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import TYPE_CHECKING
-
-from smact.utils.compat import StrEnum
 
 if TYPE_CHECKING:
     import pandas as pd
-    from elementembeddings.composition import CompositionalEmbedding
-    from elementembeddings.core import Embedding
+    from elementembeddings.composition import CompositionalEmbedding  # type: ignore[import-untyped]
+    from elementembeddings.core import Embedding  # type: ignore[import-untyped]
 
 try:
-    from elementembeddings.composition import (
-        composition_featuriser as ee_composition_featuriser,
+    from elementembeddings.composition import (  # type: ignore[import-untyped]
+        composition_featuriser as ee_composition_featuriser,  # type: ignore[reportAssignmentType]
     )
-    from elementembeddings.composition import (
-        species_composition_featuriser as ee_species_composition_featuriser,
+    from elementembeddings.composition import (  # type: ignore[import-untyped]
+        species_composition_featuriser as ee_species_composition_featuriser,  # type: ignore[reportAssignmentType]
     )
 
     HAS_ELEMENTEMBEDDINGS = True
 except ImportError:
     HAS_ELEMENTEMBEDDINGS = False
 
-    def ee_composition_featuriser(*args, **kwargs):
+    def ee_composition_featuriser(*args, **kwargs):  # type: ignore[misc]
         """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
+        raise ImportError("ElementEmbeddings not installed")
 
-    def ee_species_composition_featuriser(*args, **kwargs):
+    def ee_species_composition_featuriser(*args, **kwargs):  # type: ignore[misc]
         """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
+        raise ImportError("ElementEmbeddings not installed")
 
 
 # Should be moved to element embeddings codebase

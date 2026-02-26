@@ -2,25 +2,33 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from collections import defaultdict
 from functools import reduce
 from math import gcd
 from operator import itemgetter
+from typing import cast as _cast
 
 import numpy as np
-import pymatgen
 from pymatgen.analysis.bond_valence import BVAnalyzer
 from pymatgen.core import SETTINGS
 from pymatgen.core import Structure as pmg_Structure
-from pymatgen.ext.matproj import MPRester
+
+try:
+    from pymatgen.ext.matproj import MPRester
+
+    HAS_LEGACY_MPRESTER = True
+except ImportError:  # pragma: no cover
+    HAS_LEGACY_MPRESTER = False
+    MPRester = None
 
 try:
     from mp_api.client import MPRester as MPResterNew
 
     HAS_MP_API = True
-except ImportError:
+except ImportError:  # pragma: no cover
     HAS_MP_API = False
     MPResterNew = None
 from pymatgen.transformations.standard_transformations import (
@@ -30,6 +38,8 @@ from pymatgen.transformations.standard_transformations import (
 import smact
 
 from .utilities import get_sign
+
+logger = logging.getLogger(__name__)
 
 
 class SmactStructure:
@@ -83,7 +93,10 @@ class SmactStructure:
                 :meth:`~.from_mp`.
 
         """
-        self.species = self._sanitise_species(species) if sanitise_species else species
+        # _sanitise_species always returns list[tuple[str, int, int]]; cast for type safety
+        self.species: list[tuple[str, int, int]] = (
+            self._sanitise_species(species) if sanitise_species else _cast("list[tuple[str, int, int]]", species)
+        )
 
         self.lattice_mat = lattice_mat
 
@@ -204,13 +217,15 @@ class SmactStructure:
             raise ValueError(species_error)
 
         if isinstance(species[0][0], str):  # String variation of instantiation
-            species.sort(key=itemgetter(1), reverse=True)
-            species.sort(key=itemgetter(0))
-            sanit_species = species
+            str_species = _cast("list[tuple[str, int, int]]", species)
+            str_species.sort(key=itemgetter(1), reverse=True)
+            str_species.sort(key=itemgetter(0))
+            sanit_species: list[tuple[str, int, int]] = str_species
 
         elif isinstance(species[0][0], smact.Species):  # Species class variation of instantiation
-            species.sort(key=lambda x: (x[0].symbol, -x[0].oxidation))
-            sanit_species = [(x[0].symbol, x[0].oxidation, x[1]) for x in species]
+            sp_species = _cast("list[tuple[smact.Species, int]]", species)
+            sp_species.sort(key=lambda x: (x[0].symbol, -x[0].oxidation))
+            sanit_species = [(x[0].symbol, x[0].oxidation, x[1]) for x in sp_species]
 
         else:
             raise TypeError(species_error)
@@ -219,14 +234,14 @@ class SmactStructure:
 
     @staticmethod
     def __parse_py_sites(
-        structure: pymatgen.core.Structure,
+        structure: pmg_Structure,
     ) -> tuple[dict[str, list[list[float]]], list[tuple[str, int, int]]]:
         """
         Parse the sites of a pymatgen Structure.
 
         Args:
         ----
-            structure: A :class:`pymatgen.core.Structure` instance.
+            structure: A :class:`pmg_Structure` instance.
 
         Returns:
         -------
@@ -239,8 +254,8 @@ class SmactStructure:
                 represented by a tuple of (element, charge, stoichiometry).
 
         """
-        if not isinstance(structure, pymatgen.core.Structure):
-            raise TypeError("structure must be a pymatgen.core.Structure instance.")
+        if not isinstance(structure, pmg_Structure):
+            raise TypeError(f"Expected pymatgen.core.Structure, got {type(structure).__name__}")
 
         sites = defaultdict(list)
         for site in structure.sites:
@@ -280,7 +295,7 @@ class SmactStructure:
         return sites, species
 
     @staticmethod
-    def from_py_struct(structure: pymatgen.core.Structure, determine_oxi: str = "BV"):
+    def from_py_struct(structure: pmg_Structure, determine_oxi: str = "BV"):
         """
         Create a SmactStructure from a pymatgen Structure object.
 
@@ -296,8 +311,8 @@ class SmactStructure:
             :class:`~.SmactStructure`
 
         """
-        if not isinstance(structure, pymatgen.core.Structure):
-            raise TypeError("Structure must be a pymatgen.core.Structure instance.")
+        if not isinstance(structure, pmg_Structure):
+            raise TypeError(f"Expected pymatgen.core.Structure, got {type(structure).__name__}")
 
         if determine_oxi == "BV":
             bva = BVAnalyzer()
@@ -307,19 +322,18 @@ class SmactStructure:
             comp = structure.composition
             oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
             struct = oxi_transform.apply_transformation(structure)
-            print("Charge assigned based on ICSD statistics")
+            logger.info("Charge assigned based on ICSD statistics")
 
         elif determine_oxi == "both":
             try:
                 bva = BVAnalyzer()
                 struct = bva.get_oxi_state_decorated_structure(structure)
-                print("Oxidation states assigned using bond valence")
-            except Exception:
-                # BVAnalyzer can raise ValueError, RuntimeError, or other exceptions
+                logger.info("Oxidation states assigned using bond valence")
+            except (ValueError, RuntimeError):
                 comp = structure.composition
                 oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
                 struct = oxi_transform.apply_transformation(structure)
-                print("Oxidation states assigned based on ICSD statistics")
+                logger.info("Oxidation states assigned based on ICSD statistics")
         elif determine_oxi == "predecorated":
             struct = structure
 
@@ -335,7 +349,7 @@ class SmactStructure:
         lattice_param = 1.0
 
         return SmactStructure(
-            species,
+            _cast("list[tuple[str, int, int] | tuple[smact.Species, int]]", species),
             lattice_mat,
             sites,
             lattice_param,
@@ -368,9 +382,20 @@ class SmactStructure:
 
         if api_key is None:
             api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")
+        if api_key is None:
+            raise ValueError(
+                "No Materials Project API key found. Set the MP_API_KEY or PMG_MAPI_KEY environment variable."
+            )
 
         # Legacy API routine
         if len(api_key) != 32:
+            if not HAS_LEGACY_MPRESTER:
+                raise ImportError(
+                    "pymatgen legacy MPRester is not available. "
+                    "Install pymatgen >= 2022.1 with legacy MP API support or use mp-api."
+                )
+            if MPRester is None:  # pragma: no cover
+                raise ImportError("pymatgen legacy MPRester is not available.")
             with MPRester(api_key) as m:
                 structs = m.query(
                     criteria={"reduced_cell_formula": formula},
@@ -379,9 +404,17 @@ class SmactStructure:
 
         elif HAS_MP_API:
             # New API routine
+            if MPResterNew is None:  # pragma: no cover
+                raise ImportError("mp-api MPRester is not available.")
             with MPResterNew(api_key, use_document_model=False) as m:
                 structs = m.materials.summary.search(formula=formula, fields=["structure"])
         else:
+            if not HAS_LEGACY_MPRESTER:
+                raise ImportError(
+                    "Neither mp-api nor pymatgen legacy MPRester is available. Install mp-api: `pip install mp-api`."
+                )
+            if MPRester is None:  # pragma: no cover
+                raise ImportError("pymatgen legacy MPRester is not available.")
             with MPRester(api_key) as m:
                 structs = m.get_structures(chemsys_formula=formula)
 
@@ -389,7 +422,7 @@ class SmactStructure:
             raise ValueError("Could not find composition in Materials Project Database, please supply a structure.")
 
         # Default to first found structure
-        struct = structs[0]["structure"] if isinstance(structs[0], dict) else structs[0]
+        struct = structs[0]["structure"] if isinstance(structs[0], dict) else structs[0]  # type: ignore[index]
 
         if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
             if determine_oxi == "BV":
@@ -398,32 +431,32 @@ class SmactStructure:
 
             elif determine_oxi == "comp_ICSD":
                 comp = struct.composition
-                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])
+                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])  # type: ignore[union-attr]
                 struct = oxi_transform.apply_transformation(struct)
-                print("Charge assigned based on ICSD statistics")
+                logger.info("Charge assigned based on ICSD statistics")
 
             elif determine_oxi == "both":
                 try:
                     bva = BVAnalyzer()
                     struct = bva.get_oxi_state_decorated_structure(struct)
-                    print("Oxidation states assigned using bond valence")
-                except ValueError:
+                    logger.info("Oxidation states assigned using bond valence")
+                except (ValueError, RuntimeError):
                     comp = struct.composition
-                    oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])
+                    oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])  # type: ignore[union-attr]
                     struct = oxi_transform.apply_transformation(struct)
-                    print("Oxidation states assigned based on ICSD statistics")
+                    logger.info("Oxidation states assigned based on ICSD statistics")
             else:
                 raise ValueError(
                     f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either 'BV','comp_ICSD' or 'both'."
                 )
-        lattice_mat = struct.lattice.matrix
+        lattice_mat = struct.lattice.matrix  # type: ignore[union-attr]
 
         lattice_param = 1.0  # Scaling factor; lattice_mat already contains actual vectors
 
         sites, _ = SmactStructure.__parse_py_sites(struct)
 
         return SmactStructure(
-            sanit_species,
+            _cast("list[tuple[str, int, int] | tuple[smact.Species, int]]", sanit_species),
             lattice_mat,
             sites,
             lattice_param,
@@ -501,7 +534,12 @@ class SmactStructure:
 
         sites = dict(sites)
 
-        return SmactStructure(species, lattice, sites, lattice_param)
+        return SmactStructure(
+            _cast("list[tuple[str, int, int] | tuple[smact.Species, int]]", species),
+            lattice,
+            sites,
+            lattice_param,
+        )
 
     def _format_style(
         self,
@@ -541,7 +579,7 @@ class SmactStructure:
 
         """
         if include_ground:
-            return delim.join(
+            return delim.join(  # type: ignore[union-attr]
                 template.format(
                     ele=specie[0],
                     stoic=specie[2],
@@ -551,7 +589,7 @@ class SmactStructure:
                 for specie in self.species
             )
 
-        return delim.join(
+        return delim.join(  # type: ignore[union-attr]
             template.format(
                 ele=specie[0],
                 stoic=specie[2],
@@ -675,13 +713,13 @@ class SmactStructure:
 
         return poscar
 
-    def as_py_struct(self) -> pymatgen.core.Structure:
+    def as_py_struct(self) -> pmg_Structure:
         """
         Represent the structure as a pymatgen Structure object.
 
         Returns:
         -------
-            pymatgen.core.Structure: pymatgen Structure object.
+            pmg_Structure: pymatgen Structure object.
 
         """
         return pmg_Structure.from_str(self.as_poscar(), fmt="poscar")

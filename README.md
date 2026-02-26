@@ -3,7 +3,7 @@
 [![Documentation Status](https://readthedocs.org/projects/smact/badge/?version=latest)](http://smact.readthedocs.org/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![python version](https://img.shields.io/pypi/pyversions/smact)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![PyPi](https://img.shields.io/pypi/v/smact)](https://pypi.org/project/SMACT/)
 [![Conda](https://anaconda.org/conda-forge/smact/badges/version.svg)](https://anaconda.org/conda-forge/smact)
 [![GitHub issues](https://img.shields.io/github/issues-raw/WMD-Group/SMACT)](https://github.com/WMD-group/SMACT/issues)
@@ -19,7 +19,7 @@
 - **Documentation:** <https://smact.readthedocs.io/en/latest/>
 - **Examples:** <https://smact.readthedocs.io/en/latest/examples.html>
 
-![A blue interface with the text "SMACT v3" at the top. Below that, there is a label "Materials Search" followed by two radio buttons: "Hi-fi" and "Lo-fi". The "Lo-fi" button is currently selected](SMACT.png)
+![A blue interface with the text "SMACT v4" at the top. Below that, there is a label "Materials Search" followed by two radio buttons: "Hi-fi" and "Lo-fi". The "Lo-fi" button is currently selected](SMACT.png)
 
 _If you torture the data enough, nature will always confess_ - Roland Coase (from 'How should economists choose?')
 
@@ -80,39 +80,33 @@ Use cases are available in our [examples](https://smact.readthedocs.io/en/latest
 
 ## Requirements
 
-The main language is Python 3 and has been tested using Python 3.10 - 3.13 (Windows is not officially supported for Python 3.13 as of yet).
-Basic requirements are Numpy and Scipy.
-The [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase) (ASE), [spglib](http://atztogo.github.io/spglib), and [pymatgen](https://pymatgen.org) are also required for many components.
+The main language is Python 3 and has been tested using Python 3.11 - 3.13.
+Core dependencies include NumPy, SciPy, pandas, [pymatgen](https://pymatgen.org), [ASE](https://wiki.fysik.dtu.dk/ase), and [spglib](http://atztogo.github.io/spglib). A full list is in [`pyproject.toml`](pyproject.toml).
 
 ## Installation
 
-The latest stable release can be installed via pip which will automatically set up other Python packages as required:
+The latest stable release can be installed via pip:
 
     pip install smact
 
-Optional dependencies can also be installed. These enable full replication of the examples and tutorials
+Optional dependencies (needed for full replication of examples and tutorials):
 
     pip install "smact[optional]"
 
-SMACT is also available via conda through the conda-forge channel on Anaconda Cloud:
+SMACT is also available via conda-forge:
 
     conda install -c conda-forge smact
 
-Alternatively, the very latest version can be installed using:
+### Developer installation
 
-    pip install git+https://github.com/WMD-group/SMACT.git
-
-For developer installation SMACT can be installed from a copy of the source
-repository (<https://github.com/wmd-group/smact>); this will be preferred if using experimental code branches.
-
-To clone the project from GitHub and make a local installation:
+We use [uv](https://docs.astral.sh/uv/) for dependency management. To set up a development environment:
 
     git clone https://github.com/wmd-group/smact.git
     cd smact
-    pip install --user -e .
+    uv sync --extra optional --dev
+    pre-commit install
 
-With -e pip will create links to the source folder so that that changes
-to the code will be immediately reflected on the PATH.
+This installs SMACT in editable mode with all optional and development dependencies, and sets up pre-commit hooks. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
 
 ## License and attribution
 
@@ -122,21 +116,28 @@ Python code and original data tables are licensed under the MIT License.
 
 ### Bugs, features and questions
 
-Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact Anthony Onwuli (maintainer) by [e-mail](mailto:anthony.onwuli16@imperial.ac.uk).
+Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to report bugs or request features in the first instance. While we hope that most questions can be answered by searching [the docs](https://smact.readthedocs.io/en/latest/), we welcome new questions on the issue tracker, especially if they helps us improve the docs! For other queries about any aspect of the code, please contact Kinga Mastej (maintainer) by [e-mail](mailto:k.mastej24@imperial.ac.uk).
 
 ### Code contributions
 
 We are always looking for ways to make SMACT better and more useful to the wider community; contributions are welcome. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following:
 
-- Code style should comply with [PEP8](http://www.python.org/dev/peps/pep-0008) where possible. [Google's house style](https://google.github.io/styleguide/pyguide.html) is also helpful, including a good model for docstrings.
-- Please use comments liberally when adding nontrivial features, and take the chance to clean up other people's code while looking at it.
+- Code style is enforced by [ruff](https://docs.astral.sh/ruff/) (linting and formatting) and [pyright](https://github.com/microsoft/pyright) (type checking). Pre-commit hooks run these automatically on commit.
+- Use [Google-style docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings).
 - Add tests wherever possible, and use the test suite to check if you broke anything.
 - Look at the [contributing guide](CONTRIBUTING.md) for more information.
 
 ### Tests
 
-We use integrated testing on GitHub via [GitHub Actions](https://github.com/features/actions). Testing modules should be pass/fail and wrapped into **tests/test_core.py** or another **tests/test_something.py** file added, if appropriate.
-Run the tests using `python -m pytest -v`.(The final `-v` is optional and adds more detail to the output.)
+We use [GitHub Actions](https://github.com/features/actions) for CI. Tests should be added to **smact/tests/test_core.py** or another **smact/tests/test_something.py** file.
+
+Run the tests locally:
+
+    make test
+
+Or to run the full CI pipeline (pre-commit hooks and tests):
+
+    make ci-local
 
 ## References
 

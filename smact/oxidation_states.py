@@ -9,6 +9,7 @@ Prediction - DOI: 10.1039/C8FD00032H.
 from __future__ import annotations
 
 import json
+import warnings
 from os import path
 
 from numpy import mean
@@ -19,7 +20,7 @@ from pymatgen.core.periodic_table import get_el_sp
 from smact import Species, data_directory
 
 
-class Oxidation_state_probability_finder:
+class OxidationStateProbabilityFinder:
     """
     Uses the model developed in the Faraday Discussions Paper (DOI:10.1039/C8FD00032H)
     to compute the likelihood of metal species existing in solids in the presence of certain anions.
@@ -111,7 +112,7 @@ class Oxidation_state_probability_finder:
         """Returns a list of species for which there exists data in the probability table used."""
         return self._included_species
 
-    def compound_probability(self, structure: Structure, ignore_stoichiometry: bool = True) -> float:
+    def compound_probability(self, structure: Structure | list, ignore_stoichiometry: bool = True) -> float:
         """
         Calculate overall probability for structure or composition.
 
@@ -132,7 +133,7 @@ class Oxidation_state_probability_finder:
             if all(isinstance(i, Species) for i in structure):
                 pass
             elif all(isinstance(i, pmgSpecies) for i in structure):
-                structure = [Species(i.symbol, i.oxi_state) for i in structure]
+                structure = [Species(i.symbol, int(i.oxi_state)) for i in structure]  # type: ignore[union-attr]
             else:
                 raise TypeError("Input requires a list of SMACT or Pymatgen species.")
         elif isinstance(structure, Structure):
@@ -142,7 +143,7 @@ class Oxidation_state_probability_finder:
             structure = [
                 Species(
                     get_el_sp(i.species_string).symbol,
-                    get_el_sp(i.species_string).oxi_state,
+                    int(get_el_sp(i.species_string).oxi_state or 0),  # type: ignore[arg-type]
                 )
                 for i in structure
             ]
@@ -167,4 +168,15 @@ class Oxidation_state_probability_finder:
 
         # Do the maths
         pair_probs = [self.pair_probability(pair[0], pair[1]) for pair in species_pairs]
-        return mean(pair_probs)
+        return float(mean(pair_probs))
+
+
+def __getattr__(name: str):
+    if name == "Oxidation_state_probability_finder":
+        warnings.warn(
+            "Oxidation_state_probability_finder is deprecated; use OxidationStateProbabilityFinder instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return OxidationStateProbabilityFinder
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
