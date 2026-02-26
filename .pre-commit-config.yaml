@@ -1,19 +1,33 @@
 ci:
   autoupdate_schedule: monthly
-  skip: [pyright]
+  skip: [ruff-check, ruff-format, codespell, pyright]
   autofix_commit_msg: pre-commit auto-fixes
   autoupdate_commit_msg: pre-commit autoupdate
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
+  - repo: local
     hooks:
-      # Run the linting tool
       - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check --fix
+        language: system
         types_or: [python, pyi]
-        args: [--fix]
-        # Run the formatter
       - id: ruff-format
-        types_or: [python, pyi] # TODO: Fix notebooks to remove this
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types_or: [python, pyi]
+      - id: codespell
+        name: codespell
+        entry: uv run codespell
+        language: system
+        stages: [pre-commit, commit-msg]
+        pass_filenames: false
+      - id: pyright
+        name: pyright
+        entry: uv run pyright smact/
+        language: system
+        types: [python]
+        pass_filenames: false
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -53,22 +67,6 @@ repos:
     hooks:
       - id: nbstripout
         args: [--drop-empty-cells, --keep-output]
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
-    hooks:
-      - id: codespell
-        stages: [pre-commit, commit-msg]
-        args: [--toml, pyproject.toml]
-        additional_dependencies:
-          - tomli
-  - repo: local
-    hooks:
-      - id: pyright
-        name: pyright
-        entry: uv run pyright smact/
-        language: system
-        types: [python]
-        pass_filenames: false
   - repo: https://github.com/adamchainz/blacken-docs
     rev: 1.20.0
     hooks:
