@@ -50,7 +50,7 @@ The steps for a new piece of work can be summarised as follows:
 9. When you are finished with the work, run the full CI pipeline locally to catch issues before pushing:
 
    ```bash
-   make ci-local # runs lint, type check, and tests
+   make ci-local # runs pre-commit hooks and tests
    ```
 
 10. Open a pull request [on the pull request page](https://github.com/WMD-group/SMACT/pulls).
@@ -106,11 +106,9 @@ The Makefile provides convenient shortcuts for common tasks:
 
 ```bash
 make install    # install all dependencies
-make lint       # run ruff and codespell
-make typecheck  # run pyright
+make pre-commit # run all pre-commit hooks (ruff, pyright, codespell, prettier, etc.)
 make test       # run pytest with coverage
-make format     # auto-fix ruff issues
-make ci-local   # run lint + typecheck + test (matches CI)
+make ci-local   # run pre-commit + test (matches CI)
 ```
 
 ### Documentation

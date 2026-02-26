@@ -135,7 +135,7 @@ Run the tests locally:
 
     make test
 
-Or to run the full CI pipeline (lint, type check, and tests):
+Or to run the full CI pipeline (pre-commit hooks and tests):
 
     make ci-local
 

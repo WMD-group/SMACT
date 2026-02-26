@@ -1,8 +1,6 @@
 ci:
   autoupdate_schedule: monthly
   skip: [ruff-check, ruff-format, codespell, pyright]
-  autofix_commit_msg: pre-commit auto-fixes
-  autoupdate_commit_msg: pre-commit autoupdate
 repos:
   - repo: local
     hooks:
