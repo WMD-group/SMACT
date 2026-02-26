@@ -8,7 +8,9 @@ from __future__ import annotations
 import numpy as np
 
 
-def cubic_perovskite(shannon_radius):  # Cubic Pervoskite
+def cubic_perovskite(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:  # Cubic Pervoskite
     """
     The lattice parameters of the cubic perovskite structure.
 
@@ -34,7 +36,9 @@ def cubic_perovskite(shannon_radius):  # Cubic Pervoskite
     return a, b, c, alpha, beta, gamma
 
 
-def wurtzite(shannon_radius):
+def wurtzite(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the wurtzite structure.
 
@@ -75,7 +79,9 @@ def wurtzite(shannon_radius):
 
 
 # A1#
-def fcc(covalent_radius):
+def fcc(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the A1.
 
@@ -100,7 +106,9 @@ def fcc(covalent_radius):
 
 
 # A2#
-def bcc(covalent_radius):
+def bcc(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the A2.
 
@@ -125,7 +133,9 @@ def bcc(covalent_radius):
 
 
 # A3#
-def hcp(covalent_radius):
+def hcp(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the hcp.
 
@@ -150,7 +160,9 @@ def hcp(covalent_radius):
 
 
 # A4#
-def diamond(covalent_radius):
+def diamond(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the diamond.
 
@@ -175,7 +187,9 @@ def diamond(covalent_radius):
 
 
 # A5#
-def bct(covalent_radius):
+def bct(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the bct.
 
@@ -200,7 +214,9 @@ def bct(covalent_radius):
 
 
 # B1
-def rocksalt(shannon_radius):
+def rocksalt(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of rocksalt.
 
@@ -230,7 +246,9 @@ def rocksalt(shannon_radius):
 
 
 # B2
-def b2(shannon_radius):
+def b2(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of b2.
 
@@ -260,7 +278,9 @@ def b2(shannon_radius):
 
 
 # B3
-def zincblende(shannon_radius):
+def zincblende(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of Zinc Blende.
 
@@ -294,7 +314,9 @@ def zincblende(shannon_radius):
 
 
 # B10
-def b10(shannon_radius):  # Litharge
+def b10(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:  # Litharge
     """
     The lattice parameters of Litharge.
 
@@ -322,7 +344,9 @@ def b10(shannon_radius):  # Litharge
     return a, b, c, alpha, beta, gamma
 
 
-def stuffed_wurtzite(shannon_radii):
+def stuffed_wurtzite(
+    shannon_radii: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The stuffed wurtzite structure (e.g. LiGaGe) space group P63/mc.
 

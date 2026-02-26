@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 
 import smact
 from smact.utils.composition import parse_formula
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "band_gap_Harrison",
@@ -86,10 +90,10 @@ def band_gap_Harrison(
     # Calculate Band gap [(3-43) Harrison 1980 ]
     Band_gap = (3.60 / 3.0) * (np.sqrt(V2**2 + V3**2)) * (1 - alpha_m)
     if verbose:
-        print("V1_bar = ", V1_bar)
-        print("V2 = ", V2)
-        print("alpha_m = ", alpha_m)
-        print("V3 = ", V3)
+        logger.debug("V1_bar = %s", V1_bar)
+        logger.debug("V2 = %s", V2)
+        logger.debug("alpha_m = %s", alpha_m)
+        logger.debug("V3 = %s", V3)
 
     return Band_gap
 
@@ -164,7 +168,7 @@ def compound_electroneg(
     # Print optional list of element electronegativities.
     # This may be a useful sanity check in case of a suspicious result.
     if verbose:
-        print("Electronegativities of elements=", eneg_list)
+        logger.debug("Electronegativities of elements= %s", eneg_list)
 
     # Raise each electronegativity to its appropriate power
     # to account for stoichiometry.
@@ -176,7 +180,7 @@ def compound_electroneg(
     compelectroneg = (prod) ** (1.0 / (sum(stoichslist)))
 
     if verbose:
-        print("Geometric mean = Compound 'electronegativity'=", compelectroneg)
+        logger.debug("Geometric mean = Compound 'electronegativity'= %s", compelectroneg)
 
     return float(compelectroneg)
 

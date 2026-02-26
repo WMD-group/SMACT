@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-import io
 import os
-import sys
 import unittest
 from os.path import dirname, exists, join, realpath
 from unittest.mock import patch
@@ -535,7 +533,7 @@ class TestSequenceFunctions(unittest.TestCase):
             smact.screening.smact_validity("NaCl", oxidation_states_set="invalid_set")
 
         # Test that wiki set gives warning
-        with pytest.warns(UserWarning, match=r"This set of oxidation states is from Wikipedia"):
+        with pytest.warns(UserWarning, match=r"This set of oxidation states is sourced from Wikipedia"):
             smact.screening.smact_validity("NaCl", oxidation_states_set="wiki")
 
     # ---------------- Lattice ----------------
@@ -603,17 +601,13 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_harrison_gap_verbose(self):
         """band_gap_Harrison with verbose=True hits lines 89-92."""
-        buf = io.StringIO()
-        sys.stdout = buf
-        try:
+        with self.assertLogs("smact.properties", level="DEBUG") as cm:
             band_gap_Harrison("Mg", "Cl", verbose=True, distance=2.67)
-        finally:
-            sys.stdout = sys.__stdout__
-        out = buf.getvalue()
-        self.assertIn("V1_bar", out)
-        self.assertIn("V2", out)
-        self.assertIn("alpha_m", out)
-        self.assertIn("V3", out)
+        log_output = "\n".join(cm.output)
+        self.assertIn("V1_bar", log_output)
+        self.assertIn("V2", log_output)
+        self.assertIn("alpha_m", log_output)
+        self.assertIn("V3", log_output)
 
     def test_compound_electroneg_element_objects(self):
         """compound_electroneg with Element objects (lines 133-134) and verbose (155, 167)."""
@@ -632,16 +626,12 @@ class TestSequenceFunctions(unittest.TestCase):
         with pytest.raises(ValueError):
             compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1], source="BadSource")
 
-        # verbose=True covers lines 155 and 167
-        buf = io.StringIO()
-        sys.stdout = buf
-        try:
+        # verbose=True covers logging lines
+        with self.assertLogs("smact.properties", level="DEBUG") as cm:
             compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1], verbose=True)
-        finally:
-            sys.stdout = sys.__stdout__
-        out = buf.getvalue()
-        self.assertIn("Electronegativities", out)
-        self.assertIn("Geometric mean", out)
+        log_output = "\n".join(cm.output)
+        self.assertIn("Electronegativities", log_output)
+        self.assertIn("Geometric mean", log_output)
 
     # --------- Builder branch coverage ---------
 

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import io
 import os
-import sys
 import unittest
 import warnings
 from unittest.mock import patch
@@ -106,28 +104,18 @@ class DopantPredictionTest(unittest.TestCase):
             test.plot_dopants()
 
     def test_to_table_no_results(self):
-        """Lines 358-360: to_table prints 'No data available' when results is None."""
+        """Lines 358-360: to_table returns empty string when results is None."""
         test = doper.Doper(("Cu+", "Ga3+", "S2-"))
-        buf = io.StringIO()
-        sys.stdout = buf
-        try:
-            _ = test.to_table  # property access, no results yet
-        finally:
-            sys.stdout = sys.__stdout__
-        self.assertIn("No data available", buf.getvalue())
+        result = test.to_table
+        self.assertEqual(result, "")
 
     def test_to_table_with_results(self):
-        """Lines 361-374: to_table prints tabulated data after get_dopants."""
+        """Lines 361-374: to_table returns tabulated string after get_dopants."""
         test = doper.Doper(("Cu+", "Ga3+", "S2-"))
         test.get_dopants(num_dopants=2)
 
-        buf = io.StringIO()
-        sys.stdout = buf
-        try:
-            _ = test.to_table
-        finally:
-            sys.stdout = sys.__stdout__
-        out = buf.getvalue()
+        out = test.to_table
+        self.assertIsInstance(out, str)
         self.assertIn("n-type cation substitutions", out)
 
     def test_plot_dopants_branches(self):

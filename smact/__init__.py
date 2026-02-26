@@ -442,7 +442,7 @@ def element_dictionary(
         return {symbol: Element(symbol) for symbol in elements}
 
 
-def are_eq(A: list, B: list, tolerance: float = 1e-4):
+def are_eq(A: Sequence[float], B: Sequence[float], tolerance: float = 1e-4):
     """
     Check two arrays for tolerance [1,2,3]==[1,2,3]; but [1,3,2]!=[1,2,3].
 
@@ -469,7 +469,7 @@ def are_eq(A: list, B: list, tolerance: float = 1e-4):
     return are_eq
 
 
-def lattices_are_same(lattice1, lattice2, tolerance: float = 1e-4):
+def lattices_are_same(lattice1: Sequence, lattice2: Sequence, tolerance: float = 1e-4):
     """
     Checks for the equivalence of two lattices.
 

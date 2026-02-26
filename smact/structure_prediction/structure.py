@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from collections import defaultdict
@@ -37,6 +38,8 @@ from pymatgen.transformations.standard_transformations import (
 import smact
 
 from .utilities import get_sign
+
+logger = logging.getLogger(__name__)
 
 
 class SmactStructure:
@@ -319,19 +322,18 @@ class SmactStructure:
             comp = structure.composition
             oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
             struct = oxi_transform.apply_transformation(structure)
-            print("Charge assigned based on ICSD statistics")
+            logger.info("Charge assigned based on ICSD statistics")
 
         elif determine_oxi == "both":
             try:
                 bva = BVAnalyzer()
                 struct = bva.get_oxi_state_decorated_structure(structure)
-                print("Oxidation states assigned using bond valence")
-            except Exception:
-                # BVAnalyzer can raise ValueError, RuntimeError, or other exceptions
+                logger.info("Oxidation states assigned using bond valence")
+            except (ValueError, RuntimeError):
                 comp = structure.composition
                 oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
                 struct = oxi_transform.apply_transformation(structure)
-                print("Oxidation states assigned based on ICSD statistics")
+                logger.info("Oxidation states assigned based on ICSD statistics")
         elif determine_oxi == "predecorated":
             struct = structure
 
@@ -428,18 +430,18 @@ class SmactStructure:
                 comp = struct.composition
                 oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])  # type: ignore[union-attr]
                 struct = oxi_transform.apply_transformation(struct)
-                print("Charge assigned based on ICSD statistics")
+                logger.info("Charge assigned based on ICSD statistics")
 
             elif determine_oxi == "both":
                 try:
                     bva = BVAnalyzer()
                     struct = bva.get_oxi_state_decorated_structure(struct)
-                    print("Oxidation states assigned using bond valence")
+                    logger.info("Oxidation states assigned using bond valence")
                 except ValueError:
                     comp = struct.composition
                     oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])  # type: ignore[union-attr]
                     struct = oxi_transform.apply_transformation(struct)
-                    print("Oxidation states assigned based on ICSD statistics")
+                    logger.info("Oxidation states assigned based on ICSD statistics")
             else:
                 raise ValueError(
                     f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either 'BV','comp_ICSD' or 'both'."

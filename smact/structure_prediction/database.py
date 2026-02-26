@@ -322,7 +322,7 @@ def parse_mprest(
     """
     try:
         return SmactStructure.from_py_struct(data["structure"], determine_oxi=determine_oxi)  # type: ignore[arg-type]
-    except Exception:
+    except (ValueError, RuntimeError, TypeError):
         # Couldn't decorate with oxidation states
-        logger.warning(f"Couldn't decorate {data['material_id']} with oxidation states.")
+        logger.warning(f"Couldn't decorate {data.get('material_id', 'unknown')} with oxidation states.")
         return None

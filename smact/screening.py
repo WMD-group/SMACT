@@ -24,6 +24,8 @@ from smact.utils.compat import StrEnum
 from smact.utils.composition import composition_dict_maker, formula_maker
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
+_NUM_ELEMENTS = 103
+
 __all__ = [
     "MIXED_VALENCE_ELEMENTS",
     "SmactFilterOutputs",
@@ -97,6 +99,49 @@ def _format_output(
             return [composition_dict_maker(smact_filter_output=comp) for comp in compositions]
         case _:
             raise ValueError(f"Invalid return_output: {return_output}. Must be a SmactFilterOutputs value.")
+
+
+_OXI_SET_ATTR_MAP: dict[str, str] = {
+    "smact14": "oxidation_states_smact14",
+    "icsd16": "oxidation_states_icsd16",
+    "icsd24": "oxidation_states_icsd24",
+    "pymatgen_sp": "oxidation_states_sp",
+    "wiki": "oxidation_states_wiki",
+}
+
+
+def _get_oxidation_states(
+    elements: Sequence[Element],
+    oxidation_states_set: str,
+) -> list[list[int] | None]:
+    """Look up oxidation states for each element from the named set or a custom file.
+
+    Args:
+        elements: Sequence of smact.Element objects.
+        oxidation_states_set: Name of a built-in set or a filepath to a custom file.
+
+    Returns:
+        List of oxidation state lists (may contain None for missing elements).
+
+    Raises:
+        ValueError: If the oxidation_states_set is not recognised and is not a valid filepath.
+    """
+    if oxidation_states_set in _OXI_SET_ATTR_MAP:
+        attr = _OXI_SET_ATTR_MAP[oxidation_states_set]
+        if oxidation_states_set == "wiki":
+            warnings.warn(
+                "This set of oxidation states is sourced from Wikipedia. The results from using this set could be "
+                "questionable and should not be used unless you know what you are doing and have inspected the "
+                "oxidation states.",
+                stacklevel=3,
+            )
+        return [getattr(e, attr) for e in elements]
+    if os.path.exists(oxidation_states_set):
+        return cast("list[list[int] | None]", [oxi_custom(e.symbol, oxidation_states_set) for e in elements])
+    raise ValueError(
+        f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd16", "icsd24", '
+        '"pymatgen_sp", "wiki" or a filepath to a textfile of oxidation states.'
+    )
 
 
 def pauling_test(
@@ -406,7 +451,7 @@ def ml_rep_generator(
     if stoichs is None:
         stoichs = [1 for i, el in enumerate(composition)]
 
-    ML_rep = [0 for i in range(103)]
+    ML_rep = [0 for i in range(_NUM_ELEMENTS)]
     if isinstance(composition[0], Element):
         for element, stoich in zip(composition, stoichs, strict=False):
             ML_rep[int(element.number) - 1] += stoich  # type: ignore[union-attr]
@@ -477,27 +522,7 @@ def smact_filter(
     electronegs = [e.pauling_eneg for e in els]
 
     # Select the specified oxidation states set:
-    oxi_set = {
-        "smact14": [e.oxidation_states_smact14 for e in els],
-        "icsd16": [e.oxidation_states_icsd16 for e in els],
-        "icsd24": [e.oxidation_states_icsd24 for e in els],
-        "pymatgen_sp": [e.oxidation_states_sp for e in els],
-        "wiki": [e.oxidation_states_wiki for e in els],
-    }
-
-    if oxidation_states_set in oxi_set:
-        ox_combos = oxi_set[oxidation_states_set]
-        if oxidation_states_set == "wiki":
-            warnings.warn(
-                "This set of oxidation states is sourced from Wikipedia. The results from using this set could be questionable and should not be used unless you know what you are doing and have inspected the oxidation states.",
-                stacklevel=2,
-            )
-    elif os.path.exists(oxidation_states_set):
-        ox_combos = [oxi_custom(e.symbol, oxidation_states_set) for e in els]
-    else:
-        raise ValueError(
-            f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd16", "icsd24", "pymatgen_sp", "wiki" or a filepath to a textfile of oxidation states.'
-        )
+    ox_combos = _get_oxidation_states(els, oxidation_states_set)
 
     # Guard: raise early if any element has no oxidation states in the chosen set
     missing = [e.symbol for e, ox in zip(els, ox_combos, strict=False) if ox is None or len(ox) == 0]
@@ -614,24 +639,8 @@ def smact_validity(
                 ox_combos.append(ox_el)
             else:
                 return False
-    elif oxidation_states_set == "smact14":
-        ox_combos = [el.oxidation_states_smact14 for el in smact_elems]
-    elif oxidation_states_set == "icsd16":
-        ox_combos = [el.oxidation_states_icsd16 for el in smact_elems]
-    elif oxidation_states_set == "pymatgen_sp":
-        ox_combos = [el.oxidation_states_sp for el in smact_elems]
-    elif oxidation_states_set == "icsd24":
-        ox_combos = [el.oxidation_states_icsd24 for el in smact_elems]
-    elif os.path.exists(oxidation_states_set):
-        ox_combos = [oxi_custom(el.symbol, oxidation_states_set) for el in smact_elems]
-    elif oxidation_states_set == "wiki":
-        warnings.warn(
-            "This set of oxidation states is from Wikipedia. Use with caution.",
-            stacklevel=2,
-        )
-        ox_combos = [el.oxidation_states_wiki for el in smact_elems]
     else:
-        raise ValueError(f"{oxidation_states_set} is not valid. Provide a known set or a valid file path.")
+        ox_combos = _get_oxidation_states(smact_elems, oxidation_states_set)
 
     # Guard: if any element has no oxidation states in the chosen set (e.g. noble
     # gases in most databases), the composition cannot be charge-balanced.

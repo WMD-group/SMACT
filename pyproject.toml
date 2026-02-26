@@ -139,7 +139,7 @@ where = ["."]
 include = ["smact","smact.*"]
 
 [tool.setuptools.package-data]
-"smact" = ["data/*.txt", "data/*.csv", "data/*.data", "data/*.xlsx", "data/*.json", "data/species_rep/*.json"]
+"smact" = ["py.typed", "data/*.txt", "data/*.csv", "data/*.data", "data/*.xlsx", "data/*.json", "data/species_rep/*.json"]
 
 [tool.pytest.ini_options]
 minversion = 6.0
