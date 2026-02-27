@@ -357,6 +357,8 @@ def _write_readme(
     """Write a README file for the trained model."""
     unit = PROPERTY_METADATA.get(property_name, {}).get("unit", "")
     training = metadata.get("training", {})
+    best_val_loss_raw = training.get("best_val_loss")
+    best_val_loss = f"{best_val_loss_raw:.4f}" if best_val_loss_raw is not None else "N/A"
 
     readme = f"""# {output_path.name}
 
@@ -372,7 +374,7 @@ def _write_readme(
 - **Validation samples**: {training.get("val_size", "N/A")}
 - **Test samples**: {training.get("test_size", "N/A")}
 - **Epochs**: {training.get("epochs", "N/A")}
-- **Best validation loss**: {training.get("best_val_loss", "N/A"):.4f}
+- **Best validation loss**: {best_val_loss}
 
 ## Usage
 
