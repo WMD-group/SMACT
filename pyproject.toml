@@ -162,7 +162,7 @@ force-exclude = true
 select = ["ALL"]
 ignore = [
         # Rule families
-    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
+    "ANN",  # flake8-annotations (not ready, require types for ALL args)
     "ARG",  # Check for unused function arguments
     "BLE",  # General catch of Exception
     "C90",  # Check for functions with a high McCabe complexity
