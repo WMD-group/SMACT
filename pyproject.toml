@@ -353,6 +353,13 @@ ignore-words-list = [
             "assertIn",
             "Mater",
         ]
+[tool.coverage.run]
+omit = [
+    "smact/benchmarking/*",
+    "smact/utils/band_gap_simple.py",
+    "smact/utils/crystal_space/plot_embedding.py",
+]
+
 [tool.coverage.report]
 fail_under = 85
 exclude_also = [

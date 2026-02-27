@@ -139,19 +139,15 @@ class DopantPredictionTest(unittest.TestCase):
 
     def test_doper_alpha_none_fallback(self):
         """Doper with alpha=None uses _DEFAULT_LAMBDA_THRESHOLD fallback (lines 106-107)."""
-        # Build a CationMutator with a fully populated lambda table and alpha=None
+        # Build a real CationMutator, then set alpha=None.
+        # Patch from_json so Doper.__init__ receives this mutator,
+        # exercising the alpha-is-None branch (lines 106-107).
         cm = CationMutator.from_json()
-        # Override alpha to None after construction
         cm.alpha = None
-        test = doper.Doper.__new__(doper.Doper)
-        test.original_species = ("Cu+", "Ga3+", "S2-")
-        test.cation_mutator = cm
-        test.possible_species = list(cm.specs)
-        # alpha is None → fallback path
-        test.lambda_threshold = doper._DEFAULT_LAMBDA_THRESHOLD
-        test.threshold = 1 / cm.Z * np.exp(doper._DEFAULT_LAMBDA_THRESHOLD)
-        test.use_probability = True
-        test.results = None
+        with patch.object(CationMutator, "from_json", return_value=cm):
+            test = doper.Doper(("Cu+", "Ga3+", "S2-"))
 
+        self.assertEqual(test.lambda_threshold, doper._DEFAULT_LAMBDA_THRESHOLD)
+        self.assertAlmostEqual(test.threshold, 1 / cm.Z * np.exp(doper._DEFAULT_LAMBDA_THRESHOLD))
         result = test.get_dopants()
         self.assertIsInstance(result, dict)
