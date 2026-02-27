@@ -27,8 +27,8 @@ print(RoostPropertyPredictor.available_properties)  # ['band_gap', 'bulk_modulus
 model = RoostPropertyPredictor(property_name="band_gap", device="cpu")
 
 # Predict single or multiple compositions
-model.predict("NaCl")                    # Single composition
-model.predict(["NaCl", "TiO2", "GaN"])   # Multiple compositions
+model.predict("NaCl")  # Single composition
+model.predict(["NaCl", "TiO2", "GaN"])  # Multiple compositions
 ```
 
 ## Key Features
@@ -59,17 +59,20 @@ In `/home/ryan/smact4properties/SMACT/smact/property_prediction/base_predictor.p
 ```python
 from abc import ABC, abstractmethod
 
+
 class BasePropertyPredictor(ABC):  # Abstract base class
     """Abstract base class for property predictors."""
-    
+
     @property
     @abstractmethod
     def supported_properties(self) -> list[str]:  # Must be implemented
         """List of properties supported by this predictor."""
         pass
-    
+
     @abstractmethod
-    def predict(self, compositions: str | list[str]) -> np.ndarray:  # Must be implemented
+    def predict(
+        self, compositions: str | list[str]
+    ) -> np.ndarray:  # Must be implemented
         """Predict property values for given compositions."""
         pass
 ```
@@ -80,12 +83,14 @@ The `RoostPropertyPredictor` **inherits from and implements** the abstract base 
 
 ```python
 class RoostPropertyPredictor(BasePropertyPredictor):  # Concrete implementation
-    
+
     @property
     def supported_properties(self) -> list[str]:  # Implements abstract method
         return self.available_properties
-    
-    def predict(self, compositions: str | list[str]) -> np.ndarray:  # Implements abstract method
+
+    def predict(
+        self, compositions: str | list[str]
+    ) -> np.ndarray:  # Implements abstract method
         compositions = self._validate_compositions(compositions)
         # Implementation here...
         return np.zeros(len(compositions))  # Placeholder for now
@@ -100,15 +105,16 @@ This allows for multiple concrete implementations:
 class WrenPropertyPredictor(BasePropertyPredictor):
     def supported_properties(self) -> list[str]:
         return ["band_gap", "formation_energy"]
-    
+
     def predict(self, compositions: str | list[str]) -> np.ndarray:
         # Wren-specific implementation
         pass
 
+
 class CGCNNPropertyPredictor(BasePropertyPredictor):
     def supported_properties(self) -> list[str]:
         return ["bulk_modulus", "shear_modulus"]
-    
+
     def predict(self, compositions: str | list[str]) -> np.ndarray:
         # CGCNN-specific implementation
         pass
@@ -117,15 +123,15 @@ class CGCNNPropertyPredictor(BasePropertyPredictor):
 ## Current Status
 
 - Clean API matching your specification
-- SMACT composition validation  
+- SMACT composition validation
 - Extensible architecture for multiple models
 - Proper error handling and type hints
 - Abstract base class enforcing interface contract
 - Model loading logic ready for actual ROOST integration
 - Placeholder predictions (returns zeros) until real models added
 
-The abstract base class enforces the interface contract while allowing flexibility in 
-implementation details for each model type. This enables the clean, extensible API and 
+The abstract base class enforces the interface contract while allowing flexibility in
+implementation details for each model type. This enables the clean, extensible API and
 ensures all future predictors follow the same pattern.
 
 The module is ready for integration with actual ROOST model checkpoints.

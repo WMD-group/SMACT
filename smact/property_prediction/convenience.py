@@ -11,7 +11,6 @@ from pathlib import Path
 import numpy as np
 
 from smact.property_prediction.base_predictor import PredictionResult
-from smact.property_prediction.roost import RoostPropertyPredictor
 
 
 def predict_band_gap(
@@ -45,6 +44,8 @@ def predict_band_gap(
         >>> result = predict_band_gap(["NaCl", "TiO2"], return_uncertainty=True)
         >>> print(result.predictions, result.uncertainties)
     """
+    from smact.property_prediction.roost import RoostPropertyPredictor
+
     predictor = RoostPropertyPredictor(
         property_name="band_gap",
         model_path=model_path,

@@ -10,9 +10,6 @@ import tarfile
 from pathlib import Path
 from typing import Any
 
-import requests
-import torch
-
 from smact.property_prediction.config import MODELS_CACHE, PRETRAINED_MODELS_BASE_URL, PRETRAINED_MODELS_DIR
 
 logger = logging.getLogger(__name__)
@@ -60,6 +57,8 @@ class RemoteFile:
 
     def _download(self) -> None:
         """Download and extract the model archive."""
+        import requests
+
         os.makedirs(self.cache_location, exist_ok=True)
 
         # Download the archive
@@ -129,6 +128,8 @@ def load_model_files(
         return {fn: cached_path / fn for fn in required_files}
 
     # Download from remote
+    import requests
+
     try:
         remote = RemoteFile(
             f"{PRETRAINED_MODELS_BASE_URL}{model_name}.tar.gz",
@@ -162,6 +163,8 @@ def load_checkpoint(
             - normalizer_dict: Normaliser states for denormalisation
             - metadata: Additional model metadata
     """
+    import torch
+
     fpaths = load_model_files(model_name, force_download)
 
     map_location = torch.device(device)
@@ -214,6 +217,8 @@ def save_checkpoint(
         model_class: Class name for deserialisation.
         model_module: Module path for deserialisation.
     """
+    import torch
+
     path = Path(path)
     os.makedirs(path, exist_ok=True)
 

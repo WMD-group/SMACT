@@ -15,12 +15,12 @@ Example:
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from smact.property_prediction.base_predictor import (
     BasePropertyPredictor,
     PredictionResult,
 )
-from smact.property_prediction.convenience import predict_band_gap
 from smact.property_prediction.io import clear_cache, list_cached_models
 from smact.property_prediction.registry import (
     get_available_models,
@@ -28,7 +28,10 @@ from smact.property_prediction.registry import (
     get_property_unit,
     get_supported_properties,
 )
-from smact.property_prediction.roost import RoostPropertyPredictor
+
+if TYPE_CHECKING:
+    from smact.property_prediction.convenience import predict_band_gap
+    from smact.property_prediction.roost import RoostPropertyPredictor
 
 __all__ = [
     "BasePropertyPredictor",
@@ -57,3 +60,18 @@ __maintainer__ = "SMACT Development Team"
 __status__ = "Development"
 
 logger = logging.getLogger(__name__)
+
+_LAZY_IMPORTS = {
+    "RoostPropertyPredictor": "smact.property_prediction.roost",
+    "predict_band_gap": "smact.property_prediction.convenience",
+}
+
+
+def __getattr__(name: str):
+    """Lazy import for torch-dependent symbols."""
+    if name in _LAZY_IMPORTS:
+        import importlib
+
+        module = importlib.import_module(_LAZY_IMPORTS[name])
+        return getattr(module, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

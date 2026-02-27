@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import torch
@@ -94,7 +94,7 @@ def convert_checkpoint(
         "dataset": dataset,
         "fidelity": fidelity,
         "unit": "eV" if property_name == "band_gap" else "",
-        "training_date": datetime.now(tz=timezone.utc).isoformat(),
+        "training_date": datetime.now(tz=UTC).isoformat(),
         "test_mae": test_metrics.get("mae"),
         "test_rmse": test_metrics.get("rmse"),
         "description": description or f"ROOST model for {property_name} prediction",

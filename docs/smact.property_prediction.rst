@@ -34,8 +34,8 @@ The typical workflow is:
 
       from smact.property_prediction import get_supported_properties, get_available_models
 
-      print(get_supported_properties())   # ['band_gap']
-      print(get_available_models())       # ['Roost-MP-2024.12.0-band_gap']
+      print(get_supported_properties())  # ['band_gap']
+      print(get_available_models())  # ['Roost-MP-2024.12.0-band_gap']
 
 Installation
 ------------
@@ -275,13 +275,13 @@ Model Management
    )
 
    # List available properties
-   get_supported_properties()   # ['band_gap']
+   get_supported_properties()  # ['band_gap']
 
    # Get property unit
-   get_property_unit("band_gap")   # 'eV'
+   get_property_unit("band_gap")  # 'eV'
 
    # List all discoverable models
-   get_available_models()   # ['Roost-MP-2024.12.0-band_gap']
+   get_available_models()  # ['Roost-MP-2024.12.0-band_gap']
 
    # List models in local cache
    list_cached_models()
@@ -310,8 +310,8 @@ numeric target column.
        epochs=100,
        batch_size=128,
        learning_rate=3e-4,
-       robust=True,        # Enable uncertainty estimation
-       device="cuda",       # Use "cpu" if no GPU
+       robust=True,  # Enable uncertainty estimation
+       device="cuda",  # Use "cpu" if no GPU
    )
 
 **Using the command line:**

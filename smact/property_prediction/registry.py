@@ -5,8 +5,6 @@ from __future__ import annotations
 import json
 import logging
 
-import requests
-
 from smact.property_prediction.config import (
     DEFAULT_MODELS,
     MODELS_CACHE,
@@ -30,6 +28,8 @@ def get_available_models(include_cached: bool = True) -> list[str]:
     Returns:
         List of available model names.
     """
+    import requests
+
     models = set()
 
     # Try to fetch remote manifest
@@ -144,7 +144,8 @@ def get_property_unit(property_name: str) -> str:
     Returns:
         Unit string (e.g., "eV", "GPa").
     """
-    return PROPERTY_METADATA.get(property_name, {}).get("unit", "")
+    unit = PROPERTY_METADATA.get(property_name, {}).get("unit", "")
+    return str(unit) if unit else ""
 
 
 def get_property_description(property_name: str) -> str:
@@ -156,7 +157,8 @@ def get_property_description(property_name: str) -> str:
     Returns:
         Description string.
     """
-    return PROPERTY_METADATA.get(property_name, {}).get("description", "")
+    desc = PROPERTY_METADATA.get(property_name, {}).get("description", "")
+    return str(desc) if desc else ""
 
 
 def model_exists(model_name: str) -> bool:
@@ -179,6 +181,8 @@ def model_exists(model_name: str) -> bool:
         return True
 
     # Check remote availability
+    import requests
+
     try:
         url = f"{PRETRAINED_MODELS_BASE_URL}{model_name}.tar.gz"
         response = requests.head(url, timeout=5)
@@ -226,10 +230,11 @@ def parse_model_name(model_name: str) -> dict[str, str | None]:
     elif len(parts) == 5:
         # Could be property_fidelity or property_part
         # Check if last part is a known fidelity
-        all_fidelities = set()
+        all_fidelities: set[str] = set()
         for prop_meta in PROPERTY_METADATA.values():
-            if prop_meta.get("fidelities"):
-                all_fidelities.update(prop_meta["fidelities"])
+            fidelities = prop_meta.get("fidelities")
+            if fidelities and isinstance(fidelities, list):
+                all_fidelities.update(fidelities)
 
         if parts[4] in all_fidelities:
             result["fidelity"] = parts[4]

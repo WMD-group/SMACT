@@ -172,7 +172,7 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         compositions = self._validate_compositions(compositions, validate_smact)
 
         # Create dataframe for CompositionData
-        df = pd.DataFrame(
+        comp_data = pd.DataFrame(
             {
                 "material_id": list(range(len(compositions))),
                 "composition": compositions,
@@ -183,7 +183,7 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         # Create dataset and dataloader
         task_dict = {self._target_name: "regression"}
         dataset = CompositionData(
-            df=df,
+            df=comp_data,
             task_dict=task_dict,
             inputs="composition",
             identifiers=["material_id", "composition"],

@@ -109,26 +109,26 @@ def train_roost_model(
     logger.info(f"Training ROOST model on {device}")
 
     # Load data
-    df = pd.read_csv(data_path, keep_default_na=False, na_values=[])
+    train_data = pd.read_csv(data_path, keep_default_na=False, na_values=[])
 
-    if target_column not in df.columns:
+    if target_column not in train_data.columns:
         raise ValueError(f"Target column '{target_column}' not found in data")
 
-    if "composition" not in df.columns:
+    if "composition" not in train_data.columns:
         raise ValueError("Data must have 'composition' column")
 
     # Add material_id if not present
-    if "material_id" not in df.columns:
-        df["material_id"] = df.index.astype(str)
+    if "material_id" not in train_data.columns:
+        train_data["material_id"] = train_data.index.astype(str)
 
-    logger.info(f"Loaded {len(df)} samples from {data_path}")
+    logger.info(f"Loaded {len(train_data)} samples from {data_path}")
 
     # Setup task
     task_dict = {target_column: "regression"}
 
     # Create dataset
     dataset = CompositionData(
-        df=df,
+        df=train_data,
         task_dict=task_dict,
         inputs="composition",
         identifiers=["material_id", "composition"],
@@ -202,7 +202,7 @@ def train_roost_model(
         criterion = torch.nn.L1Loss()
 
     # Calculate normaliser from training data
-    train_targets = df.iloc[train_idx][target_column].to_numpy()
+    train_targets = train_data.iloc[train_idx][target_column].to_numpy()
     normaliser = Normalizer()
     normaliser.fit(torch.tensor(train_targets, dtype=torch.float32))
     normaliser_dict = {target_column: normaliser.state_dict()}
@@ -370,8 +370,7 @@ def _write_readme(
 from smact.property_prediction import RoostPropertyPredictor
 
 predictor = RoostPropertyPredictor(
-    property_name="{property_name}",
-    model_path="{output_path}"
+    property_name="{property_name}", model_path="{output_path}"
 )
 predictions = predictor.predict(["NaCl", "TiO2"])
 ```
