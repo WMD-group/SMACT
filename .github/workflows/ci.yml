@@ -21,6 +21,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.12"
+          enable-cache: true
 
       - name: Install dependencies
         run: uv sync --extra optional --dev
@@ -47,6 +48,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
+          enable-cache: true
 
       - name: Install dependencies
         run: |
@@ -64,6 +66,6 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           #files: ./coverage.xml
-          fail_ci_if_error: False
+          fail_ci_if_error: true
           env_vars: OS,PYTHON
           verbose: true

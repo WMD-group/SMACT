@@ -132,12 +132,12 @@ def compound_electroneg(
     if not elements:
         raise TypeError("Please supply a non-empty list of elements")
 
-    if isinstance(elements[0], str):
+    if all(isinstance(e, str) for e in elements):
         elementlist: list[smact.Element] = [smact.Element(i) for i in elements]  # type: ignore[arg-type]
-    elif isinstance(elements[0], smact.Element):
+    elif all(isinstance(e, smact.Element) for e in elements):
         elementlist = list(elements)  # type: ignore[arg-type]
     else:
-        raise TypeError("Please supply a list of element symbols or SMACT Element objects")
+        raise TypeError("Please supply a list of element symbols or SMACT Element objects (no mixed types)")
 
     stoichslist: list[int | float] = list(stoichs)
     # Convert stoichslist from string to float
@@ -162,7 +162,7 @@ def compound_electroneg(
 
     # Raise each electronegativity to its appropriate power
     # to account for stoichiometry.
-    eneg_list = [eneg**stoich for eneg, stoich in zip(eneg_list, stoichslist, strict=False)]
+    eneg_list = [eneg**stoich for eneg, stoich in zip(eneg_list, stoichslist, strict=True)]
 
     # Calculate geometric mean (n-th root of product)
     prod = np.prod(eneg_list)

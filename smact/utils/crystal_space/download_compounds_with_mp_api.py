@@ -23,7 +23,7 @@ def download_mp_data(
     max_stoich: int = 8,
     save_dir: str | Path = "data/binary/mp_api",
     request_interval: float = 0.1,
-):
+) -> None:
     """
     Downloads Materials Project data all possible combinations of `num_elements` elements
     with atomic numbers.

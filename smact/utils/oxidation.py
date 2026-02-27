@@ -19,7 +19,7 @@ class ICSD24OxStatesFilter:
         ox_states_df (pd.DataFrame): The ICSD 24 oxidation states list as a DataFrame.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialise the ICSD 24 oxidation states list."""
         self.ox_states_df = pd.read_json(path.join(data_directory, "oxidation_states_icsd24_counts.json"))
 
@@ -28,7 +28,7 @@ class ICSD24OxStatesFilter:
         consensus: int = 3,
         include_zero: bool = False,
         commonality: str | float = "low",
-    ):
+    ) -> pd.DataFrame:
         """Filter the ICSD 24 oxidation states list by a threshold.
 
         Args:
@@ -86,7 +86,7 @@ class ICSD24OxStatesFilter:
         include_zero: bool = False,
         include_one_oxidation_state: bool = False,
         commonality: str | float = "low",
-    ):
+    ) -> list[str]:
         """Get the filtered ICSD 24 oxidation states list as a list of species.
 
         Args:
@@ -120,7 +120,7 @@ class ICSD24OxStatesFilter:
         include_one_oxidation_state: bool = False,
         sort_by_occurrences: bool = True,
         include_zero: bool = False,
-    ):
+    ) -> pd.DataFrame:
         """Get the ICSD 24 oxidation states list as a dataframe of species with their occurrences.
 
         Args:
@@ -154,7 +154,7 @@ class ICSD24OxStatesFilter:
         )
         if sort_by_occurrences:
             return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)  # type: ignore[union-attr]
-        return species_occurrences_df
+        return species_occurrences_df  # type: ignore[return-value]
 
     def write(
         self,
@@ -163,7 +163,7 @@ class ICSD24OxStatesFilter:
         consensus: int = 3,
         include_zero: bool = False,
         commonality: str = "low",
-    ):
+    ) -> None:
         """Write the filtered ICSD 24 oxidation states list to a SMACT-compatible oxidation states txt file.
 
         Args:
@@ -200,7 +200,7 @@ class ICSD24OxStatesFilter:
             for line in final_summary:
                 f.write(line + "\n")
 
-    def _filter_oxidation_states(self, group: pd.DataFrame, threshold: int):
+    def _filter_oxidation_states(self, group: pd.DataFrame, threshold: int) -> str:
         """Filter the oxidation states list by a threshold."""
         filtered_states = group[group["results_count"] >= threshold]
 

@@ -30,3 +30,13 @@ def element_o():
 @pytest.fixture
 def files_dir():
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
+
+
+@pytest.fixture
+def test_ox_states_path(files_dir):
+    return os.path.join(files_dir, "test_oxidation_states.txt")
+
+
+@pytest.fixture
+def test_struct_path(files_dir):
+    return os.path.join(files_dir, "mp-540839_CsPbI3_oxi.json")

@@ -1,5 +1,7 @@
 ci:
   autoupdate_schedule: monthly
+  # skip applies only to pre-commit.ci hosted service (not GitHub Actions CI).
+  # These hooks use local system tooling (uv run) which is unavailable on pre-commit.ci.
   skip: [ruff-check, ruff-format, codespell, pyright]
 repos:
   - repo: local

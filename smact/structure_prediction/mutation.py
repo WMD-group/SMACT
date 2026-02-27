@@ -37,7 +37,7 @@ class CationMutator:
         self,
         lambda_df: pd.DataFrame,
         alpha: Callable[[str, str], float] | None = (lambda s1, s2: -5.0),
-    ):
+    ) -> None:
         """
         Assign attributes and get lambda table.
 
@@ -68,7 +68,7 @@ class CationMutator:
     def from_json(
         lambda_json: str | None = None,
         alpha: Callable[[str, str], float] | None = (lambda s1, s2: -5.0),
-    ):
+    ) -> CationMutator:
         """
         Create a CationMutator instance from a DataFrame.
 
@@ -109,7 +109,7 @@ class CationMutator:
 
         return CationMutator(lambda_df, alpha)
 
-    def _populate_lambda(self):
+    def _populate_lambda(self) -> None:
         """
         Populate lambda table.
 
@@ -121,7 +121,7 @@ class CationMutator:
         """
         pairs = itertools.combinations_with_replacement(self.specs, 2)
 
-        def add_alpha(s1, s2):
+        def add_alpha(s1: str, s2: str) -> None:
             """Add an alpha value to the lambda table at both coordinates."""
             if self.alpha is None:
                 raise ValueError("alpha function must not be None")
@@ -129,7 +129,7 @@ class CationMutator:
             self.lambda_tab.loc[s1, s2] = a
             self.lambda_tab.loc[s2, s1] = a
 
-        def mirror_lambda(s1, s2):
+        def mirror_lambda(s1: str, s2: str) -> None:
             """Mirror the lambda value at (s2, s1) into (s1, s2)."""
             self.lambda_tab.loc[s1, s2] = self.lambda_tab.loc[s2, s1]
 

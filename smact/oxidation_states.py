@@ -26,7 +26,7 @@ class OxidationStateProbabilityFinder:
     to compute the likelihood of metal species existing in solids in the presence of certain anions.
     """
 
-    def __init__(self, probability_table: dict[tuple[str, str], float] | None = None):
+    def __init__(self, probability_table: dict[tuple[str, str], float] | None = None) -> None:
         """
         Initialise the oxidation state probability finder.
 
@@ -55,7 +55,7 @@ class OxidationStateProbabilityFinder:
         self._included_cations = included_cations
         self._included_anions = included_anions
 
-    def _generate_lookup_key(self, species1: Species, species2: Species):
+    def _generate_lookup_key(self, species1: Species, species2: Species) -> tuple[str, str]:
         """
         Internal function to generate keys to lookup table.
 
@@ -108,7 +108,7 @@ class OxidationStateProbabilityFinder:
         probability_table_key = self._generate_lookup_key(species1, species2)
         return self._probability_table[probability_table_key]
 
-    def get_included_species(self):
+    def get_included_species(self) -> list[str]:
         """Returns a list of species for which there exists data in the probability table used."""
         return self._included_species
 
@@ -171,7 +171,7 @@ class OxidationStateProbabilityFinder:
         return float(mean(pair_probs))
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> type:
     if name == "Oxidation_state_probability_finder":
         warnings.warn(
             "Oxidation_state_probability_finder is deprecated; use OxidationStateProbabilityFinder instead.",

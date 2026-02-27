@@ -22,7 +22,7 @@ def update_layout(
     num_col: int = 3,
     width: float = 1200,
     height: float = 1800,
-):
+) -> go.Figure:
     """Update layout of a plotly figure."""
     # set axis
     for i in range(1, num_row + 1):
@@ -76,7 +76,7 @@ def plot_reducers_embeddings(
     save_path: Path,
     symbol: str = "circle",
     title: str = "Embedding Visualization",
-):
+) -> go.Figure:
     """Plot dimension reduction plots."""
     fig = make_subplots(
         rows=6,
