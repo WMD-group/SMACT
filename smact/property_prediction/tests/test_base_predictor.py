@@ -146,7 +146,7 @@ class TestValidateCompositions:
 
             # First check if smact_validity works at all
             smact_validity("NaCl")
-        except Exception as e:
+        except (ImportError, ModuleNotFoundError) as e:
             pytest.skip(f"SMACT validation not available in this environment: {e}")
 
         predictor = ConcretePredictor(property_name="test_property")
@@ -161,7 +161,7 @@ class TestValidateCompositions:
 
             # First check if smact_validity works at all
             smact_validity("NaCl")
-        except Exception as e:
+        except (ImportError, ModuleNotFoundError) as e:
             pytest.skip(f"SMACT validation not available in this environment: {e}")
 
         predictor = ConcretePredictor(property_name="test_property")

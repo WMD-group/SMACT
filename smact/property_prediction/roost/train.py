@@ -136,6 +136,14 @@ def train_roost_model(
     )
     n_targets = dataset.n_targets
 
+    # Validate split fractions
+    if not 0 < test_size < 1:
+        raise ValueError(f"test_size must be between 0 and 1, got {test_size}")
+    if not 0 < val_size < 1:
+        raise ValueError(f"val_size must be between 0 and 1, got {val_size}")
+    if test_size + val_size >= 1:
+        raise ValueError(f"test_size + val_size must be < 1, got {test_size + val_size}")
+
     # Split data
     indices = list(range(len(dataset)))
     train_idx, test_idx = train_test_split(indices, test_size=test_size, random_state=data_seed)

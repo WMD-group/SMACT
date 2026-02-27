@@ -132,6 +132,12 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         task_dict = model_params.get("task_dict", {})
         if task_dict:
             self._target_name = next(iter(task_dict.keys()))
+            if self._target_name != self.property_name:
+                logger.warning(
+                    f"Checkpoint target '{self._target_name}' differs from "
+                    f"requested property '{self.property_name}'. "
+                    f"Predictions will use the checkpoint's target."
+                )
 
         # Reconstruct the model
         self.model = Roost(**model_params)
@@ -235,6 +241,10 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         predictions = np.concatenate(all_preds)
 
         if return_uncertainty:
+            if not self._robust:
+                logger.warning(
+                    "Uncertainty requested but model is not robust. PredictionResult.uncertainties will be None."
+                )
             uncertainties_arr = None
             if all_uncertainties:
                 uncertainties_arr = np.concatenate(all_uncertainties)

@@ -53,7 +53,7 @@ cgcnn_model = CGCNNPropertyPredictor(property_name="bulk_modulus")
 
 ## Abstract Base Class Architecture
 
-In `/home/ryan/smact4properties/SMACT/smact/property_prediction/base_predictor.py`:
+In `smact/property_prediction/base_predictor.py`:
 
 ```python
 from abc import ABC, abstractmethod

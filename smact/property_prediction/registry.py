@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
 
 from smact.property_prediction.config import (
     DEFAULT_MODELS,
@@ -14,6 +15,15 @@ from smact.property_prediction.config import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _is_valid_model_dir(path: Path) -> bool:
+    """Check if a directory contains a complete model."""
+    return (
+        path.is_dir()
+        and (path / "model.json").exists()
+        and ((path / "model.pt").exists() or (path / "state.pt").exists())
+    )
 
 
 def get_available_models(include_cached: bool = True) -> list[str]:
@@ -39,19 +49,19 @@ def get_available_models(include_cached: bool = True) -> list[str]:
         if response.status_code == 200:
             manifest = json.loads(response.content)
             models.update(manifest.get("models", []))
-    except requests.RequestException as e:
+    except (requests.RequestException, json.JSONDecodeError) as e:
         logger.debug(f"Could not fetch remote manifest: {e}")
 
     # Include models from pretrained_models directory in the repository
     if PRETRAINED_MODELS_DIR.exists():
         for path in PRETRAINED_MODELS_DIR.iterdir():
-            if path.is_dir() and (path / "model.json").exists():
+            if _is_valid_model_dir(path):
                 models.add(path.name)
 
     # Include locally cached models
     if include_cached and MODELS_CACHE.exists():
         for path in MODELS_CACHE.iterdir():
-            if path.is_dir() and (path / "model.json").exists():
+            if _is_valid_model_dir(path):
                 models.add(path.name)
 
     return sorted(models)
@@ -172,12 +182,12 @@ def model_exists(model_name: str) -> bool:
     """
     # Check pretrained_models directory in the repository
     pretrained_path = PRETRAINED_MODELS_DIR / model_name
-    if pretrained_path.is_dir() and (pretrained_path / "model.json").exists():
+    if _is_valid_model_dir(pretrained_path):
         return True
 
     # Check local cache
     cached_path = MODELS_CACHE / model_name
-    if cached_path.is_dir() and (cached_path / "model.json").exists():
+    if _is_valid_model_dir(cached_path):
         return True
 
     # Check remote availability
@@ -185,7 +195,7 @@ def model_exists(model_name: str) -> bool:
 
     try:
         url = f"{PRETRAINED_MODELS_BASE_URL}{model_name}.tar.gz"
-        response = requests.head(url, timeout=5)
+        response = requests.head(url, timeout=5, allow_redirects=True)
         return response.status_code == 200
     except requests.RequestException:
         return False

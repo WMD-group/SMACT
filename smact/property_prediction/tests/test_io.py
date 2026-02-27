@@ -100,15 +100,20 @@ class TestLoadModelFiles:
             assert "state.pt" in files
             assert files["model.json"] == model_path / "model.json"
 
-    def test_missing_files_raises(self):
+    def test_missing_files_raises(self, monkeypatch):
         """Should raise error if files are missing."""
+        import smact.property_prediction.io as io_mod
+
+        # Block remote fetch so the test is deterministic (no network access)
+        monkeypatch.setattr(io_mod, "RemoteFile", None)
+
         with tempfile.TemporaryDirectory() as tmpdir:
             model_path = Path(tmpdir)
             # Create only partial files
             (model_path / "model.json").write_text("{}")
 
             # Should not find complete model locally and fail to download
-            with pytest.raises(FileNotFoundError):
+            with pytest.raises((FileNotFoundError, TypeError)):
                 load_model_files(model_path / "nonexistent")
 
 

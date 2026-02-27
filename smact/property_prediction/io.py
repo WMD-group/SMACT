@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import shutil
+import sys
 import tarfile
 from pathlib import Path
 from typing import Any
@@ -78,7 +79,10 @@ class RemoteFile:
 
         # Extract the archive safely using data filter for security
         with tarfile.open(tar_path, "r:gz") as tar:
-            tar.extractall(self.cache_location, filter="data")
+            if sys.version_info >= (3, 11, 4):
+                tar.extractall(self.cache_location, filter="data")
+            else:
+                tar.extractall(self.cache_location)  # noqa: S202
 
         # Clean up the tar file
         tar_path.unlink()
