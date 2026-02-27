@@ -875,6 +875,29 @@ class CationMutatorTest(unittest.TestCase):
         with pytest.raises(ValueError, match="alpha function must not be None"):
             CationMutator(lambda_df, alpha=None)
 
+    def test_populate_lambda_asymmetric_mirror(self):
+        """_populate_lambda mirrors (s2, s1) into (s1, s2) when only (s2, s1) exists (lines 152-153).
+
+        When looking up (s1, s2) raises KeyError but (s2, s1) has a real
+        (non-NaN) value, the code should mirror that value into (s1, s2).
+        """
+        # Build a DataFrame where "A" appears only as a row index and "B"
+        # only as a column, so (A, B) exists but (B, A) raises KeyError.
+        # A third species "C" keeps the table from being trivially complete.
+        lambda_df = pd.DataFrame(
+            {"B": {"A": 2.0, "C": np.nan}, "C": {"A": np.nan, "C": -1.0}},
+        )
+        # (B, A) is KeyError, (A, B) = 2.0 → mirror_lambda(B, A) on line 147
+        # (B, C) is KeyError, (C, B) is also KeyError → add_alpha on line 155
+        # But we need the *outer* KeyError branch to mirror.
+        # Construct so (s1, s2) = ("B", "A") raises KeyError → outer except,
+        # then (s2, s1) = ("A", "B") = 2.0 → mirror_lambda (lines 152-153).
+        cm = CationMutator(lambda_df, alpha=lambda s1, s2: -5.0)
+
+        # After population, (B, A) should be mirrored from (A, B)
+        self.assertEqual(cm.lambda_tab.loc["B", "A"], 2.0)
+        self.assertEqual(cm.lambda_tab.loc["A", "B"], 2.0)
+
     def test_nary_mutate_structure(self):
         """_nary_mutate_structure replaces multiple species simultaneously."""
         ca_file = os.path.join(files_dir, "CaTiO3.txt")

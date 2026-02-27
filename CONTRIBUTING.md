@@ -32,7 +32,7 @@ The steps for a new piece of work can be summarised as follows:
 5. Install SMACT with all development and optional dependencies. This creates a virtual environment automatically and installs the package in editable mode.
 
    ```bash
-   uv sync --extra optional --dev
+   uv sync --extra optional --extra property_prediction --dev
    pre-commit install # Install pre-commit hooks
    ```
 
@@ -91,7 +91,7 @@ Recommended reading: [How to Write the Perfect Pull Request](https://github.blog
 All development dependencies are managed in `pyproject.toml`. To install them:
 
 ```bash
-uv sync --extra optional --dev
+uv sync --extra optional --extra property_prediction --dev
 ```
 
 ### Pre-commit hooks

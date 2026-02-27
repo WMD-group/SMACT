@@ -93,6 +93,11 @@ visualisation = [
     "dash>=2.18.2",
 ]
 ml = ["xgboost","shap","smact[featurisers]"]
+property_prediction = [
+    "aviary-models>=1.2.1",
+    "requests",
+    "torch>=2.0.0",
+]
 optional = [
     "pydantic>=2.9.2",
     "smact[mp]",
@@ -142,7 +147,7 @@ include = ["smact","smact.*"]
 
 [tool.pytest.ini_options]
 minversion = 6.0
-testpaths = ["smact/tests"]
+testpaths = ["smact/tests", "smact/property_prediction/tests"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests that require external services (e.g. Materials Project API)",
@@ -157,7 +162,7 @@ force-exclude = true
 select = ["ALL"]
 ignore = [
         # Rule families
-    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
+    "ANN",  # flake8-annotations (not ready, require types for ALL args)
     "ARG",  # Check for unused function arguments
     "BLE",  # General catch of Exception
     "C90",  # Check for functions with a high McCabe complexity
@@ -229,6 +234,12 @@ docstring-code-format = true
 [tool.ruff.lint.per-file-ignores]
 "smact/tests/*" = ["ANN", "D"]
 "smact/benchmarking/*" = ["ANN"]
+"smact/property_prediction/tests/*" = ["D"]
+# TC rules want runtime imports moved to TYPE_CHECKING blocks, but they are used at runtime
+# PLC0415 wants imports at top-level, but we use lazy imports for heavy dependencies (aviary, torch)
+# SIM108 suggests ternary operators but if-else is clearer for complex expressions
+"smact/property_prediction/*" = ["TC001", "TC002", "TC003", "PLC0415", "SIM108"]
+
 
 [tool.pyright]
 typeCheckingMode = "standard"
@@ -342,6 +353,13 @@ ignore-words-list = [
             "assertIn",
             "Mater",
         ]
+[tool.coverage.run]
+omit = [
+    "smact/benchmarking/*",
+    "smact/utils/band_gap_simple.py",
+    "smact/utils/crystal_space/plot_embedding.py",
+]
+
 [tool.coverage.report]
 fail_under = 85
 exclude_also = [

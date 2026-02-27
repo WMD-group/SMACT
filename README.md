@@ -103,7 +103,7 @@ We use [uv](https://docs.astral.sh/uv/) for dependency management. To set up a d
 
     git clone https://github.com/wmd-group/smact.git
     cd smact
-    uv sync --extra optional --dev
+    uv sync --extra optional --extra property_prediction --dev
     pre-commit install
 
 This installs SMACT in editable mode with all optional and development dependencies, and sets up pre-commit hooks. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.

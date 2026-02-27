@@ -64,7 +64,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "SMACT"
-copyright = "2025, The SMACT Developers"
+copyright = "2026, The SMACT Developers"
 author = "The SMACT Developers"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -389,4 +389,9 @@ epub_exclude_files = ["search.html"]
 # If false, no index is generated.
 # epub_use_index = True
 
-# Mock out spglib and ase modules to avoid import failures
+# Mock out modules to avoid import failures in docs build
+autodoc_mock_imports = [
+    "torch",
+    "aviary",
+    "requests",
+]
