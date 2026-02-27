@@ -95,6 +95,7 @@ visualisation = [
 ml = ["xgboost","shap","smact[featurisers]"]
 property_prediction = [
     "aviary-models>=1.2.1",
+    "requests",
     "torch>=2.0.0",
 ]
 optional = [

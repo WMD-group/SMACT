@@ -50,7 +50,10 @@ class RemoteFile:
         self.model_name = uri.split("/")[-1].replace(".tar.gz", "")
         self.local_path = self.cache_location / self.model_name
 
-        if not self.local_path.exists() or force_download:
+        required = ("model.json", "model.pt", "state.pt")
+        has_complete_model = self.local_path.is_dir() and all((self.local_path / fn).exists() for fn in required)
+
+        if force_download or not has_complete_model:
             logger.info(f"Downloading model from {uri}...")
             self._download()
         else:
@@ -139,7 +142,10 @@ def load_model_files(
             f"{PRETRAINED_MODELS_BASE_URL}{model_name}.tar.gz",
             force_download=force_download,
         )
-        return {fn: remote.local_path / fn for fn in required_files}
+        resolved = {fn: remote.local_path / fn for fn in required_files}
+        if not all(path.exists() for path in resolved.values()):
+            raise FileNotFoundError(f"Downloaded model '{model_name}' is incomplete at {remote.local_path}")
+        return resolved
     except requests.RequestException as e:
         raise FileNotFoundError(
             f"Could not find or download model '{model_name}'. "

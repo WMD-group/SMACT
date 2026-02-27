@@ -3996,6 +3996,7 @@ optional = [
 ]
 property-prediction = [
     { name = "aviary-models" },
+    { name = "requests" },
     { name = "torch", version = "2.7.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
     { name = "torch", version = "2.10.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'win32'" },
 ]
@@ -4089,6 +4090,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "readthedocs-sphinx-search", marker = "extra == 'docs'", specifier = "==0.3.2" },
+    { name = "requests", marker = "extra == 'property-prediction'" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "scipy" },
     { name = "seaborn", marker = "extra == 'strict'", specifier = "==0.13.2" },

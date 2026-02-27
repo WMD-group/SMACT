@@ -22,7 +22,8 @@ def _is_valid_model_dir(path: Path) -> bool:
     return (
         path.is_dir()
         and (path / "model.json").exists()
-        and ((path / "model.pt").exists() or (path / "state.pt").exists())
+        and (path / "model.pt").exists()
+        and (path / "state.pt").exists()
     )
 
 

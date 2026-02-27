@@ -133,10 +133,8 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         if task_dict:
             self._target_name = next(iter(task_dict.keys()))
             if self._target_name != self.property_name:
-                logger.warning(
-                    f"Checkpoint target '{self._target_name}' differs from "
-                    f"requested property '{self.property_name}'. "
-                    f"Predictions will use the checkpoint's target."
+                raise ValueError(
+                    f"Checkpoint target '{self._target_name}' does not match requested property '{self.property_name}'."
                 )
 
         # Reconstruct the model
