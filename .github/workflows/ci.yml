@@ -23,7 +23,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync --extra optional --dev
+        run: uv sync --extra optional --extra property_prediction --dev
 
       - name: Run pre-commit hooks
         run: uv run pre-commit run --all-files

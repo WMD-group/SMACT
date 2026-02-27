@@ -440,21 +440,21 @@ class TestOxidationEdgeCases(unittest.TestCase):
 
     def test_get_species_occurrences_unsorted(self):
         """get_species_occurrences_df with sort_by_occurrences=False (line 157)."""
-        df = self.ox_filter.get_species_occurrences_df(sort_by_occurrences=False)
-        self.assertIsInstance(df, pd.DataFrame)
-        self.assertGreater(len(df), 0)  # type: ignore[arg-type]
+        occurrences = self.ox_filter.get_species_occurrences_df(sort_by_occurrences=False)
+        self.assertIsInstance(occurrences, pd.DataFrame)
+        self.assertGreater(len(occurrences), 0)  # type: ignore[arg-type]
 
     def test_filter_numeric_commonality(self):
         """filter with a numeric commonality threshold (line 51)."""
-        df = self.ox_filter.filter(commonality=25.0)
-        self.assertIsInstance(df, pd.DataFrame)
-        self.assertGreater(len(df), 0)
+        filtered = self.ox_filter.filter(commonality=25.0)
+        self.assertIsInstance(filtered, pd.DataFrame)
+        self.assertGreater(len(filtered), 0)
 
     def test_get_species_occurrences_include_zero(self):
         """get_species_occurrences_df with include_zero=True (line 138)."""
-        df = self.ox_filter.get_species_occurrences_df(include_zero=True)
-        self.assertIsInstance(df, pd.DataFrame)
-        self.assertGreater(len(df), 0)  # type: ignore[arg-type]
+        occurrences = self.ox_filter.get_species_occurrences_df(include_zero=True)
+        self.assertIsInstance(occurrences, pd.DataFrame)
+        self.assertGreater(len(occurrences), 0)  # type: ignore[arg-type]
 
     def test_get_species_list_value_error_path(self):
         """get_species_list skips species whose ox_state can't be parsed (lines 113-114)."""
