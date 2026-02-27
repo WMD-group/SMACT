@@ -394,4 +394,8 @@ autodoc_mock_imports = [
     "torch",
     "aviary",
     "requests",
+    "pymatgen",
+    "pymatgen.util",
+    "pymatgen.util.plotting",
+    "ase",
 ]

@@ -223,9 +223,9 @@ class StructurePredictor:
                 # Get species to be substituted
                 # Ensure n species are obtained
 
-                if len(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species)) != n_ary:  # type: ignore[operator]
+                if len(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_spec_str)) != n_ary:
                     continue
-                alt_spec = list(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species))  # type: ignore[operator]
+                alt_spec = list(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_spec_str))
 
                 # Need to consider p(A,X)p(B,Y) and p(A,Y)p(B,X)
                 # if utilities.parse_spec(alt_spec_1)[1] != diff_species_1[1] and utilities.parse_spec(alt_spec_2)[1] != diff_species_2[1] :

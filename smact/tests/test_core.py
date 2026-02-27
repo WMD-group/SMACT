@@ -158,7 +158,7 @@ class TestSequenceFunctions:
         assert smact.screening.eneg_states_test_threshold([1, -1], [1.83, 1.82], threshold=0.1)
 
     def test_ml_rep_generator(self):
-        Pb, O = (smact.Element(label) for label in ("Pb", "O"))
+        Pb, o_elem = (smact.Element(label) for label in ("Pb", "O"))
         PbO2_ml = [
             0.0,
             0.0,
@@ -265,7 +265,7 @@ class TestSequenceFunctions:
             0.0,  # element 103 (Lr)
         ]
         assert smact.screening.ml_rep_generator(["Pb", "O"], [1, 2]) == PbO2_ml
-        assert smact.screening.ml_rep_generator([Pb, O], [1, 2]) == PbO2_ml
+        assert smact.screening.ml_rep_generator([Pb, o_elem], [1, 2]) == PbO2_ml
 
     def test_smact_filter(self):
         oxidation_states_sets = ["smact14", "icsd24"]
@@ -516,10 +516,10 @@ class TestSequenceFunctions:
     def test_compound_electroneg_element_objects(self, caplog):
         """compound_electroneg with Element objects and logging."""
         Fe = smact.Element("Fe")
-        O = smact.Element("O")
+        o_elem = smact.Element("O")
 
         # Element list input + Mulliken
-        val = compound_electroneg(elements=[Fe, O], stoichs=[1, 1], source="Mulliken")
+        val = compound_electroneg(elements=[Fe, o_elem], stoichs=[1, 1], source="Mulliken")
         assert isinstance(val, float)
 
         # Invalid element type raises TypeError

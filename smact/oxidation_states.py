@@ -143,7 +143,7 @@ class OxidationStateProbabilityFinder:
             structure = [
                 Species(
                     get_el_sp(i.species_string).symbol,
-                    int(get_el_sp(i.species_string).oxi_state or 0),  # type: ignore[arg-type]
+                    int(oxi) if (oxi := get_el_sp(i.species_string).oxi_state) is not None else 0,  # type: ignore[arg-type]
                 )
                 for i in structure
             ]

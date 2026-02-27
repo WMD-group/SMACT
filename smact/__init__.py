@@ -434,12 +434,17 @@ def lattices_are_same(lattice1: Sequence, lattice2: Sequence, tolerance: float =
     Returns:
         True if every site in *lattice1* has a matching site in *lattice2*.
     """
-    matches = 0
+    matched: set[int] = set()
     for site1 in lattice1:
-        for site2 in lattice2:
-            if site1.symbol == site2.symbol and are_eq(site1.position, site2.position, tolerance=tolerance):
-                matches += 1
-    return matches == len(lattice1)
+        for j, site2 in enumerate(lattice2):
+            if (
+                j not in matched
+                and site1.symbol == site2.symbol
+                and are_eq(site1.position, site2.position, tolerance=tolerance)
+            ):
+                matched.add(j)
+                break
+    return len(matched) == len(lattice1)
 
 
 def _gcd_recursive(*args: int) -> int:

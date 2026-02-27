@@ -106,7 +106,7 @@ def composition_dict_maker(smact_filter_output: tuple[str, int, int] | tuple[str
     """Convert an item in the output of smact.screening.smact_filter into a composition dictionary.
 
     Args:
-        smact_filter_output (tuple[str, int, int]): An item in the list returned from smact_filter
+        smact_filter_output (tuple[str, int, int] | tuple[str, int]): An item in the list returned from smact_filter
 
     Returns:
         composition_dict (dict[str, float]): A composition dictionary

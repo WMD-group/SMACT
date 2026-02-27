@@ -144,6 +144,8 @@ def compound_electroneg(
     stoichslist = list(map(float, stoichslist))
     if len(elementlist) != len(stoichslist):
         raise ValueError("elements and stoichs must have the same length")
+    if any(s <= 0 for s in stoichslist):
+        raise ValueError("All stoichiometries must be positive")
 
     # Get electronegativity values for each element
 

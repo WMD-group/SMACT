@@ -339,7 +339,13 @@ class Doper:
         }
         for dopants in self.results.values():
             idx = _plot_value_index.get(plot_value, _COMBINED_SCORE_INDEX)
-            dict_results = {utilities.parse_spec(row[0])[0]: row[idx] for row in dopants.get("sorted")}
+            sorted_rows = dopants.get("sorted")
+            if sorted_rows and idx >= len(sorted_rows[0]):
+                raise ValueError(
+                    f"Cannot plot '{plot_value}': dopant rows have only {len(sorted_rows[0])} columns. "
+                    "Run get_dopants with get_selectivity=True to include selectivity data."
+                )
+            dict_results = {utilities.parse_spec(row[0])[0]: row[idx] for row in sorted_rows}
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,
                 cmap=cmap,

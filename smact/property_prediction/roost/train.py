@@ -50,7 +50,6 @@ def train_roost_model(
     data_seed: int = 42,
     # Misc
     device: str | None = None,
-    ensemble_size: int = 1,
 ) -> Path:
     """Train a ROOST model for property prediction.
 
@@ -73,7 +72,6 @@ def train_roost_model(
         val_size: Fraction of data for validation.
         data_seed: Random seed for data splitting.
         device: Device to train on (auto-detect if None).
-        ensemble_size: Number of models to train in ensemble.
 
     Returns:
         Path to saved model directory.
