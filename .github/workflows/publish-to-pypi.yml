@@ -19,7 +19,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
       - name: Build
         run: uv build
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           path: dist/*.*
 
