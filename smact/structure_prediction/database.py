@@ -82,7 +82,7 @@ class StructureDB:
 
     """
 
-    def __init__(self, db: str):
+    def __init__(self, db: str) -> None:
         """
         Set database name.
 
@@ -108,7 +108,7 @@ class StructureDB:
 
         return self.cur
 
-    def __exit__(self, exc_type, *args):
+    def __exit__(self, exc_type: type[BaseException] | None, *args: object) -> None:
         """
         Close database connection.
 
@@ -186,7 +186,7 @@ class StructureDB:
 
         return self.add_structs(results, table, commit_after_each=True)
 
-    def add_table(self, table: str):
+    def add_table(self, table: str) -> None:
         """
         Add a table to the database.
 
@@ -202,7 +202,7 @@ class StructureDB:
                 (composition TEXT NOT NULL, structure TEXT NOT NULL)""",
             )
 
-    def add_struct(self, struct: SmactStructure, table: str):
+    def add_struct(self, struct: SmactStructure, table: str) -> None:
         """
         Add a SmactStructure to a table.
 

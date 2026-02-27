@@ -1,5 +1,5 @@
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.01361/status.svg)](https://doi.org/10.21105/joss.01361)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5553202.svg)](https://doi.org/10.5281/zenodo.5553202)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5553201.svg)](https://doi.org/10.5281/zenodo.5553201)
 [![Documentation Status](https://readthedocs.org/projects/smact/badge/?version=latest)](http://smact.readthedocs.org/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![python version](https://img.shields.io/pypi/pyversions/smact)
@@ -120,7 +120,7 @@ Please use the [Issue Tracker](https://github.com/WMD-group/smact/issues) to rep
 
 ### Code contributions
 
-We are always looking for ways to make SMACT better and more useful to the wider community; contributions are welcome. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following:
+We are always looking for ways to make SMACT better and more useful to the wider community; contributions are welcome. As of v4.0.0, we use [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow): branch from `master`, open a pull request against `master`, and releases are tagged from `master`. Please use the ["Fork and Pull"](https://guides.github.com/activities/forking/) workflow to make contributions and stick as closely as possible to the following:
 
 - Code style is enforced by [ruff](https://docs.astral.sh/ruff/) (linting and formatting) and [pyright](https://github.com/microsoft/pyright) (type checking). Pre-commit hooks run these automatically on commit.
 - Use [Google-style docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings).

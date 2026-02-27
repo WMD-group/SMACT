@@ -6,6 +6,10 @@ import re
 
 __all__ = ["get_sign", "parse_spec", "unparse_spec"]
 
+_SPEC_RE = re.compile(r"([A-Za-z]+)([0-9]*[\+\-])")
+_ELE_RE = re.compile(r"[A-Za-z]+")
+_CHARGE_RE = re.compile(r"\d+")
+
 
 def parse_spec(species: str) -> tuple[str, int]:
     """
@@ -16,7 +20,7 @@ def parse_spec(species: str) -> tuple[str, int]:
 
     """
     try:
-        ele, oxi_state = re.match(r"([A-Za-z]+)([0-9]*[\+\-])", species).groups()  # type: ignore[union-attr]
+        ele, oxi_state = _SPEC_RE.match(species).groups()  # type: ignore[union-attr]
         # The regex guarantees oxi_state ends in '+' or '-', so this branch
         # is always taken; the else clause is unreachable by construction.
         charge = (int(oxi_state[:-1] or 1)) * (-1 if "-" in oxi_state else 1)
@@ -33,12 +37,12 @@ def _parse_spec_old(species: str) -> tuple[str, int]:
     :return: a tuple of the atomic symbol and oxidation state
 
     """
-    match = re.match(r"[A-Za-z]+", species)
+    match = _ELE_RE.match(species)
     if match is None:
         raise ValueError(f"Invalid species string (no element symbol found): {species!r}")
     ele = match.group(0)
 
-    charge_match = re.search(r"\d+", species)
+    charge_match = _CHARGE_RE.search(species)
     ox_state = int(charge_match.group(0)) if charge_match else 0
 
     if "-" in species:

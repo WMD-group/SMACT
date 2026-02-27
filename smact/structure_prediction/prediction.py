@@ -44,7 +44,7 @@ class StructurePredictor:
 
     """
 
-    def __init__(self, mutator: CationMutator, struct_db: StructureDB, table: str):
+    def __init__(self, mutator: CationMutator, struct_db: StructureDB, table: str) -> None:
         """
         Initialize class.
 

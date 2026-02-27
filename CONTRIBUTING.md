@@ -2,9 +2,14 @@
 
 This is a quick guide on how to follow best practice and contribute smoothly to `SMACT`.
 
+> **Note (v4.0.0):** As of v4.0.0, SMACT has adopted **GitHub Flow** as its
+> branching strategy. The `develop` branch is no longer used. All feature
+> branches should be created from `master`, and all pull requests should
+> target `master`. Release versions are cut by tagging commits on `master`.
+
 ## Workflow
 
-We follow the [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow), using
+We follow [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow), using
 branches for new work and pull requests for verifying the work.
 
 The steps for a new piece of work can be summarised as follows:

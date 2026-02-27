@@ -77,7 +77,7 @@ class SubstitutionModel(abc.ABC):
 class RadiusModel(SubstitutionModel):
     """Substitution probability model based on Shannon radii."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         r"""
         Parse Shannon radii data file.
 
@@ -94,7 +94,7 @@ class RadiusModel(SubstitutionModel):
 
         self.k = (self.shannon_data["ionic_radius"].max() - self.shannon_data["ionic_radius"].min()) ** -2
 
-    def sub_prob(self, s1, s2):
+    def sub_prob(self, s1: str, s2: str) -> float:
         r"""
         Calculate the probability of substituting species s1 for s2.
 
