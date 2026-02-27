@@ -135,7 +135,9 @@ class Doper:
                 )
         return data
 
-    def _merge_dicts(self, keys: list[str], dopants_list: list[list], groupby_list: list[dict], sort_idx: int = 2) -> dict:
+    def _merge_dicts(
+        self, keys: list[str], dopants_list: list[list], groupby_list: list[dict], sort_idx: int = 2
+    ) -> dict:
         merged_dict = dict()
         for k, dopants, group in zip(keys, dopants_list, groupby_list, strict=True):
             merged_values = dict()

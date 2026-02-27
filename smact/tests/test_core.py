@@ -286,7 +286,9 @@ class TestSequenceFunctions:
             assert [(r[0], r[1], r[2]) for r in output] == oxidation_states_sets_results[ox_state_set]["thresh_2"]  # type: ignore[misc]
 
         # Test that reading the oxidation states from a file produces the same results
-        assert smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set="smact14") == smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=TEST_OX_STATES)
+        assert smact.screening.smact_filter(
+            [Na, Fe, Cl], threshold=2, oxidation_states_set="smact14"
+        ) == smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=TEST_OX_STATES)
 
         assert set(
             smact.screening.smact_filter(
@@ -361,9 +363,9 @@ class TestSequenceFunctions:
         (no TypeError) regardless of which oxidation_states_set is used.
         """
         for ox_set in ["smact14", "icsd16", "icsd24", "pymatgen_sp"]:
-            assert not smact.screening.smact_validity(
-                "NeF2", oxidation_states_set=ox_set
-            ), f"NeF2 should be False with oxidation_states_set={ox_set}"
+            assert not smact.screening.smact_validity("NeF2", oxidation_states_set=ox_set), (
+                f"NeF2 should be False with oxidation_states_set={ox_set}"
+            )
         # Xe and Kr have known oxidation states and should still pass
         assert smact.screening.smact_validity("XeF2")
         assert smact.screening.smact_validity("KrF2")
@@ -399,9 +401,9 @@ class TestSequenceFunctions:
         # Test different oxidation state sets
         oxidation_sets = ["smact14", "icsd16", "icsd24", "pymatgen_sp"]
         for ox_set in oxidation_sets:
-            assert smact.screening.smact_validity(
-                "NaCl", oxidation_states_set=ox_set
-            ), f"Failed with oxidation state set: {ox_set}"
+            assert smact.screening.smact_validity("NaCl", oxidation_states_set=ox_set), (
+                f"Failed with oxidation state set: {ox_set}"
+            )
 
         # Test with file path
 

@@ -72,8 +72,7 @@ jobs:
           git add docs/CHANGELOG.md
           git add .
           git commit -m "Update changelog for new release"
-          git pull --rebase origin develop  # Pull latest changes and rebase
-          git push origin develop  # Push changes to the develop branch
-          git push
+          git pull --rebase origin master  # Pull latest changes and rebase
+          git push origin master  # Push changes to the master branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
