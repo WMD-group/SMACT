@@ -6,15 +6,33 @@
 smact/property_prediction/
 ├── __init__.py              # Main module interface
 ├── base_predictor.py        # Abstract base class
-├── convenience.py           # Convenience functions
-└── roost/
-    ├── __init__.py         # ROOST module
-    └── predictor.py        # ROOST implementation
+├── config.py                # Property metadata and defaults
+├── convenience.py           # Convenience functions (predict_band_gap)
+├── io.py                    # Model loading, caching, and downloading
+├── registry.py              # Model registry and discovery
+├── roost/
+│   ├── __init__.py         # ROOST module
+│   ├── predictor.py        # ROOST implementation
+│   └── train.py            # Training pipeline
+└── scripts/
+    └── convert_checkpoint.py  # Checkpoint conversion utility
 ```
 
-## API Implementation
+## Quick Start
 
-Your exact usage pattern now works:
+```python
+from smact.property_prediction import predict_band_gap
+
+# Single composition
+result = predict_band_gap("GaN")
+# array([1.59])
+
+# Multiple compositions
+results = predict_band_gap(["NaCl", "TiO2", "GaN", "Si"])
+# array([5.67, 2.13, 1.59, 0.72])
+```
+
+## Predictor API
 
 ```python
 from smact.property_prediction import RoostPropertyPredictor
@@ -22,115 +40,43 @@ from smact.property_prediction import RoostPropertyPredictor
 # Check available properties
 print(RoostPropertyPredictor.available_properties)  # ['band_gap']
 
-# Create model with just property name and device
-model = RoostPropertyPredictor(property_name="band_gap", device="cpu")
+# Create predictor
+predictor = RoostPropertyPredictor(property_name="band_gap", device="cpu")
 
-# Predict single or multiple compositions
-model.predict("NaCl")  # Single composition
-model.predict(["NaCl", "TiO2", "GaN"])  # Multiple compositions
+# Predict
+predictor.predict("NaCl")  # Single composition
+predictor.predict(["NaCl", "TiO2", "GaN"])  # Multiple compositions
+
+# With uncertainty quantification (requires robust model)
+result = predictor.predict(["NaCl", "TiO2"], return_uncertainty=True)
+print(result.predictions)  # [5.67, 2.13]
+print(result.uncertainties)  # [0.42, 0.31]
+print(result.unit)  # "eV"
 ```
 
 ## Key Features
 
-1. **Clean API**: No model_path required - handled internally with defaults
+1. **Clean API**: No model_path required — handled internally with defaults
 2. **Class-level properties**: `RoostPropertyPredictor.available_properties`
 3. **SMACT validation**: All compositions validated using `smact_validity()`
-4. **Extensible design**: Easy to add new model types (Wren, CGCNN, etc.)
-5. **Type hints**: Full typing support throughout
-6. **Error handling**: Clear error messages for invalid compositions/properties
+4. **Uncertainty quantification**: Aleatoric uncertainty via heteroscedastic (robust) loss
+5. **Model registry**: Query available models, properties, and units
+6. **Extensible design**: ABC-based architecture for adding new backends (Wren, CGCNN, etc.)
+7. **Lazy imports**: torch/aviary only imported when actually used
 
-## Extensibility for Multiple Models
+## Architecture
 
-The architecture is designed for multiple models:
+The module uses an Abstract Base Class pattern (`BasePropertyPredictor` → `RoostPropertyPredictor`)
+to support future model backends without API changes. All predictors share:
 
-```python
-# Future implementations will work the same way:
-from smact.property_prediction import WrenPropertyPredictor, CGCNNPropertyPredictor
+- `predict(compositions, return_uncertainty=False)` → `np.ndarray | PredictionResult`
+- `PredictionResult` dataclass with `.predictions`, `.uncertainties`, `.unit`, `.to_dict()`
 
-wren_model = WrenPropertyPredictor(property_name="band_gap")
-cgcnn_model = CGCNNPropertyPredictor(property_name="bulk_modulus")
-```
+## Model Resolution
 
-## Abstract Base Class Architecture
+When loading a model by name, SMACT checks in order:
 
-In `smact/property_prediction/base_predictor.py`:
-
-```python
-from abc import ABC, abstractmethod
-
-
-class BasePropertyPredictor(ABC):  # Abstract base class
-    """Abstract base class for property predictors."""
-
-    @property
-    @abstractmethod
-    def supported_properties(self) -> list[str]:  # Must be implemented
-        """List of properties supported by this predictor."""
-        pass
-
-    @abstractmethod
-    def predict(
-        self, compositions: str | list[str]
-    ) -> np.ndarray:  # Must be implemented
-        """Predict property values for given compositions."""
-        pass
-```
-
-## Concrete Implementation
-
-The `RoostPropertyPredictor` **inherits from and implements** the abstract base class:
-
-```python
-class RoostPropertyPredictor(BasePropertyPredictor):  # Concrete implementation
-
-    @property
-    def supported_properties(self) -> list[str]:  # Implements abstract method
-        return self.available_properties
-
-    def predict(
-        self, compositions: str | list[str]
-    ) -> np.ndarray:  # Implements abstract method
-        compositions = self._validate_compositions(compositions)
-        # Implementation here...
-        return np.zeros(len(compositions))  # Placeholder for now
-```
-
-## Extensible Pattern
-
-This allows for multiple concrete implementations:
-
-```python
-# Future models will also inherit from BasePropertyPredictor
-class WrenPropertyPredictor(BasePropertyPredictor):
-    def supported_properties(self) -> list[str]:
-        return ["band_gap", "formation_energy"]
-
-    def predict(self, compositions: str | list[str]) -> np.ndarray:
-        # Wren-specific implementation
-        pass
-
-
-class CGCNNPropertyPredictor(BasePropertyPredictor):
-    def supported_properties(self) -> list[str]:
-        return ["bulk_modulus", "shear_modulus"]
-
-    def predict(self, compositions: str | list[str]) -> np.ndarray:
-        # CGCNN-specific implementation
-        pass
-```
-
-## Current Status
-
-- Clean API matching your specification
-- SMACT composition validation
-- Extensible architecture for multiple models
-- Proper error handling and type hints
-- Abstract base class enforcing interface contract
-- Model loading logic ready for actual ROOST integration
-- Placeholder predictions (returns zeros) until real models added
-
-The abstract base class enforces the interface contract while allowing flexibility in
-implementation details for each model type. This enables the clean, extensible API and
-ensures all future predictors follow the same pattern.
-
-The module is ready for integration with actual ROOST model checkpoints.
+1. **Local directory path** — user-supplied explicit path
+2. **`pretrained_models/`** — bundled in the repo (for source installs)
+3. **`~/.cache/smact/models/`** — previously downloaded models
+4. **Remote download** — fetches from GitHub Releases

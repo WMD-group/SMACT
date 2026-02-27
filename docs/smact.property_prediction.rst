@@ -245,9 +245,10 @@ Fidelity can be selected at construction time:
    # Select specific fidelity (when multiple are available)
    predictor = RoostPropertyPredictor(property_name="band_gap", fidelity="hse06")
 
-   # Or specify a model directly
+   # Or specify a model directly by name
    predictor = RoostPropertyPredictor(
-       property_name="band_gap", model_name="Roost-MP-2024.12.0-band_gap"
+       property_name="band_gap",
+       model_name="Roost-MP-2024.12.0-band_gap",
    )
 
 Model Resolution Order

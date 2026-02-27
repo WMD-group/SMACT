@@ -240,8 +240,9 @@ class RoostPropertyPredictor(BasePropertyPredictor):
 
         if return_uncertainty:
             if not self._robust:
-                logger.warning(
-                    "Uncertainty requested but model is not robust. PredictionResult.uncertainties will be None."
+                raise ValueError(
+                    f"Uncertainty estimation requires a robust model, but the loaded model "
+                    f"(robust={self._robust}) does not support it."
                 )
             uncertainties_arr = None
             if all_uncertainties:

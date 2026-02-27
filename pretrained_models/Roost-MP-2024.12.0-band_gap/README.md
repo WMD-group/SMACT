@@ -42,7 +42,7 @@ Predict the DFT-computed electronic band gap of inorganic materials from composi
 from smact.property_prediction import predict_band_gap
 
 result = predict_band_gap("NaCl")
-print(f"Band gap: {result['prediction']:.2f} eV")
+print(f"Band gap: {result[0]:.2f} eV")
 ```
 
 ## References
