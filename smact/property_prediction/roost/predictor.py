@@ -193,7 +193,7 @@ class RoostPropertyPredictor(BasePropertyPredictor):
             dataset,
             batch_size=self.batch_size,
             shuffle=False,
-            collate_fn=collate_batch,
+            collate_fn=collate_batch,  # type: ignore[arg-type]  # aviary annotation is too narrow
         )
 
         # Run inference

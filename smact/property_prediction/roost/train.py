@@ -195,9 +195,9 @@ def train_roost_model(
 
     # Setup loss and normaliser
     if robust:
-        from aviary.losses import RobustL1Loss
+        from aviary.losses import robust_l1_loss
 
-        criterion = RobustL1Loss()
+        criterion = robust_l1_loss
     else:
         criterion = torch.nn.L1Loss()
 
@@ -237,7 +237,8 @@ def train_roost_model(
 
             # Compute loss
             if robust:
-                loss = criterion(output, target_norm.unsqueeze(1))
+                preds, log_std = output.unbind(dim=1)
+                loss = criterion(preds, log_std, target_norm)
             else:
                 loss = criterion(output.squeeze(1), target_norm)
 
@@ -266,7 +267,8 @@ def train_roost_model(
                 output = outputs[0]
 
                 if robust:
-                    loss = criterion(output, target_norm.unsqueeze(1))
+                    preds, log_std = output.unbind(dim=1)
+                    loss = criterion(preds, log_std, target_norm)
                 else:
                     loss = criterion(output.squeeze(1), target_norm)
 
