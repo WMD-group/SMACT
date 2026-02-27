@@ -25,6 +25,7 @@ __all__ = [
 
 import itertools
 import warnings
+from functools import reduce
 from math import gcd
 from operator import mul as multiply
 from os import path
@@ -153,7 +154,7 @@ class Element:
     num_valence: int | None
     num_valence_modified: int | None
 
-    def __init__(self, symbol: str, oxi_states_custom_filepath: str | None = None):
+    def __init__(self, symbol: str, oxi_states_custom_filepath: str | None = None) -> None:
         """
         Initialise Element class.
 
@@ -295,7 +296,7 @@ class Species(Element):
         oxidation: int,
         coordination: int = 4,
         radii_source: str = "shannon",
-    ):
+    ) -> None:
         """
         Initialise Species class.
 
@@ -370,22 +371,15 @@ def ordered_elements(x: int, y: int) -> list[str]:
     """
     with open(path.join(data_directory, "ordered_periodic.txt")) as f:
         data = f.readlines()
-    elements = []
-    for line in data:
-        inp = line.split()
-        elements.append(inp[0])
+    elements = [line.split()[0] for line in data]
 
-    ordered_elements = []
-    for i in range(x, y + 1):
-        ordered_elements.append(elements[i - 1])
-
-    return ordered_elements
+    return elements[x - 1 : y]
 
 
 def element_dictionary(
     elements: Iterable[str] | None = None,
     oxi_states_custom_filepath: str | None = None,
-):
+) -> dict[str, Element]:
     """
     Create a dictionary of initialised smact.Element objects.
 
@@ -450,11 +444,7 @@ def lattices_are_same(lattice1: Sequence, lattice2: Sequence, tolerance: float =
 
 def _gcd_recursive(*args: int) -> int:
     """Get the greatest common denominator among any number of ints."""
-    if len(args) == 1:
-        return args[0]
-    if len(args) == 2:
-        return gcd(*args)
-    return gcd(args[0], _gcd_recursive(*args[1:]))
+    return reduce(gcd, args)
 
 
 def _isneutral(oxidations: Sequence[int], stoichs: Sequence[int]) -> bool:
@@ -474,7 +464,7 @@ def neutral_ratios_iter(
     oxidations: Sequence[int],
     stoichs: Sequence[Sequence[int]] | None = None,
     threshold: int | None = 5,
-):
+) -> filter:
     """
     Iterator for charge-neutral stoichiometries.
 

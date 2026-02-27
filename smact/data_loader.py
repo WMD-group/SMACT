@@ -16,8 +16,12 @@ import csv
 import functools
 import logging
 import os
+from typing import TYPE_CHECKING
 
 import pandas as pd
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 from smact import data_directory
 
@@ -48,7 +52,7 @@ def _warn(message: str) -> None:
     logger.debug(message)
 
 
-def _get_data_rows(filename):
+def _get_data_rows(filename: str) -> Generator[list[str], None, None]:
     """Generator for datafile entries by row for custom oxidation states lists. Skips rows with no oxidation states for performance."""
     with open(filename) as file:
         for line in file:
@@ -57,7 +61,7 @@ def _get_data_rows(filename):
                 yield line.split()
 
 
-def float_or_None(x):
+def float_or_None(x: str) -> float | None:
     """Cast a string to a float or to a None."""
     try:
         return float(x)
@@ -213,7 +217,7 @@ def _load_hhis() -> dict[str, tuple[float, float]]:
     return data
 
 
-def lookup_element_hhis(symbol):
+def lookup_element_hhis(symbol: str) -> tuple[float, float] | None:
     """
     Retrieve the HHI_R and HHI_p scores for an element.
 
@@ -257,11 +261,11 @@ def _load_element_data() -> dict[str, dict]:
     data: dict[str, dict] = {}
     for items in _get_data_rows(os.path.join(data_directory, "element_data.txt")):
         clean_items = items[0:2] + list(map(float_or_None, items[2:]))
-        data[items[0]] = dict(list(zip(_ELEMENT_DATA_KEYS, clean_items, strict=False)))
+        data[items[0]] = dict(list(zip(_ELEMENT_DATA_KEYS, clean_items, strict=True)))
     return data
 
 
-def lookup_element_data(symbol: str, copy: bool = True):
+def lookup_element_data(symbol: str, copy: bool = True) -> dict | None:
     """
     Retrieve tabulated data for an element.
 
@@ -311,7 +315,7 @@ def _load_shannon_radii() -> dict[str, list[dict]]:
     return data
 
 
-def lookup_element_shannon_radius_data(symbol, copy=True):
+def lookup_element_shannon_radius_data(symbol: str, copy: bool = True) -> list[dict] | None:
     """
     Retrieve Shannon radii for known states of an element.
 
@@ -378,7 +382,7 @@ def _load_shannon_radii_extendedML() -> dict[str, list[dict]]:
     return data
 
 
-def lookup_element_shannon_radius_data_extendedML(symbol, copy=True):
+def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True) -> list[dict] | None:
     """
     Retrieve the machine learned extended Shannon radii for
     known states of an element.
@@ -448,7 +452,7 @@ def _load_sse_data() -> dict[str, dict]:
     return data
 
 
-def lookup_element_sse_data(symbol):
+def lookup_element_sse_data(symbol: str) -> dict | None:
     """
     Retrieve the solid-state energy (SSE) data for an element.
 
@@ -505,7 +509,7 @@ def _load_sse2015_data() -> dict[str, list[dict]]:
     return data
 
 
-def lookup_element_sse2015_data(symbol, copy=True):
+def lookup_element_sse2015_data(symbol: str, copy: bool = True) -> list[dict] | None:
     """
     Retrieve SSE (2015) data for element in oxidation state.
 
@@ -551,7 +555,7 @@ def _load_sse_pauling_data() -> dict[str, dict]:
     return data
 
 
-def lookup_element_sse_pauling_data(symbol):
+def lookup_element_sse_pauling_data(symbol: str) -> dict | None:
     """
     Retrieve Pauling SSE data.
 
@@ -609,7 +613,7 @@ def _load_magpie_data() -> dict[str, dict]:
     return data
 
 
-def lookup_element_magpie_data(symbol: str, copy: bool = True):
+def lookup_element_magpie_data(symbol: str, copy: bool = True) -> dict | None:
     """
     Retrieve element data contained in the Magpie representation.
 
@@ -646,7 +650,7 @@ def _load_valence_data() -> dict[str, dict]:
     return data
 
 
-def lookup_element_valence_data(symbol: str, copy: bool = True):
+def lookup_element_valence_data(symbol: str, copy: bool = True) -> dict | None:
     """
     Retrieve valence electron data.
 

@@ -77,7 +77,7 @@ class SmactStructure:
         sites: dict[str, list[list[float]]],
         lattice_param: float | None = 1.0,
         sanitise_species: bool | None = True,
-    ):
+    ) -> None:
         """
         Initialize structure with constituent species.
 
@@ -104,7 +104,7 @@ class SmactStructure:
 
         self.lattice_param = lattice_param
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Represent the structure as a POSCAR.
 
@@ -113,7 +113,7 @@ class SmactStructure:
         """
         return self.as_poscar()
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """
         Determine equality of SmactStructures based on their attributes.
 
@@ -131,9 +131,15 @@ class SmactStructure:
         if not isinstance(other, SmactStructure):
             return False
 
+        if list(self.sites.keys()) != list(other.sites.keys()):
+            return False
+
         sites_equal = True
-        for si, sj in zip(self.sites.values(), other.sites.values(), strict=False):
-            for ci, cj in zip(si, sj, strict=False):
+        for si, sj in zip(self.sites.values(), other.sites.values(), strict=True):
+            if len(si) != len(sj):
+                sites_equal = False
+                break
+            for ci, cj in zip(si, sj, strict=True):
                 if not np.allclose(ci, cj, atol=1e-7, rtol=0):
                     sites_equal = False
                     break
@@ -144,11 +150,10 @@ class SmactStructure:
                 np.array_equal(self.lattice_mat, other.lattice_mat),
                 self.lattice_param == other.lattice_param,
                 sites_equal,
-                list(self.sites.keys()) == list(other.sites.keys()),
             ]
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """
         Provide a hash consistent with :meth:`__eq__`.
 
@@ -279,7 +284,7 @@ class SmactStructure:
         total_specs = [int(x / hcf) for x in total_specs]
 
         species = []
-        for spec, stoic in zip(sites.keys(), total_specs, strict=False):
+        for spec, stoic in zip(sites.keys(), total_specs, strict=True):
             charge_match = re.search(r"\d+", spec)
 
             if charge_match:
@@ -295,7 +300,7 @@ class SmactStructure:
         return sites, species
 
     @staticmethod
-    def from_py_struct(structure: pmg_Structure, determine_oxi: str = "BV"):
+    def from_py_struct(structure: pmg_Structure, determine_oxi: str = "BV") -> SmactStructure:
         """
         Create a SmactStructure from a pymatgen Structure object.
 
@@ -361,7 +366,7 @@ class SmactStructure:
         species: list[tuple[str, int, int] | tuple[smact.Species, int]],
         api_key: str | None = None,
         determine_oxi: str = "BV",
-    ):
+    ) -> SmactStructure:
         """
         Create a SmactStructure using the first Materials Project entry for a composition.
 
@@ -464,7 +469,7 @@ class SmactStructure:
         )
 
     @staticmethod
-    def from_file(fname: str):
+    def from_file(fname: str) -> SmactStructure:
         """
         Create SmactStructure from a POSCAR file.
 
@@ -482,7 +487,7 @@ class SmactStructure:
             return SmactStructure.from_poscar(f.read())
 
     @staticmethod
-    def from_poscar(poscar: str):
+    def from_poscar(poscar: str) -> SmactStructure:
         """
         Create SmactStructure from a POSCAR string.
 
@@ -504,7 +509,7 @@ class SmactStructure:
         total_specs = [int(x / hcf) for x in total_specs]
 
         species = []
-        for spec_str, stoic in zip(lines[0].split(" "), total_specs, strict=False):
+        for spec_str, stoic in zip(lines[0].split(" "), total_specs, strict=True):
             charge_match = re.search(r"\d+", spec_str)
 
             if charge_match:

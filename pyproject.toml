@@ -143,6 +143,10 @@ include = ["smact","smact.*"]
 [tool.pytest.ini_options]
 minversion = 6.0
 testpaths = ["smact/tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests that require external services (e.g. Materials Project API)",
+]
 
 [tool.ruff]
 target-version = "py311"
@@ -153,7 +157,7 @@ force-exclude = true
 select = ["ALL"]
 ignore = [
         # Rule families
-    "ANN",  # flake8-annotations (not ready, require types for ALL args)
+    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
     "ARG",  # Check for unused function arguments
     "BLE",  # General catch of Exception
     "C90",  # Check for functions with a high McCabe complexity
@@ -201,12 +205,12 @@ ignore = [
     "S101",    # Use of "assert"
     "S110",    # Log for try-except-pass
     "S112",    # Log for try-except-continue
-    "S301",    # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
-    "S311",    # Use random module for cryptographic purposes
-    "S314",    # Replace xml with defusedxml to avoid XML attacks
-    "S603",    # Check source for use of "subprocess" call
-    "S607",    # Start process with relative path
-    "S608",    # Possible SQL injection vector through string-based query construction
+    "S301",    # pickle used only to load trusted internal data files shipped with the package
+    "S311",    # random used for non-cryptographic shuffling/sampling in scientific code
+    "S314",    # XML parsing of trusted CIF/structure files only; no untrusted XML input
+    "S603",    # subprocess calls used in controlled build/utility scripts with fixed arguments
+    "S607",    # relative paths in subprocess are for local dev tooling only (e.g. pre-commit)
+    "S608",    # SQL queries built from internally-generated species strings, not user input
     "SIM105",  # Use contextlib.suppress() instead of try-except-pass
     "TRY002",  # Create your own exception TODO fix these
     "TRY003",  # Avoid specifying long messages outside the exception class
@@ -223,10 +227,11 @@ docstring-code-format = true
 
 
 [tool.ruff.lint.per-file-ignores]
-"smact/tests/*" = ["D"]
+"smact/tests/*" = ["ANN", "D"]
+"smact/benchmarking/*" = ["ANN"]
 
 [tool.pyright]
-typeCheckingMode = "basic"
+typeCheckingMode = "standard"
 reportPossiblyUnboundVariable = true
 reportUnboundVariable = true
 
@@ -338,6 +343,7 @@ ignore-words-list = [
             "Mater",
         ]
 [tool.coverage.report]
+fail_under = 85
 exclude_also = [
     'def __repr__',
     'if self.debug:',

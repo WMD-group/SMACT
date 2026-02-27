@@ -63,7 +63,7 @@ class Doper:
         filepath: str | None = None,
         embedding: str | None = None,
         use_probability: bool = True,
-    ):
+    ) -> None:
         """
         Initialise the `Doper` class with a tuple of species.
 
@@ -112,8 +112,8 @@ class Doper:
         self,
         data_list: list[list],
         cations: list[str],
-        sub,
-    ):
+        sub: str,
+    ) -> list[list]:
         data = data_list.copy()
         for dopants in data:
             if sub == "anion":
@@ -135,9 +135,9 @@ class Doper:
                 )
         return data
 
-    def _merge_dicts(self, keys, dopants_list, groupby_list, sort_idx: int = 2):
+    def _merge_dicts(self, keys: list[str], dopants_list: list[list], groupby_list: list[dict], sort_idx: int = 2) -> dict:
         merged_dict = dict()
-        for k, dopants, group in zip(keys, dopants_list, groupby_list, strict=False):
+        for k, dopants, group in zip(keys, dopants_list, groupby_list, strict=True):
             merged_values = dict()
             merged_values["sorted"] = dopants
             for key, value in group.items():
@@ -149,7 +149,7 @@ class Doper:
         self,
         specie_ions: list[str],
         ion_type: str,
-    ):
+    ) -> tuple[list[str], list[str]]:
         """
         Get possible dopants for a given list of elements and dopants.
 
@@ -220,7 +220,7 @@ class Doper:
                 results.append([candidate, host, prob, lam])
         return results
 
-    def get_dopants(self, num_dopants: int = 5, get_selectivity=True, group_by_charge=True) -> dict:
+    def get_dopants(self, num_dopants: int = 5, get_selectivity: bool = True, group_by_charge: bool = True) -> dict:
         """
         Get the top n dopants for each case.
 
@@ -345,7 +345,7 @@ class Doper:
                 edge_color="white",
             )
 
-    def _format_number(self, num_str):
+    def _format_number(self, num_str: str | int) -> str:
         num = int(num_str)
         sign = "+" if num >= 0 else "-"
         return f"{abs(num)}{sign}"

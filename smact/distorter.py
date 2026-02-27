@@ -125,7 +125,7 @@ def build_sub_lattice(lattice: Atoms, symbol: str) -> list[list[float]]:
     sub_lattice = []
     atomic_labels = lattice.get_chemical_symbols()
     positions = lattice.get_scaled_positions()
-    for atom, pos in zip(atomic_labels, positions, strict=False):
+    for atom, pos in zip(atomic_labels, positions, strict=True):
         if atom == symbol:
             sub_lattice.append(pos)
     return sub_lattice

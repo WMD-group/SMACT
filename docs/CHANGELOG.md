@@ -1,13 +1,47 @@
 # Changelog
 
-## [Unreleased](https://github.com/WMD-group/SMACT/tree/HEAD)
+## [v4.0.0](https://github.com/WMD-group/SMACT/tree/v4.0.0) (2026-02-26)
 
-[Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.1.0...HEAD)
+[Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.1.0...v4.0.0)
+
+**Breaking changes:**
+
+- Drop Python 3.10 support; minimum version is now Python 3.11
+- Rename `SmactFilterOutputs.dict` to `composition_dict` to avoid shadowing the built-in [\#442](https://github.com/WMD-group/SMACT/pull/442)
+- Enforce `zip(strict=True)` across all source code — silently mismatched sequences now raise `ValueError`
+
+**Implemented enhancements:**
+
+- Add mixed-valence support to `smact_validity` [\#568](https://github.com/WMD-group/SMACT/pull/568)
+- Add ElementEmbeddings integration via `smact.io` [\#442](https://github.com/WMD-group/SMACT/pull/442)
+- Add full type annotations across all public APIs with pyright "standard" mode enforcement
+- Enable ruff ANN rules for enforcing type annotations in source code
+- Migrate `test_core.py` from `unittest.TestCase` to idiomatic pytest
+- Add pytest markers for `slow` and `integration` tests
+- Add coverage threshold (`fail_under = 85`) to prevent regressions
+- Compile regexes at module level in `composition.py` and `species.py` for performance
+- Read docs version from `importlib.metadata` instead of hardcoding
+
+**Fixed bugs:**
+
+- Fix noble gas `TypeError` crash with explicit oxidation state sets [\#588](https://github.com/WMD-group/SMACT/pull/588)
+- Fix `RuntimeError` in `SmactStructure.from_mp()` BVAnalyzer fallback [\#595](https://github.com/WMD-group/SMACT/pull/595)
+- Replace recursive GCD with `functools.reduce` to prevent stack overflow on large stoichiometries
+- Fix type-check in `properties.py` that only validated the first element in a list
+- Convert recursive `parse_formula` to iterative with depth limit to prevent `RecursionError`
+- Fix variable shadowing in `ordered_elements` function
+- Fix `SmactStructure.__eq__` to handle different species counts without raising `ValueError`
+- Fix wurtzite builder oxidation states mismatch (8 states for 4 sites)
 
 **Merged pull requests:**
 
-- Update workflows [\#405](https://github.com/WMD-group/SMACT/pull/405) ([AntObi](https://github.com/AntObi))
-- Update workflows and requirements \(Merge develop into master\) [\#404](https://github.com/WMD-group/SMACT/pull/404) ([AntObi](https://github.com/AntObi))
+- Deep audit: security, correctness, and API cleanup for v4.0.0 [\#595](https://github.com/WMD-group/SMACT/pull/595)
+- Unify local checks via pre-commit and consolidate CI workflows
+- Fix all pyright type errors and add pyright to CI
+- Modernize install instructions and update Python version to >=3.11
+- Remove redundant requirements files and modernize docs
+- Use local pre-commit hooks for ruff, codespell, and pyright
+- Update maintainers for v4.0.0 [\#595](https://github.com/WMD-group/SMACT/pull/595)
 
 ## [v3.1.0](https://github.com/WMD-group/SMACT/tree/v3.1.0) (2025-04-02)
 

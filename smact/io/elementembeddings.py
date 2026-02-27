@@ -22,11 +22,11 @@ try:
 except ImportError:
     HAS_ELEMENTEMBEDDINGS = False
 
-    def ee_composition_featuriser(*args, **kwargs):  # type: ignore[misc]
+    def ee_composition_featuriser(*args: object, **kwargs: object) -> None:  # type: ignore[misc]
         """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
         raise ImportError("ElementEmbeddings not installed")
 
-    def ee_species_composition_featuriser(*args, **kwargs):  # type: ignore[misc]
+    def ee_species_composition_featuriser(*args: object, **kwargs: object) -> None:  # type: ignore[misc]
         """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
         raise ImportError("ElementEmbeddings not installed")
 
@@ -100,7 +100,7 @@ def composition_featuriser(
             "Install it with: pip install ElementEmbeddings"
         )
 
-    return ee_composition_featuriser(
+    return ee_composition_featuriser(  # type: ignore[return-value]
         data=composition_data,
         formula_column=formula_column,
         embedding=embedding,
@@ -142,7 +142,7 @@ def species_composition_featuriser(
             "Install it with: pip install ElementEmbeddings"
         )
 
-    return ee_species_composition_featuriser(
+    return ee_species_composition_featuriser(  # type: ignore[return-value]
         data=composition_data,
         embedding=embedding,
         stats=stats,

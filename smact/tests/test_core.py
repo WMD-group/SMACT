@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+import logging
 import os
-import unittest
 from os.path import dirname, exists, join, realpath
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -33,74 +33,72 @@ TEST_OX_STATES = os.path.join(files_dir, "test_oxidation_states.txt")
 TEST_STRUCT = os.path.join(files_dir, "mp-540839_CsPbI3_oxi.json")
 
 
-class TestSequenceFunctions(unittest.TestCase):
+class TestSequenceFunctions:
     # ---------------- TOP-LEVEL ----------------
 
     def test_Element_class_Pt(self):
         Pt = smact.Element(
             "Pt",
         )
-        self.assertEqual(Pt.name, "Platinum")
-        self.assertEqual(Pt.ionpot, 8.95883)
-        self.assertEqual(Pt.number, 78)
-        self.assertEqual(Pt.dipol, 44.00)
+        assert Pt.name == "Platinum"
+        assert Pt.ionpot == 8.95883
+        assert Pt.number == 78
+        assert Pt.dipol == 44.00
 
     def test_ordered_elements(self):
-        self.assertEqual(smact.ordered_elements(65, 68), ["Tb", "Dy", "Ho", "Er"])
-        self.assertEqual(smact.ordered_elements(52, 52), ["Te"])
+        assert smact.ordered_elements(65, 68) == ["Tb", "Dy", "Ho", "Er"]
+        assert smact.ordered_elements(52, 52) == ["Te"]
 
     def test_element_dictionary(self):
         newlist = ["O", "Rb", "W"]
         dictionary = smact.element_dictionary(newlist, TEST_OX_STATES)
-        self.assertEqual(dictionary["O"].crustal_abundance, 461000.0)
-        self.assertEqual(dictionary["Rb"].oxidation_states_smact14, [-1, 1])
-        self.assertEqual(dictionary["Rb"].oxidation_states, [1])
-        self.assertEqual(dictionary["Rb"].oxidation_states_custom, [-1, 1])
-        self.assertEqual(dictionary["W"].name, "Tungsten")
-        self.assertTrue("Rn" in smact.element_dictionary())
+        assert dictionary["O"].crustal_abundance == 461000.0
+        assert dictionary["Rb"].oxidation_states_smact14 == [-1, 1]
+        assert dictionary["Rb"].oxidation_states == [1]
+        assert dictionary["Rb"].oxidation_states_custom == [-1, 1]
+        assert dictionary["W"].name == "Tungsten"
+        assert "Rn" in smact.element_dictionary()
 
     def test_are_eq(self):
-        self.assertTrue(smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00], tolerance=1e-2))
-        self.assertFalse(smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00]))
+        assert smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00], tolerance=1e-2)
+        assert not smact.are_eq([1.00, 2.00, 3.00], [1.001, 1.999, 3.00])
 
     def test_gcd_recursive(self):
-        self.assertEqual(smact._gcd_recursive(4, 12, 10, 32), 2)
-        self.assertEqual(smact._gcd_recursive(15, 4), 1)
+        assert smact._gcd_recursive(4, 12, 10, 32) == 2
+        assert smact._gcd_recursive(15, 4) == 1
 
     def test_isneutral(self):
-        self.assertTrue(smact._isneutral((-2, 1), (2, 4)))
-        self.assertFalse(smact._isneutral((4, -1), (1, 3)))
+        assert smact._isneutral((-2, 1), (2, 4))
+        assert not smact._isneutral((4, -1), (1, 3))
 
     def test_neutral_ratios(self):
         ox = [1, -2, 1]
         neutral_combos = smact.neutral_ratios(ox)
-        self.assertEqual(len(neutral_combos), 9)
-        self.assertTrue((3, 2, 1) in neutral_combos)
+        assert len(neutral_combos) == 9
+        assert (3, 2, 1) in neutral_combos
 
     # ---------------- Properties ----------------
 
     def test_compound_eneg_brass(self):
-        self.assertAlmostEqual(
-            compound_electroneg(elements=["Cu", "Zn"], stoichs=[0.5, 0.5], source="Pauling"),
+        assert compound_electroneg(elements=["Cu", "Zn"], stoichs=[0.5, 0.5], source="Pauling") == pytest.approx(
             5.0638963259,
         )
 
     def test_harrison_gap_MgCl(self):
-        self.assertAlmostEqual(
-            band_gap_Harrison("Mg", "Cl", distance=2.67),
+        assert band_gap_Harrison("Mg", "Cl", distance=2.67) == pytest.approx(
             3.545075110572662,
         )
 
     def test_valence_electron_count(self):
         # Test valid compounds
-        self.assertAlmostEqual(valence_electron_count("Fe2O3"), 6.8, places=2)
-        self.assertAlmostEqual(valence_electron_count("CuZn"), 11.5, places=2)
+        assert valence_electron_count("Fe2O3") == pytest.approx(6.8, abs=1e-2)
+        assert valence_electron_count("CuZn") == pytest.approx(11.5, abs=1e-2)
 
         # Test single element
-        self.assertEqual(valence_electron_count("Fe"), 8)
+        assert valence_electron_count("Fe") == 8
 
         # Test empty string
-        self.assertEqual(valence_electron_count(""), 0.0)
+        assert valence_electron_count("") == 0.0
 
         # Test invalid elements and formats
         with pytest.raises(ValueError):
@@ -113,65 +111,51 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_builder_ZnS(self):
         ZnS, _ = wurtzite(["Zn", "S"])
-        self.assertEqual((ZnS.sites[0].position[2]), 0)
-        self.assertEqual((ZnS.sites[0].position[0]), 2.0 / 3.0)
+        assert (ZnS.sites[0].position[2]) == 0
+        assert (ZnS.sites[0].position[0]) == 2.0 / 3.0
 
     # ---------------- SCREENING ----------------
 
     def test_pauling_test(self):
         Sn, S = (smact.Element(label) for label in ("Sn", "S"))
-        self.assertTrue(
-            smact.screening.pauling_test(
-                (+2, -2),
-                (Sn.pauling_eneg, S.pauling_eneg),
-            )
+        assert smact.screening.pauling_test(
+            (+2, -2),
+            (Sn.pauling_eneg, S.pauling_eneg),
         )
-        self.assertFalse(smact.screening.pauling_test((-2, +2), (Sn.pauling_eneg, S.pauling_eneg)))
-        self.assertFalse(
-            smact.screening.pauling_test(
-                (-2, -2, +2),
-                (S.pauling_eneg, S.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "S", "Sn"),
-                repeat_anions=False,
-            )
+        assert not smact.screening.pauling_test((-2, +2), (Sn.pauling_eneg, S.pauling_eneg))
+        assert not smact.screening.pauling_test(
+            (-2, -2, +2),
+            (S.pauling_eneg, S.pauling_eneg, Sn.pauling_eneg),
+            symbols=("S", "S", "Sn"),
+            repeat_anions=False,
         )
-        self.assertTrue(
-            smact.screening.pauling_test(
-                (-2, -2, +2),
-                (S.pauling_eneg, S.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "S", "Sn"),
-                repeat_cations=False,
-            )
+        assert smact.screening.pauling_test(
+            (-2, -2, +2),
+            (S.pauling_eneg, S.pauling_eneg, Sn.pauling_eneg),
+            symbols=("S", "S", "Sn"),
+            repeat_cations=False,
         )
-        self.assertFalse(
-            smact.screening.pauling_test(
-                (-2, +2, +2),
-                (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "Sn", "Sn"),
-                repeat_cations=False,
-            )
+        assert not smact.screening.pauling_test(
+            (-2, +2, +2),
+            (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
+            symbols=("S", "Sn", "Sn"),
+            repeat_cations=False,
         )
-        self.assertTrue(
-            smact.screening.pauling_test(
-                (-2, +2, +2),
-                (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
-                symbols=("S", "Sn", "Sn"),
-                repeat_anions=False,
-            )
+        assert smact.screening.pauling_test(
+            (-2, +2, +2),
+            (S.pauling_eneg, Sn.pauling_eneg, Sn.pauling_eneg),
+            symbols=("S", "Sn", "Sn"),
+            repeat_anions=False,
         )
 
     def test_eneg_states_test(self):
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
-        self.assertTrue(
-            smact.screening.eneg_states_test([1, 3, -1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
-        )
-        self.assertFalse(
-            smact.screening.eneg_states_test([-1, 3, 1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
-        )
+        assert smact.screening.eneg_states_test([1, 3, -1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
+        assert not smact.screening.eneg_states_test([-1, 3, 1], [Na.pauling_eneg, Fe.pauling_eneg, Cl.pauling_eneg])
 
     def test_eneg_states_test_threshold(self):
-        self.assertFalse(smact.screening.eneg_states_test_threshold([1, -1], [1.83, 1.82], threshold=0))
-        self.assertTrue(smact.screening.eneg_states_test_threshold([1, -1], [1.83, 1.82], threshold=0.1))
+        assert not smact.screening.eneg_states_test_threshold([1, -1], [1.83, 1.82], threshold=0)
+        assert smact.screening.eneg_states_test_threshold([1, -1], [1.83, 1.82], threshold=0.1)
 
     def test_ml_rep_generator(self):
         Pb, O = (smact.Element(label) for label in ("Pb", "O"))
@@ -280,8 +264,8 @@ class TestSequenceFunctions(unittest.TestCase):
             0.0,
             0.0,  # element 103 (Lr)
         ]
-        self.assertEqual(smact.screening.ml_rep_generator(["Pb", "O"], [1, 2]), PbO2_ml)
-        self.assertEqual(smact.screening.ml_rep_generator([Pb, O], [1, 2]), PbO2_ml)
+        assert smact.screening.ml_rep_generator(["Pb", "O"], [1, 2]) == PbO2_ml
+        assert smact.screening.ml_rep_generator([Pb, O], [1, 2]) == PbO2_ml
 
     def test_smact_filter(self):
         oxidation_states_sets = ["smact14", "icsd24"]
@@ -298,47 +282,29 @@ class TestSequenceFunctions(unittest.TestCase):
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
 
         for ox_state_set in oxidation_states_sets:
-            with self.subTest(ox_state_set=ox_state_set):
-                output = smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=ox_state_set)
-                self.assertEqual(
-                    [(r[0], r[1], r[2]) for r in output],  # type: ignore[misc]
-                    oxidation_states_sets_results[ox_state_set]["thresh_2"],
-                )
+            output = smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=ox_state_set)
+            assert [(r[0], r[1], r[2]) for r in output] == oxidation_states_sets_results[ox_state_set]["thresh_2"]  # type: ignore[misc]
 
         # Test that reading the oxidation states from a file produces the same results
-        self.assertEqual(
-            smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set="smact14"),
-            smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=TEST_OX_STATES),
-        )
+        assert smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set="smact14") == smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=TEST_OX_STATES)
 
-        self.assertEqual(
-            set(
-                smact.screening.smact_filter(
-                    [Na, Fe, Cl], threshold=2, species_unique=False, oxidation_states_set="smact14"
-                )
-            ),
-            {
-                (("Na", "Fe", "Cl"), (2, 1, 1)),
-                (("Na", "Fe", "Cl"), (1, 1, 2)),
-            },
-        )
+        assert set(
+            smact.screening.smact_filter(
+                [Na, Fe, Cl], threshold=2, species_unique=False, oxidation_states_set="smact14"
+            )
+        ) == {
+            (("Na", "Fe", "Cl"), (2, 1, 1)),
+            (("Na", "Fe", "Cl"), (1, 1, 2)),
+        }
 
-        self.assertEqual(
-            len(smact.screening.smact_filter([Na, Fe, Cl], threshold=8, oxidation_states_set="smact14")), 77
-        )
+        assert len(smact.screening.smact_filter([Na, Fe, Cl], threshold=8, oxidation_states_set="smact14")) == 77
 
         result = smact.screening.smact_filter([Na, Fe, Cl], stoichs=[[1], [1], [4]], oxidation_states_set="smact14")
-        self.assertEqual(
-            [(r[0], r[1], r[2]) for r in result],  # type: ignore[misc]
-            [
-                (("Na", "Fe", "Cl"), (1, 3, -1), (1, 1, 4)),
-            ],
-        )
+        assert [(r[0], r[1], r[2]) for r in result] == [  # type: ignore[misc]
+            (("Na", "Fe", "Cl"), (1, 3, -1), (1, 1, 4)),
+        ]
         stoichs = [list(range(1, 5)), list(range(1, 5)), list(range(1, 10))]
-        self.assertEqual(
-            len(smact.screening.smact_filter([Na, Fe, Cl], stoichs=stoichs, oxidation_states_set="smact14")),
-            45,
-        )
+        assert len(smact.screening.smact_filter([Na, Fe, Cl], stoichs=stoichs, oxidation_states_set="smact14")) == 45
 
     # --------- New tests for revised screening logic ---------
 
@@ -348,12 +314,12 @@ class TestSequenceFunctions(unittest.TestCase):
         """
         # Test with a valid composition
         result = smact.screening.smact_validity("NaCl")
-        self.assertIsInstance(result, bool)
-        self.assertTrue(result)
+        assert isinstance(result, bool)
+        assert result
 
         # Test with an invalid composition
         invalid_result = smact.screening.smact_validity("Al3Li", include_alloys=False)
-        self.assertFalse(invalid_result)
+        assert not invalid_result
 
     def test_smact_validity_parameters(self):
         """
@@ -361,15 +327,15 @@ class TestSequenceFunctions(unittest.TestCase):
         """
         # Test with pauling test disabled
         result_no_pauling = smact.screening.smact_validity("NaCl", use_pauling_test=False)
-        self.assertTrue(result_no_pauling)
+        assert result_no_pauling
 
         # Test with metallicity check
         result_metallicity = smact.screening.smact_validity("Fe", check_metallicity=True, metallicity_threshold=0.1)
-        self.assertTrue(result_metallicity)
+        assert result_metallicity
 
         # Test with different oxidation states set
         result_ox_states = smact.screening.smact_validity("NaCl", oxidation_states_set="icsd16")
-        self.assertTrue(result_ox_states)
+        assert result_ox_states
 
     def test_smact_validity_type_error_forced(self):
         """
@@ -384,8 +350,8 @@ class TestSequenceFunctions(unittest.TestCase):
         try:
             smact.screening.pauling_test = mock_pauling_test
             result = smact.screening.smact_validity("NaCl", use_pauling_test=True)
-            self.assertIsInstance(result, bool)
-            self.assertTrue(result)
+            assert isinstance(result, bool)
+            assert result
         finally:
             smact.screening.pauling_test = original_pauling_test
 
@@ -395,16 +361,15 @@ class TestSequenceFunctions(unittest.TestCase):
         (no TypeError) regardless of which oxidation_states_set is used.
         """
         for ox_set in ["smact14", "icsd16", "icsd24", "pymatgen_sp"]:
-            self.assertFalse(
-                smact.screening.smact_validity("NeF2", oxidation_states_set=ox_set),
-                f"NeF2 should be False with oxidation_states_set={ox_set}",
-            )
+            assert not smact.screening.smact_validity(
+                "NeF2", oxidation_states_set=ox_set
+            ), f"NeF2 should be False with oxidation_states_set={ox_set}"
         # Xe and Kr have known oxidation states and should still pass
-        self.assertTrue(smact.screening.smact_validity("XeF2"))
-        self.assertTrue(smact.screening.smact_validity("KrF2"))
+        assert smact.screening.smact_validity("XeF2")
+        assert smact.screening.smact_validity("KrF2")
         # Also verify the explicit oxidation_states_set path (the reported bug case)
-        self.assertTrue(smact.screening.smact_validity("XeF2", oxidation_states_set="icsd24"))
-        self.assertTrue(smact.screening.smact_validity("KrF2", oxidation_states_set="icsd24"))
+        assert smact.screening.smact_validity("XeF2", oxidation_states_set="icsd24")
+        assert smact.screening.smact_validity("KrF2", oxidation_states_set="icsd24")
 
     def test_smact_validity_special_cases(self):
         """
@@ -414,19 +379,17 @@ class TestSequenceFunctions(unittest.TestCase):
         - High metallicity
         """
         # Single element should be valid
-        self.assertTrue(smact.screening.smact_validity("Fe"))
+        assert smact.screening.smact_validity("Fe")
 
         # Alloy should be valid when include_alloys=True
-        self.assertTrue(smact.screening.smact_validity("FeAl", include_alloys=True))
+        assert smact.screening.smact_validity("FeAl", include_alloys=True)
 
         # High metallicity check
-        self.assertTrue(
-            smact.screening.smact_validity(
-                "FeNi",
-                check_metallicity=True,
-                metallicity_threshold=0.5,
-                include_alloys=False,  # Test metallicity path specifically
-            )
+        assert smact.screening.smact_validity(
+            "FeNi",
+            check_metallicity=True,
+            metallicity_threshold=0.5,
+            include_alloys=False,  # Test metallicity path specifically
         )
 
     def test_smact_validity_oxidation_states(self):
@@ -436,35 +399,34 @@ class TestSequenceFunctions(unittest.TestCase):
         # Test different oxidation state sets
         oxidation_sets = ["smact14", "icsd16", "icsd24", "pymatgen_sp"]
         for ox_set in oxidation_sets:
-            self.assertTrue(
-                smact.screening.smact_validity("NaCl", oxidation_states_set=ox_set),
-                f"Failed with oxidation state set: {ox_set}",
-            )
+            assert smact.screening.smact_validity(
+                "NaCl", oxidation_states_set=ox_set
+            ), f"Failed with oxidation state set: {ox_set}"
 
         # Test with file path
 
         files_dir = join(dirname(realpath(__file__)), "files")
         test_ox_states = join(files_dir, "test_oxidation_states.txt")
-        self.assertTrue(smact.screening.smact_validity("NaCl", oxidation_states_set=test_ox_states))
+        assert smact.screening.smact_validity("NaCl", oxidation_states_set=test_ox_states)
 
     def test_smact_validity_mixed_valence(self):
         """Test mixed valence handling in smact_validity."""
         # Fe3O4: fails without mixed_valence (no single Fe oxidation state works)
-        self.assertFalse(smact.screening.smact_validity("Fe3O4"))
+        assert not smact.screening.smact_validity("Fe3O4")
         # Fe3O4: passes with mixed_valence=True (Fe2+ + 2*Fe3+ + 4*O2-)
-        self.assertTrue(smact.screening.smact_validity("Fe3O4", mixed_valence=True))
+        assert smact.screening.smact_validity("Fe3O4", mixed_valence=True)
 
         # Mn3O4 (hausmannite): Mn2+Mn3+2O4 — second real mixed-valence compound
-        self.assertTrue(smact.screening.smact_validity("Mn3O4", mixed_valence=True))
+        assert smact.screening.smact_validity("Mn3O4", mixed_valence=True)
 
         # Compounds with no mixed-valence elements: flag has no effect on valid compounds
-        self.assertTrue(smact.screening.smact_validity("NaCl", mixed_valence=True))
+        assert smact.screening.smact_validity("NaCl", mixed_valence=True)
 
         # Compound with no mixed-valence elements that fails regardless (Li only has +1, can't balance)
-        self.assertFalse(smact.screening.smact_validity("LiF2", mixed_valence=True))
+        assert not smact.screening.smact_validity("LiF2", mixed_valence=True)
 
         # Explicit confirmation of default behaviour (mixed_valence=False)
-        self.assertFalse(smact.screening.smact_validity("Fe3O4", mixed_valence=False))
+        assert not smact.screening.smact_validity("Fe3O4", mixed_valence=False)
 
     def test_smact_validity_error_handling(self):
         """
@@ -483,36 +445,34 @@ class TestSequenceFunctions(unittest.TestCase):
         site_A = smact.lattice.Site([0, 0, 0], -1)
         site_B = smact.lattice.Site([0.5, 0.5, 0.5], [+2, +3])
         test_lattice = smact.lattice.Lattice([site_A, site_B], space_group=221)
-        self.assertEqual(test_lattice.sites[0].oxidation_states, -1)
-        self.assertEqual(test_lattice.sites[1].position, [0.5, 0.5, 0.5])
+        assert test_lattice.sites[0].oxidation_states == -1
+        assert test_lattice.sites[1].position == [0.5, 0.5, 0.5]
 
     # ---------- Lattice parameters -----------
     def test_lattice_parameters(self):
         perovskite = smact.lattice_parameters.cubic_perovskite([1.81, 1.33, 1.82])
         wurtz = smact.lattice_parameters.wurtzite([1.81, 1.33])
-        self.assertAlmostEqual(perovskite[0], 6.3)
-        self.assertAlmostEqual(perovskite[1], 6.3)
-        self.assertAlmostEqual(perovskite[3], 90)
-        self.assertAlmostEqual(wurtz[0], 5.13076)
-        self.assertAlmostEqual(wurtz[2], 8.3838)
+        assert perovskite[0] == pytest.approx(6.3)
+        assert perovskite[1] == pytest.approx(6.3)
+        assert perovskite[3] == pytest.approx(90)
+        assert wurtz[0] == pytest.approx(5.13076)
+        assert wurtz[2] == pytest.approx(8.3838)
 
     # ---------- smact.oxidation_states module -----------
     def test_oxidation_states(self):
         ox = smact.oxidation_states.Oxidation_state_probability_finder()
-        self.assertAlmostEqual(
-            ox.compound_probability([Specie("Fe", +3), Specie("O", -2)]),
+        assert ox.compound_probability([Specie("Fe", +3), Specie("O", -2)]) == pytest.approx(
             0.74280230326,
         )
-        self.assertAlmostEqual(
-            ox.pair_probability(Species("Fe", +3), Species("O", -2)),
+        assert ox.pair_probability(Species("Fe", +3), Species("O", -2)) == pytest.approx(
             0.74280230326,
         )
-        self.assertEqual(len(ox.get_included_species()), 173)
+        assert len(ox.get_included_species()) == 173
 
     def test_compound_probability_structure(self):
         structure = Structure.from_file(TEST_STRUCT)
         ox = smact.oxidation_states.Oxidation_state_probability_finder()
-        self.assertEqual(ox.compound_probability(structure), 1.0)
+        assert ox.compound_probability(structure) == 1.0
 
     # --------- Additional Coverage Tests (for untested lines in screening) ---------
 
@@ -521,9 +481,9 @@ class TestSequenceFunctions(unittest.TestCase):
         Test that providing a valid file path triggers the file-based combos branch.
         """
 
-        self.assertTrue(exists(TEST_OX_STATES), "TEST_OX_STATES must exist for this test.")
+        assert exists(TEST_OX_STATES), "TEST_OX_STATES must exist for this test."
         # Test just the validity
-        self.assertTrue(smact.screening.smact_validity("NaCl", oxidation_states_set=TEST_OX_STATES))
+        assert smact.screening.smact_validity("NaCl", oxidation_states_set=TEST_OX_STATES)
 
     # --------- Properties branch coverage ---------
 
@@ -531,34 +491,34 @@ class TestSequenceFunctions(unittest.TestCase):
         """eneg_mulliken: str input, Element input, and invalid type."""
         # str input (line 32)
         val_str = eneg_mulliken("Fe")
-        self.assertIsInstance(val_str, float)
+        assert isinstance(val_str, float)
 
         # Element input (line 36)
         val_el = eneg_mulliken(smact.Element("Fe"))
-        self.assertAlmostEqual(val_str, val_el)
+        assert val_str == pytest.approx(val_el)
 
         # Invalid type raises TypeError (lines 33-34)
         with pytest.raises(TypeError):
             eneg_mulliken(42)  # type: ignore[arg-type]
 
-    def test_harrison_gap_logging(self):
+    def test_harrison_gap_logging(self, caplog):
         """band_gap_Harrison always logs debug info."""
-        with self.assertLogs("smact.properties", level="DEBUG") as cm:
+        with caplog.at_level(logging.DEBUG, logger="smact.properties"):
             band_gap_Harrison("Mg", "Cl", distance=2.67)
-        log_output = "\n".join(cm.output)
-        self.assertIn("V1_bar", log_output)
-        self.assertIn("V2", log_output)
-        self.assertIn("alpha_m", log_output)
-        self.assertIn("V3", log_output)
+        log_output = caplog.text
+        assert "V1_bar" in log_output
+        assert "V2" in log_output
+        assert "alpha_m" in log_output
+        assert "V3" in log_output
 
-    def test_compound_electroneg_element_objects(self):
+    def test_compound_electroneg_element_objects(self, caplog):
         """compound_electroneg with Element objects and logging."""
         Fe = smact.Element("Fe")
         O = smact.Element("O")
 
         # Element list input + Mulliken
         val = compound_electroneg(elements=[Fe, O], stoichs=[1, 1], source="Mulliken")
-        self.assertIsInstance(val, float)
+        assert isinstance(val, float)
 
         # Invalid element type raises TypeError
         with pytest.raises(TypeError):
@@ -569,19 +529,19 @@ class TestSequenceFunctions(unittest.TestCase):
             compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1], source="BadSource")
 
         # Always logs debug info now
-        with self.assertLogs("smact.properties", level="DEBUG") as cm:
+        with caplog.at_level(logging.DEBUG, logger="smact.properties"):
             compound_electroneg(elements=["Fe", "O"], stoichs=[1, 1])
-        log_output = "\n".join(cm.output)
-        self.assertIn("Electronegativities", log_output)
-        self.assertIn("Geometric mean", log_output)
+        log_output = caplog.text
+        assert "Electronegativities" in log_output
+        assert "Geometric mean" in log_output
 
     # --------- Builder branch coverage ---------
 
     def test_cubic_perovskite(self):
         """cubic_perovskite was never tested; covers builder.py lines 41-58."""
         lattice, system = cubic_perovskite(["Ba", "Ti", "O"])
-        self.assertEqual(len(lattice.sites), 5)  # 1 Ba + 1 Ti + 3 O
-        self.assertIsNotNone(system)
+        assert len(lattice.sites) == 5  # 1 Ba + 1 Ti + 3 O
+        assert system is not None
 
     # --------- Oxidation-states branch coverage ---------
 
@@ -620,7 +580,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
         # List of pymatgen Species (lines 134-136)
         result = ox.compound_probability([Specie("Fe", 3), Specie("O", -2)])
-        self.assertIsInstance(result, float)
+        assert isinstance(result, float)
 
         # List with mixed/invalid pymatgen species (line 138) — a list mixing types
         with pytest.raises(TypeError):
@@ -645,7 +605,7 @@ class TestSequenceFunctions(unittest.TestCase):
             repeat_cations=True,
             threshold=0.5,
         )
-        self.assertIsInstance(result, bool)
+        assert isinstance(result, bool)
 
         # repeat_anions=False, repeat_cations=False, distinct symbols, threshold != 0
         # → _no_repeats line 179 returns True → pauling_test line 150
@@ -657,7 +617,7 @@ class TestSequenceFunctions(unittest.TestCase):
             repeat_cations=False,
             threshold=0.5,
         )
-        self.assertIsInstance(result2, bool)
+        assert isinstance(result2, bool)
 
     def test_no_repeats_line_179(self):
         """_no_repeats line 179: repeat_anions=False AND repeat_cations=False → len check."""
@@ -672,18 +632,18 @@ class TestSequenceFunctions(unittest.TestCase):
             repeat_cations=False,
             threshold=0.0,
         )
-        self.assertIsInstance(result, bool)
+        assert isinstance(result, bool)
 
     def test_ml_rep_generator_no_stoichs(self):
         """ml_rep_generator without explicit stoichs triggers default-stoichs path (line 403)."""
         result = smact.screening.ml_rep_generator(["Na", "Cl"])
-        self.assertEqual(len(result), 103)
-        self.assertAlmostEqual(sum(result), 1.0)
+        assert len(result) == 103
+        assert sum(result) == pytest.approx(1.0)
         # Each element contributes equally when stoichs default to 1
         Na_idx = int(smact.Element("Na").number) - 1
         Cl_idx = int(smact.Element("Cl").number) - 1
-        self.assertAlmostEqual(result[Na_idx], 0.5)
-        self.assertAlmostEqual(result[Cl_idx], 0.5)
+        assert result[Na_idx] == pytest.approx(0.5)
+        assert result[Cl_idx] == pytest.approx(0.5)
 
     def test_smact_filter_wiki_warning(self):
         """smact_filter with wiki oxidation_states_set emits a warning (line 487)."""
@@ -713,7 +673,7 @@ class TestSequenceFunctions(unittest.TestCase):
         """smact_validity returns False when element absent from consensus ICSD24 filter (line 609)."""
         # Noble gas with no ICSD entries: Ar not expected in consensus filter
         result = smact.screening.smact_validity("ArNa", oxidation_states_set=None)
-        self.assertFalse(result)
+        assert not result
 
     # --------- distorter coverage ---------
 
@@ -734,26 +694,26 @@ class TestSequenceFunctions(unittest.TestCase):
         with patch.object(distorter.spglib, "get_spacegroup", return_value="Fm-3m (225)"):
             # get_sg (lines 44-47)
             sg = distorter.get_sg(nacl)
-            self.assertIsInstance(sg, Spacegroup)
-            self.assertEqual(sg.no, 225)
+            assert isinstance(sg, Spacegroup)
+            assert sg.no == 225
 
             # build_sub_lattice (lines 132-140) — does not use spglib
             sub_lat = distorter.build_sub_lattice(nacl, "Na")
-            self.assertGreater(len(sub_lat), 0)
-            self.assertEqual(len(sub_lat[0]), 3)
+            assert len(sub_lat) > 0
+            assert len(sub_lat[0]) == 3
 
             # get_inequivalent_sites (lines 69-87) — calls get_sg internally
             ineq = distorter.get_inequivalent_sites(sub_lat, nacl)
-            self.assertGreater(len(ineq), 0)
+            assert len(ineq) > 0
 
             # make_substitution (lines 105-114) — does not use spglib
             new_lattice = distorter.make_substitution(nacl, sub_lat[0], "K")
-            self.assertIn("K", new_lattice.get_chemical_symbols())
+            assert "K" in new_lattice.get_chemical_symbols()
 
             # get_inequivalent_sites line 77: duplicate site → new_site = False
             # Passing the same site twice makes the second pass find a match
             ineq_dup = distorter.get_inequivalent_sites([sub_lat[0], sub_lat[0]], nacl)
-            self.assertEqual(len(ineq_dup), 1)
+            assert len(ineq_dup) == 1
 
     # --------- __init__.py edge case coverage ---------
 
@@ -767,12 +727,12 @@ class TestSequenceFunctions(unittest.TestCase):
             pytest.warns(UserWarning, match="Custom oxidation states file not found"),
         ):
             el = smact.Element("Fe", oxi_states_custom_filepath="dummy.txt")
-        self.assertIsNone(el.oxidation_states_custom)
+        assert el.oxidation_states_custom is None
 
     def test_species_extended_radii(self):
         """Species with radii_source='extended' loads ML Shannon radii."""
         sp = Species("Fe", 3, coordination=6, radii_source="extended")
-        self.assertIsNotNone(sp.shannon_radius)
+        assert sp.shannon_radius is not None
 
     def test_species_invalid_radii_source(self):
         """Species with invalid radii_source raises ValueError."""
@@ -783,17 +743,17 @@ class TestSequenceFunctions(unittest.TestCase):
         """Species SSE_2015 is set when data exists (e.g. Fe3+)."""
         sp = Species("Fe", 3)
         # Fe3+ should have SSE_2015 data
-        self.assertIsNotNone(sp.SSE_2015)
+        assert sp.SSE_2015 is not None
 
     def test_species_no_sse_2015(self):
         """Species SSE_2015 is None when no data exists."""
         # Oxidation state 0 for noble gas — no SSE_2015 data
         sp = Species("Fe", 0)
-        self.assertIsNone(sp.SSE_2015)
+        assert sp.SSE_2015 is None
 
     def test_are_eq_different_lengths(self):
         """are_eq returns False for arrays of different lengths."""
-        self.assertFalse(smact.are_eq([1.0, 2.0], [1.0, 2.0, 3.0]))
+        assert not smact.are_eq([1.0, 2.0], [1.0, 2.0, 3.0])
 
     def test_neutral_ratios_iter_no_threshold(self):
         """neutral_ratios_iter raises ValueError when both stoichs and threshold are None."""
@@ -803,7 +763,7 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_site_default_oxidation_states(self):
         """Site with no oxidation_states defaults to [0]."""
         site = smact.lattice.Site([0, 0, 0])
-        self.assertEqual(site.oxidation_states, [0])
+        assert site.oxidation_states == [0]
 
     # --------- Properties edge cases ---------
 
@@ -825,8 +785,8 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_compound_electroneg_pauling_source(self):
         """compound_electroneg with Pauling source works for elements with Pauling data."""
         val = compound_electroneg(elements=["Na", "Cl"], stoichs=[1, 1], source="Pauling")
-        self.assertIsInstance(val, float)
-        self.assertGreater(val, 0)
+        assert isinstance(val, float)
+        assert val > 0
 
     def test_compound_electroneg_length_mismatch(self):
         """compound_electroneg raises ValueError when elements and stoichs differ in length."""
@@ -846,21 +806,21 @@ class TestSequenceFunctions(unittest.TestCase):
         site_b2 = SimpleNamespace(symbol="Cl", position=[0.5, 0.5, 0.5])
         lattice2 = [site_a2, site_b2]
 
-        self.assertTrue(smact.lattices_are_same(lattice1, lattice2))
+        assert smact.lattices_are_same(lattice1, lattice2)
 
         # Different lattice
         site_c = SimpleNamespace(symbol="K", position=[0.0, 0.0, 0.0])
         lattice3 = [site_c, site_b2]
-        self.assertFalse(smact.lattices_are_same(lattice1, lattice3))
+        assert not smact.lattices_are_same(lattice1, lattice3)
 
     def test_gcd_recursive_single_arg(self):
         """_gcd_recursive with single argument returns that value (line 461)."""
-        self.assertEqual(smact._gcd_recursive(7), 7)
+        assert smact._gcd_recursive(7) == 7
 
     def test_species_no_sse2015_data(self):
         """Species SSE_2015 else branch when element has no SSE_2015 data at all (line 360)."""
         sp = Species("He", 0)
-        self.assertIsNone(sp.SSE_2015)
+        assert sp.SSE_2015 is None
 
     # --------- Properties: Pauling with missing eneg, VEC TypeError ---------
 
@@ -879,7 +839,7 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_eneg_states_test_threshold_none_eneg(self):
         """eneg_states_test_threshold returns False when an electronegativity is None."""
         result = smact.screening.eneg_states_test_threshold([1, -1], [None, 3.16], threshold=0)
-        self.assertFalse(result)
+        assert not result
 
     def test_smact_validity_mixed_valence_blowup_warning(self):
         """smact_validity warns and returns False when MV expansion exceeds 1M combinations (lines 645-650).
@@ -890,4 +850,4 @@ class TestSequenceFunctions(unittest.TestCase):
         """
         with pytest.warns(UserWarning, match="too many combinations"):
             result = smact.screening.smact_validity("Fe8O17", mixed_valence=True, oxidation_states_set="smact14")
-        self.assertFalse(result)
+        assert not result
