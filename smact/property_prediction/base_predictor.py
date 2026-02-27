@@ -179,7 +179,7 @@ class BasePropertyPredictor(ABC):
                 try:
                     if not smact_validity(comp):
                         invalid.append(comp)
-                except Exception:
+                except (ValueError, TypeError):
                     # If smact_validity raises an exception, the composition
                     # is likely malformed
                     invalid.append(comp)

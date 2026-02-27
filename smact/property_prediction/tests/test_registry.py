@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("requests", reason="requests required for registry tests")
-
 from smact.property_prediction.config import DEFAULT_MODELS, PROPERTY_METADATA
 from smact.property_prediction.registry import (
     get_default_model,

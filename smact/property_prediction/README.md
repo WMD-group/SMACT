@@ -7,10 +7,9 @@ smact/property_prediction/
 ├── __init__.py              # Main module interface
 ├── base_predictor.py        # Abstract base class
 ├── convenience.py           # Convenience functions
-├── roost/
-│   ├── __init__.py         # ROOST module
-│   └── predictor.py        # ROOST implementation
-└── example_usage.py        # Example usage demonstration
+└── roost/
+    ├── __init__.py         # ROOST module
+    └── predictor.py        # ROOST implementation
 ```
 
 ## API Implementation
@@ -21,7 +20,7 @@ Your exact usage pattern now works:
 from smact.property_prediction import RoostPropertyPredictor
 
 # Check available properties
-print(RoostPropertyPredictor.available_properties)  # ['band_gap', 'bulk_modulus']
+print(RoostPropertyPredictor.available_properties)  # ['band_gap']
 
 # Create model with just property name and device
 model = RoostPropertyPredictor(property_name="band_gap", device="cpu")

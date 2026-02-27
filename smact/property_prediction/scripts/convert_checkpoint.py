@@ -127,8 +127,10 @@ def convert_checkpoint(
     print(f"  Dataset: {dataset}")
     print(f"  Fidelity: {fidelity or 'default'}")
     if test_metrics:
-        print(f"  Test MAE: {test_metrics.get('mae', 'N/A'):.4f}")
-        print(f"  Test RMSE: {test_metrics.get('rmse', 'N/A'):.4f}")
+        mae = test_metrics.get("mae")
+        rmse = test_metrics.get("rmse")
+        print(f"  Test MAE: {mae:.4f}" if mae is not None else "  Test MAE: N/A")
+        print(f"  Test RMSE: {rmse:.4f}" if rmse is not None else "  Test RMSE: N/A")
 
 
 def main() -> None:

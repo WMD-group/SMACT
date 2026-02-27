@@ -7,6 +7,7 @@ using composition-property data.
 from __future__ import annotations
 
 import argparse
+import copy
 import logging
 from pathlib import Path
 from typing import Any
@@ -92,16 +93,16 @@ def train_roost_model(
     from aviary.roost.data import CompositionData, collate_batch
     from aviary.roost.model import Roost
 
-    # Apply defaults
-    elem_embedding = elem_embedding or DEFAULT_MODEL_PARAMS["elem_embedding"]
-    elem_fea_len = elem_fea_len or DEFAULT_MODEL_PARAMS["elem_fea_len"]
-    n_graph = n_graph or DEFAULT_MODEL_PARAMS["n_graph"]
-    robust = robust if robust is not None else DEFAULT_TRAINING_PARAMS["robust"]
-    epochs = epochs or DEFAULT_TRAINING_PARAMS["epochs"]
-    batch_size = batch_size or DEFAULT_TRAINING_PARAMS["batch_size"]
-    learning_rate = learning_rate or DEFAULT_TRAINING_PARAMS["learning_rate"]
-    weight_decay = weight_decay or DEFAULT_TRAINING_PARAMS["weight_decay"]
-    patience = patience if patience is not None else DEFAULT_TRAINING_PARAMS["patience"]
+    # Apply defaults (use `is None` to preserve falsy values like 0 or 0.0)
+    elem_embedding = DEFAULT_MODEL_PARAMS["elem_embedding"] if elem_embedding is None else elem_embedding
+    elem_fea_len = DEFAULT_MODEL_PARAMS["elem_fea_len"] if elem_fea_len is None else elem_fea_len
+    n_graph = DEFAULT_MODEL_PARAMS["n_graph"] if n_graph is None else n_graph
+    robust = DEFAULT_TRAINING_PARAMS["robust"] if robust is None else robust
+    epochs = DEFAULT_TRAINING_PARAMS["epochs"] if epochs is None else epochs
+    batch_size = DEFAULT_TRAINING_PARAMS["batch_size"] if batch_size is None else batch_size
+    learning_rate = DEFAULT_TRAINING_PARAMS["learning_rate"] if learning_rate is None else learning_rate
+    weight_decay = DEFAULT_TRAINING_PARAMS["weight_decay"] if weight_decay is None else weight_decay
+    patience = DEFAULT_TRAINING_PARAMS["patience"] if patience is None else patience
 
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -281,7 +282,7 @@ def train_roost_model(
         # Check for improvement
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            best_state_dict = model.state_dict().copy()
+            best_state_dict = copy.deepcopy(model.state_dict())
             epochs_without_improvement = 0
         else:
             epochs_without_improvement += 1
@@ -429,7 +430,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--robust",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
+        default=None,
         help="Use robust (uncertainty-aware) training",
     )
     parser.add_argument(
