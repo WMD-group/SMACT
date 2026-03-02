@@ -1,7 +1,7 @@
 [build-system]
 # Minimum requirements for the build system to execute.
 requires = ["setuptools>=77.0.0",
-"oldest-supported-numpy"]  # PEP 508 specifications.
+"numpy"]  # PEP 508 specifications.
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -161,84 +161,39 @@ force-exclude = true
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-        # Rule families
-    "ANN",  # flake8-annotations (not ready, require types for ALL args)
-    "ARG",  # Check for unused function arguments
-    "BLE",  # General catch of Exception
-    "C90",  # Check for functions with a high McCabe complexity
-    "COM",  # flake8-commas (conflict with line wrapper)
-    "CPY",  # Missing copyright notice at top of file (need preview mode)
-    "EM",   # Format nice error messages
-    "ERA",  # Check for commented-out code
-    "FIX",  # Check for FIXME, TODO and other developer notes
-    "FURB", # refurb (need preview mode, too many preview errors)
-    "G",    # Validate logging format strings
-    "INP",  # Ban PEP-420 implicit namespace packages
-    "N",    # PEP8-naming (many var/arg names are intended)
-    "PTH",  # Prefer pathlib over os.path
-    "SLF",  # Access "private" class members
-    "T20",  # Check for print/pprint
-    "TD",   # TODO tags related
-
-    # Single rules
-    "B023",    # Function definition does not bind loop variable
-    "B028",    # No explicit stacklevel keyword argument found
-    "B904",    # Within an except clause, raise exceptions with ...
-    "C408",    # unnecessary-collection-call
-    "D105",    # Missing docstring in magic method
-    "D205",    # One blank line required between summary line and description
-    "D212",    # Multi-line docstring summary should start at the first line
-    "E501",    # Line too long
-    "E722",    # Do not use bare `except` TODO fix this
     "FBT001",  # Boolean-typed positional argument in function definition
     "FBT002",  # Boolean default positional argument in function
-    "ISC001",
-    "NPY201",  # TODO: enable after migration to NumPy 2.0
-    "PERF203", # Use of try-except in for/while loop
-    "PERF401", # Replace "for" loops with list comprehension
-    "PLR0911", # Too many return statements
-    "PLR0912", # Too many branches
-    "PLR0913", # Too many arguments
-    "PLR0915", # Too many statements
-    "PLR2004", # Magic-value-comparison TODO fix these
-    "PLW2901", # Outer for loop variable overwritten by inner assignment target
-    "PLW0603", # Using the global statement to update `_el_ox_states_wiki` is discouraged TODO fix these
-    "PT009",   # Use a regular `assert` instead of unittest-style `assertAlmostEqual`
-    "PT011",   # `pytest.raises(ValueError)` is too broad, set the `match` parameter or use a more specific exception TODO fix these
-    "PT013",   # Incorrect import of pytest
-    "RET505",  # Unnecessary `else` after `return` statement
-    "S101",    # Use of "assert"
-    "S110",    # Log for try-except-pass
-    "S112",    # Log for try-except-continue
-    "S301",    # pickle used only to load trusted internal data files shipped with the package
-    "S311",    # random used for non-cryptographic shuffling/sampling in scientific code
-    "S314",    # XML parsing of trusted CIF/structure files only; no untrusted XML input
-    "S603",    # subprocess calls used in controlled build/utility scripts with fixed arguments
-    "S607",    # relative paths in subprocess are for local dev tooling only (e.g. pre-commit)
-    "S608",    # SQL queries built from internally-generated species strings, not user input
-    "SIM105",  # Use contextlib.suppress() instead of try-except-pass
-    "TRY002",  # Create your own exception TODO fix these
-    "TRY003",  # Avoid specifying long messages outside the exception class
-    "TRY300",  # Check for return statements in try blocks
-    "TRY301",  # Check for raise statements within try blocks
-    "E741",    # Ambiguous variable
+    "ISC001",  # Implicit string concatenation — conflicts with ruff-format
+    "COM812",  # Missing trailing comma — conflicts with ruff-format
+    "CPY",     # Missing copyright notice — requires preview mode
+    "FURB",    # refurb — requires preview mode
+    "D212",    # Multi-line docstring summary on first line — conflicts with Google convention (D213)
 ]
-exclude = ["docs/conf.py", "docs/*"]
+exclude = ["docs/conf.py", "docs/*", "dev_scripts/*"]
 pydocstyle.convention = "google"
 isort.required-imports = ["from __future__ import annotations"]
+pylint.max-args = 8
+pylint.max-branches = 15
+pylint.max-statements = 80
+pylint.max-returns = 8
 
 [tool.ruff.format]
 docstring-code-format = true
 
 
 [tool.ruff.lint.per-file-ignores]
-"smact/tests/*" = ["ANN", "D"]
-"smact/benchmarking/*" = ["ANN"]
-"smact/property_prediction/tests/*" = ["D"]
+"smact/tests/*" = ["ANN", "D", "N", "S", "PLR2004", "PT009", "PT011", "SLF001", "ARG", "PTH", "FIX002", "TD"]
+"smact/benchmarking/*" = ["ANN", "T20"]
+"smact/property_prediction/tests/*" = ["ANN", "D", "N", "S", "PLR2004", "SLF001", "ARG", "PTH"]
 # TC rules want runtime imports moved to TYPE_CHECKING blocks, but they are used at runtime
 # PLC0415 wants imports at top-level, but we use lazy imports for heavy dependencies (aviary, torch)
 # SIM108 suggests ternary operators but if-else is clearer for complex expressions
 "smact/property_prediction/*" = ["TC001", "TC002", "TC003", "PLC0415", "SIM108"]
+# S608: internal SQLite ORM uses string-built queries on controlled input
+# SLF001: structure_prediction modules access each other's private members (friend-class pattern)
+"smact/structure_prediction/database.py" = ["S608"]
+"smact/structure_prediction/mutation.py" = ["SLF001"]
+"smact/structure_prediction/prediction.py" = ["SLF001"]
 
 
 [tool.pyright]
