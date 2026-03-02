@@ -21,7 +21,7 @@ The latest stable release of SMACT can be installed via pip, which will automati
 
     pip install smact
 
-Alternatively, the latest master branch from the Git repo can be installed using:
+Alternatively, the latest version from the default branch of the Git repo can be installed using:
 
 .. code::
 

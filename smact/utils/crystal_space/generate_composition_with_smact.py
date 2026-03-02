@@ -199,7 +199,9 @@ def generate_composition_with_smact_custom(
         max_atomic_num (int): the maximum atomic number. Defaults to 103.
         num_processes (int): the number of processes to use. Defaults to None.
         save_path (str): the path to save the results. Defaults to None.
-        oxidation_states_set (str): the path to the oxidation states file. Defaults to "icsd24".
+        oxidation_states_set (str): Named oxidation states set
+            ("icsd24", "icsd16", "smact14", "pymatgen_sp") or path to a
+            custom file. Defaults to "icsd24".
 
     Returns:
         df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
