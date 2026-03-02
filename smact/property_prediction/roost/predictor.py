@@ -71,7 +71,7 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         device: str = "cpu",
         elem_embedding: str = "matscholar200",
         batch_size: int = 128,
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> None:
         """Initialise the ROOST property predictor.
 
@@ -266,7 +266,7 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         checkpoint_path: str | Path,
         property_name: str,
         device: str = "cpu",
-        **kwargs: Any,  # noqa: ANN401
+        **kwargs: Any,
     ) -> RoostPropertyPredictor:
         """Create predictor from a local checkpoint directory.
 

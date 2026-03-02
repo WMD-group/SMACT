@@ -27,7 +27,7 @@ from smact.property_prediction.io import save_checkpoint
 logger = logging.getLogger(__name__)
 
 
-def train_roost_model(  # noqa: C901, PLR0912, PLR0913, PLR0915
+def train_roost_model(
     data_path: str | Path,
     target_column: str,
     property_name: str,

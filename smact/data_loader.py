@@ -64,7 +64,7 @@ def _get_data_rows(filename: str) -> Generator[list[str], None, None]:
                 yield stripped.split()
 
 
-def float_or_None(x: str) -> float | None:  # noqa: N802
+def float_or_None(x: str) -> float | None:
     """Cast a string to a float or to a None."""
     try:
         return float(x)
@@ -390,7 +390,7 @@ def _load_shannon_radii_extended_ml() -> dict[str, list[dict]]:
     return data
 
 
-def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True) -> list[dict] | None:  # noqa: N802
+def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True) -> list[dict] | None:
     """Retrieve the machine learned extended Shannon radii for known states of an element.
 
     Retrieve Shannon radii for known oxidation states and coordination

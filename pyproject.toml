@@ -184,13 +184,20 @@ docstring-code-format = true
 [tool.ruff.lint.per-file-ignores]
 "smact/tests/*" = ["ANN", "D", "N", "S", "PLR2004", "PT009", "PT011", "SLF001", "ARG", "PTH", "FIX002", "TD"]
 "smact/benchmarking/*" = ["ANN", "T20"]
-"smact/property_prediction/tests/*" = ["ANN", "D", "N", "S", "PLR2004", "SLF001", "ARG", "PTH"]
+"smact/property_prediction/tests/*" = ["ANN", "D", "E402", "N", "S", "PLR2004", "SLF001", "ARG", "PTH"]
 # TC rules want runtime imports moved to TYPE_CHECKING blocks, but they are used at runtime
 # PLC0415 wants imports at top-level, but we use lazy imports for heavy dependencies (aviary, torch)
 # SIM108 suggests ternary operators but if-else is clearer for complex expressions
 "smact/property_prediction/*" = ["TC001", "TC002", "TC003", "PLC0415", "SIM108"]
+"smact/property_prediction/base_predictor.py" = ["ANN401", "ARG002"]
+"smact/property_prediction/roost/predictor.py" = ["ANN401"]
+"smact/property_prediction/roost/train.py" = ["C901", "PLR0912", "PLR0913", "PLR0915"]
 # S608: internal SQLite ORM uses string-built queries on controlled input
 # SLF001: structure_prediction modules access each other's private members (friend-class pattern)
+"smact/__init__.py" = ["E402"]
+"smact/data_loader.py" = ["N802"]
+"smact/properties.py" = ["N802"]
+"smact/utils/band_gap_simple.py" = ["T201"]
 "smact/structure_prediction/database.py" = ["S608"]
 "smact/structure_prediction/mutation.py" = ["SLF001"]
 "smact/structure_prediction/prediction.py" = ["SLF001"]
@@ -200,6 +207,9 @@ docstring-code-format = true
 typeCheckingMode = "standard"
 reportPossiblyUnboundVariable = true
 reportUnboundVariable = true
+# ElementEmbeddings is an untyped third-party package (no py.typed marker).
+# Accept untyped imports rather than requiring inline suppressions.
+reportMissingTypeStubs = false
 
 [tool.codespell]
 skip = "*.csv,*/site/*,*/docs/_build/*,docs/tutorials/data/*,paper.md,*dev_docs/*,paper.bib,*.txt,*examples/Structure_Prediction/Li-Garnets_SP-Pym-new.ipynb"

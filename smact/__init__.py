@@ -29,7 +29,7 @@ from functools import reduce
 from math import gcd
 from operator import mul as multiply
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
@@ -41,7 +41,7 @@ import pandas as pd
 module_directory = str(Path(__file__).resolve().parent)
 data_directory = str(Path(module_directory) / "data")
 # get correct path for datafiles when called from another directory
-from smact import data_loader  # noqa: E402
+from smact import data_loader
 
 
 class Element:
@@ -91,8 +91,8 @@ class Element:
         Element.oxidation_states_icsd16 (list) : List of oxidation states that appear in the 2016 version of ICSD
 
         Element.oxidation_states_wiki (list): List of oxidation states that
-            appear wikipedia
-            (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements)  # noqa: E501
+            appear on Wikipedia. See
+            https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements
             Data retrieved: 2022-09-22
 
         Element.oxidation_states_custom (list | None ): List of oxidation
@@ -178,7 +178,7 @@ class Element:
                 self._oxidation_states_custom = data_loader.lookup_element_oxidation_states_custom(
                     symbol, oxi_states_custom_filepath
                 )
-                self.oxidation_states_custom = self._oxidation_states_custom  # type: ignore[assignment]
+                self.oxidation_states_custom = cast("list[int] | None", self._oxidation_states_custom)
             except (TypeError, FileNotFoundError, OSError, ValueError):
                 warnings.warn("Custom oxidation states file not found. Please check the file path.", stacklevel=2)
                 self.oxidation_states_custom = None

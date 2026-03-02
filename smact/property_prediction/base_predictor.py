@@ -84,7 +84,7 @@ class BasePropertyPredictor(ABC):
         model_name: str | None = None,
         model_path: str | Path | None = None,
         device: str = "cpu",
-        **kwargs: Any,  # noqa: ANN401, ARG002
+        **kwargs: Any,
     ) -> None:
         """Initialise the property predictor.
 

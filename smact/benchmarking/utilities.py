@@ -9,6 +9,8 @@ from time import time
 
 DELIM_LENGTH = 15
 
+logger = logging.getLogger(__name__)
+
 logging.basicConfig(filename="benchmark.log", level=logging.INFO)
 
 
@@ -19,7 +21,7 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
         @functools.wraps(func)
         def wrapper_timeit(*args, **kwargs):
             if delim:
-                logging.info("-" * DELIM_LENGTH)  # noqa: LOG015
+                logger.info("-" * DELIM_LENGTH)
 
             times = []
             value = None
@@ -28,10 +30,10 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
                 value = func(*args, **kwargs)
                 times.append(time() - t0)
 
-            logging.info("%s -- Average over %s repeats = %ss", func.__name__, n, mean(times))  # noqa: LOG015
+            logger.info("%s -- Average over %s repeats = %ss", func.__name__, n, mean(times))
 
             if delim:
-                logging.info("-" * DELIM_LENGTH)  # noqa: LOG015
+                logger.info("-" * DELIM_LENGTH)
             return value
 
         return wrapper_timeit

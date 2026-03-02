@@ -10,7 +10,7 @@ import pytest
 
 torch = pytest.importorskip("torch", reason="torch required for IO tests")
 
-from smact.property_prediction.io import (  # noqa: E402
+from smact.property_prediction.io import (
     get_cache_size,
     list_cached_models,
     load_model_files,
