@@ -106,10 +106,10 @@ def get_pauling_test_mismatch(composition: str | Composition) -> float:
     electronegativities = [el.pauling_eneg for el in elements]
 
     # If any element lacks a known electronegativity, return NaN
-    if None in electronegativities:
+    if any(e is None or e <= 0 for e in electronegativities):
         return float("nan")
 
-    eneg_values: list[float] = [e for e in electronegativities if e is not None]
+    eneg_values: list[float] = [e for e in electronegativities if e is not None and e > 0]
     mismatches: list[float] = [
         abs(eneg1 - eneg2) for i, eneg1 in enumerate(eneg_values) for eneg2 in eneg_values[i + 1 :]
     ]

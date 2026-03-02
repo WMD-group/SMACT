@@ -102,6 +102,16 @@ def train_roost_model(  # noqa: C901, PLR0912, PLR0913, PLR0915
     weight_decay = DEFAULT_TRAINING_PARAMS["weight_decay"] if weight_decay is None else weight_decay
     patience = DEFAULT_TRAINING_PARAMS["patience"] if patience is None else patience
 
+    if epochs <= 0:
+        msg = "epochs must be positive"
+        raise ValueError(msg)
+    if batch_size <= 0:
+        msg = "batch_size must be positive"
+        raise ValueError(msg)
+    if learning_rate <= 0:
+        msg = "learning_rate must be positive"
+        raise ValueError(msg)
+
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 

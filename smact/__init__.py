@@ -179,7 +179,7 @@ class Element:
                     symbol, oxi_states_custom_filepath
                 )
                 self.oxidation_states_custom = self._oxidation_states_custom  # type: ignore[assignment]
-            except TypeError:
+            except (TypeError, FileNotFoundError, OSError, ValueError):
                 warnings.warn("Custom oxidation states file not found. Please check the file path.", stacklevel=2)
                 self.oxidation_states_custom = None
         else:
