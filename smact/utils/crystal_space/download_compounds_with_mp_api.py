@@ -97,5 +97,5 @@ def download_mp_data(
             if energy_above_hull is not None and energy_above_hull < e_hull_dict[formula_pretty]:
                 e_hull_dict[formula_pretty] = energy_above_hull
                 with (save_dir / f"{formula_pretty}.json").open("w") as f:
-                    json.dump(doc.model_dump(mode="json"), f)  # type: ignore[union-attr]
+                    json.dump(doc.model_dump(), f, default=str)  # type: ignore[union-attr]
         time.sleep(request_interval)

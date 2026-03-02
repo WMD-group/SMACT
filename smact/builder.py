@@ -22,10 +22,7 @@ def _tile_oxidation_states(
     if n_sites == n_base:
         return base_oxidation_states
     if n_sites % n_base != 0:
-        msg = (
-            f"Number of sites ({n_sites}) is not a multiple of the base "
-            f"oxidation states pattern ({n_base})"
-        )
+        msg = f"Number of sites ({n_sites}) is not a multiple of the base oxidation states pattern ({n_base})"
         raise ValueError(msg)
     return list(itertools.islice(itertools.cycle(base_oxidation_states), n_sites))
 
