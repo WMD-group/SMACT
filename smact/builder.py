@@ -73,7 +73,7 @@ def wurtzite(
     if repetitions is None:
         repetitions = [1, 1, 1]
     if cell_par is None:
-        cell_par = [2, 2, 6, 90, 90, 120]
+        cell_par = [3, 3, 6, 90, 90, 120]
     system = crystal(
         (species),
         basis=[(2.0 / 3.0, 1.0 / 3.0, 0), (2.0 / 3.0, 1.0 / 3.0, 5.0 / 8.0)],
