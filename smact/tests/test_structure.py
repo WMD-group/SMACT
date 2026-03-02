@@ -43,7 +43,7 @@ MP_API_AVAILABLE = bool(find_spec("mp_api"))
 try:
     skip_mprester_tests = requests.get(MP_URL, timeout=60).status_code != 200
 
-except (ModuleNotFoundError, ImportError, requests.exceptions.ConnectionError):
+except (ModuleNotFoundError, ImportError, requests.exceptions.RequestException):
     # Skip all MPRester tests if some downstream problem on the website, mp-api or whatever.
     skip_mprester_tests = True
 
@@ -103,9 +103,10 @@ class StructureTest(unittest.TestCase):
         self.assertTrue(np.array_equal(s1.lattice_mat, s2.lattice_mat))
         self.assertEqual(list(s1.sites.keys()), list(s2.sites.keys()))
 
-        for si, sj in zip(s1.sites, s2.sites, strict=False):
-            for c1, c2 in zip(si, sj, strict=False):
-                self.assertAlmostEqual(c1, c2, places=places)  # type: ignore[arg-type]
+        for si, sj in zip(s1.sites.values(), s2.sites.values(), strict=True):
+            for ci, cj in zip(si, sj, strict=True):
+                for c1, c2 in zip(ci, cj, strict=True):
+                    self.assertAlmostEqual(c1, c2, places=places)
 
     def test_as_poscar(self):
         """Test POSCAR generation."""
