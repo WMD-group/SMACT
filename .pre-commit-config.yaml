@@ -33,7 +33,6 @@ repos:
         name: codespell
         entry: uv run codespell
         language: system
-        stages: [pre-commit, commit-msg]
         pass_filenames: false
       - id: pyright
         name: pyright
