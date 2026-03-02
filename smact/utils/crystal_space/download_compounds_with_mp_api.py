@@ -94,8 +94,8 @@ def download_mp_data(
             formula_pretty = doc.formula_pretty  # type: ignore[attr-defined]
             energy_above_hull = doc.energy_above_hull  # type: ignore[attr-defined]
 
-            if (energy_above_hull) < e_hull_dict[formula_pretty]:  # type: ignore[operator]
-                e_hull_dict[formula_pretty] = energy_above_hull  # type: ignore[arg-type]
+            if energy_above_hull is not None and energy_above_hull < e_hull_dict[formula_pretty]:
+                e_hull_dict[formula_pretty] = energy_above_hull
                 with (save_dir / f"{formula_pretty}.json").open("w") as f:
-                    json.dump(doc.dict(), f)  # type: ignore[attr-defined]
+                    json.dump(doc.model_dump(mode="json"), f)  # type: ignore[union-attr]
         time.sleep(request_interval)
