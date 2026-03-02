@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 from typing import TYPE_CHECKING
 
 from ase.spacegroup import crystal
@@ -10,6 +11,23 @@ if TYPE_CHECKING:
     from ase import Atoms
 
 from smact.lattice import Lattice, Site
+
+
+def _tile_oxidation_states(
+    base_oxidation_states: list[list[int]],
+    n_sites: int,
+) -> list[list[int]]:
+    """Tile the base unit-cell oxidation states to match the number of sites in an expanded cell."""
+    n_base = len(base_oxidation_states)
+    if n_sites == n_base:
+        return base_oxidation_states
+    if n_sites % n_base != 0:
+        msg = (
+            f"Number of sites ({n_sites}) is not a multiple of the base "
+            f"oxidation states pattern ({n_base})"
+        )
+        raise ValueError(msg)
+    return list(itertools.islice(itertools.cycle(base_oxidation_states), n_sites))
 
 
 def cubic_perovskite(
@@ -44,8 +62,9 @@ def cubic_perovskite(
         cellpar=cell_par,
     )
 
-    oxidation_states = [[2]] + [[4]] + [[-2]] * 3
-    sites_list = [Site(site[0], site[1]) for site in zip(system.get_scaled_positions(), oxidation_states, strict=False)]
+    base_oxidation_states = [[2]] + [[4]] + [[-2]] * 3
+    oxidation_states = _tile_oxidation_states(base_oxidation_states, len(system))
+    sites_list = [Site(pos, ox) for pos, ox in zip(system.get_scaled_positions(), oxidation_states, strict=True)]
 
     return Lattice(sites_list), system
 
@@ -82,6 +101,7 @@ def wurtzite(
         cellpar=cell_par,
     )
 
-    oxidation_states = [[2]] * 2 + [[-2]] * 2
-    sites_list = [Site(site[0], site[1]) for site in zip(system.get_scaled_positions(), oxidation_states, strict=False)]
+    base_oxidation_states = [[2]] * 2 + [[-2]] * 2
+    oxidation_states = _tile_oxidation_states(base_oxidation_states, len(system))
+    sites_list = [Site(pos, ox) for pos, ox in zip(system.get_scaled_positions(), oxidation_states, strict=True)]
     return Lattice(sites_list), system
