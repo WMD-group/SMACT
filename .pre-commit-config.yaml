@@ -1,8 +1,21 @@
 ci:
-  autoupdate_schedule: monthly
-  # skip applies only to pre-commit.ci hosted service (not GitHub Actions CI).
-  # These hooks use local system tooling (uv run) which is unavailable on pre-commit.ci.
-  skip: [ruff-check, ruff-format, codespell, pyright]
+  # All linting runs in GitHub Actions ("Lint & type check" job).
+  # Skip every hook so pre-commit.ci is a no-op until the app is removed
+  # from https://github.com/organizations/WMD-group/settings/installations
+  skip:
+    [
+      ruff-check,
+      ruff-format,
+      codespell,
+      pyright,
+      check-yaml,
+      end-of-file-fixer,
+      trailing-whitespace,
+      markdownlint,
+      prettier,
+      nbstripout,
+      blacken-docs,
+    ]
 repos:
   - repo: local
     hooks:
