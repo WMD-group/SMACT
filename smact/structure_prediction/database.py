@@ -18,9 +18,10 @@ except ImportError:  # pragma: no cover
 import os
 import re
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pymatgen.core import SETTINGS
+from pymatgen.core import Structure as pmg_Structure
 from pymatgen.ext.matproj import MPRester
 
 from . import logger
@@ -30,8 +31,8 @@ from .utilities import get_sign
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from pymatgen.core import Structure as pmg_Structure
 
+_NEW_MP_API_KEY_LENGTH = 32
 
 _VALID_TABLE_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
@@ -160,7 +161,7 @@ class StructureDB:
             if mp_api_key is None:
                 msg = "No Materials Project API key provided."
                 raise ValueError(msg)
-            if len(mp_api_key) != 32:  # noqa: PLR2004
+            if len(mp_api_key) != _NEW_MP_API_KEY_LENGTH:
                 with MPRester(mp_api_key) as m:
                     data = m.query(
                         criteria={"icsd_ids.0": {"$exists": True}},
@@ -348,7 +349,8 @@ def parse_mprest(
 
     """
     try:
-        return SmactStructure.from_py_struct(data["structure"], determine_oxi=determine_oxi)  # type: ignore[arg-type]
+        structure = cast("pmg_Structure", data["structure"])
+        return SmactStructure.from_py_struct(structure, determine_oxi=determine_oxi)
     except (ValueError, RuntimeError, TypeError):
         # Couldn't decorate with oxidation states
         logger.warning(f"Couldn't decorate {data.get('material_id', 'unknown')} with oxidation states.")

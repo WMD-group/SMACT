@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
+from typing import Any
 
 from pymatgen.core import Composition
 
@@ -13,6 +14,7 @@ _FORMULA_PAREN_RE = re.compile(r"\(([^\(\)]+)\)\s*([\.e\d]*)")
 _SYMBOL_RE = re.compile(r"([A-Z][a-z]*)\s*([-*\.e\d]*)")
 
 _MAX_FORMULA_DEPTH = 50
+_STOICH_ONLY_TUPLE_LEN = 2
 
 
 # Adapted from ElementEmbeddings and Pymatgen
@@ -62,39 +64,40 @@ def _get_sym_dict(formula: str, factor: float) -> dict[str, float]:
     return sym_dict
 
 
-def comp_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -> Composition:
+def comp_maker(smact_filter_output: tuple[Any, ...]) -> Composition:
     """Convert an item in the output of smact.screening.smact_filer into a Pymatgen Composition.
 
     Args:
-        smact_filter_output (tuple[str, int, int]|tuple[str, int]): An item in the list returned from smact_filter
+        smact_filter_output: An item in the list returned from smact_filter.
+            Either (elements, oxidation_states, stoichiometries) or (elements, stoichiometries).
 
     Returns:
         composition (pymatgen.core.Composition): An instance of the Composition class
     """
-    if len(smact_filter_output) == 2:  # noqa: PLR2004
-        form = []
-        for el, ammt in zip(smact_filter_output[0], smact_filter_output[-1], strict=True):  # type: ignore[arg-type]
-            form.append(el)
-            form.append(ammt)
-        form = "".join(str(e) for e in form)
+    if len(smact_filter_output) == _STOICH_ONLY_TUPLE_LEN:
+        form_parts: list[str | int] = []
+        for el, ammt in zip(smact_filter_output[0], smact_filter_output[-1], strict=True):
+            form_parts.append(el)
+            form_parts.append(ammt)
+        form: str | dict[str, int] = "".join(str(e) for e in form_parts)
     else:
         form = {
             unparse_spec((el, ox)): ammt
             for el, ox, ammt in zip(
-                smact_filter_output[0],  # type: ignore[arg-type]
-                smact_filter_output[1],  # type: ignore[arg-type]
-                smact_filter_output[2],  # type: ignore[arg-type]
+                smact_filter_output[0],
+                smact_filter_output[1],
+                smact_filter_output[2],
                 strict=True,
             )
         }
     return Composition(form)
 
 
-def formula_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -> str:
+def formula_maker(smact_filter_output: tuple[Any, ...]) -> str:
     """Convert an item in the output of smact.screening.smact_filter into a chemical formula.
 
     Args:
-        smact_filter_output (tuple[str, int, int]|tuple[str, int]): An item in the list returned from smact_filter
+        smact_filter_output: An item in the list returned from smact_filter.
 
     Returns:
             formula (str): A formula
@@ -103,11 +106,11 @@ def formula_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -
     return comp_maker(smact_filter_output).reduced_formula
 
 
-def composition_dict_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -> dict:
+def composition_dict_maker(smact_filter_output: tuple[Any, ...]) -> dict:
     """Convert an item in the output of smact.screening.smact_filter into a composition dictionary.
 
     Args:
-        smact_filter_output (tuple[str, int, int] | tuple[str, int]): An item in the list returned from smact_filter
+        smact_filter_output: An item in the list returned from smact_filter.
 
     Returns:
         composition_dict (dict[str, float]): A composition dictionary

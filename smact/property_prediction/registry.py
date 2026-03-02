@@ -16,6 +16,11 @@ from smact.property_prediction.config import (
 
 logger = logging.getLogger(__name__)
 
+_HTTP_OK = 200
+_MIN_MODEL_ID_PARTS = 4
+_MODEL_FIDELITY_PARTS = 5
+_MODEL_EXTENDED_PARTS = 5
+
 
 def _is_valid_model_dir(path: Path) -> bool:
     """Check if a directory contains a complete model."""
@@ -47,7 +52,7 @@ def get_available_models(include_cached: bool = True) -> list[str]:
     try:
         manifest_url = f"{PRETRAINED_MODELS_BASE_URL}manifest.json"
         response = requests.get(manifest_url, timeout=10)
-        if response.status_code == 200:  # noqa: PLR2004
+        if response.status_code == _HTTP_OK:
             manifest = json.loads(response.content)
             models.update(manifest.get("models", []))
     except (requests.RequestException, json.JSONDecodeError) as e:
@@ -204,7 +209,7 @@ def model_exists(model_name: str) -> bool:
     except requests.RequestException:
         return False
     else:
-        return response.status_code == 200  # noqa: PLR2004
+        return response.status_code == _HTTP_OK
 
 
 def parse_model_name(model_name: str) -> dict[str, str | None]:
@@ -220,7 +225,7 @@ def parse_model_name(model_name: str) -> dict[str, str | None]:
     """
     parts = model_name.split("-")
 
-    if len(parts) < 4:  # noqa: PLR2004
+    if len(parts) < _MIN_MODEL_ID_PARTS:
         return {
             "model_type": None,
             "dataset": None,
@@ -234,16 +239,16 @@ def parse_model_name(model_name: str) -> dict[str, str | None]:
         "dataset": parts[1],  # e.g., "MP"
         "version": parts[2],  # e.g., "2024.1.0"
         "property": parts[3],  # e.g., "band_gap"
-        "fidelity": parts[4] if len(parts) > 4 else None,  # noqa: PLR2004  # e.g., "pbe"
+        "fidelity": parts[4] if len(parts) > _MIN_MODEL_ID_PARTS else None,  # e.g., "pbe"
     }
 
     # Handle properties with underscores (e.g., "band_gap")
     # If we have more parts, they might be part of property name
-    if len(parts) > 5:  # noqa: PLR2004
+    if len(parts) > _MODEL_FIDELITY_PARTS:
         # Rejoin property parts
         result["property"] = "_".join(parts[3:-1])
         result["fidelity"] = parts[-1]
-    elif len(parts) == 5:  # noqa: PLR2004
+    elif len(parts) == _MODEL_EXTENDED_PARTS:
         # Could be property_fidelity or property_part
         # Check if last part is a known fidelity
         all_fidelities: set[str] = set()

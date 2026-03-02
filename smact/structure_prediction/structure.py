@@ -10,7 +10,11 @@ from functools import reduce
 from math import gcd
 from operator import itemgetter
 from pathlib import Path
+from typing import TYPE_CHECKING
 from typing import cast as _cast
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 import numpy as np
 from pymatgen.analysis.bond_valence import BVAnalyzer
@@ -41,6 +45,8 @@ import smact
 from .utilities import get_sign
 
 logger = logging.getLogger(__name__)
+
+_NEW_MP_API_KEY_LENGTH = 32
 
 
 class SmactStructure:
@@ -73,7 +79,7 @@ class SmactStructure:
 
     def __init__(
         self,
-        species: list[tuple[str, int, int] | tuple[smact.Species, int]],
+        species: Sequence[tuple[str, int, int] | tuple[smact.Species, int]],
         lattice_mat: np.ndarray,
         sites: dict[str, list[list[float]]],
         lattice_param: float | None = 1.0,
@@ -186,7 +192,7 @@ class SmactStructure:
 
     @staticmethod
     def _sanitise_species(
-        species: list[tuple[str, int, int] | tuple[smact.Species, int]],
+        species: Sequence[tuple[str, int, int] | tuple[smact.Species, int]],
     ) -> list[tuple[str, int, int]]:
         """
         Sanitise and format a list of species.
@@ -305,6 +311,76 @@ class SmactStructure:
         return sites, species
 
     @staticmethod
+    def _assign_oxidation_states(
+        structure: pmg_Structure,
+        determine_oxi: str,
+        *,
+        max_sites: int | None = None,
+        allow_predecorated: bool = False,
+    ) -> pmg_Structure:
+        """Assign oxidation states to a pymatgen Structure.
+
+        Args:
+            structure: A pymatgen Structure without oxidation states.
+            determine_oxi: Method for assigning oxidation states.
+                'BV' for bond valence, 'comp_ICSD' for ICSD statistics,
+                'both' to try BV first then fall back to ICSD,
+                'predecorated' to return structure as-is (only if allow_predecorated is True).
+            max_sites: If set, passed to ``oxi_state_guesses(max_sites=...)``.
+            allow_predecorated: Whether to accept 'predecorated' as a valid option.
+
+        Returns:
+            Structure with oxidation states assigned.
+
+        Raises:
+            ValueError: If determine_oxi is not a valid option.
+        """
+        if determine_oxi == "BV":
+            bva = BVAnalyzer()
+            return bva.get_oxi_state_decorated_structure(structure)
+
+        if determine_oxi == "comp_ICSD":
+            return SmactStructure._apply_icsd_oxi(structure, max_sites=max_sites)
+
+        if determine_oxi == "both":
+            try:
+                bva = BVAnalyzer()
+                decorated = bva.get_oxi_state_decorated_structure(structure)
+            except (ValueError, RuntimeError):
+                decorated = SmactStructure._apply_icsd_oxi(structure, max_sites=max_sites)
+                logger.info("Oxidation states assigned based on ICSD statistics")
+            else:
+                logger.info("Oxidation states assigned using bond valence")
+            return decorated
+
+        if determine_oxi == "predecorated" and allow_predecorated:
+            return structure
+
+        valid = "'BV', 'comp_ICSD', 'both'"
+        if allow_predecorated:
+            valid += " or 'predecorated'"
+        msg = f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either {valid}."
+        raise ValueError(msg)
+
+    @staticmethod
+    def _apply_icsd_oxi(
+        structure: pmg_Structure,
+        *,
+        max_sites: int | None = None,
+    ) -> pmg_Structure:
+        """Assign oxidation states using ICSD composition statistics."""
+        comp = structure.composition
+        guess_kwargs: dict[str, int] = {}
+        if max_sites is not None:
+            guess_kwargs["max_sites"] = max_sites
+        oxi_transform = OxidationStateDecorationTransformation(
+            comp.oxi_state_guesses(**guess_kwargs)[0]  # type: ignore[arg-type]  # pymatgen stub mismatch
+        )
+        result = oxi_transform.apply_transformation(structure)
+        logger.info("Charge assigned based on ICSD statistics")
+        return result
+
+    @staticmethod
     def from_py_struct(structure: pmg_Structure, determine_oxi: str = "BV") -> SmactStructure:
         """
         Create a SmactStructure from a pymatgen Structure object.
@@ -325,36 +401,7 @@ class SmactStructure:
             msg = f"Expected pymatgen.core.Structure, got {type(structure).__name__}"
             raise TypeError(msg)
 
-        if determine_oxi == "BV":
-            bva = BVAnalyzer()
-            struct = bva.get_oxi_state_decorated_structure(structure)
-
-        elif determine_oxi == "comp_ICSD":
-            comp = structure.composition
-            oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
-            struct = oxi_transform.apply_transformation(structure)
-            logger.info("Charge assigned based on ICSD statistics")
-
-        elif determine_oxi == "both":
-            try:
-                bva = BVAnalyzer()
-                struct = bva.get_oxi_state_decorated_structure(structure)
-                logger.info("Oxidation states assigned using bond valence")
-            except (ValueError, RuntimeError):
-                comp = structure.composition
-                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses()[0])
-                struct = oxi_transform.apply_transformation(structure)
-                logger.info("Oxidation states assigned based on ICSD statistics")
-        elif determine_oxi == "predecorated":
-            struct = structure
-
-        else:
-            msg = (
-                f"Argument for 'determine_oxi', <{determine_oxi}>"
-                " is not valid. Choose either 'BV', 'comp_ICSD',"
-                " 'both' or 'predecorated'."
-            )
-            raise ValueError(msg)
+        struct = SmactStructure._assign_oxidation_states(structure, determine_oxi, allow_predecorated=True)
 
         sites, species = SmactStructure.__parse_py_sites(struct)
 
@@ -371,8 +418,54 @@ class SmactStructure:
         )
 
     @staticmethod
-    def from_mp(  # noqa: C901, PLR0912
-        species: list[tuple[str, int, int] | tuple[smact.Species, int]],
+    def _query_mp_structures(api_key: str, formula: str) -> list:
+        """Query the Materials Project for structures matching a formula.
+
+        Args:
+            api_key: A Materials Project API key.
+            formula: Chemical formula to search for.
+
+        Returns:
+            List of structure results from the API.
+
+        Raises:
+            ImportError: If the required MP API client is not available.
+        """
+        if len(api_key) != _NEW_MP_API_KEY_LENGTH:
+            if not HAS_LEGACY_MPRESTER:
+                msg = (
+                    "pymatgen legacy MPRester is not available. "
+                    "Install pymatgen >= 2022.1 with legacy MP API support or use mp-api."
+                )
+                raise ImportError(msg)
+            if MPRester is None:  # pragma: no cover
+                msg = "pymatgen legacy MPRester is not available."
+                raise ImportError(msg)
+            with MPRester(api_key) as m:
+                return m.query(
+                    criteria={"reduced_cell_formula": formula},
+                    properties=["structure"],
+                )
+
+        if HAS_MP_API:
+            if MPResterNew is None:  # pragma: no cover
+                msg = "mp-api MPRester is not available."
+                raise ImportError(msg)
+            with MPResterNew(api_key, use_document_model=False) as m:
+                return m.materials.summary.search(formula=formula, fields=["structure"])
+
+        if not HAS_LEGACY_MPRESTER:
+            msg = "Neither mp-api nor pymatgen legacy MPRester is available. Install mp-api: `pip install mp-api`."
+            raise ImportError(msg)
+        if MPRester is None:  # pragma: no cover
+            msg = "pymatgen legacy MPRester is not available."
+            raise ImportError(msg)
+        with MPRester(api_key) as m:
+            return m.get_structures(chemsys_formula=formula)
+
+    @staticmethod
+    def from_mp(
+        species: Sequence[tuple[str, int, int] | tuple[smact.Species, int]],
         api_key: str | None = None,
         determine_oxi: str = "BV",
     ) -> SmactStructure:
@@ -404,78 +497,21 @@ class SmactStructure:
             msg = "No Materials Project API key found. Set the MP_API_KEY or PMG_MAPI_KEY environment variable."
             raise ValueError(msg)
 
-        # Legacy API routine
-        if len(api_key) != 32:  # noqa: PLR2004
-            if not HAS_LEGACY_MPRESTER:
-                msg = (
-                    "pymatgen legacy MPRester is not available. "
-                    "Install pymatgen >= 2022.1 with legacy MP API support or use mp-api."
-                )
-                raise ImportError(msg)
-            if MPRester is None:  # pragma: no cover
-                msg = "pymatgen legacy MPRester is not available."
-                raise ImportError(msg)
-            with MPRester(api_key) as m:
-                structs = m.query(
-                    criteria={"reduced_cell_formula": formula},
-                    properties=["structure"],
-                )
-
-        elif HAS_MP_API:
-            # New API routine
-            if MPResterNew is None:  # pragma: no cover
-                msg = "mp-api MPRester is not available."
-                raise ImportError(msg)
-            with MPResterNew(api_key, use_document_model=False) as m:
-                structs = m.materials.summary.search(formula=formula, fields=["structure"])
-        else:
-            if not HAS_LEGACY_MPRESTER:
-                msg = "Neither mp-api nor pymatgen legacy MPRester is available. Install mp-api: `pip install mp-api`."
-                raise ImportError(msg)
-            if MPRester is None:  # pragma: no cover
-                msg = "pymatgen legacy MPRester is not available."
-                raise ImportError(msg)
-            with MPRester(api_key) as m:
-                structs = m.get_structures(chemsys_formula=formula)
+        structs = SmactStructure._query_mp_structures(api_key, formula)
 
         if len(structs) == 0:
             msg = "Could not find composition in Materials Project Database, please supply a structure."
             raise ValueError(msg)
 
         # Default to first found structure
-        struct = structs[0]["structure"] if isinstance(structs[0], dict) else structs[0]  # type: ignore[index]
+        first = structs[0]
+        struct = first["structure"] if isinstance(first, dict) else first
+        assert isinstance(struct, pmg_Structure)  # noqa: S101
 
         if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
-            if determine_oxi == "BV":
-                bva = BVAnalyzer()
-                struct = bva.get_oxi_state_decorated_structure(struct)
+            struct = SmactStructure._assign_oxidation_states(struct, determine_oxi, max_sites=-50)
 
-            elif determine_oxi == "comp_ICSD":
-                comp = struct.composition
-                oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])  # type: ignore[union-attr]
-                struct = oxi_transform.apply_transformation(struct)
-                logger.info("Charge assigned based on ICSD statistics")
-
-            elif determine_oxi == "both":
-                try:
-                    bva = BVAnalyzer()
-                    struct = bva.get_oxi_state_decorated_structure(struct)
-                    logger.info("Oxidation states assigned using bond valence")
-                except (ValueError, RuntimeError):
-                    comp = struct.composition
-                    oxi_transform = OxidationStateDecorationTransformation(
-                        comp.oxi_state_guesses(max_sites=-50)[0]  # type: ignore[union-attr]
-                    )
-                    struct = oxi_transform.apply_transformation(struct)
-                    logger.info("Oxidation states assigned based on ICSD statistics")
-            else:
-                msg = (
-                    f"Argument for 'determine_oxi', <{determine_oxi}>"
-                    " is not valid. Choose either 'BV',"
-                    " 'comp_ICSD' or 'both'."
-                )
-                raise ValueError(msg)
-        lattice_mat = struct.lattice.matrix  # type: ignore[union-attr]
+        lattice_mat = struct.lattice.matrix
 
         lattice_param = 1.0  # Scaling factor; lattice_mat already contains actual vectors
 
@@ -570,7 +606,7 @@ class SmactStructure:
     def _format_style(
         self,
         template: str,
-        delim: str | None = " ",
+        delim: str = " ",
         include_ground: bool | None = False,
     ) -> str:
         """
@@ -605,7 +641,7 @@ class SmactStructure:
 
         """
         if include_ground:
-            return delim.join(  # type: ignore[union-attr]
+            return delim.join(
                 template.format(
                     ele=specie[0],
                     stoic=specie[2],
@@ -615,7 +651,7 @@ class SmactStructure:
                 for specie in self.species
             )
 
-        return delim.join(  # type: ignore[union-attr]
+        return delim.join(
             template.format(
                 ele=specie[0],
                 stoic=specie[2],

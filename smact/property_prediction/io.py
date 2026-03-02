@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import logging
 import shutil
-import sys
 import tarfile
 from pathlib import Path
 from typing import Any
@@ -13,6 +12,8 @@ from typing import Any
 from smact.property_prediction.config import MODELS_CACHE, PRETRAINED_MODELS_BASE_URL, PRETRAINED_MODELS_DIR
 
 logger = logging.getLogger(__name__)
+
+_HTTP_OK = 200
 
 
 class RemoteFile:
@@ -66,7 +67,7 @@ class RemoteFile:
 
         # Download the archive
         response = requests.get(self.uri, stream=True, timeout=120)
-        if response.status_code != 200:  # noqa: PLR2004
+        if response.status_code != _HTTP_OK:
             msg = f"Failed to download model from {self.uri}. Status code: {response.status_code}"
             raise requests.RequestException(msg)
 
@@ -78,12 +79,9 @@ class RemoteFile:
 
         logger.info("Downloaded to %s, extracting...", tar_path)
 
-        # Extract the archive safely using data filter for security
+        # Extract the archive safely using data filter for security (Python 3.12+)
         with tarfile.open(tar_path, "r:gz") as tar:
-            if sys.version_info >= (3, 11, 4):
-                tar.extractall(self.cache_location, filter="data")
-            else:
-                tar.extractall(self.cache_location)  # noqa: S202
+            tar.extractall(self.cache_location, filter="data")
 
         # Clean up the tar file
         tar_path.unlink()

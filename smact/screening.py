@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import itertools
 import warnings
+from dataclasses import dataclass
 from enum import StrEnum
 from itertools import combinations
 from pathlib import Path
@@ -23,8 +24,10 @@ from smact.utils.composition import composition_dict_maker, formula_maker
 from smact.utils.oxidation import ICSD24OxStatesFilter
 
 _NUM_ELEMENTS = 103
+_MAX_MIXED_VALENCE_COMBOS = 1_000_000
 
 __all__ = [
+    "ICSD24FilterConfig",
     "SmactFilterOutputs",
     "eneg_states_test",
     "eneg_states_test_threshold",
@@ -33,6 +36,24 @@ __all__ = [
     "smact_filter",
     "smact_validity",
 ]
+
+
+@dataclass(frozen=True)
+class ICSD24FilterConfig:
+    """Parameters for ICSD24 oxidation state filtering.
+
+    Attributes:
+        include_zero: Include oxidation state of zero. Default is False.
+        consensus: Minimum number of literature occurrences for
+            an ion to be considered valid. Default is 3.
+        commonality: Excludes species below a certain proportion
+            of appearances. "low", "medium", "high", "main", or a float/int threshold.
+    """
+
+    include_zero: bool = False
+    consensus: int = 3
+    commonality: str | float = "medium"
+
 
 MIXED_VALENCE_ELEMENTS: frozenset[str] = frozenset(
     {
@@ -342,11 +363,11 @@ def ml_rep_generator(
 
     ml_rep = [0] * _NUM_ELEMENTS
     if isinstance(composition[0], Element):
-        for element, stoich in zip(composition, stoichs, strict=True):
-            ml_rep[int(element.number) - 1] += stoich  # type: ignore[union-attr]
+        for element, stoich in zip(cast("list[Element]", composition), stoichs, strict=True):
+            ml_rep[int(element.number) - 1] += stoich
     else:
-        for element, stoich in zip(composition, stoichs, strict=True):
-            ml_rep[int(Element(element).number) - 1] += stoich  # type: ignore[arg-type]
+        for element_sym, stoich in zip(cast("list[str]", composition), stoichs, strict=True):
+            ml_rep[int(Element(element_sym).number) - 1] += stoich
 
     total = sum(ml_rep)
     if total == 0:
@@ -463,16 +484,80 @@ def smact_filter(
 # ---------------------------------------------------------------------
 
 
-def smact_validity(  # noqa: C901, PLR0911, PLR0912, PLR0913
+def _check_fast_paths(
+    elem_symbols: tuple[str, ...],
+    include_alloys: bool,
+    check_metallicity: bool,
+    metallicity_threshold: float,
+    composition: Composition,
+) -> bool | None:
+    """Check fast-path conditions that short-circuit validity checking.
+
+    Returns True/False for fast-path decisions, or None if full checking is needed.
+    """
+    if len(set(elem_symbols)) == 1:
+        return True
+    if include_alloys and all(sym in metals for sym in elem_symbols):
+        return True
+    if check_metallicity and metallicity_score(composition) >= metallicity_threshold:
+        return True
+    return None
+
+
+def _get_icsd24_oxidation_states(
+    smact_elems: list[Element],
+    config: ICSD24FilterConfig,
+) -> list[list[int]] | None:
+    """Get oxidation states from ICSD24 filter. Returns None if any element has no states."""
+    ox_filter = ICSD24OxStatesFilter()
+    filtered_df = ox_filter.filter(
+        consensus=config.consensus,
+        include_zero=config.include_zero,
+        commonality=config.commonality,
+    )
+    oxidation_dict = {
+        row["element"]: [int(x) for x in str(row["oxidation_state"]).split()] for _, row in filtered_df.iterrows()
+    }
+    ox_combos: list[list[int]] = []
+    for el in smact_elems:
+        ox_el = oxidation_dict.get(el.symbol)
+        if ox_el is None:
+            return None
+        ox_combos.append(ox_el)
+    return ox_combos
+
+
+def _check_mixed_valence(
+    ox_combos: list[list[int]],
+    stoichs: list[tuple[int, ...]],
+    threshold: int,
+    electronegs: list[float | None],
+    elem_symbols: tuple[str, ...],
+    use_pauling_test: bool,
+) -> bool:
+    """Check validity after expanding mixed-valence elements."""
+    projected = 1
+    for el, ox, count in zip(elem_symbols, ox_combos, stoichs, strict=True):
+        projected *= len(ox) ** count[0] if el in MIXED_VALENCE_ELEMENTS else len(ox)
+    if projected > _MAX_MIXED_VALENCE_COMBOS:
+        warnings.warn(
+            "Mixed-valence expansion would generate too many combinations "
+            f"({projected:,}); skipping to avoid excessive runtime.",
+            stacklevel=2,
+        )
+        return False
+    ox_combos, stoichs, electronegs = _expand_mixed_valence_comp(ox_combos, stoichs, electronegs, elem_symbols)
+    return _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
+
+
+def smact_validity(
     composition: Composition | str,
     use_pauling_test: bool = True,
     include_alloys: bool = True,
     check_metallicity: bool = False,
     metallicity_threshold: float = 0.7,
     oxidation_states_set: str | None = None,
-    include_zero: bool = False,
-    consensus: int = 3,
-    commonality: str = "medium",
+    icsd_filter: ICSD24FilterConfig | None = None,
     mixed_valence: bool = False,
 ) -> bool:
     """
@@ -490,49 +575,26 @@ def smact_validity(  # noqa: C901, PLR0911, PLR0912, PLR0913
         check_metallicity (bool): If True, consider high metallicity valid.
         metallicity_threshold (float): Score threshold for metallicity validity.
         oxidation_states_set (str): Which set of oxidation states to use.
-            If specified it overrides the making of the oxidation states set.
-        include_zero (bool): Include oxidation state of zero in the
-            filtered list. Default is False.
-        consensus (int): Minimum number of occurrences in literature for
-            an ion to be considered valid. Default is 3.
-        commonality (str): Excludes species below a certain proportion
-            of appearances in literature with respect to the total
-            number of reports of a given element (after the consensus
-            threshold has been applied). "low" includes all species,
-            "medium" excludes rare species below 10% occurrence, and
-            "high" excludes non-majority species below 50% occurrence.
-            "main" selects the species with the highest occurrence for
-            a given element. Users may also specify their own threshold
-            (float or int). Default is "medium".
+            If specified it overrides the ICSD24 filter.
+        icsd_filter (ICSD24FilterConfig): Configuration for ICSD24 oxidation
+            state filtering. Only used when ``oxidation_states_set`` is None.
+            Defaults to ``ICSD24FilterConfig()`` (consensus=3, commonality="medium").
         mixed_valence (bool): If True, allow mixed valence elements to be treated as separate species. Default is False.
 
     Returns:
         bool: True if the composition is valid, False otherwise.
     """
-    if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):  # noqa: PLR2004
-        warnings.warn(
-            "Parameters include_zero, consensus, and commonality are only used when oxidation_states_set is None",
-            stacklevel=2,
-        )
+    if icsd_filter is None:
+        icsd_filter = ICSD24FilterConfig()
 
     if isinstance(composition, str):
         composition = Composition(composition)
 
     elem_symbols = tuple(composition.as_dict().keys())
 
-    # Fast path for single elements
-    if len(set(elem_symbols)) == 1:
-        return True
-
-    # Fast path for alloys
-    if include_alloys and all(sym in metals for sym in elem_symbols):
-        return True
-
-    # Fast path for high metallicity compositions
-    if check_metallicity:
-        score = metallicity_score(composition)
-        if score >= metallicity_threshold:
-            return True
+    fast = _check_fast_paths(elem_symbols, include_alloys, check_metallicity, metallicity_threshold, composition)
+    if fast is not None:
+        return fast
 
     # Convert composition counts -> stoichiometric ratios
     counts = [int(v) for v in composition.as_dict().values()]
@@ -547,54 +609,22 @@ def smact_validity(  # noqa: C901, PLR0911, PLR0912, PLR0913
 
     # Get oxidation states data
     if oxidation_states_set is None:
-        ox_filter = ICSD24OxStatesFilter()
-        filtered_df = ox_filter.filter(consensus=consensus, include_zero=include_zero, commonality=commonality)
-        oxidation_dict = {
-            row["element"]: [int(x) for x in str(row["oxidation_state"]).split()] for _, row in filtered_df.iterrows()
-        }
-        ox_combos = []
-        for el in smact_elems:
-            ox_el = oxidation_dict.get(el.symbol)
-            if ox_el is not None:
-                ox_combos.append(ox_el)
-            else:
-                return False
+        ox_combos_result = _get_icsd24_oxidation_states(smact_elems, icsd_filter)
+        if ox_combos_result is None:
+            return False
+        ox_combos_valid = ox_combos_result
     else:
         ox_combos = _get_oxidation_states(smact_elems, oxidation_states_set)
-
-    # Guard: if any element has no oxidation states in the chosen set (e.g. noble
-    # gases in most databases), the composition cannot be charge-balanced.
-    if any(ox is None or len(ox) == 0 for ox in ox_combos):
-        return False
-
-    # After the guard, ox_combos contains only non-None, non-empty lists of ints
-    ox_combos_valid = cast("list[list[int]]", ox_combos)
+        if any(ox is None or len(ox) == 0 for ox in ox_combos):
+            return False
+        ox_combos_valid = cast("list[list[int]]", ox_combos)
 
     # Check all possible oxidation state combinations
-    ox_valid = _is_valid_oxi_state(ox_combos_valid, stoichs, threshold, electronegs, use_pauling_test)
-
-    if ox_valid:
+    if _is_valid_oxi_state(ox_combos_valid, stoichs, threshold, electronegs, use_pauling_test):
         return True
+
     if mixed_valence and any(el in MIXED_VALENCE_ELEMENTS for el in elem_symbols):
-        # Guard against combinatorial blow-up before expanding
-        projected = 1
-        for el, ox, count in zip(elem_symbols, ox_combos_valid, stoichs, strict=True):
-            projected *= len(ox) ** count[0] if el in MIXED_VALENCE_ELEMENTS else len(ox)
-        if projected > 1_000_000:  # noqa: PLR2004
-            warnings.warn(
-                "Mixed-valence expansion would generate too many combinations "
-                f"({projected:,}); skipping to avoid excessive runtime.",
-                stacklevel=2,
-            )
-            return False
-        # Treat each atom of a mixed-valence element as an independent site.
-        # threshold is computed from the original stoichs and remains valid after
-        # expansion: expanded MV sites have stoich (1,) ≤ threshold, and
-        # non-MV sites retain their original stoichs which are also ≤ threshold.
-        ox_combos_valid, stoichs, electronegs = _expand_mixed_valence_comp(
-            ox_combos_valid, stoichs, electronegs, elem_symbols
-        )
-        return _is_valid_oxi_state(ox_combos_valid, stoichs, threshold, electronegs, use_pauling_test)
+        return _check_mixed_valence(ox_combos_valid, stoichs, threshold, electronegs, elem_symbols, use_pauling_test)
 
     return False
 
