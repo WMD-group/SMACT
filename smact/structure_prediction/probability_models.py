@@ -18,8 +18,8 @@ Todo:
 from __future__ import annotations
 
 import abc
-import os
 from itertools import combinations_with_replacement
+from pathlib import Path
 
 import pandas as pd
 
@@ -88,7 +88,7 @@ class RadiusModel(SubstitutionModel):
             k = \Delta r_\mathrm{max}^{-2}.
 
         """
-        shannon_file = os.path.join(data_directory, "shannon_radii.csv")
+        shannon_file = str(Path(data_directory) / "shannon_radii.csv")
 
         self.shannon_data = pd.read_csv(shannon_file, index_col=0)
 
@@ -121,7 +121,8 @@ class RadiusModel(SubstitutionModel):
             ele1_rows = self.shannon_data.loc[spec1[0]]
             ele2_rows = self.shannon_data.loc[spec2[0]]
         except KeyError as e:
-            raise KeyError(f"Element not in Shannon radius data file: {e}")
+            msg = f"Element not in Shannon radius data file: {e}"
+            raise KeyError(msg) from e
 
         spec1_rows = ele1_rows.loc[ele1_rows["charge"] == spec1[1]]
         spec2_rows = ele2_rows.loc[ele2_rows["charge"] == spec2[1]]

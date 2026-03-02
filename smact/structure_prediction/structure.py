@@ -9,6 +9,7 @@ from collections import defaultdict
 from functools import reduce
 from math import gcd
 from operator import itemgetter
+from pathlib import Path
 from typing import cast as _cast
 
 import numpy as np
@@ -207,11 +208,14 @@ class SmactStructure:
 
         """
         if not isinstance(species, list):
-            raise TypeError(f"`species` must be a list, got {type(species)}.")
+            msg = f"`species` must be a list, got {type(species)}."
+            raise TypeError(msg)
         if len(species) == 0:
-            raise ValueError("`species` cannot be empty.")
+            msg = "`species` cannot be empty."
+            raise ValueError(msg)
         if not isinstance(species[0], tuple):
-            raise TypeError(f"`species` must be a list of tuples, got list of {type(species[0])}.")
+            msg = f"`species` must be a list of tuples, got list of {type(species[0])}."
+            raise TypeError(msg)
 
         species_error = (
             "`species` list of tuples must contain either "
@@ -260,7 +264,8 @@ class SmactStructure:
 
         """
         if not isinstance(structure, pmg_Structure):
-            raise TypeError(f"Expected pymatgen.core.Structure, got {type(structure).__name__}")
+            msg = f"Expected pymatgen.core.Structure, got {type(structure).__name__}"
+            raise TypeError(msg)
 
         sites = defaultdict(list)
         for site in structure.sites:
@@ -317,7 +322,8 @@ class SmactStructure:
 
         """
         if not isinstance(structure, pmg_Structure):
-            raise TypeError(f"Expected pymatgen.core.Structure, got {type(structure).__name__}")
+            msg = f"Expected pymatgen.core.Structure, got {type(structure).__name__}"
+            raise TypeError(msg)
 
         if determine_oxi == "BV":
             bva = BVAnalyzer()
@@ -343,9 +349,12 @@ class SmactStructure:
             struct = structure
 
         else:
-            raise ValueError(
-                f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either 'BV','comp_ICSD','both' or 'predecorated'."
+            msg = (
+                f"Argument for 'determine_oxi', <{determine_oxi}>"
+                " is not valid. Choose either 'BV', 'comp_ICSD',"
+                " 'both' or 'predecorated'."
             )
+            raise ValueError(msg)
 
         sites, species = SmactStructure.__parse_py_sites(struct)
 
@@ -362,7 +371,7 @@ class SmactStructure:
         )
 
     @staticmethod
-    def from_mp(
+    def from_mp(  # noqa: C901, PLR0912
         species: list[tuple[str, int, int] | tuple[smact.Species, int]],
         api_key: str | None = None,
         determine_oxi: str = "BV",
@@ -373,7 +382,11 @@ class SmactStructure:
         Args:
         ----
             species: See :meth:`~.__init__`.
-            determine_oxi (str): The method to determine the assignments oxidation states in the structure. Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence, ICSD statistics or trial both sequentially, respectively.
+            determine_oxi (str): The method to determine the assignments
+                oxidation states in the structure. Options are 'BV',
+                'comp_ICSD', 'both' for determining the oxidation states
+                by bond valence, ICSD statistics or trial both
+                sequentially, respectively.
             api_key (str| None): A www.materialsproject.org API key.
 
         Returns:
@@ -388,19 +401,20 @@ class SmactStructure:
         if api_key is None:
             api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")
         if api_key is None:
-            raise ValueError(
-                "No Materials Project API key found. Set the MP_API_KEY or PMG_MAPI_KEY environment variable."
-            )
+            msg = "No Materials Project API key found. Set the MP_API_KEY or PMG_MAPI_KEY environment variable."
+            raise ValueError(msg)
 
         # Legacy API routine
-        if len(api_key) != 32:
+        if len(api_key) != 32:  # noqa: PLR2004
             if not HAS_LEGACY_MPRESTER:
-                raise ImportError(
+                msg = (
                     "pymatgen legacy MPRester is not available. "
                     "Install pymatgen >= 2022.1 with legacy MP API support or use mp-api."
                 )
+                raise ImportError(msg)
             if MPRester is None:  # pragma: no cover
-                raise ImportError("pymatgen legacy MPRester is not available.")
+                msg = "pymatgen legacy MPRester is not available."
+                raise ImportError(msg)
             with MPRester(api_key) as m:
                 structs = m.query(
                     criteria={"reduced_cell_formula": formula},
@@ -410,21 +424,23 @@ class SmactStructure:
         elif HAS_MP_API:
             # New API routine
             if MPResterNew is None:  # pragma: no cover
-                raise ImportError("mp-api MPRester is not available.")
+                msg = "mp-api MPRester is not available."
+                raise ImportError(msg)
             with MPResterNew(api_key, use_document_model=False) as m:
                 structs = m.materials.summary.search(formula=formula, fields=["structure"])
         else:
             if not HAS_LEGACY_MPRESTER:
-                raise ImportError(
-                    "Neither mp-api nor pymatgen legacy MPRester is available. Install mp-api: `pip install mp-api`."
-                )
+                msg = "Neither mp-api nor pymatgen legacy MPRester is available. Install mp-api: `pip install mp-api`."
+                raise ImportError(msg)
             if MPRester is None:  # pragma: no cover
-                raise ImportError("pymatgen legacy MPRester is not available.")
+                msg = "pymatgen legacy MPRester is not available."
+                raise ImportError(msg)
             with MPRester(api_key) as m:
                 structs = m.get_structures(chemsys_formula=formula)
 
         if len(structs) == 0:
-            raise ValueError("Could not find composition in Materials Project Database, please supply a structure.")
+            msg = "Could not find composition in Materials Project Database, please supply a structure."
+            raise ValueError(msg)
 
         # Default to first found structure
         struct = structs[0]["structure"] if isinstance(structs[0], dict) else structs[0]  # type: ignore[index]
@@ -447,13 +463,18 @@ class SmactStructure:
                     logger.info("Oxidation states assigned using bond valence")
                 except (ValueError, RuntimeError):
                     comp = struct.composition
-                    oxi_transform = OxidationStateDecorationTransformation(comp.oxi_state_guesses(max_sites=-50)[0])  # type: ignore[union-attr]
+                    oxi_transform = OxidationStateDecorationTransformation(
+                        comp.oxi_state_guesses(max_sites=-50)[0]  # type: ignore[union-attr]
+                    )
                     struct = oxi_transform.apply_transformation(struct)
                     logger.info("Oxidation states assigned based on ICSD statistics")
             else:
-                raise ValueError(
-                    f"Argument for 'determine_oxi', <{determine_oxi}> is not valid. Choose either 'BV','comp_ICSD' or 'both'."
+                msg = (
+                    f"Argument for 'determine_oxi', <{determine_oxi}>"
+                    " is not valid. Choose either 'BV',"
+                    " 'comp_ICSD' or 'both'."
                 )
+                raise ValueError(msg)
         lattice_mat = struct.lattice.matrix  # type: ignore[union-attr]
 
         lattice_param = 1.0  # Scaling factor; lattice_mat already contains actual vectors
@@ -483,7 +504,7 @@ class SmactStructure:
             :class:`~.SmactStructure`
 
         """
-        with open(fname) as f:
+        with Path(fname).open() as f:
             return SmactStructure.from_poscar(f.read())
 
     @staticmethod

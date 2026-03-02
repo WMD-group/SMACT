@@ -39,18 +39,21 @@ def _ensure_composition(composition: str | Composition) -> Composition:
     """
     if isinstance(composition, str):
         if not composition.strip():
-            raise ValueError("Empty composition")
+            msg = "Empty composition"
+            raise ValueError(msg)
         # Try to parse with pymatgen
         try:
             return Composition(composition)
         except ValueError as exc:
             # If pymatgen can't parse, re-raise with a message the test expects
-            raise ValueError("Invalid formula") from exc
+            msg = "Invalid formula"
+            raise ValueError(msg) from exc
     return composition
 
 
 def get_element_fraction(composition: str | Composition, element_set: Collection[str]) -> float:
     """Calculate the fraction of elements from a given set in a composition.
+
     This helper function is used to avoid code duplication in functions that
     calculate fractions of specific element types (e.g., metals, d-block elements).
 
@@ -90,8 +93,7 @@ def get_distinct_metal_count(composition: str | Composition) -> int:
 
 
 def get_pauling_test_mismatch(composition: str | Composition) -> float:
-    """Calculate a score for how much the composition deviates from ideal
-    Pauling electronegativity ordering.
+    """Calculate a score for how much the composition deviates from ideal Pauling electronegativity ordering.
 
     Higher mismatch => more difference (ionic, e.g. NaCl).
     Lower mismatch => metal-metal bonds (e.g. Fe-Al).
@@ -108,10 +110,9 @@ def get_pauling_test_mismatch(composition: str | Composition) -> float:
         return float("nan")
 
     eneg_values: list[float] = [e for e in electronegativities if e is not None]
-    mismatches: list[float] = []
-    for i, eneg1 in enumerate(eneg_values):
-        for eneg2 in eneg_values[i + 1 :]:
-            mismatches.append(abs(eneg1 - eneg2))
+    mismatches: list[float] = [
+        abs(eneg1 - eneg2) for i, eneg1 in enumerate(eneg_values) for eneg2 in eneg_values[i + 1 :]
+    ]
 
     # Return average mismatch across all unique pairs
     return float(np.mean(mismatches)) if mismatches else 0.0

@@ -84,8 +84,8 @@ class BasePropertyPredictor(ABC):
         model_name: str | None = None,
         model_path: str | Path | None = None,
         device: str = "cpu",
-        **kwargs: Any,
-    ):
+        **kwargs: Any,  # noqa: ANN401, ARG002
+    ) -> None:
         """Initialise the property predictor.
 
         Args:
@@ -110,10 +110,11 @@ class BasePropertyPredictor(ABC):
 
         # Validate property name
         if property_name not in self.supported_properties:
-            raise ValueError(
+            msg = (
                 f"Property '{property_name}' not supported. "
                 f"Supported properties: {', '.join(self.supported_properties)}"
             )
+            raise ValueError(msg)
 
     @property
     @abstractmethod
@@ -169,7 +170,8 @@ class BasePropertyPredictor(ABC):
         compositions = [str(c) for c in compositions]
 
         if not compositions:
-            raise ValueError("At least one composition must be provided.")
+            msg = "At least one composition must be provided."
+            raise ValueError(msg)
 
         if validate_smact:
             from smact.screening import smact_validity
@@ -185,9 +187,10 @@ class BasePropertyPredictor(ABC):
                     invalid.append(comp)
 
             if invalid:
-                raise ValueError(
+                msg = (
                     f"Invalid compositions according to SMACT: {invalid}. Set validate_smact=False to skip validation."
                 )
+                raise ValueError(msg)
 
         return compositions
 

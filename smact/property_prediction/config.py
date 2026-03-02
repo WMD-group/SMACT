@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 # Pretrained models bundled in the repository (available when running from source)
 PRETRAINED_MODELS_DIR = Path(__file__).resolve().parent.parent.parent / "pretrained_models"
 
 # Cache locations (following MatGL pattern)
-SMACT_CACHE = Path(os.path.expanduser("~")) / ".cache" / "smact"
+SMACT_CACHE = Path("~").expanduser() / ".cache" / "smact"
 MODELS_CACHE = SMACT_CACHE / "models"
 
 # Remote URL base for pretrained models

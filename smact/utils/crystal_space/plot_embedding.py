@@ -53,17 +53,17 @@ def update_layout(
         title_font_size=30,
         width=width,
         height=height,
-        margin=dict(l=10, r=10, t=80, b=50),
+        margin={"l": 10, "r": 10, "t": 80, "b": 50},
         paper_bgcolor="rgba(255,255,255,1)",
         plot_bgcolor="rgba(255,255,255,1)",
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            xanchor="center",
-            x=0.5,
-            y=-0.04,
-            font=dict(size=30),
-        ),
+        legend={
+            "orientation": "h",
+            "yanchor": "bottom",
+            "xanchor": "center",
+            "x": 0.5,
+            "y": -0.04,
+            "font": {"size": 30},
+        },
     )
     return fig
 
@@ -88,7 +88,7 @@ def plot_reducers_embeddings(
 
     # updatee the font size of subplot titles
     for i in fig["layout"]["annotations"]:  # type: ignore[index]
-        i["font"] = dict(size=25)  # type: ignore[index]
+        i["font"] = {"size": 25}  # type: ignore[index]
 
     legend_colors = {
         "unlikely": "#D9D9D9",
@@ -100,7 +100,7 @@ def plot_reducers_embeddings(
     for i, embedding_name in enumerate(embedding_names):
         for j, reducer in enumerate(reducers):
             logger.info("processing %d %d...", i, j)
-            embedding_data = pd.read_pickle(
+            embedding_data = pd.read_pickle(  # noqa: S301
                 embedding_dir / f"{reducer}_{embedding_name}.pkl",
             )
             embedding_data.columns = ["x", "y"]
@@ -112,13 +112,13 @@ def plot_reducers_embeddings(
                     x=df_plot["x"],
                     y=df_plot["y"],
                     mode="markers",
-                    marker=dict(
-                        size=8,
-                        color=df_plot["label"].map(legend_colors),  # type: ignore[arg-type]
-                        opacity=0.8,
-                        symbol=symbol,
-                        line=dict(width=0.5, color="DarkSlateGrey"),
-                    ),
+                    marker={
+                        "size": 8,
+                        "color": df_plot["label"].map(legend_colors),  # type: ignore[arg-type]
+                        "opacity": 0.8,
+                        "symbol": symbol,
+                        "line": {"width": 0.5, "color": "DarkSlateGrey"},
+                    },
                     showlegend=False,
                     text=df_plot["formula"],
                     hovertemplate=("<b>%{text}</b><br><br>"),
@@ -134,13 +134,13 @@ def plot_reducers_embeddings(
                 x=[None],
                 y=[None],
                 mode="markers",
-                marker=dict(
-                    size=8,
-                    color=color,
-                    opacity=0.8,
-                    symbol=symbol,
-                    line=dict(width=0.5, color="DarkSlateGrey"),
-                ),
+                marker={
+                    "size": 8,
+                    "color": color,
+                    "opacity": 0.8,
+                    "symbol": symbol,
+                    "line": {"width": 0.5, "color": "DarkSlateGrey"},
+                },
                 # make only first letter capital
                 name=label.capitalize(),
                 showlegend=True,

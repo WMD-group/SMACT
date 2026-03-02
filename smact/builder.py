@@ -44,10 +44,8 @@ def cubic_perovskite(
         cellpar=cell_par,
     )
 
-    sites_list = []
     oxidation_states = [[2]] + [[4]] + [[-2]] * 3
-    for site in zip(system.get_scaled_positions(), oxidation_states, strict=True):
-        sites_list.append(Site(site[0], site[1]))
+    sites_list = [Site(site[0], site[1]) for site in zip(system.get_scaled_positions(), oxidation_states, strict=True)]
 
     return Lattice(sites_list), system
 
@@ -84,9 +82,6 @@ def wurtzite(
         cellpar=[3, 3, 6, 90, 90, 120],
     )
 
-    sites_list = []
     oxidation_states = [[2]] * 2 + [[-2]] * 2
-
-    for site in zip(system.get_scaled_positions(), oxidation_states, strict=True):
-        sites_list.append(Site(site[0], site[1]))
+    sites_list = [Site(site[0], site[1]) for site in zip(system.get_scaled_positions(), oxidation_states, strict=True)]
     return Lattice(sites_list), system

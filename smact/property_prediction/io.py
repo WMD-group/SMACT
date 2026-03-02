@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import shutil
 import sys
 import tarfile
@@ -34,7 +33,7 @@ class RemoteFile:
         uri: str,
         cache_location: Path = MODELS_CACHE,
         force_download: bool = False,
-    ):
+    ) -> None:
         """Initialise the RemoteFile handler.
 
         Args:
@@ -54,31 +53,30 @@ class RemoteFile:
         has_complete_model = self.local_path.is_dir() and all((self.local_path / fn).exists() for fn in required)
 
         if force_download or not has_complete_model:
-            logger.info(f"Downloading model from {uri}...")
+            logger.info("Downloading model from %s...", uri)
             self._download()
         else:
-            logger.debug(f"Using cached model at {self.local_path}")
+            logger.debug("Using cached model at %s", self.local_path)
 
     def _download(self) -> None:
         """Download and extract the model archive."""
         import requests
 
-        os.makedirs(self.cache_location, exist_ok=True)
+        self.cache_location.mkdir(parents=True, exist_ok=True)
 
         # Download the archive
         response = requests.get(self.uri, stream=True, timeout=120)
-        if response.status_code != 200:
-            raise requests.RequestException(
-                f"Failed to download model from {self.uri}. Status code: {response.status_code}"
-            )
+        if response.status_code != 200:  # noqa: PLR2004
+            msg = f"Failed to download model from {self.uri}. Status code: {response.status_code}"
+            raise requests.RequestException(msg)
 
         # Save to temporary tar.gz file
         tar_path = self.cache_location / f"{self.model_name}.tar.gz"
-        with open(tar_path, "wb") as f:
+        with tar_path.open("wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
-        logger.info(f"Downloaded to {tar_path}, extracting...")
+        logger.info("Downloaded to %s, extracting...", tar_path)
 
         # Extract the archive safely using data filter for security
         with tarfile.open(tar_path, "r:gz") as tar:
@@ -89,7 +87,7 @@ class RemoteFile:
 
         # Clean up the tar file
         tar_path.unlink()
-        logger.info(f"Model extracted to {self.local_path}")
+        logger.info("Model extracted to %s", self.local_path)
 
 
 def load_model_files(
@@ -119,19 +117,19 @@ def load_model_files(
 
     # Check if it's a local directory path
     if path.is_dir() and all((path / fn).exists() for fn in required_files):
-        logger.debug(f"Loading model from local path: {path}")
+        logger.debug("Loading model from local path: %s", path)
         return {fn: path / fn for fn in required_files}
 
     # Check pretrained_models directory in the repository
     pretrained_path = PRETRAINED_MODELS_DIR / str(model_name)
     if pretrained_path.is_dir() and all((pretrained_path / fn).exists() for fn in required_files):
-        logger.debug(f"Loading model from pretrained_models: {pretrained_path}")
+        logger.debug("Loading model from pretrained_models: %s", pretrained_path)
         return {fn: pretrained_path / fn for fn in required_files}
 
     # Check cache
     cached_path = MODELS_CACHE / str(model_name)
     if cached_path.is_dir() and all((cached_path / fn).exists() for fn in required_files) and not force_download:
-        logger.debug(f"Loading model from cache: {cached_path}")
+        logger.debug("Loading model from cache: %s", cached_path)
         return {fn: cached_path / fn for fn in required_files}
 
     # Download from remote
@@ -144,14 +142,17 @@ def load_model_files(
         )
         resolved = {fn: remote.local_path / fn for fn in required_files}
         if not all(path.exists() for path in resolved.values()):
-            raise FileNotFoundError(f"Downloaded model '{model_name}' is incomplete at {remote.local_path}")
-        return resolved
+            msg = f"Downloaded model '{model_name}' is incomplete at {remote.local_path}"
+            raise FileNotFoundError(msg)
     except requests.RequestException as e:
-        raise FileNotFoundError(
+        msg = (
             f"Could not find or download model '{model_name}'. "
             f"Check that the model name is correct and you have internet access. "
             f"Original error: {e}"
-        ) from e
+        )
+        raise FileNotFoundError(msg) from e
+    else:
+        return resolved
 
 
 def load_checkpoint(
@@ -180,7 +181,7 @@ def load_checkpoint(
     map_location = torch.device(device)
 
     # Load metadata from JSON
-    with open(fpaths["model.json"]) as f:
+    with fpaths["model.json"].open() as f:
         metadata = json.load(f)
 
     # Load model parameters and state dict
@@ -191,7 +192,8 @@ def load_checkpoint(
     model_version = metadata.get("@model_version", 0)
     if model_version > 1:
         logger.warning(
-            f"Model version ({model_version}) is newer than supported. Some features may not work correctly."
+            "Model version (%s) is newer than supported. Some features may not work correctly.",
+            model_version,
         )
 
     return {
@@ -230,7 +232,7 @@ def save_checkpoint(
     import torch
 
     path = Path(path)
-    os.makedirs(path, exist_ok=True)
+    path.mkdir(parents=True, exist_ok=True)
 
     # Save model parameters (including normaliser dict)
     params_to_save = {**model_params, "normalizer_dict": normalizer_dict}
@@ -247,10 +249,10 @@ def save_checkpoint(
         "metadata": metadata or {},
         "kwargs": model_params,
     }
-    with open(path / "model.json", "w") as f:
+    with (path / "model.json").open("w") as f:
         json.dump(model_json, f, indent=4, default=str)
 
-    logger.info(f"Checkpoint saved to {path}")
+    logger.info("Checkpoint saved to %s", path)
 
 
 def clear_cache(confirm: bool = True) -> None:
@@ -260,17 +262,17 @@ def clear_cache(confirm: bool = True) -> None:
         confirm: If True, ask for confirmation before deleting.
     """
     if not MODELS_CACHE.exists():
-        print(f"Cache directory {MODELS_CACHE} does not exist.")
+        logger.info("Cache directory %s does not exist.", MODELS_CACHE)
         return
 
     if confirm:
         answer = input(f"Delete all cached models in {MODELS_CACHE}? (y/n): ").lower()
         if answer != "y":
-            print("Cancelled.")
+            logger.info("Cancelled.")
             return
 
     shutil.rmtree(MODELS_CACHE)
-    print(f"Cleared cache at {MODELS_CACHE}")
+    logger.info("Cleared cache at %s", MODELS_CACHE)
 
 
 def get_cache_size() -> int:
@@ -299,9 +301,6 @@ def list_cached_models() -> list[str]:
     if not MODELS_CACHE.exists():
         return []
 
-    models = []
-    for path in MODELS_CACHE.iterdir():
-        if path.is_dir() and (path / "model.json").exists():
-            models.append(path.name)
+    models = [path.name for path in MODELS_CACHE.iterdir() if path.is_dir() and (path / "model.json").exists()]
 
     return sorted(models)

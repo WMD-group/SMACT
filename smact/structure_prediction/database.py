@@ -43,10 +43,11 @@ def _validate_table_name(table: str) -> str:
         ValueError: If the table name contains invalid characters.
     """
     if not _VALID_TABLE_NAME_RE.match(table):
-        raise ValueError(
+        msg = (
             f"Invalid table name {table!r}. "
             "Table names must start with a letter or underscore and contain only alphanumerics and underscores."
         )
+        raise ValueError(msg)
     return table
 
 
@@ -157,8 +158,9 @@ class StructureDB:
                 # Try to get the API key from the environment
                 mp_api_key = SETTINGS.get("PMG_MAPI_KEY") or os.environ.get("MP_API_KEY")
             if mp_api_key is None:
-                raise ValueError("No Materials Project API key provided.")
-            if len(mp_api_key) != 32:
+                msg = "No Materials Project API key provided."
+                raise ValueError(msg)
+            if len(mp_api_key) != 32:  # noqa: PLR2004
                 with MPRester(mp_api_key) as m:
                     data = m.query(
                         criteria={"icsd_ids.0": {"$exists": True}},
@@ -166,10 +168,11 @@ class StructureDB:
                     )
             else:
                 if not HAS_MP_API or MPResterNew is None:
-                    raise ImportError(
+                    msg = (
                         "mp-api is required for 32-character Materials Project API keys. "
                         "Install it with: pip install mp-api"
                     )
+                    raise ImportError(msg)
                 with MPResterNew(mp_api_key, use_document_model=False) as m:
                     data = m.materials.summary.search(theoretical=False, fields=["structure", "material_id"])
         else:

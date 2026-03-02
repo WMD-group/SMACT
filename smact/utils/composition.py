@@ -41,7 +41,8 @@ def parse_formula(formula: str) -> dict[str, float]:
         expanded_sym = "".join([f"{el}{amt}" for el, amt in unit_sym_dict.items()])
         formula = formula.replace(m.group(), expanded_sym)
     else:
-        raise ValueError(f"Formula exceeds maximum nesting depth of {_MAX_FORMULA_DEPTH}: {formula!r}")
+        msg = f"Formula exceeds maximum nesting depth of {_MAX_FORMULA_DEPTH}: {formula!r}"
+        raise ValueError(msg)
     return _get_sym_dict(formula, 1)
 
 
@@ -70,7 +71,7 @@ def comp_maker(smact_filter_output: tuple[str, int, int] | tuple[str, int]) -> C
     Returns:
         composition (pymatgen.core.Composition): An instance of the Composition class
     """
-    if len(smact_filter_output) == 2:
+    if len(smact_filter_output) == 2:  # noqa: PLR2004
         form = []
         for el, ammt in zip(smact_filter_output[0], smact_filter_output[-1], strict=True):  # type: ignore[arg-type]
             form.append(el)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import re
+from pathlib import Path
 
 
 def remove_github_actions_entries(changelog_path: str) -> None:
@@ -12,10 +13,11 @@ def remove_github_actions_entries(changelog_path: str) -> None:
     Args:
         changelog_path: Path to the changelog file.
     """
-    with open(changelog_path) as file:
+    p = Path(changelog_path)
+    with p.open() as file:
         lines = file.readlines()
 
-    with open(changelog_path, "w") as file:
+    with p.open("w") as file:
         skip = False
         for line in lines:
             if re.search(r"\[github-actions\[bot\]\]", line):

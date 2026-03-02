@@ -67,11 +67,12 @@ _LAZY_IMPORTS = {
 }
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> type:
     """Lazy import for torch-dependent symbols."""
     if name in _LAZY_IMPORTS:
         import importlib
 
         module = importlib.import_module(_LAZY_IMPORTS[name])
         return getattr(module, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)

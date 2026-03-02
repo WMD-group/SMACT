@@ -28,7 +28,7 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
                 value = func(*args, **kwargs)
                 times.append(time() - t0)
 
-            logging.info(f"{func.__name__} -- Average over {n} repeats = {mean(times)}s")  # noqa: LOG015
+            logging.info("%s -- Average over %s repeats = %ss", func.__name__, n, mean(times))  # noqa: LOG015
 
             if delim:
                 logging.info("-" * DELIM_LENGTH)  # noqa: LOG015
@@ -41,5 +41,4 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
 
     if _func is None:
         return decorator_timeit
-    else:
-        return decorator_timeit(_func)
+    return decorator_timeit(_func)

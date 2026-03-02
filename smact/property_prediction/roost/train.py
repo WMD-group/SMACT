@@ -27,7 +27,7 @@ from smact.property_prediction.io import save_checkpoint
 logger = logging.getLogger(__name__)
 
 
-def train_roost_model(
+def train_roost_model(  # noqa: C901, PLR0912, PLR0913, PLR0915
     data_path: str | Path,
     target_column: str,
     property_name: str,
@@ -105,22 +105,24 @@ def train_roost_model(
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    logger.info(f"Training ROOST model on {device}")
+    logger.info("Training ROOST model on %s", device)
 
     # Load data
     train_data = pd.read_csv(data_path, keep_default_na=False, na_values=[])
 
     if target_column not in train_data.columns:
-        raise ValueError(f"Target column '{target_column}' not found in data")
+        msg = f"Target column '{target_column}' not found in data"
+        raise ValueError(msg)
 
     if "composition" not in train_data.columns:
-        raise ValueError("Data must have 'composition' column")
+        msg = "Data must have 'composition' column"
+        raise ValueError(msg)
 
     # Add material_id if not present
     if "material_id" not in train_data.columns:
         train_data["material_id"] = train_data.index.astype(str)
 
-    logger.info(f"Loaded {len(train_data)} samples from {data_path}")
+    logger.info("Loaded %d samples from %s", len(train_data), data_path)
 
     # Setup task
     task_dict = {target_column: "regression"}
@@ -136,11 +138,14 @@ def train_roost_model(
 
     # Validate split fractions
     if not 0 < test_size < 1:
-        raise ValueError(f"test_size must be between 0 and 1, got {test_size}")
+        msg = f"test_size must be between 0 and 1, got {test_size}"
+        raise ValueError(msg)
     if not 0 < val_size < 1:
-        raise ValueError(f"val_size must be between 0 and 1, got {val_size}")
+        msg = f"val_size must be between 0 and 1, got {val_size}"
+        raise ValueError(msg)
     if test_size + val_size >= 1:
-        raise ValueError(f"test_size + val_size must be < 1, got {test_size + val_size}")
+        msg = f"test_size + val_size must be < 1, got {test_size + val_size}"
+        raise ValueError(msg)
 
     # Split data
     indices = list(range(len(dataset)))
@@ -150,7 +155,7 @@ def train_roost_model(
     train_set = Subset(dataset, train_idx)
     val_set = Subset(dataset, val_idx)
 
-    logger.info(f"Data split: train={len(train_set)}, val={len(val_set)}, test={len(test_idx)}")
+    logger.info("Data split: train=%d, val=%d, test=%d", len(train_set), len(val_set), len(test_idx))
 
     # Create dataloaders
     data_params = {
@@ -209,7 +214,7 @@ def train_roost_model(
     normaliser.fit(torch.tensor(train_targets, dtype=torch.float32))
     normaliser_dict = {target_column: normaliser.state_dict()}
 
-    logger.info(f"Starting training for {epochs} epochs...")
+    logger.info("Starting training for %d epochs...", epochs)
 
     # Training loop
     best_val_loss = float("inf")
@@ -295,11 +300,11 @@ def train_roost_model(
 
         # Early stopping
         if patience is not None and epochs_without_improvement >= patience:
-            logger.info(f"Early stopping at epoch {epoch + 1}")
+            logger.info("Early stopping at epoch %d", epoch + 1)
             break
 
         if (epoch + 1) % 10 == 0:
-            logger.info(f"Epoch {epoch + 1}/{epochs}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
+            logger.info("Epoch %d/%d: train_loss=%.4f, val_loss=%.4f", epoch + 1, epochs, train_loss, val_loss)
 
     # Load best model
     if best_state_dict is not None:
@@ -341,7 +346,7 @@ def train_roost_model(
     # Write README
     _write_readme(output_path, property_name, fidelity, metadata)
 
-    logger.info(f"Model saved to {output_path}")
+    logger.info("Model saved to %s", output_path)
 
     return output_path
 
@@ -385,7 +390,7 @@ predictor = RoostPropertyPredictor(
 predictions = predictor.predict(["NaCl", "TiO2"])
 ```
 """
-    with open(output_path / "README.md", "w") as f:
+    with (output_path / "README.md").open("w") as f:
         f.write(readme)
 
 

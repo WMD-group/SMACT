@@ -1,14 +1,15 @@
-"""The dopant prediction module facilitates high-throughput prediction of p-type and n-type dopants
-in multi-component solids. The search and ranking process is based on electronic filters
+"""The dopant prediction module facilitates high-throughput prediction of p-type and n-type dopants.
+
+The search and ranking process is based on electronic filters
 (e.g. accessible oxidation states) and chemical filters (e.g. difference in ionic radius).
 """
 
 from __future__ import annotations
 
 import logging
-import os
 import warnings
 from itertools import groupby
+from pathlib import Path
 
 import numpy as np
 from pymatgen.util import plotting
@@ -35,16 +36,15 @@ _SELECTIVITY_INDEX = 4
 _COMBINED_SCORE_INDEX = 5
 _NUM_DOPANT_TYPES = 4
 
-SKIPSPECIES_COSINE_SIM_PATH = os.path.join(
-    data_directory,
-    "species_rep/skipspecies_20221028_319ion_dim200_cosine_similarity.json",
+SKIPSPECIES_COSINE_SIM_PATH = str(
+    Path(data_directory) / "species_rep/skipspecies_20221028_319ion_dim200_cosine_similarity.json"
 )
-SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH = os.path.join(
-    data_directory, "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-Eform_cosine_similarity.json"
+SPECIES_M3GNET_MP2023_EFORM_COSINE_PATH = str(
+    Path(data_directory) / "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-Eform_cosine_similarity.json"
 )
 
-SPECIES_M3GNET_MP2023_GAP_COSINE_PATH = os.path.join(
-    data_directory, "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-band_gap_cosine_similarity.json"
+SPECIES_M3GNET_MP2023_GAP_COSINE_PATH = str(
+    Path(data_directory) / "species_rep/ion_embedding_M3GNet-MP-2023.11.1-oxi-band_gap_cosine_similarity.json"
 )
 
 # Backward-compatible alias — the original name had a double-S typo.
@@ -53,7 +53,8 @@ SKIPSSPECIES_COSINE_SIM_PATH = SKIPSPECIES_COSINE_SIM_PATH
 
 class Doper:
     """
-    A class to search for n & p type dopants
+    A class to search for n & p type dopants.
+
     Methods: get_dopants, plot_dopants.
     """
 
@@ -72,7 +73,9 @@ class Doper:
             original_species: See :class:`~.Doper`.
             filepath (str): Path to a JSON file containing lambda table data.
             embedding (str): Name of the species embedding to use. Currently only 'skipspecies' is supported.
-            use_probability (bool): Whether to use the probability of substitution (calculated from `CationMutator`), or the raw similarity score/lambda value.
+            use_probability (bool): Whether to use the probability of
+                substitution (calculated from `CationMutator`), or
+                the raw similarity score/lambda value.
 
         """
         self.original_species = original_species
@@ -80,13 +83,15 @@ class Doper:
         # filepath and embedding are mutually exclusive
         # check if both are provided
         if filepath and embedding:
-            raise ValueError("Only one of filepath or embedding should be provided")
+            msg = "Only one of filepath or embedding should be provided"
+            raise ValueError(msg)
         if embedding and embedding not in [
             "skipspecies",
             "M3GNet-MP-2023.11.1-oxi-Eform",
             "M3GNet-MP-2023.11.1-oxi-band_gap",
         ]:
-            raise ValueError(f"Embedding {embedding} is not supported")
+            msg = f"Embedding {embedding} is not supported"
+            raise ValueError(msg)
         if embedding == "skipspecies":
             self.cation_mutator = mutation.CationMutator.from_json(SKIPSPECIES_COSINE_SIM_PATH)
         elif embedding == "M3GNet-MP-2023.11.1-oxi-Eform":
@@ -129,18 +134,19 @@ class Doper:
             selectivity = round(selectivity, 2)
             dopants.append(selectivity)
             if len(dopants) != _SELECTIVITY_INDEX + 1:  # pragma: no cover
-                raise RuntimeError(
+                msg = (
                     f"Dopant list has unexpected length {len(dopants)} (expected {_SELECTIVITY_INDEX + 1}). "
                     "This is an internal error; please report it."
                 )
+                raise RuntimeError(msg)
         return data
 
     def _merge_dicts(
         self, keys: list[str], dopants_list: list[list], groupby_list: list[dict], sort_idx: int = 2
     ) -> dict:
-        merged_dict = dict()
+        merged_dict = {}
         for k, dopants, group in zip(keys, dopants_list, groupby_list, strict=True):
-            merged_values = dict()
+            merged_values = {}
             merged_values["sorted"] = dopants
             for key, value in group.items():
                 merged_values[key] = sorted(value, key=lambda x: x[sort_idx], reverse=True)
@@ -222,7 +228,7 @@ class Doper:
                 results.append([candidate, host, prob, lam])
         return results
 
-    def get_dopants(self, num_dopants: int = 5, get_selectivity: bool = True, group_by_charge: bool = True) -> dict:
+    def get_dopants(self, num_dopants: int = 5, get_selectivity: bool = True, group_by_charge: bool = True) -> dict:  # noqa: C901
         """
         Get the top n dopants for each case.
 
@@ -284,15 +290,13 @@ class Doper:
                 dopants_list.sort(key=lambda x: x[_COMBINED_SCORE_INDEX], reverse=True)
 
         # if groupby
-        groupby_lists = [
-            dict() for _ in range(_NUM_DOPANT_TYPES)
-        ]  # create list of empty dict (n-cat, p-cat, n-an, p-an)
+        groupby_lists = [{} for _ in range(_NUM_DOPANT_TYPES)]  # create list of empty dict (n-cat, p-cat, n-an, p-an)
         # in case group_by_charge = False
         if group_by_charge:
             for i, dl in enumerate(dopants_lists):
                 # groupby first element charge
-                dl = sorted(dl, key=lambda x: utilities.parse_spec(x[0])[1])
-                grouped_data = groupby(dl, key=lambda x: utilities.parse_spec(x[0])[1])
+                dl_sorted = sorted(dl, key=lambda x: utilities.parse_spec(x[0])[1])
+                grouped_data = groupby(dl_sorted, key=lambda x: utilities.parse_spec(x[0])[1])
                 grouped_top_data = {str(k): list(g)[:num_dopants] for k, g in grouped_data}
                 groupby_lists[i] = grouped_top_data
                 del grouped_data
@@ -322,7 +326,8 @@ class Doper:
         Args:
         ----
             cmap (str): The colormap to use for the heatmap.
-            plot_value (str): The value to plot on the heatmap. Options are "probability", "similarity" or "selectivity".
+            plot_value (str): The value to plot on the heatmap.
+                Options are "probability", "similarity" or "selectivity".
 
         Returns:
         -------
@@ -330,7 +335,8 @@ class Doper:
 
         """
         if not self.results:
-            raise RuntimeError("Dopants are not calculated. Run get_dopants first.")
+            msg = "Dopants are not calculated. Run get_dopants first."
+            raise RuntimeError(msg)
 
         _plot_value_index = {
             "probability": _PROBABILITY_INDEX,
@@ -341,10 +347,11 @@ class Doper:
             idx = _plot_value_index.get(plot_value, _COMBINED_SCORE_INDEX)
             sorted_rows = dopants.get("sorted")
             if sorted_rows and idx >= len(sorted_rows[0]):
-                raise ValueError(
+                msg = (
                     f"Cannot plot '{plot_value}': dopant rows have only {len(sorted_rows[0])} columns. "
                     "Run get_dopants with get_selectivity=True to include selectivity data."
                 )
+                raise ValueError(msg)
             dict_results = {utilities.parse_spec(row[0])[0]: row[idx] for row in sorted_rows}
             plotting.periodic_table_heatmap(
                 elemental_data=dict_results,

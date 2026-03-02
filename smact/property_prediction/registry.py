@@ -47,11 +47,11 @@ def get_available_models(include_cached: bool = True) -> list[str]:
     try:
         manifest_url = f"{PRETRAINED_MODELS_BASE_URL}manifest.json"
         response = requests.get(manifest_url, timeout=10)
-        if response.status_code == 200:
+        if response.status_code == 200:  # noqa: PLR2004
             manifest = json.loads(response.content)
             models.update(manifest.get("models", []))
     except (requests.RequestException, json.JSONDecodeError) as e:
-        logger.debug(f"Could not fetch remote manifest: {e}")
+        logger.debug("Could not fetch remote manifest: %s", e)
 
     # Include models from pretrained_models directory in the repository
     if PRETRAINED_MODELS_DIR.exists():
@@ -87,7 +87,8 @@ def get_default_model(
     """
     if property_name not in DEFAULT_MODELS:
         available = list(DEFAULT_MODELS.keys())
-        raise ValueError(f"Unknown property: '{property_name}'. Available properties: {available}")
+        msg = f"Unknown property: '{property_name}'. Available properties: {available}"
+        raise ValueError(msg)
 
     prop_models = DEFAULT_MODELS[property_name]
     available_fidelities = [k for k in prop_models if k != "default"]
@@ -96,7 +97,8 @@ def get_default_model(
     if fidelity is None:
         default_value = prop_models.get("default")
         if default_value is None:
-            raise ValueError(f"No default model configured for property '{property_name}'")
+            msg = f"No default model configured for property '{property_name}'"
+            raise ValueError(msg)
 
         # Check if default points to a fidelity key or directly to a model name
         if default_value in prop_models:
@@ -107,10 +109,11 @@ def get_default_model(
             return default_value
 
     if fidelity not in prop_models:
-        raise ValueError(
+        msg = (
             f"Fidelity '{fidelity}' not available for property '{property_name}'. "
             f"Available fidelities: {available_fidelities}"
         )
+        raise ValueError(msg)
 
     return prop_models[fidelity]
 
@@ -138,7 +141,8 @@ def get_property_fidelities(property_name: str) -> list[str] | None:
     """
     if property_name not in PROPERTY_METADATA:
         available = list(PROPERTY_METADATA.keys())
-        raise ValueError(f"Unknown property: '{property_name}'. Available properties: {available}")
+        msg = f"Unknown property: '{property_name}'. Available properties: {available}"
+        raise ValueError(msg)
 
     fidelities = PROPERTY_METADATA[property_name].get("fidelities")
     if fidelities is None:
@@ -197,9 +201,10 @@ def model_exists(model_name: str) -> bool:
     try:
         url = f"{PRETRAINED_MODELS_BASE_URL}{model_name}.tar.gz"
         response = requests.head(url, timeout=5, allow_redirects=True)
-        return response.status_code == 200
     except requests.RequestException:
         return False
+    else:
+        return response.status_code == 200  # noqa: PLR2004
 
 
 def parse_model_name(model_name: str) -> dict[str, str | None]:
@@ -215,7 +220,7 @@ def parse_model_name(model_name: str) -> dict[str, str | None]:
     """
     parts = model_name.split("-")
 
-    if len(parts) < 4:
+    if len(parts) < 4:  # noqa: PLR2004
         return {
             "model_type": None,
             "dataset": None,
@@ -229,16 +234,16 @@ def parse_model_name(model_name: str) -> dict[str, str | None]:
         "dataset": parts[1],  # e.g., "MP"
         "version": parts[2],  # e.g., "2024.1.0"
         "property": parts[3],  # e.g., "band_gap"
-        "fidelity": parts[4] if len(parts) > 4 else None,  # e.g., "pbe"
+        "fidelity": parts[4] if len(parts) > 4 else None,  # noqa: PLR2004  # e.g., "pbe"
     }
 
     # Handle properties with underscores (e.g., "band_gap")
     # If we have more parts, they might be part of property name
-    if len(parts) > 5:
+    if len(parts) > 5:  # noqa: PLR2004
         # Rejoin property parts
         result["property"] = "_".join(parts[3:-1])
         result["fidelity"] = parts[-1]
-    elif len(parts) == 5:
+    elif len(parts) == 5:  # noqa: PLR2004
         # Could be property_fidelity or property_part
         # Check if last part is a known fidelity
         all_fidelities: set[str] = set()

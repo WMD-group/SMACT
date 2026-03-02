@@ -71,8 +71,8 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         device: str = "cpu",
         elem_embedding: str = "matscholar200",
         batch_size: int = 128,
-        **kwargs: Any,
-    ):
+        **kwargs: Any,  # noqa: ANN401
+    ) -> None:
         """Initialise the ROOST property predictor.
 
         Args:
@@ -118,7 +118,8 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         # Load checkpoint
         model_source = self.model_path if self.model_path else self.model_name
         if model_source is None:
-            raise ValueError("No model specified. Provide either model_path or model_name.")
+            msg = "No model specified. Provide either model_path or model_name."
+            raise ValueError(msg)
 
         checkpoint = load_checkpoint(model_source, device=self.device)
 
@@ -133,9 +134,10 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         if task_dict:
             self._target_name = next(iter(task_dict.keys()))
             if self._target_name != self.property_name:
-                raise ValueError(
+                msg = (
                     f"Checkpoint target '{self._target_name}' does not match requested property '{self.property_name}'."
                 )
+                raise ValueError(msg)
 
         # Reconstruct the model
         self.model = Roost(**model_params)
@@ -149,7 +151,7 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         if normaliser_state is not None:
             self._normaliser = Normalizer.from_state_dict(normaliser_state)
 
-        logger.info(f"Loaded ROOST model for {self.property_name} (robust={self._robust}, device={self.device})")
+        logger.info("Loaded ROOST model for %s (robust=%s, device=%s)", self.property_name, self._robust, self.device)
 
     def predict(
         self,
@@ -240,10 +242,11 @@ class RoostPropertyPredictor(BasePropertyPredictor):
 
         if return_uncertainty:
             if not self._robust:
-                raise ValueError(
+                msg = (
                     f"Uncertainty estimation requires a robust model, but the loaded model "
                     f"(robust={self._robust}) does not support it."
                 )
+                raise ValueError(msg)
             uncertainties_arr = None
             if all_uncertainties:
                 uncertainties_arr = np.concatenate(all_uncertainties)
@@ -263,7 +266,7 @@ class RoostPropertyPredictor(BasePropertyPredictor):
         checkpoint_path: str | Path,
         property_name: str,
         device: str = "cpu",
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> RoostPropertyPredictor:
         """Create predictor from a local checkpoint directory.
 

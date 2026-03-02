@@ -24,9 +24,10 @@ def parse_spec(species: str) -> tuple[str, int]:
         # The regex guarantees oxi_state ends in '+' or '-', so this branch
         # is always taken; the else clause is unreachable by construction.
         charge = (int(oxi_state[:-1] or 1)) * (-1 if "-" in oxi_state else 1)
-        return ele, charge
     except AttributeError:
         return _parse_spec_old(species)
+    else:
+        return ele, charge
 
 
 def _parse_spec_old(species: str) -> tuple[str, int]:
@@ -39,7 +40,8 @@ def _parse_spec_old(species: str) -> tuple[str, int]:
     """
     match = _ELE_RE.match(species)
     if match is None:
-        raise ValueError(f"Invalid species string (no element symbol found): {species!r}")
+        msg = f"Invalid species string (no element symbol found): {species!r}"
+        raise ValueError(msg)
     ele = match.group(0)
 
     charge_match = _CHARGE_RE.search(species)
@@ -64,7 +66,6 @@ def _parse_spec_old(species: str) -> tuple[str, int]:
 def unparse_spec(species: tuple[str, int], include_one: bool = True) -> str:
     """Unparse a species into a string representation.
 
-
     The analogue of :func:`parse_spec`.
 
     Args:
@@ -86,8 +87,7 @@ def unparse_spec(species: tuple[str, int], include_one: bool = True) -> str:
     """
     if include_one or abs(species[1]) != 1:
         return f"{species[0]}{abs(species[1])}{get_sign(species[1])}"
-    else:
-        return f"{species[0]}{get_sign(species[1])}"
+    return f"{species[0]}{get_sign(species[1])}"
 
 
 def get_sign(charge: int) -> str:
@@ -105,7 +105,6 @@ def get_sign(charge: int) -> str:
     """
     if charge > 0:
         return "+"
-    elif charge < 0:
+    if charge < 0:
         return "-"
-    else:
-        return ""
+    return ""

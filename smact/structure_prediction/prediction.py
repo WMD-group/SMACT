@@ -60,7 +60,7 @@ class StructurePredictor:
         self.db = struct_db
         self.table = table
 
-    def predict_structs(
+    def predict_structs(  # noqa: C901
         self,
         species: list[tuple[str, int]],
         thresh: float | None = 1e-3,
@@ -110,7 +110,6 @@ class StructurePredictor:
             diff_sub_probs = self.cm.cond_sub_probs(diff_spec_str)
 
             for parent in parents:
-                # print("Testing parent")
                 # Filter out any structures with identical species
                 if parent.has_species(diff_spec):
                     continue
@@ -148,7 +147,7 @@ class StructurePredictor:
                         parent,
                     )
 
-    def nary_predict_structs(
+    def nary_predict_structs(  # noqa: C901, PLR0912
         self,
         species: list[tuple[str, int]],
         n_ary: int | None = 2,
@@ -190,25 +189,20 @@ class StructurePredictor:
 
         for spec_idx, parents in enumerate(potential_nary_parents):
             # Get missing ions
-            # Ensure we get the correct number of species
-            # Ensure the ions obtained are different
-            # if len(set(species) - set(sub_species[spec_idx])) !=2:
-            # continue
             diff_species = list(set(species) - set(sub_species[spec_idx]))
             diff_spec_str = [unparse_spec(i) for i in diff_species]
 
             diff_sub_probs = [self.cm.cond_sub_probs(i) for i in diff_spec_str]
 
             for parent in parents:
-                # print("testing parent")
                 # Filter out any structures with identical species
                 if n_ary == 1:
                     if parent.has_species(diff_species[0]):
                         continue
-                elif n_ary == 2:
+                elif n_ary == 2:  # noqa: PLR2004
                     if parent.has_species(diff_species[0]) and parent.has_species(diff_species[1]):
                         continue
-                elif n_ary == 3 and (
+                elif n_ary == 3 and (  # noqa: PLR2004
                     parent.has_species(diff_species[0])
                     and parent.has_species(diff_species[1])
                     and parent.has_species(diff_species[2])
@@ -227,15 +221,8 @@ class StructurePredictor:
                     continue
                 alt_spec = list(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_spec_str))
 
-                # Need to consider p(A,X)p(B,Y) and p(A,Y)p(B,X)
-                # if utilities.parse_spec(alt_spec_1)[1] != diff_species_1[1] and utilities.parse_spec(alt_spec_2)[1] != diff_species_2[1] :
-                # Different charge
-                # continue
-
                 try:
-                    p = []
-                    for i in range(n_ary):  # type: ignore[arg-type]
-                        p.append(diff_sub_probs[i].loc[alt_spec[i]])
+                    p = [diff_sub_probs[i].loc[alt_spec[i]] for i in range(n_ary)]  # type: ignore[arg-type]
                 except KeyError:
                     # Not in the Series
                     continue

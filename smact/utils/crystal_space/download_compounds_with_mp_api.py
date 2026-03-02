@@ -25,8 +25,9 @@ def download_mp_data(
     request_interval: float = 0.1,
 ) -> None:
     """
-    Downloads Materials Project data all possible combinations of `num_elements` elements
-    with atomic numbers.
+    Downloads Materials Project data for all possible combinations of `num_elements` elements.
+
+    Uses elements with atomic numbers.
     When chemical formula is same, the one with lowest energy above hull is saved.
     The data is saved to a specified directory.
 
@@ -49,7 +50,8 @@ def download_mp_data(
     """
     # check if MP_API_KEY is set
     if mp_api_key is None:
-        raise ValueError("Please set your MP_API_KEY in the environment variable.")
+        msg = "Please set your MP_API_KEY in the environment variable."
+        raise ValueError(msg)
     # set save directory
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
@@ -94,6 +96,6 @@ def download_mp_data(
 
             if (energy_above_hull) < e_hull_dict[formula_pretty]:  # type: ignore[operator]
                 e_hull_dict[formula_pretty] = energy_above_hull  # type: ignore[arg-type]
-                with open(save_dir / f"{formula_pretty}.json", "w") as f:
+                with (save_dir / f"{formula_pretty}.json").open("w") as f:
                     json.dump(doc.dict(), f)  # type: ignore[attr-defined]
         time.sleep(request_interval)

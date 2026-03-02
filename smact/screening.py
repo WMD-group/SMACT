@@ -1,14 +1,12 @@
-"""A collection of tools for estimating physical properties
-based on chemical composition.
-"""
+"""Tools for estimating physical properties based on chemical composition."""
 
 from __future__ import annotations
 
 import itertools
-import os
 import warnings
 from enum import StrEnum
 from itertools import combinations
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -97,7 +95,8 @@ def _format_output(
         case SmactFilterOutputs.composition_dict:
             return [composition_dict_maker(smact_filter_output=comp) for comp in compositions]
         case _:
-            raise ValueError(f"Invalid return_output: {return_output}. Must be a SmactFilterOutputs value.")
+            msg = f"Invalid return_output: {return_output}. Must be a SmactFilterOutputs value."
+            raise ValueError(msg)
 
 
 _OXI_SET_ATTR_MAP: dict[str, str] = {
@@ -135,12 +134,13 @@ def _get_oxidation_states(
                 stacklevel=3,
             )
         return [getattr(e, attr) for e in elements]
-    if os.path.exists(oxidation_states_set):
+    if Path(oxidation_states_set).exists():
         return cast("list[list[int] | None]", [oxi_custom(e.symbol, oxidation_states_set) for e in elements])
-    raise ValueError(
+    msg = (
         f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd16", "icsd24", '
         '"pymatgen_sp", "wiki" or a filepath to a textfile of oxidation states.'
     )
+    raise ValueError(msg)
 
 
 def pauling_test(
@@ -152,7 +152,8 @@ def pauling_test(
     threshold: float = 0.0,
 ) -> bool:
     """
-    Check if a combination of ions makes chemical sense,
+    Check if a combination of ions makes chemical sense.
+
         (i.e. positive ions should be of lower electronegativity).
 
     Args:
@@ -179,10 +180,10 @@ def pauling_test(
     if repeat_anions and repeat_cations and threshold == 0.0:
         return eneg_states_test(oxidation_states, electronegativities)
 
-    elif repeat_anions and repeat_cations:
+    if repeat_anions and repeat_cations:
         return eneg_states_test_threshold(oxidation_states, electronegativities, threshold=threshold)
 
-    elif _no_repeats(
+    if _no_repeats(
         oxidation_states,
         symbols,
         repeat_anions=repeat_anions,
@@ -190,10 +191,8 @@ def pauling_test(
     ):
         if threshold == 0.0:
             return eneg_states_test(oxidation_states, electronegativities)
-        else:
-            return eneg_states_test_threshold(oxidation_states, electronegativities, threshold=threshold)
-    else:
-        return False
+        return eneg_states_test_threshold(oxidation_states, electronegativities, threshold=threshold)
+    return False
 
 
 def _no_repeats(
@@ -221,17 +220,16 @@ def _no_repeats(
     """
     if repeat_anions is False and repeat_cations is False:
         return len(symbols) == len(set(symbols))
-    else:
-        anions, cations = [], []
-        for state, symbol in zip(oxidation_states, symbols, strict=True):
-            if state > 0:
-                cations.append(symbol)
-            else:
-                anions.append(symbol)
-        return not (
-            (not repeat_anions and len(anions) != len(set(anions)))
-            or (not repeat_cations and len(cations) != len(set(cations)))
-        )
+    anions, cations = [], []
+    for state, symbol in zip(oxidation_states, symbols, strict=True):
+        if state > 0:
+            cations.append(symbol)
+        else:
+            anions.append(symbol)
+    return not (
+        (not repeat_anions and len(anions) != len(set(anions)))
+        or (not repeat_cations and len(cations) != len(set(cations)))
+    )
 
 
 def eneg_states_test(ox_states: Sequence[int], enegs: Sequence[float | None]) -> bool:
@@ -309,8 +307,9 @@ def ml_rep_generator(
     stoichs: list[int] | None = None,
 ) -> list[float]:
     """
-    Function to take a composition of Elements and return a
-    list of values between 0 and 1 that describes the composition,
+    Function to take a composition of Elements and return a list of values.
+
+    Values are between 0 and 1 that describes the composition,
     useful for machine learning.
 
     The list is of length 103 as there are 103 elements
@@ -334,15 +333,15 @@ def ml_rep_generator(
     if stoichs is None:
         stoichs = [1] * len(composition)
 
-    ML_rep = [0] * _NUM_ELEMENTS
+    ml_rep = [0] * _NUM_ELEMENTS
     if isinstance(composition[0], Element):
         for element, stoich in zip(composition, stoichs, strict=True):
-            ML_rep[int(element.number) - 1] += stoich  # type: ignore[union-attr]
+            ml_rep[int(element.number) - 1] += stoich  # type: ignore[union-attr]
     else:
         for element, stoich in zip(composition, stoichs, strict=True):
-            ML_rep[int(Element(element).number) - 1] += stoich  # type: ignore[arg-type]
+            ml_rep[int(Element(element).number) - 1] += stoich  # type: ignore[arg-type]
 
-    return [float(i) / sum(ML_rep) for i in ML_rep]
+    return [float(i) / sum(ml_rep) for i in ml_rep]
 
 
 def smact_filter(
@@ -353,22 +352,37 @@ def smact_filter(
     oxidation_states_set: str = "icsd24",
     return_output: SmactFilterOutputs = SmactFilterOutputs.default,
 ) -> list[tuple[str, int, int]] | list[tuple[str, int]] | list[str] | list[dict]:
-    """Function that applies the charge neutrality and electronegativity
-    tests in one go for simple application in external scripts that
+    """Function that applies the charge neutrality and electronegativity tests.
+
+    Applied in one go for simple application in external scripts that
     wish to apply the general 'smact test'.
 
      .. warning::
-        For backwards compatibility in SMACT >=2.7, expllicitly set oxidation_states_set to 'smact14' if you wish to use the 2014 SMACT default oxidation states.
-        In SMACT 3.0, the smact_filter function will be set to use a new default oxidation states set.
+        For backwards compatibility in SMACT >=2.7, explicitly set
+        oxidation_states_set to 'smact14' if you wish to use the 2014
+        SMACT default oxidation states. In SMACT 3.0, the smact_filter
+        function will be set to use a new default oxidation states set.
 
     Args:
     ----
         els (tuple/list): A list of smact.Element objects.
         threshold (int): Threshold for stoichiometry limit, default = 8.
-        stoichs (list[int]): A selection of valid stoichiometric ratios for each site.
-        species_unique (bool): Whether or not to consider elements in different oxidation states as unique in the results.
-        oxidation_states_set (string): A string to choose which set of oxidation states should be chosen. Options are 'smact14', 'icsd16',"icsd24", 'pymatgen_sp' and 'wiki' for the  2014 SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure predictor and Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements) oxidation states respectively. A filepath to an oxidation states text file can also be supplied as well.
-        return_output (SmactFilterOutputs): If set to 'default', the function will return a list of tuples containing the tuples of symbols, oxidation states and stoichiometry values. "formula" returns a list of formulas and "composition_dict" returns a list of dictionaries.
+        stoichs (list[int]): A selection of valid stoichiometric
+            ratios for each site.
+        species_unique (bool): Whether or not to consider elements in
+            different oxidation states as unique in the results.
+        oxidation_states_set (string): A string to choose which set of
+            oxidation states should be chosen. Options are 'smact14',
+            'icsd16', "icsd24", 'pymatgen_sp' and 'wiki' for the 2014
+            SMACT default, 2016 ICSD, 2024 ICSD, pymatgen structure
+            predictor and Wikipedia oxidation states respectively.
+            A filepath to an oxidation states text file can also be
+            supplied as well.
+        return_output (SmactFilterOutputs): If set to 'default', the
+            function will return a list of tuples containing the tuples
+            of symbols, oxidation states and stoichiometry values.
+            "formula" returns a list of formulas and "composition_dict"
+            returns a list of dictionaries.
 
     Returns:
     -------
@@ -410,10 +424,11 @@ def smact_filter(
     # Guard: raise early if any element has no oxidation states in the chosen set
     missing = [e.symbol for e, ox in zip(els, ox_combos, strict=True) if ox is None or len(ox) == 0]
     if missing:
-        raise ValueError(
+        msg = (
             f"No oxidation states found for {missing} in oxidation_states_set='{oxidation_states_set}'. "
             "Cannot enumerate charge-neutral compositions."
         )
+        raise ValueError(msg)
 
     # After the guard, ox_combos contains only non-None, non-empty lists of ints
     ox_combos_typed = cast("list[list[int]]", ox_combos)
@@ -424,8 +439,7 @@ def smact_filter(
         cn_r = neutral_ratios(list(ox_states), stoichs=stoichs, threshold=threshold)
         # Electronegativity test
         if cn_r and pauling_test(ox_states, electronegs):
-            for ratio in cn_r:
-                compositions.append((symbols, ox_states, ratio))
+            compositions.extend((symbols, ox_states, ratio) for ratio in cn_r)
     # Return list depending on whether we are interested in unique species combinations
     # or just unique element combinations.
     if not species_unique:
@@ -438,7 +452,7 @@ def smact_filter(
 # ---------------------------------------------------------------------
 
 
-def smact_validity(
+def smact_validity(  # noqa: C901, PLR0911, PLR0912, PLR0913
     composition: Composition | str,
     use_pauling_test: bool = True,
     include_alloys: bool = True,
@@ -451,7 +465,8 @@ def smact_validity(
     mixed_valence: bool = False,
 ) -> bool:
     """
-    Check if a composition is valid according to SMACT rules:
+    Check if a composition is valid according to SMACT rules.
+
     1) Passes charge neutrality.
     2) Passes (optional) Pauling electronegativity test, or is considered an alloy or metal if so chosen.
 
@@ -463,16 +478,27 @@ def smact_validity(
         include_alloys (bool): Consider pure metals valid automatically.
         check_metallicity (bool): If True, consider high metallicity valid.
         metallicity_threshold (float): Score threshold for metallicity validity.
-        oxidation_states_set (str): Which set of oxidation states to use. If specified it overrides the making of the oxidation states set.
-        include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
-        consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
-        commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "medium".
+        oxidation_states_set (str): Which set of oxidation states to use.
+            If specified it overrides the making of the oxidation states set.
+        include_zero (bool): Include oxidation state of zero in the
+            filtered list. Default is False.
+        consensus (int): Minimum number of occurrences in literature for
+            an ion to be considered valid. Default is 3.
+        commonality (str): Excludes species below a certain proportion
+            of appearances in literature with respect to the total
+            number of reports of a given element (after the consensus
+            threshold has been applied). "low" includes all species,
+            "medium" excludes rare species below 10% occurrence, and
+            "high" excludes non-majority species below 50% occurrence.
+            "main" selects the species with the highest occurrence for
+            a given element. Users may also specify their own threshold
+            (float or int). Default is "medium".
         mixed_valence (bool): If True, allow mixed valence elements to be treated as separate species. Default is False.
 
     Returns:
         bool: True if the composition is valid, False otherwise.
     """
-    if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):
+    if oxidation_states_set is not None and any([include_zero, consensus != 3, commonality != "medium"]):  # noqa: PLR2004
         warnings.warn(
             "Parameters include_zero, consensus, and commonality are only used when oxidation_states_set is None",
             stacklevel=2,
@@ -538,12 +564,12 @@ def smact_validity(
 
     if ox_valid:
         return True
-    elif mixed_valence and any(el in MIXED_VALENCE_ELEMENTS for el in elem_symbols):
+    if mixed_valence and any(el in MIXED_VALENCE_ELEMENTS for el in elem_symbols):
         # Guard against combinatorial blow-up before expanding
         projected = 1
         for el, ox, count in zip(elem_symbols, ox_combos_valid, stoichs, strict=True):
             projected *= len(ox) ** count[0] if el in MIXED_VALENCE_ELEMENTS else len(ox)
-        if projected > 1_000_000:
+        if projected > 1_000_000:  # noqa: PLR2004
             warnings.warn(
                 "Mixed-valence expansion would generate too many combinations "
                 f"({projected:,}); skipping to avoid excessive runtime.",

@@ -5,7 +5,6 @@ from __future__ import annotations
 import itertools
 import logging
 import multiprocessing
-import os
 import warnings
 from functools import partial
 from pathlib import Path
@@ -23,10 +22,10 @@ logger = logging.getLogger(__name__)
 # Map short names used in smact_filter to their underlying data files so that
 # generate_composition_with_smact_custom can accept the same named sets.
 _NAMED_OX_SETS: dict[str, str] = {
-    "smact14": os.path.join(data_directory, "oxidation_states.txt"),
-    "icsd16": os.path.join(data_directory, "oxidation_states_icsd.txt"),
-    "icsd24": os.path.join(data_directory, "oxidation_states_icsd24_filtered.txt"),
-    "pymatgen_sp": os.path.join(data_directory, "oxidation_states_SP.txt"),
+    "smact14": str(Path(data_directory) / "oxidation_states.txt"),
+    "icsd16": str(Path(data_directory) / "oxidation_states_icsd.txt"),
+    "icsd24": str(Path(data_directory) / "oxidation_states_icsd24_filtered.txt"),
+    "pymatgen_sp": str(Path(data_directory) / "oxidation_states_SP.txt"),
 }
 
 warnings.simplefilter(action="ignore", category=UserWarning)
@@ -140,8 +139,7 @@ def generate_composition_with_smact(
     oxidation_states_set: str = "icsd24",
 ) -> pd.DataFrame:
     """
-    Generate all possible compositions of a given number of elements and
-    filter them with SMACT.
+    Generate all possible compositions of a given number of elements and filter them with SMACT.
 
     Args:
         num_elements (int): the number of elements in a compound. Defaults to 2.
@@ -149,7 +147,11 @@ def generate_composition_with_smact(
         max_atomic_num (int): the maximum atomic number. Defaults to 103.
         num_processes (int): the number of processes to use. Defaults to None.
         save_path (str): the path to save the results. Defaults to None.
-        oxidation_states_set (str): the oxidation states set to use. Options are "smact14", "icsd16", "icsd24", "pymatgen_sp". For reproducing the Faraday Discussions results, use "smact14". For custom oxidation states lists check generate_composition_with_smact_custom below.
+        oxidation_states_set (str): the oxidation states set to use.
+            Options are "smact14", "icsd16", "icsd24", "pymatgen_sp".
+            For reproducing the Faraday Discussions results, use
+            "smact14". For custom oxidation states lists check
+            generate_composition_with_smact_custom below.
 
     Returns:
         df (pd.DataFrame): A DataFrame of SMACT-generated compositions with boolean smact_allowed column.
@@ -189,8 +191,7 @@ def generate_composition_with_smact_custom(
     oxidation_states_set: str = "icsd24",
 ) -> pd.DataFrame:
     """
-    Generate all possible compositions of a given number of elements and
-    filter them with SMACT.
+    Generate all possible compositions of a given number of elements and filter them with SMACT.
 
     Args:
         num_elements (int): the number of elements in a compound. Defaults to 2.

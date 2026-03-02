@@ -15,7 +15,7 @@ from __future__ import annotations
 import csv
 import functools
 import logging
-import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -53,15 +53,18 @@ def _warn(message: str) -> None:
 
 
 def _get_data_rows(filename: str) -> Generator[list[str], None, None]:
-    """Generator for datafile entries by row for custom oxidation states lists. Skips rows with no oxidation states for performance."""
-    with open(filename) as file:
-        for line in file:
-            line = line.strip()
-            if line and line[0] != "#" and any(char.isdigit() for char in line):
-                yield line.split()
+    """Generator for datafile entries by row for custom oxidation states lists.
+
+    Skips rows with no oxidation states for performance.
+    """
+    with Path(filename).open() as file:
+        for raw_line in file:
+            stripped = raw_line.strip()
+            if stripped and stripped[0] != "#" and any(char.isdigit() for char in stripped):
+                yield stripped.split()
 
 
-def float_or_None(x: str) -> float | None:
+def float_or_None(x: str) -> float | None:  # noqa: N802
     """Cast a string to a float or to a None."""
     try:
         return float(x)
@@ -94,6 +97,7 @@ def _lookup_ox_states(
 def lookup_element_oxidation_states(symbol: str, copy: bool = True) -> list[int] | None:
     """
     Retrieve a list of known oxidation states for an element.
+
     The oxidation states list used is the SMACT default (smact14) and
     most exhaustive list.
 
@@ -105,12 +109,13 @@ def lookup_element_oxidation_states(symbol: str, copy: bool = True) -> list[int]
     Returns:
         list: Known oxidation states, or None if not found.
     """
-    return _lookup_ox_states(symbol, os.path.join(data_directory, "oxidation_states.txt"), copy)
+    return _lookup_ox_states(symbol, str(Path(data_directory) / "oxidation_states.txt"), copy)
 
 
 def lookup_element_oxidation_states_icsd(symbol: str, copy: bool = True) -> list[int] | None:
     """
     Retrieve a list of known oxidation states for an element.
+
     The oxidation states list used contains only those found
     in the ICSD (and judged to be non-spurious).
 
@@ -121,12 +126,13 @@ def lookup_element_oxidation_states_icsd(symbol: str, copy: bool = True) -> list
     Returns:
         list: Known oxidation states, or None if not found.
     """
-    return _lookup_ox_states(symbol, os.path.join(data_directory, "oxidation_states_icsd.txt"), copy)
+    return _lookup_ox_states(symbol, str(Path(data_directory) / "oxidation_states_icsd.txt"), copy)
 
 
 def lookup_element_oxidation_states_sp(symbol: str, copy: bool = True) -> list[int] | None:
     """
     Retrieve a list of known oxidation states for an element.
+
     The oxidation states list used contains only those that
     are in the Pymatgen default lambda table for structure prediction.
 
@@ -137,12 +143,13 @@ def lookup_element_oxidation_states_sp(symbol: str, copy: bool = True) -> list[i
     Returns:
         list: Known oxidation states, or None if not found.
     """
-    return _lookup_ox_states(symbol, os.path.join(data_directory, "oxidation_states_SP.txt"), copy)
+    return _lookup_ox_states(symbol, str(Path(data_directory) / "oxidation_states_SP.txt"), copy)
 
 
 def lookup_element_oxidation_states_wiki(symbol: str, copy: bool = True) -> list[int] | None:
     """
     Retrieve a list of known oxidation states for an element.
+
     The oxidation states list used contains only those that
     appear on Wikipedia (https://en.wikipedia.org/wiki/Template:List_of_oxidation_states_of_the_elements).
 
@@ -153,7 +160,7 @@ def lookup_element_oxidation_states_wiki(symbol: str, copy: bool = True) -> list
     Returns:
         list: Known oxidation states, or None if not found.
     """
-    return _lookup_ox_states(symbol, os.path.join(data_directory, "oxidation_states_wiki.txt"), copy)
+    return _lookup_ox_states(symbol, str(Path(data_directory) / "oxidation_states_wiki.txt"), copy)
 
 
 def lookup_element_oxidation_states_custom(
@@ -188,6 +195,7 @@ def lookup_element_oxidation_states_custom(
 def lookup_element_oxidation_states_icsd24(symbol: str, copy: bool = True) -> list[int] | None:
     """
     Retrieve a list of known oxidation states for an element.
+
     The oxidation states list used contains only those found
     in the 2024 version of the ICSD (with ≥5 reports).
 
@@ -200,7 +208,7 @@ def lookup_element_oxidation_states_icsd24(symbol: str, copy: bool = True) -> li
     """
     return _lookup_ox_states(
         symbol,
-        os.path.join(data_directory, "oxidation_states_icsd24_filtered.txt"),
+        str(Path(data_directory) / "oxidation_states_icsd24_filtered.txt"),
         copy,
     )
 
@@ -208,11 +216,11 @@ def lookup_element_oxidation_states_icsd24(symbol: str, copy: bool = True) -> li
 @functools.cache
 def _load_hhis() -> dict[str, tuple[float, float]]:
     data: dict[str, tuple[float, float]] = {}
-    with open(os.path.join(data_directory, "hhi.txt")) as file:
-        for line in file:
-            line = line.strip()
-            if line and line[0] != "#":
-                items = line.split()
+    with (Path(data_directory) / "hhi.txt").open() as file:
+        for raw_line in file:
+            stripped = raw_line.strip()
+            if stripped and stripped[0] != "#":
+                items = stripped.split()
                 data[items[0]] = (float(items[1]), float(items[2]))
     return data
 
@@ -259,7 +267,7 @@ _ELEMENT_DATA_KEYS = (
 @functools.cache
 def _load_element_data() -> dict[str, dict]:
     data: dict[str, dict] = {}
-    for items in _get_data_rows(os.path.join(data_directory, "element_data.txt")):
+    for items in _get_data_rows(str(Path(data_directory) / "element_data.txt")):
         clean_items = items[0:2] + list(map(float_or_None, items[2:]))
         data[items[0]] = dict(list(zip(_ELEMENT_DATA_KEYS, clean_items, strict=True)))
     return data
@@ -296,7 +304,7 @@ def lookup_element_data(symbol: str, copy: bool = True) -> dict | None:
 @functools.cache
 def _load_shannon_radii() -> dict[str, list[dict]]:
     data: dict[str, list[dict]] = {}
-    with open(os.path.join(data_directory, "shannon_radii.csv")) as file:
+    with (Path(data_directory) / "shannon_radii.csv").open() as file:
         reader = csv.reader(file)
         next(reader)  # skip header
         for row in reader:
@@ -361,9 +369,9 @@ def lookup_element_shannon_radius_data(symbol: str, copy: bool = True) -> list[d
 
 
 @functools.cache
-def _load_shannon_radii_extendedML() -> dict[str, list[dict]]:
+def _load_shannon_radii_extended_ml() -> dict[str, list[dict]]:
     data: dict[str, list[dict]] = {}
-    with open(os.path.join(data_directory, "shannon_radii_ML_extended.csv")) as file:
+    with (Path(data_directory) / "shannon_radii_ML_extended.csv").open() as file:
         reader = csv.reader(file)
         next(reader)  # skip header
         for row in reader:
@@ -382,11 +390,8 @@ def _load_shannon_radii_extendedML() -> dict[str, list[dict]]:
     return data
 
 
-def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True) -> list[dict] | None:
-    """
-    Retrieve the machine learned extended Shannon radii for
-    known states of an element.
-
+def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True) -> list[dict] | None:  # noqa: N802
+    """Retrieve the machine learned extended Shannon radii for known states of an element.
 
     Retrieve Shannon radii for known oxidation states and coordination
     environments of an element.
@@ -428,7 +433,7 @@ def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True
             *str*
 
     """
-    data = _load_shannon_radii_extendedML()
+    data = _load_shannon_radii_extended_ml()
     if symbol in data:
         return [item.copy() for item in data[symbol]] if copy else data[symbol]
     _warn(f"Extended Shannon-radius data for element {symbol} not found.")
@@ -438,7 +443,7 @@ def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True
 @functools.cache
 def _load_sse_data() -> dict[str, dict]:
     data: dict[str, dict] = {}
-    with open(os.path.join(data_directory, "SSE.csv")) as file:
+    with (Path(data_directory) / "SSE.csv").open() as file:
         reader = csv.reader(file)
         for row in reader:
             data[row[0]] = {
@@ -494,7 +499,7 @@ def lookup_element_sse_data(symbol: str) -> dict | None:
 @functools.cache
 def _load_sse2015_data() -> dict[str, list[dict]]:
     data: dict[str, list[dict]] = {}
-    with open(os.path.join(data_directory, "SSE_2015.csv")) as file:
+    with (Path(data_directory) / "SSE_2015.csv").open() as file:
         reader = csv.reader(file)
         for row in reader:
             key = row[0]
@@ -548,7 +553,7 @@ def lookup_element_sse2015_data(symbol: str, copy: bool = True) -> list[dict] | 
 @functools.cache
 def _load_sse_pauling_data() -> dict[str, dict]:
     data: dict[str, dict] = {}
-    with open(os.path.join(data_directory, "SSE_Pauling.csv")) as file:
+    with (Path(data_directory) / "SSE_Pauling.csv").open() as file:
         reader = csv.reader(file)
         for row in reader:
             data[row[0]] = {"SolidStateEnergyPauling": float(row[1])}
@@ -583,7 +588,7 @@ def lookup_element_sse_pauling_data(symbol: str) -> dict | None:
 @functools.cache
 def _load_magpie_data() -> dict[str, dict]:
     data: dict[str, dict] = {}
-    magpie_df = pd.read_csv(os.path.join(data_directory, "magpie.csv"))
+    magpie_df = pd.read_csv(str(Path(data_directory) / "magpie.csv"))
     for _index, row in magpie_df.iterrows():
         key = row.iloc[0]
         data[key] = {
@@ -644,7 +649,7 @@ def lookup_element_magpie_data(symbol: str, copy: bool = True) -> dict | None:
 @functools.cache
 def _load_valence_data() -> dict[str, dict]:
     data: dict[str, dict] = {}
-    valence_df = pd.read_csv(os.path.join(data_directory, "element_valence_modified.csv"))
+    valence_df = pd.read_csv(str(Path(data_directory) / "element_valence_modified.csv"))
     for _index, row in valence_df.iterrows():
         data[row.iloc[0]] = {"NValence": int(row.iloc[1])}
     return data

@@ -1,6 +1,7 @@
 """
-smact.oxidation_states: Module for predicting the likelihood of species
-coexisting in a compound based on statistical analysis of oxidation states.
+smact.oxidation_states: Module for predicting the likelihood of species coexisting in a compound.
+
+Based on statistical analysis of oxidation states.
 It is possible to use the values obtained in the publication Materials
 Discovery by Chemical Analogy: Role of Oxidation States in Structure
 Prediction - DOI: 10.1039/C8FD00032H.
@@ -10,7 +11,7 @@ from __future__ import annotations
 
 import json
 import warnings
-from os import path
+from pathlib import Path
 
 from numpy import mean
 from pymatgen.core import Structure
@@ -22,8 +23,9 @@ from smact import Species, data_directory
 
 class OxidationStateProbabilityFinder:
     """
-    Uses the model developed in the Faraday Discussions Paper (DOI:10.1039/C8FD00032H)
-    to compute the likelihood of metal species existing in solids in the presence of certain anions.
+    Uses the model developed in the Faraday Discussions Paper (DOI:10.1039/C8FD00032H).
+
+    Computes the likelihood of metal species existing in solids in the presence of certain anions.
     """
 
     def __init__(self, probability_table: dict[tuple[str, str], float] | None = None) -> None:
@@ -38,7 +40,7 @@ class OxidationStateProbabilityFinder:
 
         """
         if probability_table is None:
-            with open(path.join(data_directory, "oxidation_state_probability_table.json")) as f:
+            with (Path(data_directory) / "oxidation_state_probability_table.json").open() as f:
                 probability_data = json.load(f)
             # Put data into the required format
             probability_table = {}
@@ -77,7 +79,8 @@ class OxidationStateProbabilityFinder:
             anion = species1
             cation = species2
         else:
-            raise ValueError("One cation and one anion required.")
+            msg = "One cation and one anion required."
+            raise ValueError(msg)
 
         # Generate keys for lookup table
         cat_key = "".join([cation.symbol, str(int(cation.oxidation))])
@@ -85,13 +88,15 @@ class OxidationStateProbabilityFinder:
 
         # Check that both the species are included in the probability table
         if not all(elem in self._included_species for elem in [an_key, cat_key]):
-            raise NameError(f"One or both of [{cat_key}, {an_key}] are not in the probability table.")
+            msg = f"One or both of [{cat_key}, {an_key}] are not in the probability table."
+            raise NameError(msg)
 
         return (an_key, cat_key)
 
     def pair_probability(self, species1: Species, species2: Species) -> float:
         r"""
         Get the anion-cation oxidation state probability for a provided pair of smact Species.
+
         i.e. :math:`P_{SA}=\\frac{N_{SX}}{N_{MX}}` in the original paper (DOI:10.1039/C8FD00032H).
 
         Args:
@@ -135,11 +140,13 @@ class OxidationStateProbabilityFinder:
             elif all(isinstance(i, pmgSpecies) for i in structure):
                 structure = [Species(i.symbol, int(i.oxi_state)) for i in structure]  # type: ignore[union-attr]
             else:
-                raise TypeError("Input requires a list of SMACT or Pymatgen species.")
+                msg = "Input requires a list of SMACT or Pymatgen species."
+                raise TypeError(msg)
         elif isinstance(structure, Structure):
             species = structure.species
             if not all(isinstance(i, pmgSpecies) for i in species):
-                raise TypeError("Structure must have oxidation states.")
+                msg = "Structure must have oxidation states."
+                raise TypeError(msg)
             structure = [
                 Species(
                     get_el_sp(i.species_string).symbol,
@@ -148,7 +155,8 @@ class OxidationStateProbabilityFinder:
                 for i in structure
             ]
         else:
-            raise TypeError("Input requires a list of SMACT or Pymatgen Species or a Structure.")
+            msg = "Input requires a list of SMACT or Pymatgen Species or a Structure."
+            raise TypeError(msg)
 
         # Put most electonegative element last in list by sorting by electroneg
         structure.sort(key=lambda x: x.pauling_eneg)
@@ -158,7 +166,8 @@ class OxidationStateProbabilityFinder:
         cations = [i for i in structure if i.oxidation > 0]
 
         if not cations:
-            raise ValueError("No cations found in structure. Cannot calculate compound probability.")
+            msg = "No cations found in structure. Cannot calculate compound probability."
+            raise ValueError(msg)
 
         species_pairs = [(anion, cation) for cation in cations]
 
@@ -179,4 +188,5 @@ def __getattr__(name: str) -> type:
             stacklevel=2,
         )
         return OxidationStateProbabilityFinder
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)

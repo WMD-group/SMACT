@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from os import path
+from pathlib import Path
 
 import pandas as pd
 
@@ -21,7 +21,7 @@ class ICSD24OxStatesFilter:
 
     def __init__(self) -> None:
         """Initialise the ICSD 24 oxidation states list."""
-        self.ox_states_df = pd.read_json(path.join(data_directory, "oxidation_states_icsd24_counts.json"))
+        self.ox_states_df = pd.read_json(str(Path(data_directory) / "oxidation_states_icsd24_counts.json"))
 
     def filter(
         self,
@@ -32,9 +32,21 @@ class ICSD24OxStatesFilter:
         """Filter the ICSD 24 oxidation states list by a threshold.
 
         Args:
-            consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
-            include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
-            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "low".
+            consensus (int): Minimum number of occurrences in
+                literature for an ion to be considered valid.
+                Default is 3.
+            include_zero (bool): Include oxidation state of zero in the
+                filtered list. Default is False.
+            commonality (str): Excludes species below a certain
+                proportion of appearances in literature with respect
+                to the total number of reports of a given element
+                (after the consensus threshold has been applied).
+                "low" includes all species, "medium" excludes rare
+                species below 10% occurrence, and "high" excludes
+                non-majority species below 50% occurrence. "main"
+                selects the species with the highest occurrence for
+                a given element. Users may also specify their own
+                threshold (float or int). Default is "low".
 
         Returns:
             pd.DataFrame: The filtered oxidation states list as a DataFrame.
@@ -50,7 +62,8 @@ class ICSD24OxStatesFilter:
         elif isinstance(commonality, int | float):
             commonality_threshold = commonality
         else:
-            raise TypeError("commonality must be a string ('low', 'medium', 'high', 'main'), a float or an integer")
+            msg = "commonality must be a string ('low', 'medium', 'high', 'main'), a float or an integer"
+            raise TypeError(msg)
 
         if not include_zero:
             filtered_df = self.ox_states_df[self.ox_states_df["oxidation_state"] != 0].reset_index(drop=True)
@@ -90,10 +103,24 @@ class ICSD24OxStatesFilter:
         """Get the filtered ICSD 24 oxidation states list as a list of species.
 
         Args:
-            consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
-            include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
-            include_one_oxidation_state (bool): Include oxidation states +1 and -1 in the filtered list or include as + and - signs. Default is False.
-            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "low".
+            consensus (int): Minimum number of occurrences in
+                literature for an ion to be considered valid.
+                Default is 3.
+            include_zero (bool): Include oxidation state of zero in
+                the filtered list. Default is False.
+            include_one_oxidation_state (bool): Include oxidation
+                states +1 and -1 in the filtered list or include
+                as + and - signs. Default is False.
+            commonality (str): Excludes species below a certain
+                proportion of appearances in literature with respect
+                to the total number of reports of a given element
+                (after the consensus threshold has been applied).
+                "low" includes all species, "medium" excludes rare
+                species below 10% occurrence, and "high" excludes
+                non-majority species below 50% occurrence. "main"
+                selects the species with the highest occurrence for
+                a given element. Users may also specify their own
+                threshold (float or int). Default is "low".
 
         Returns:
             list: The filtered oxidation states list as a list of species.
@@ -124,10 +151,16 @@ class ICSD24OxStatesFilter:
         """Get the ICSD 24 oxidation states list as a dataframe of species with their occurrences.
 
         Args:
-            consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
-            include_one_oxidation_state (bool): Include oxidation states +1 and -1 in the species or include as + and - signs. Default is False.
-            sort_by_occurrences (bool): Sort the species list by occurrences. Default is True.
-            include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
+            consensus (int): Minimum number of occurrences in
+                literature for an ion to be considered valid.
+                Default is 3.
+            include_one_oxidation_state (bool): Include oxidation
+                states +1 and -1 in the species or include as + and
+                - signs. Default is False.
+            sort_by_occurrences (bool): Sort the species list by
+                occurrences. Default is True.
+            include_zero (bool): Include oxidation state of zero in
+                the filtered list. Default is False.
 
         Returns:
             dataframe: The species list as a dataframe of species with their occurrences.
@@ -169,9 +202,21 @@ class ICSD24OxStatesFilter:
         Args:
             filename (str): The filename to write the filtered oxidation states list to.
             comment (str): A comment to include in the txt file. Default is None.
-            consensus (int): Minimum number of occurrences in literature for an ion to be considered valid. Default is 3.
-            include_zero (bool): Include oxidation state of zero in the filtered list. Default is False.
-            commonality (str): Excludes species below a certain proportion of appearances in literature with respect to the total number of reports of a given element (after the consensus threshold has been applied). "low" includes all species, "medium" excludes rare species below 10% occurrence, and "high" excludes non-majority species below 50% occurrence. "main" selects the species with the highest occurrence for a given element. Users may also specify their own threshold (float or int). Default is "low".
+            consensus (int): Minimum number of occurrences in
+                literature for an ion to be considered valid.
+                Default is 3.
+            include_zero (bool): Include oxidation state of zero in
+                the filtered list. Default is False.
+            commonality (str): Excludes species below a certain
+                proportion of appearances in literature with respect
+                to the total number of reports of a given element
+                (after the consensus threshold has been applied).
+                "low" includes all species, "medium" excludes rare
+                species below 10% occurrence, and "high" excludes
+                non-majority species below 50% occurrence. "main"
+                selects the species with the highest occurrence for
+                a given element. Users may also specify their own
+                threshold (float or int). Default is "low".
         """
         filtered_df = self.filter(consensus, include_zero, commonality)
         # Convert the DataFrame to the require format
@@ -189,9 +234,11 @@ class ICSD24OxStatesFilter:
         # Write the filtered oxidation states list to a txt file
         if not filename.endswith(".txt"):
             filename += ".txt"
-        with open(filename, "w") as f:
+        with Path(filename).open("w") as f:
             f.write(
-                f"#\n# Oxidation state set\n# Source: ICSD (2024), filtered for {commonality} commonality of reports\n#\n"
+                f"#\n# Oxidation state set\n"
+                f"# Source: ICSD (2024), filtered for"
+                f" {commonality} commonality of reports\n#\n"
             )
             if comment:
                 f.write(f"# {comment}\n#\n")

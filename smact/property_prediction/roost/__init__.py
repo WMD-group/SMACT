@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from smact.property_prediction.roost.predictor import RoostPropertyPredictor
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> type:
     """Lazy import to avoid requiring torch at package import time."""
     if name in ("RoostPropertyPredictor", "Roost"):
         from smact.property_prediction.roost.predictor import RoostPropertyPredictor
@@ -17,7 +17,8 @@ def __getattr__(name: str):
             return RoostPropertyPredictor
         return RoostPropertyPredictor
 
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
 
 
 __all__ = ["RoostPropertyPredictor"]

@@ -22,13 +22,15 @@ try:
 except ImportError:
     HAS_ELEMENTEMBEDDINGS = False
 
-    def ee_composition_featuriser(*args: object, **kwargs: object) -> None:  # type: ignore[misc]
+    def ee_composition_featuriser(*_args: object, **_kwargs: object) -> None:  # type: ignore[misc]
         """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
-        raise ImportError("ElementEmbeddings not installed")
+        msg = "ElementEmbeddings not installed"
+        raise ImportError(msg)
 
-    def ee_species_composition_featuriser(*args: object, **kwargs: object) -> None:  # type: ignore[misc]
+    def ee_species_composition_featuriser(*_args: object, **_kwargs: object) -> None:  # type: ignore[misc]
         """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
-        raise ImportError("ElementEmbeddings not installed")
+        msg = "ElementEmbeddings not installed"
+        raise ImportError(msg)
 
 
 # Should be moved to element embeddings codebase
@@ -95,10 +97,11 @@ def composition_featuriser(
         pd.DataFrame: DataFrame containing the computed feature vectors.
     """
     if not HAS_ELEMENTEMBEDDINGS:
-        raise ImportError(
+        msg = (
             "The 'ElementEmbeddings' package is required for this function. "
             "Install it with: pip install ElementEmbeddings"
         )
+        raise ImportError(msg)
 
     return ee_composition_featuriser(  # type: ignore[return-value]
         data=composition_data,
@@ -137,10 +140,11 @@ def species_composition_featuriser(
         or a list of feature vectors is returned
     """
     if not HAS_ELEMENTEMBEDDINGS:
-        raise ImportError(
+        msg = (
             "The 'ElementEmbeddings' package is required for this function. "
             "Install it with: pip install ElementEmbeddings"
         )
+        raise ImportError(msg)
 
     return ee_species_composition_featuriser(  # type: ignore[return-value]
         data=composition_data,

@@ -1,6 +1,7 @@
 """
-This module can be used to calculate roughly the lattice parameters of a
-lattice type, based on the radii of the species on each site.
+This module can be used to calculate roughly the lattice parameters of a lattice type.
+
+Based on the radii of the species on each site.
 """
 
 from __future__ import annotations
@@ -24,9 +25,11 @@ def _check_positive(values: list[float] | float, name: str = "radius", expected_
     if isinstance(values, (int, float)):
         values = [values]
     if expected_length is not None and len(values) != expected_length:
-        raise ValueError(f"Expected {expected_length} {name} values, got {len(values)}")
+        msg = f"Expected {expected_length} {name} values, got {len(values)}"
+        raise ValueError(msg)
     if any(v <= 0 for v in values):
-        raise ValueError(f"All {name} values must be positive, got {values}")
+        msg = f"All {name} values must be positive, got {values}"
+        raise ValueError(msg)
 
 
 def cubic_perovskite(
@@ -51,7 +54,6 @@ def cubic_perovskite(
     a = max(limiting_factors)
     b = a
     c = a
-    #    space = a * np.sqrt(3) - 2 * shannon_radius[1]
     alpha = 90
     beta = 90
     gamma = 90
@@ -96,7 +98,6 @@ def wurtzite(
         a = 2 * _TETRAHEDRAL_HALF_ANGLE_SIN * (shannon_radius[0] + shannon_radius[1])
         b = a
         c = (shannon_radius[0] + shannon_radius[1]) * (2 + 2 * _TETRAHEDRAL_COMPLEMENT_SIN)
-    #    inner_space = a * (6**0.5) - (4*shannon_radius[0])
     return a, b, c, alpha, beta, gamma
 
 

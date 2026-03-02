@@ -11,10 +11,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 from datetime import UTC, datetime
 from pathlib import Path
 
 import torch
+
+logger = logging.getLogger(__name__)
 
 
 def convert_checkpoint(
@@ -35,7 +38,7 @@ def convert_checkpoint(
         fidelity: Fidelity level (e.g., "pbe", "hse06") or None.
         description: Optional description of the model.
     """
-    print(f"Loading checkpoint from {input_path}")
+    logger.info("Loading checkpoint from %s", input_path)
     checkpoint = torch.load(input_path, map_location="cpu", weights_only=False)
 
     # Extract components
@@ -59,7 +62,7 @@ def convert_checkpoint(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Save state dict
-    print("Saving state.pt...")
+    logger.info("Saving state.pt...")
     torch.save(state_dict, output_dir / "state.pt")
 
     # Build model params with required fields for Roost constructor
@@ -85,7 +88,7 @@ def convert_checkpoint(
     }
 
     # Save model params
-    print("Saving model.pt...")
+    logger.info("Saving model.pt...")
     torch.save(params_to_save, output_dir / "model.pt")
 
     # Create metadata
@@ -111,26 +114,26 @@ def convert_checkpoint(
         "kwargs": model_params,
     }
 
-    print("Saving model.json...")
-    with open(output_dir / "model.json", "w") as f:
+    logger.info("Saving model.json...")
+    with (output_dir / "model.json").open("w") as f:
         json.dump(model_json, f, indent=4, default=str)
 
-    print("\nCheckpoint converted successfully!")
-    print(f"Output directory: {output_dir}")
-    print("\nFiles created:")
+    logger.info("Checkpoint converted successfully!")
+    logger.info("Output directory: %s", output_dir)
+    logger.info("Files created:")
     for f in output_dir.iterdir():
         size_kb = f.stat().st_size / 1024
-        print(f"  {f.name}: {size_kb:.1f} KB")
+        logger.info("  %s: %.1f KB", f.name, size_kb)
 
-    print("\nMetadata:")
-    print(f"  Property: {property_name}")
-    print(f"  Dataset: {dataset}")
-    print(f"  Fidelity: {fidelity or 'default'}")
+    logger.info("Metadata:")
+    logger.info("  Property: %s", property_name)
+    logger.info("  Dataset: %s", dataset)
+    logger.info("  Fidelity: %s", fidelity or "default")
     if test_metrics:
         mae = test_metrics.get("mae")
         rmse = test_metrics.get("rmse")
-        print(f"  Test MAE: {mae:.4f}" if mae is not None else "  Test MAE: N/A")
-        print(f"  Test RMSE: {rmse:.4f}" if rmse is not None else "  Test RMSE: N/A")
+        logger.info("  Test MAE: %.4f", mae) if mae is not None else logger.info("  Test MAE: N/A")
+        logger.info("  Test RMSE: %.4f", rmse) if rmse is not None else logger.info("  Test RMSE: N/A")
 
 
 def main() -> None:

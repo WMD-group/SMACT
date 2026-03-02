@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import itertools
 import json
-import os
 from copy import deepcopy
 from operator import itemgetter
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -36,7 +36,7 @@ class CationMutator:
     def __init__(
         self,
         lambda_df: pd.DataFrame,
-        alpha: Callable[[str, str], float] | None = (lambda s1, s2: -5.0),
+        alpha: Callable[[str, str], float] | None = (lambda _s1, _s2: -5.0),
     ) -> None:
         """
         Assign attributes and get lambda table.
@@ -67,7 +67,7 @@ class CationMutator:
     @staticmethod
     def from_json(
         lambda_json: str | None = None,
-        alpha: Callable[[str, str], float] | None = (lambda s1, s2: -5.0),
+        alpha: Callable[[str, str], float] | None = (lambda _s1, _s2: -5.0),
     ) -> CationMutator:
         """
         Create a CationMutator instance from a DataFrame.
@@ -88,13 +88,13 @@ class CationMutator:
 
         """
         if lambda_json is not None:
-            with open(lambda_json) as f:
+            with Path(lambda_json).open() as f:
                 lambda_dat = json.load(f)
         else:
             # Get pymatgen lambda table
-            py_sp_dir = os.path.dirname(pymatgen_sp.__file__)
-            pymatgen_lambda = os.path.join(py_sp_dir, "data", "lambda.json")
-            with open(pymatgen_lambda) as f:
+            py_sp_dir = Path(pymatgen_sp.__file__).parent
+            pymatgen_lambda = py_sp_dir / "data" / "lambda.json"
+            with pymatgen_lambda.open() as f:
                 lambda_dat = json.load(f)
 
             # Get rid of 'D1+' values to reflect pymatgen
@@ -109,7 +109,7 @@ class CationMutator:
 
         return CationMutator(lambda_df, alpha)
 
-    def _populate_lambda(self) -> None:
+    def _populate_lambda(self) -> None:  # noqa: C901
         """
         Populate lambda table.
 
@@ -124,7 +124,8 @@ class CationMutator:
         def add_alpha(s1: str, s2: str) -> None:
             """Add an alpha value to the lambda table at both coordinates."""
             if self.alpha is None:
-                raise ValueError("alpha function must not be None")
+                msg = "alpha function must not be None"
+                raise ValueError(msg)
             a = self.alpha(s1, s2)
             self.lambda_tab.loc[s1, s2] = a
             self.lambda_tab.loc[s2, s1] = a
@@ -196,7 +197,8 @@ class CationMutator:
 
         """
         if not {species} <= self.specs:
-            raise ValueError(f"{species} not in lambda table.")
+            msg = f"{species} not in lambda table."
+            raise ValueError(msg)
 
         return self.lambda_tab.loc[species]
 
@@ -249,7 +251,8 @@ class CationMutator:
 
         # Check for charge neutrality
         if sum(x[1] * x[2] for x in struct_buff.species) != 0:  # type: ignore[misc]
-            raise ValueError("New structure is not charge neutral.")
+            msg = "New structure is not charge neutral."
+            raise ValueError(msg)
 
         # Sort species again
         struct_buff.species.sort(key=itemgetter(1), reverse=True)  # type: ignore[misc]
@@ -271,6 +274,7 @@ class CationMutator:
     ) -> SmactStructure:
         """
         Perform a n-ary mutation of a SmactStructure (n>1).
+
         Replaces all instances of a group of species within the structure.
         Stoichiometry is maintained.
         Charge neutrality is preserved, but the species pair do not need the same charge.
@@ -299,7 +303,8 @@ class CationMutator:
 
         # Check for charge neutrality
         if sum(x[1] * x[2] for x in struct_buff.species) != 0:  # type: ignore[misc]
-            raise ValueError("New structure is not charge neutral")
+            msg = "New structure is not charge neutral"
+            raise ValueError(msg)
 
         # Sort species again
         struct_buff.species.sort(key=itemgetter(1), reverse=True)  # type: ignore[misc]
