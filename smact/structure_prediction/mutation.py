@@ -109,7 +109,50 @@ class CationMutator:
 
         return CationMutator(lambda_df, alpha)
 
-    def _populate_lambda(self) -> None:  # noqa: C901
+    def _add_alpha(self, s1: str, s2: str) -> None:
+        """Add an alpha value to the lambda table at both coordinates."""
+        if self.alpha is None:
+            msg = "alpha function must not be None"
+            raise ValueError(msg)
+        a = self.alpha(s1, s2)
+        self.lambda_tab.loc[s1, s2] = a
+        self.lambda_tab.loc[s2, s1] = a
+
+    def _mirror_lambda(self, s1: str, s2: str) -> None:
+        """Mirror the lambda value at (s2, s1) into (s1, s2)."""
+        self.lambda_tab.loc[s1, s2] = self.lambda_tab.loc[s2, s1]
+
+    def _populate_from_pair(self, s1: str, s2: str) -> None:
+        """Populate lambda when (s1, s2) exists in the table.
+
+        If the value is NaN, try to mirror from (s2, s1) or fall back to alpha.
+        If the value is valid, mirror it to (s2, s1).
+        """
+        if np.isnan(self.lambda_tab.loc[s1, s2]):
+            try:
+                if not np.isnan(self.lambda_tab.loc[s2, s1]):
+                    self._mirror_lambda(s1, s2)
+                else:
+                    self._add_alpha(s1, s2)
+            except KeyError:
+                self._add_alpha(s1, s2)
+        else:
+            self._mirror_lambda(s2, s1)
+
+    def _populate_from_single(self, s1: str, s2: str) -> None:
+        """Populate lambda when (s1, s2) is missing but (s2, s1) may exist.
+
+        If (s2, s1) exists and is valid, mirror it. Otherwise, use alpha.
+        """
+        try:
+            if np.isnan(self.lambda_tab.loc[s2, s1]):
+                self._add_alpha(s1, s2)
+            else:
+                self._mirror_lambda(s1, s2)
+        except KeyError:
+            self._add_alpha(s1, s2)
+
+    def _populate_lambda(self) -> None:
         """
         Populate lambda table.
 
@@ -121,39 +164,11 @@ class CationMutator:
         """
         pairs = itertools.combinations_with_replacement(self.specs, 2)
 
-        def add_alpha(s1: str, s2: str) -> None:
-            """Add an alpha value to the lambda table at both coordinates."""
-            if self.alpha is None:
-                msg = "alpha function must not be None"
-                raise ValueError(msg)
-            a = self.alpha(s1, s2)
-            self.lambda_tab.loc[s1, s2] = a
-            self.lambda_tab.loc[s2, s1] = a
-
-        def mirror_lambda(s1: str, s2: str) -> None:
-            """Mirror the lambda value at (s2, s1) into (s1, s2)."""
-            self.lambda_tab.loc[s1, s2] = self.lambda_tab.loc[s2, s1]
-
         for s1, s2 in pairs:
             try:
-                if np.isnan(self.lambda_tab.loc[s1, s2]):
-                    try:
-                        if not np.isnan(self.lambda_tab.loc[s2, s1]):
-                            mirror_lambda(s1, s2)
-                        else:
-                            add_alpha(s1, s2)
-                    except KeyError:
-                        add_alpha(s1, s2)
-                else:
-                    mirror_lambda(s2, s1)
+                self._populate_from_pair(s1, s2)
             except KeyError:
-                try:
-                    if np.isnan(self.lambda_tab.loc[s2, s1]):
-                        add_alpha(s1, s2)
-                    else:
-                        mirror_lambda(s1, s2)
-                except KeyError:
-                    add_alpha(s1, s2)
+                self._populate_from_single(s1, s2)
 
         # Ensure symmetry
         idx = self.lambda_tab.index
@@ -246,17 +261,17 @@ class CationMutator:
         final_spec_tup = parse_spec(final_species)
 
         # Replace species tuple (struct_buff.species is always list[tuple[str, int, int]] after sanitisation)
-        old_stoic = struct_buff.species[spec_loc][2]  # type: ignore[misc]
-        struct_buff.species[spec_loc] = (*final_spec_tup, old_stoic)  # type: ignore[assignment]
+        old_stoic: int = struct_buff.species[spec_loc][2]
+        struct_buff.species[spec_loc] = (final_spec_tup[0], final_spec_tup[1], old_stoic)
 
         # Check for charge neutrality
-        if sum(x[1] * x[2] for x in struct_buff.species) != 0:  # type: ignore[misc]
+        if sum(spec[1] * spec[2] for spec in struct_buff.species) != 0:
             msg = "New structure is not charge neutral."
             raise ValueError(msg)
 
         # Sort species again
-        struct_buff.species.sort(key=itemgetter(1), reverse=True)  # type: ignore[misc]
-        struct_buff.species.sort(key=itemgetter(0))  # type: ignore[misc]
+        struct_buff.species.sort(key=lambda s: s[1], reverse=True)
+        struct_buff.species.sort(key=lambda s: s[0])
 
         # Replace sites
         struct_buff.sites[final_species] = struct_buff.sites.pop(init_species)
@@ -298,17 +313,17 @@ class CationMutator:
 
         # Replace species tuple (struct_buff.species is always list[tuple[str, int, int]] after sanitisation)
         for i in range(n):
-            old_stoic = struct_buff.species[spec_loc[i]][2]  # type: ignore[misc]
-            struct_buff.species[spec_loc[i]] = (*final_spec_tup_list[i], old_stoic)  # type: ignore[assignment]
+            old_stoic: int = struct_buff.species[spec_loc[i]][2]
+            struct_buff.species[spec_loc[i]] = (final_spec_tup_list[i][0], final_spec_tup_list[i][1], old_stoic)
 
         # Check for charge neutrality
-        if sum(x[1] * x[2] for x in struct_buff.species) != 0:  # type: ignore[misc]
+        if sum(spec[1] * spec[2] for spec in struct_buff.species) != 0:
             msg = "New structure is not charge neutral"
             raise ValueError(msg)
 
         # Sort species again
-        struct_buff.species.sort(key=itemgetter(1), reverse=True)  # type: ignore[misc]
-        struct_buff.species.sort(key=itemgetter(0))
+        struct_buff.species.sort(key=lambda s: s[1], reverse=True)
+        struct_buff.species.sort(key=lambda s: s[0])
 
         # Replace sites
         for i in range(n):

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import cast
 
 import numpy as np
 
@@ -41,7 +42,7 @@ def eneg_mulliken(element: smact.Element | str) -> float:
     return (element.ionpot + element.e_affinity) / 2.0
 
 
-def band_gap_Harrison(  # noqa: N802
+def band_gap_Harrison(
     anion: str,
     cation: str,
     distance: float | str = 2.0,
@@ -95,7 +96,41 @@ def band_gap_Harrison(  # noqa: N802
     return band_gap
 
 
-def compound_electroneg(  # noqa: C901
+def _get_eneg_values(
+    elementlist: list[smact.Element],
+    source: str,
+) -> list[float]:
+    """Return per-element electronegativity values for the requested source.
+
+    Args:
+    ----
+        elementlist: SMACT Element objects.
+        source: ``'Mulliken'`` or ``'Pauling'``.
+
+    Returns:
+    -------
+        List of electronegativity floats, one per element.
+
+    Raises:
+    ------
+        ValueError: If *source* is unrecognised or a Pauling value is missing.
+
+    """
+    if source == "Mulliken":
+        return [(el.ionpot + el.e_affinity) / 2.0 for el in elementlist]
+
+    if source == "Pauling":
+        eneg_list = [(2.86 * el.pauling_eneg) for el in elementlist if el.pauling_eneg is not None]
+        if len(eneg_list) != len(elementlist):
+            msg = "Some elements have no Pauling electronegativity; cannot use Pauling source."
+            raise ValueError(msg)
+        return eneg_list
+
+    msg = f"Electronegativity type '{source}' is not recognised"
+    raise ValueError(msg)
+
+
+def compound_electroneg(
     elements: list[str | smact.Element] | None = None,
     stoichs: list[int | float] | None = None,
     source: str = "Mulliken",
@@ -137,9 +172,9 @@ def compound_electroneg(  # noqa: C901
         raise TypeError(msg)
 
     if all(isinstance(e, str) for e in elements):
-        elementlist: list[smact.Element] = [smact.Element(i) for i in elements]  # type: ignore[arg-type]
+        elementlist: list[smact.Element] = [smact.Element(e) for e in cast("list[str]", elements)]
     elif all(isinstance(e, smact.Element) for e in elements):
-        elementlist = list(elements)  # type: ignore[arg-type]
+        elementlist = cast("list[smact.Element]", elements)
     else:
         msg = "Please supply a list of element symbols or SMACT Element objects (no mixed types)"
         raise TypeError(msg)
@@ -155,19 +190,7 @@ def compound_electroneg(  # noqa: C901
         raise ValueError(msg)
 
     # Get electronegativity values for each element
-
-    eneg_list: list[float]
-    if source == "Mulliken":
-        eneg_list = [(el.ionpot + el.e_affinity) / 2.0 for el in elementlist]
-
-    elif source == "Pauling":
-        eneg_list = [(2.86 * el.pauling_eneg) for el in elementlist if el.pauling_eneg is not None]
-        if len(eneg_list) != len(elementlist):
-            msg = "Some elements have no Pauling electronegativity; cannot use Pauling source."
-            raise ValueError(msg)
-    else:
-        msg = f"Electronegativity type '{source}' is not recognised"
-        raise ValueError(msg)
+    eneg_list = _get_eneg_values(elementlist, source)
 
     logger.debug("Electronegativities of elements= %s", eneg_list)
 

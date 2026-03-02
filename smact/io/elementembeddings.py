@@ -7,30 +7,19 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import pandas as pd
-    from elementembeddings.composition import CompositionalEmbedding  # type: ignore[import-untyped]
-    from elementembeddings.core import Embedding  # type: ignore[import-untyped]
+    from elementembeddings.composition import CompositionalEmbedding
+    from elementembeddings.core import Embedding
 
 try:
-    from elementembeddings.composition import (  # type: ignore[import-untyped]
-        composition_featuriser as ee_composition_featuriser,  # type: ignore[reportAssignmentType]
+    from elementembeddings.composition import (
+        composition_featuriser as _ee_composition_featuriser,
     )
-    from elementembeddings.composition import (  # type: ignore[import-untyped]
-        species_composition_featuriser as ee_species_composition_featuriser,  # type: ignore[reportAssignmentType]
+    from elementembeddings.composition import (
+        species_composition_featuriser as _ee_species_composition_featuriser,
     )
-
-    HAS_ELEMENTEMBEDDINGS = True
 except ImportError:
-    HAS_ELEMENTEMBEDDINGS = False
-
-    def ee_composition_featuriser(*_args: object, **_kwargs: object) -> None:  # type: ignore[misc]
-        """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
-        msg = "ElementEmbeddings not installed"
-        raise ImportError(msg)
-
-    def ee_species_composition_featuriser(*_args: object, **_kwargs: object) -> None:  # type: ignore[misc]
-        """Stub — never called due to HAS_ELEMENTEMBEDDINGS guard."""
-        msg = "ElementEmbeddings not installed"
-        raise ImportError(msg)
+    _ee_composition_featuriser = None
+    _ee_species_composition_featuriser = None
 
 
 # Should be moved to element embeddings codebase
@@ -96,14 +85,14 @@ def composition_featuriser(
     -------
         pd.DataFrame: DataFrame containing the computed feature vectors.
     """
-    if not HAS_ELEMENTEMBEDDINGS:
+    if _ee_composition_featuriser is None:
         msg = (
             "The 'ElementEmbeddings' package is required for this function. "
             "Install it with: pip install ElementEmbeddings"
         )
         raise ImportError(msg)
 
-    return ee_composition_featuriser(  # type: ignore[return-value]
+    return _ee_composition_featuriser(
         data=composition_data,
         formula_column=formula_column,
         embedding=embedding,
@@ -139,14 +128,14 @@ def species_composition_featuriser(
         Union[pd.DataFrame,list]: A pandas DataFrame containing the feature vector,
         or a list of feature vectors is returned
     """
-    if not HAS_ELEMENTEMBEDDINGS:
+    if _ee_species_composition_featuriser is None:
         msg = (
             "The 'ElementEmbeddings' package is required for this function. "
             "Install it with: pip install ElementEmbeddings"
         )
         raise ImportError(msg)
 
-    return ee_species_composition_featuriser(  # type: ignore[return-value]
+    return _ee_species_composition_featuriser(
         data=composition_data,
         embedding=embedding,
         stats=stats,
