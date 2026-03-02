@@ -39,7 +39,7 @@ def convert_checkpoint(
         description: Optional description of the model.
     """
     logger.info("Loading checkpoint from %s", input_path)
-    checkpoint = torch.load(input_path, map_location="cpu", weights_only=False)
+    checkpoint = torch.load(input_path, map_location="cpu", weights_only=True)
 
     # Extract components
     model_params = checkpoint.get("model_params", {})
