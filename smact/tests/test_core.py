@@ -347,7 +347,8 @@ class TestSequenceFunctions:
         original_pauling_test = smact.screening.pauling_test
 
         def mock_pauling_test(*args, **kwargs):
-            raise TypeError("Mock TypeError triggered")
+            msg = "Mock TypeError triggered"
+            raise TypeError(msg)
 
         try:
             smact.screening.pauling_test = mock_pauling_test
@@ -680,7 +681,7 @@ class TestSequenceFunctions:
     # --------- distorter coverage ---------
 
     def test_distorter_functions(self):
-        """distorter get_sg, build_sub_lattice, get_inequivalent_sites, make_substitution (lines 44-47, 69-87, 105-114, 132-140).
+        """distorter get_sg, build_sub_lattice, get_inequivalent_sites, make_substitution.
 
         Newer spglib dropped direct ASE Atoms support (returns None), so we patch
         spglib.get_spacegroup to return the canonical Fm-3m string for NaCl.

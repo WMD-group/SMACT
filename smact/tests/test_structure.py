@@ -157,7 +157,7 @@ class StructureTest(unittest.TestCase):
         self.assertStructAlmostEqual(s1, s2)
 
     def test_from_py_struct_icsd(self):
-        """Test generation of SmactStructure from a pymatgen Structure using ICSD statistics to determine oxidation states."""
+        """Test SmactStructure from a pymatgen Structure using ICSD statistics."""
         with open(TEST_PY_STRUCT) as f:
             d = json.load(f)
             py_structure = pymatgen.core.Structure.from_dict(d)  # type: ignore[attr-defined]
@@ -183,13 +183,13 @@ class StructureTest(unittest.TestCase):
         s2 = SmactStructure(*self._gen_empty_structure([("Fe", 2, 1), ("Fe", 3, 2), ("O", -2, 4)]))
 
         Ba = Species("Ba", 2)
-        O = Species("O", -2)
+        ox = Species("O", -2)
         F = Species("F", -1)
         Fe2 = Species("Fe", 2)
         Fe3 = Species("Fe", 3)
 
-        s3 = SmactStructure(*self._gen_empty_structure([(Ba, 2), (O, 1), (F, 2)]))
-        s4 = SmactStructure(*self._gen_empty_structure([(Fe2, 1), (Fe3, 2), (O, 4)]))
+        s3 = SmactStructure(*self._gen_empty_structure([(Ba, 2), (ox, 1), (F, 2)]))
+        s4 = SmactStructure(*self._gen_empty_structure([(Fe2, 1), (Fe3, 2), (ox, 4)]))
 
         Ba_2OF_2 = "Ba_2_2+F_2_1-O_1_2-"
         Fe_3O_4 = "Fe_2_3+Fe_1_2+O_4_2-"
@@ -621,6 +621,11 @@ class StructureDBTest(unittest.TestCase):
 
     def test_db_rollback_on_exception(self):
         """StructureDB.__exit__ rollback branch (line 103): exception triggers conn.rollback()."""
+
+        def _raise_intentional_error():
+            msg = "intentional error for rollback"
+            raise RuntimeError(msg)
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
 
@@ -630,7 +635,7 @@ class StructureDBTest(unittest.TestCase):
         try:
             with db as c:
                 c.execute("INSERT INTO rollback_test VALUES (?, ?)", ("comp", "poscar"))
-                raise RuntimeError("intentional error for rollback")
+                _raise_intentional_error()
         except RuntimeError:
             pass
 
