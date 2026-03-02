@@ -177,6 +177,9 @@ def pauling_test(
     """
     if symbols is None:
         symbols = []
+    if not symbols and not (repeat_anions and repeat_cations):
+        msg = "symbols is required when repeat_anions or repeat_cations is False"
+        raise ValueError(msg)
     if repeat_anions and repeat_cations and threshold == 0.0:
         return eneg_states_test(oxidation_states, electronegativities)
 
@@ -330,6 +333,10 @@ def ml_rep_generator(
             to one
 
     """
+    if not composition:
+        msg = "composition must not be empty"
+        raise ValueError(msg)
+
     if stoichs is None:
         stoichs = [1] * len(composition)
 
@@ -341,7 +348,11 @@ def ml_rep_generator(
         for element, stoich in zip(composition, stoichs, strict=True):
             ml_rep[int(Element(element).number) - 1] += stoich  # type: ignore[arg-type]
 
-    return [float(i) / sum(ml_rep) for i in ml_rep]
+    total = sum(ml_rep)
+    if total == 0:
+        msg = "Stoichiometries sum to zero; cannot normalise"
+        raise ValueError(msg)
+    return [float(i) / total for i in ml_rep]
 
 
 def smact_filter(

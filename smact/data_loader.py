@@ -185,7 +185,7 @@ def lookup_element_oxidation_states_custom(
     """
     data = _load_oxidation_states(filepath)
     if symbol == "all":
-        return list(data) if copy else data
+        return dict(data) if copy else data
     if symbol in data:
         return list(data[symbol]) if copy else data[symbol]
     _warn(f"Oxidation states for element {symbol} not found.")

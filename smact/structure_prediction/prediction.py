@@ -178,7 +178,7 @@ class StructurePredictor:
         # Ensure that we can obtain a subset of species of the target compound
         if n_ary is None:
             return
-        if len(species) - n_ary == 0:
+        if n_ary < 1 or n_ary >= len(species):
             return
         sub_species = itertools.combinations(species, len(species) - n_ary)
         sub_species = list(map(list, sub_species))
