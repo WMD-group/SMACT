@@ -31,6 +31,7 @@ def cubic_perovskite(
     species: list[str],
     cell_par: list[float] | None = None,
     repetitions: list[int] | None = None,
+    oxidation_states: list[list[int]] | None = None,
 ) -> tuple[Lattice, Atoms]:
     """
     Build a perovskite cell using the crystal function in ASE.
@@ -40,6 +41,8 @@ def cubic_perovskite(
         species (str): Element symbols
         cell_par (list): Six floats/ints specifying 3 unit cell lengths and 3 unit cell angles.
         repetitions (list): Three floats specifying the expansion of the cell in x,y,z directions.
+        oxidation_states (list): Oxidation states per site in the unit cell basis.
+            Defaults to ``[[2], [4], [-2], [-2], [-2]]`` for the standard ABX3 perovskite.
 
     Returns:
     -------
@@ -59,9 +62,10 @@ def cubic_perovskite(
         cellpar=cell_par,
     )
 
-    base_oxidation_states = [[2]] + [[4]] + [[-2]] * 3
-    oxidation_states = _tile_oxidation_states(base_oxidation_states, len(system))
-    sites_list = [Site(pos, ox) for pos, ox in zip(system.get_scaled_positions(), oxidation_states, strict=True)]
+    if oxidation_states is None:
+        oxidation_states = [[2]] + [[4]] + [[-2]] * 3
+    tiled_oxi = _tile_oxidation_states(oxidation_states, len(system))
+    sites_list = [Site(pos, ox) for pos, ox in zip(system.get_scaled_positions(), tiled_oxi, strict=True)]
 
     return Lattice(sites_list), system
 
@@ -70,6 +74,7 @@ def wurtzite(
     species: list[str],
     cell_par: list[float] | None = None,
     repetitions: list[int] | None = None,
+    oxidation_states: list[list[int]] | None = None,
 ) -> tuple[Lattice, Atoms]:
     """
     Build a wurzite cell using the crystal function in ASE.
@@ -79,6 +84,8 @@ def wurtzite(
         species (str): Element symbols
         cell_par (list): Six floats/ints specifying 3 unit cell lengths and 3 unit cell angles.
         repetitions (list): Three floats specifying the expansion of the cell in x,y,z directions.
+        oxidation_states (list): Oxidation states per site in the unit cell basis.
+            Defaults to ``[[2], [2], [-2], [-2]]`` for the standard AX wurtzite.
 
     Returns:
     -------
@@ -98,7 +105,8 @@ def wurtzite(
         cellpar=cell_par,
     )
 
-    base_oxidation_states = [[2]] * 2 + [[-2]] * 2
-    oxidation_states = _tile_oxidation_states(base_oxidation_states, len(system))
-    sites_list = [Site(pos, ox) for pos, ox in zip(system.get_scaled_positions(), oxidation_states, strict=True)]
+    if oxidation_states is None:
+        oxidation_states = [[2]] * 2 + [[-2]] * 2
+    tiled_oxi = _tile_oxidation_states(oxidation_states, len(system))
+    sites_list = [Site(pos, ox) for pos, ox in zip(system.get_scaled_positions(), tiled_oxi, strict=True)]
     return Lattice(sites_list), system
