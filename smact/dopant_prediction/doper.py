@@ -228,7 +228,36 @@ class Doper:
                 results.append([candidate, host, prob, lam])
         return results
 
-    def get_dopants(self, num_dopants: int = 5, get_selectivity: bool = True, group_by_charge: bool = True) -> dict:  # noqa: C901
+    def _compute_selectivity_scores(
+        self,
+        dopants_lists: list[list],
+        cations: list[str],
+    ) -> None:
+        """Compute selectivity and combined scores for each dopant list in-place."""
+        type_labels = ["cation", "cation", "anion", "anion"]
+        for i, sub in enumerate(type_labels):
+            dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, sub)
+
+        for dopants_list in dopants_lists:
+            for dopant in dopants_list:
+                similarity = dopant[_SIMILARITY_INDEX]
+                selectivity = dopant[_SELECTIVITY_INDEX]
+                dopant.append(self._calculate_combined_score(similarity, selectivity))
+
+        for dopants_list in dopants_lists:
+            dopants_list.sort(key=lambda x: x[_COMBINED_SCORE_INDEX], reverse=True)
+
+    @staticmethod
+    def _group_by_charge(dopants_lists: list[list], num_dopants: int) -> list[dict]:
+        """Group dopant lists by dopant charge, returning top entries per charge."""
+        groupby_lists: list[dict] = []
+        for dl in dopants_lists:
+            dl_sorted = sorted(dl, key=lambda x: utilities.parse_spec(x[0])[1])
+            grouped_data = groupby(dl_sorted, key=lambda x: utilities.parse_spec(x[0])[1])
+            groupby_lists.append({str(k): list(g)[:num_dopants] for k, g in grouped_data})
+        return groupby_lists
+
+    def get_dopants(self, num_dopants: int = 5, get_selectivity: bool = True, group_by_charge: bool = True) -> dict:
         """
         Get the top n dopants for each case.
 
@@ -272,34 +301,13 @@ class Doper:
         self.len_list = _NUM_DOPANT_TYPES
         if get_selectivity:
             self.len_list = _NUM_DOPANT_TYPES + 2
-            for i in range(len(dopants_lists)):
-                sub = "cation"
-                if i > 1:
-                    sub = "anion"
-                dopants_lists[i] = self._get_selectivity(dopants_lists[i], cations, sub)
+            self._compute_selectivity_scores(dopants_lists, cations)
 
-            for dopants_list in dopants_lists:
-                for dopant in dopants_list:
-                    similarity = dopant[_SIMILARITY_INDEX]
-                    selectivity = dopant[_SELECTIVITY_INDEX]
-                    combined_score = self._calculate_combined_score(similarity, selectivity)
-                    dopant.append(combined_score)
-
-            # sort by combined score
-            for dopants_list in dopants_lists:
-                dopants_list.sort(key=lambda x: x[_COMBINED_SCORE_INDEX], reverse=True)
-
-        # if groupby
-        groupby_lists = [{} for _ in range(_NUM_DOPANT_TYPES)]  # create list of empty dict (n-cat, p-cat, n-an, p-an)
-        # in case group_by_charge = False
+        # Group by charge if requested
         if group_by_charge:
-            for i, dl in enumerate(dopants_lists):
-                # groupby first element charge
-                dl_sorted = sorted(dl, key=lambda x: utilities.parse_spec(x[0])[1])
-                grouped_data = groupby(dl_sorted, key=lambda x: utilities.parse_spec(x[0])[1])
-                grouped_top_data = {str(k): list(g)[:num_dopants] for k, g in grouped_data}
-                groupby_lists[i] = grouped_top_data
-                del grouped_data
+            groupby_lists = self._group_by_charge(dopants_lists, num_dopants)
+        else:
+            groupby_lists = [{} for _ in range(_NUM_DOPANT_TYPES)]
 
         # select top n elements
         dopants_lists = [dopants_list[:num_dopants] for dopants_list in dopants_lists]
@@ -311,12 +319,9 @@ class Doper:
             "p-type anion substitutions",
         ]
 
-        # When selectivity is computed the final sort is by combined score (idx 5);
-        # otherwise use the same probability-vs-lambda index as the outer sort.
         effective_sort_idx = _COMBINED_SCORE_INDEX if get_selectivity else sort_idx
         self.results = self._merge_dicts(keys, dopants_lists, groupby_lists, effective_sort_idx)
 
-        # return the top (num_dopants) results for each case
         return self.results
 
     def plot_dopants(self, cmap: str = "YlOrRd", plot_value: str = "probability") -> None:
