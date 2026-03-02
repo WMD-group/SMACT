@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import warnings
 from pathlib import Path
+from typing import cast
 
 from numpy import mean
 from pymatgen.core import Structure
@@ -138,7 +139,8 @@ class OxidationStateProbabilityFinder:
             if all(isinstance(i, Species) for i in structure):
                 pass
             elif all(isinstance(i, pmgSpecies) for i in structure):
-                structure = [Species(i.symbol, int(i.oxi_state)) for i in structure]  # type: ignore[union-attr]
+                pmg_species = cast("list[pmgSpecies]", structure)
+                structure = [Species(i.symbol, int(i.oxi_state or 0)) for i in pmg_species]
             else:
                 msg = "Input requires a list of SMACT or Pymatgen species."
                 raise TypeError(msg)
@@ -147,13 +149,12 @@ class OxidationStateProbabilityFinder:
             if not all(isinstance(i, pmgSpecies) for i in species):
                 msg = "Structure must have oxidation states."
                 raise TypeError(msg)
-            structure = [
-                Species(
-                    get_el_sp(i.species_string).symbol,
-                    int(oxi) if (oxi := get_el_sp(i.species_string).oxi_state) is not None else 0,  # type: ignore[arg-type]
-                )
-                for i in structure
-            ]
+            structure_list: list[Species] = []
+            for site in structure:
+                sp = cast("pmgSpecies", get_el_sp(site.species_string))
+                oxi = sp.oxi_state
+                structure_list.append(Species(sp.symbol, int(oxi or 0)))
+            structure = structure_list
         else:
             msg = "Input requires a list of SMACT or Pymatgen Species or a Structure."
             raise TypeError(msg)

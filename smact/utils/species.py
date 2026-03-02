@@ -19,15 +19,14 @@ def parse_spec(species: str) -> tuple[str, int]:
     :return: a tuple of the atomic symbol and oxidation state
 
     """
-    try:
-        ele, oxi_state = _SPEC_RE.match(species).groups()  # type: ignore[union-attr]
-        # The regex guarantees oxi_state ends in '+' or '-', so this branch
-        # is always taken; the else clause is unreachable by construction.
-        charge = (int(oxi_state[:-1] or 1)) * (-1 if "-" in oxi_state else 1)
-    except AttributeError:
+    m = _SPEC_RE.match(species)
+    if m is None:
         return _parse_spec_old(species)
-    else:
-        return ele, charge
+    ele, oxi_state = m.groups()
+    # The regex guarantees oxi_state ends in '+' or '-', so this branch
+    # is always taken; the else clause is unreachable by construction.
+    charge = (int(oxi_state[:-1] or 1)) * (-1 if "-" in oxi_state else 1)
+    return ele, charge
 
 
 def _parse_spec_old(species: str) -> tuple[str, int]:

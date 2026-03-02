@@ -10,6 +10,7 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
+from emmet.core.summary import SummaryDoc
 from mp_api.client import MPRester
 from pymatgen.core import Composition
 from tqdm import tqdm
@@ -91,11 +92,17 @@ def download_mp_data(
             )
         # save data with lowest energy above hull
         for doc in docs:
-            formula_pretty = doc.formula_pretty  # type: ignore[attr-defined]
-            energy_above_hull = doc.energy_above_hull  # type: ignore[attr-defined]
+            if not isinstance(doc, SummaryDoc):
+                continue
+            formula_pretty = doc.formula_pretty
+            energy_above_hull = doc.energy_above_hull
 
-            if energy_above_hull is not None and energy_above_hull < e_hull_dict[formula_pretty]:
+            if (
+                energy_above_hull is not None
+                and formula_pretty is not None
+                and energy_above_hull < e_hull_dict[formula_pretty]
+            ):
                 e_hull_dict[formula_pretty] = energy_above_hull
                 with (save_dir / f"{formula_pretty}.json").open("w") as f:
-                    json.dump(doc.model_dump(), f, default=str)  # type: ignore[union-attr]
+                    json.dump(doc.model_dump(), f, default=str)
         time.sleep(request_interval)

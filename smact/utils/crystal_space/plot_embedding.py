@@ -86,9 +86,9 @@ def plot_reducers_embeddings(
         horizontal_spacing=0.02,
     )
 
-    # updatee the font size of subplot titles
-    for i in fig["layout"]["annotations"]:  # type: ignore[index]
-        i["font"] = {"size": 25}  # type: ignore[index]
+    # update the font size of subplot titles
+    for annotation in fig.layout.annotations:  # type: ignore[union-attr]  # plotly stubs incomplete
+        annotation.update(font={"size": 25})
 
     legend_colors = {
         "unlikely": "#D9D9D9",
@@ -114,7 +114,7 @@ def plot_reducers_embeddings(
                     mode="markers",
                     marker={
                         "size": 8,
-                        "color": df_plot["label"].map(legend_colors),  # type: ignore[arg-type]
+                        "color": df_plot["label"].map(legend_colors).tolist(),  # type: ignore[arg-type]  # pandas stubs don't accept Mapping
                         "opacity": 0.8,
                         "symbol": symbol,
                         "line": {"width": 0.5, "color": "DarkSlateGrey"},

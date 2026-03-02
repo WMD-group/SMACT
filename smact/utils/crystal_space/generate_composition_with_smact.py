@@ -8,6 +8,10 @@ import multiprocessing
 import warnings
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 import pandas as pd
 from pymatgen.core import Composition
@@ -77,9 +81,9 @@ def _generate_unique_compounds(
     pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     compounds = list(
         tqdm(
-            pool.imap_unordered(  # type: ignore[misc]
+            pool.imap_unordered(
                 partial(convert_formula, num_elements=num_elements, max_stoich=max_stoich),
-                combinations,  # type: ignore[arg-type]
+                cast("Iterable[Any]", combinations),
             ),
             total=len(combinations),
         )
@@ -119,7 +123,7 @@ def _build_results_df(
     smact_allowed = list(set(smact_allowed))
     logger.info("Number of compounds allowed by SMACT: %d", len(smact_allowed))
 
-    results_df = pd.DataFrame(data=False, index=compounds, columns=["smact_allowed"])  # type: ignore[call-overload]
+    results_df = pd.DataFrame({"smact_allowed": False}, index=pd.Index(compounds))
     results_df.loc[smact_allowed, "smact_allowed"] = True
 
     if save_path is not None:
@@ -169,9 +173,9 @@ def generate_composition_with_smact(
     pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     results = list(
         tqdm(
-            pool.imap_unordered(  # type: ignore[misc]
+            pool.imap_unordered(
                 partial(smact_filter, threshold=max_stoich, oxidation_states_set=oxidation_states_set),
-                compounds_pauling,  # type: ignore[arg-type]
+                cast("Iterable[Any]", compounds_pauling),
             ),
             total=len(compounds_pauling),
         )
@@ -213,24 +217,27 @@ def generate_composition_with_smact_custom(
     logger.info("#3. Filtering compounds with SMACT...")
 
     ox_filepath = _NAMED_OX_SETS.get(oxidation_states_set, oxidation_states_set)
-    ox_states_custom = lookup_element_oxidation_states_custom("all", ox_filepath, copy=False)
-    fr_eneg = Element("Fr").pauling_eneg
-    elements_pauling = [
-        Element(element)
-        for element in ordered_elements(1, max_atomic_num)
-        if ox_states_custom is not None
-        and element in ox_states_custom  # type: ignore[operator]
-        and Element(element).pauling_eneg is not None
-        and (fr_eneg is None or Element(element).pauling_eneg >= fr_eneg)  # type: ignore[operator]
-    ]
+    ox_states_raw = lookup_element_oxidation_states_custom("all", ox_filepath, copy=False)
+    # When called with "all", the return is always a dict mapping symbols to
+    # oxidation-state lists.  Narrow the type so the `in` check is safe.
+    ox_states_custom = cast("dict[str, list[int]]", ox_states_raw) if isinstance(ox_states_raw, dict) else {}
+    fr_eneg: float | None = Element("Fr").pauling_eneg
+    elements_pauling: list[Element] = []
+    for symbol in ordered_elements(1, max_atomic_num):
+        if symbol not in ox_states_custom:
+            continue
+        el = Element(symbol)
+        eneg = el.pauling_eneg
+        if eneg is not None and (fr_eneg is None or eneg >= fr_eneg):
+            elements_pauling.append(el)
     compounds_pauling = list(itertools.combinations(elements_pauling, num_elements))
 
     pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
     results = list(
         tqdm(
-            pool.imap_unordered(  # type: ignore[misc]
+            pool.imap_unordered(
                 partial(smact_filter, threshold=max_stoich, oxidation_states_set=ox_filepath),
-                compounds_pauling,  # type: ignore[arg-type]
+                cast("Iterable[Any]", compounds_pauling),
             ),
             total=len(compounds_pauling),
         )

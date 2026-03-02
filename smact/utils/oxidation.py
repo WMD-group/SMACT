@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
 
@@ -70,21 +71,22 @@ class ICSD24OxStatesFilter:
         else:
             filtered_df = self.ox_states_df
 
-        filtered_df = filtered_df[
-            (filtered_df["results_count"] >= consensus) & (filtered_df["results_count"] != 0)
-        ].reset_index(drop=True)  # type: ignore[union-attr]
+        filtered_df = cast(
+            "pd.DataFrame",
+            filtered_df[(filtered_df["results_count"] >= consensus) & (filtered_df["results_count"] != 0)],
+        ).reset_index(drop=True)
 
         element_totals = filtered_df.groupby("element")["results_count"].transform("sum")
         filtered_df["species_proportion (%)"] = filtered_df["results_count"] / element_totals * 100
 
         if commonality == "main":
-            filtered_df = (
-                filtered_df.loc[filtered_df.groupby("element")["species_proportion (%)"].idxmax()]
-            ).reset_index(drop=True)  # type: ignore[union-attr]
+            idx = filtered_df.groupby("element")["species_proportion (%)"].idxmax()
+            filtered_df = cast("pd.DataFrame", filtered_df.loc[idx]).reset_index(drop=True)
         else:
-            filtered_df = filtered_df[filtered_df["species_proportion (%)"] >= commonality_threshold].reset_index(  # type: ignore[union-attr]
-                drop=True
-            )
+            filtered_df = cast(
+                "pd.DataFrame",
+                filtered_df[filtered_df["species_proportion (%)"] >= commonality_threshold],
+            ).reset_index(drop=True)
 
         summary_df = (
             filtered_df.groupby("element").apply(self._filter_oxidation_states, 0, include_groups=False).reset_index()
@@ -170,9 +172,10 @@ class ICSD24OxStatesFilter:
         else:
             species_occurrences_df = self.ox_states_df
 
-        species_occurrences_df = species_occurrences_df[
-            (species_occurrences_df.results_count >= consensus)
-        ].reset_index(drop=True)  # type: ignore[union-attr]
+        species_occurrences_df = cast(
+            "pd.DataFrame",
+            species_occurrences_df[species_occurrences_df.results_count >= consensus],
+        ).reset_index(drop=True)
         species_occurrences_df["species"] = species_occurrences_df.apply(
             lambda x: unparse_spec(
                 (x["element"], x["oxidation_state"]),
@@ -181,13 +184,17 @@ class ICSD24OxStatesFilter:
             axis=1,
         )
         species_occurrences_df = species_occurrences_df[["element", "species", "results_count"]]
-        element_totals = species_occurrences_df.groupby("element")["results_count"].transform("sum")  # type: ignore[union-attr]
+        grouped = species_occurrences_df.groupby("element")["results_count"]
+        element_totals = grouped.transform("sum")
         species_occurrences_df["species_proportion (%)"] = (
             species_occurrences_df["results_count"] / element_totals * 100
         )
         if sort_by_occurrences:
-            return species_occurrences_df.sort_values("results_count", ascending=False).reset_index(drop=True)  # type: ignore[union-attr]
-        return species_occurrences_df  # type: ignore[return-value]
+            sorted_df = species_occurrences_df.sort_values(  # type: ignore[call-overload]  # pandas stubs overload
+                by="results_count", ascending=False
+            )
+            return cast("pd.DataFrame", sorted_df).reset_index(drop=True)
+        return cast("pd.DataFrame", species_occurrences_df)
 
     def write(
         self,

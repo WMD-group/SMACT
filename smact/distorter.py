@@ -8,18 +8,19 @@ and the sub-lattice on which substitutions are to be made.
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import smact
 
 if TYPE_CHECKING:
     from ase import Atoms
+    from ase.atom import Atom
 
 try:
-    from pyspglib import spglib  # type: ignore[import-untyped]
+    from pyspglib import spglib  # type: ignore[import-not-found]
 except ImportError:
     try:
-        import spglib  # type: ignore[import-untyped]
+        import spglib
     except ImportError as e:  # pragma: no cover
         msg = "Could not load spglib. Install it with: pip install spglib"
         raise ImportError(msg) from e
@@ -38,8 +39,11 @@ def get_sg(lattice: Atoms) -> Spacegroup:
         sg (int): integer number of the spacegroup
 
     """
-    spacegroup = spglib.get_spacegroup(lattice, symprec=1e-5)  # type: ignore[arg-type]
-    space_split = spacegroup.split()  # type: ignore[union-attr]
+    spacegroup: str | None = spglib.get_spacegroup(lattice, symprec=1e-5)  # type: ignore[arg-type]  # spglib expects Cell, ASE Atoms is compatible at runtime
+    if spacegroup is None:
+        msg = "spglib could not determine the spacegroup of the lattice"
+        raise ValueError(msg)
+    space_split = spacegroup.split()
     spg_num = space_split[1].replace("(", "").replace(")", "")
     return Spacegroup(int(spg_num))
 
@@ -104,7 +108,8 @@ def make_substitution(lattice: Atoms, site: list[float], new_species: str) -> At
     lattice_sites = new_lattice.get_scaled_positions()
     for i, lattice_site in enumerate(lattice_sites):
         if smact.are_eq(lattice_site, site):
-            new_lattice[i].symbol = new_species  # type: ignore[assignment]
+            atom = cast("Atom", new_lattice[i])
+            atom.symbol = new_species
     return new_lattice
 
 
