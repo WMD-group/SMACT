@@ -5,6 +5,7 @@ import logging
 import os
 from os.path import dirname, exists, join, realpath
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -282,8 +283,8 @@ class TestSequenceFunctions:
         Na, Fe, Cl = (smact.Element(label) for label in ("Na", "Fe", "Cl"))
 
         for ox_state_set in oxidation_states_sets:
-            output = smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=ox_state_set)
-            assert [(r[0], r[1], r[2]) for r in output] == oxidation_states_sets_results[ox_state_set]["thresh_2"]  # type: ignore[misc]
+            output: Any = smact.screening.smact_filter([Na, Fe, Cl], threshold=2, oxidation_states_set=ox_state_set)
+            assert [(r[0], r[1], r[2]) for r in output] == oxidation_states_sets_results[ox_state_set]["thresh_2"]
 
         # Test that reading the oxidation states from a file produces the same results
         assert smact.screening.smact_filter(
@@ -301,8 +302,10 @@ class TestSequenceFunctions:
 
         assert len(smact.screening.smact_filter([Na, Fe, Cl], threshold=8, oxidation_states_set="smact14")) == 77
 
-        result = smact.screening.smact_filter([Na, Fe, Cl], stoichs=[[1], [1], [4]], oxidation_states_set="smact14")
-        assert [(r[0], r[1], r[2]) for r in result] == [  # type: ignore[misc]
+        result: Any = smact.screening.smact_filter(
+            [Na, Fe, Cl], stoichs=[[1], [1], [4]], oxidation_states_set="smact14"
+        )
+        assert [(r[0], r[1], r[2]) for r in result] == [
             (("Na", "Fe", "Cl"), (1, 3, -1), (1, 1, 4)),
         ]
         stoichs = [list(range(1, 5)), list(range(1, 5)), list(range(1, 10))]
@@ -501,8 +504,9 @@ class TestSequenceFunctions:
         assert val_str == pytest.approx(val_el)
 
         # Invalid type raises TypeError (lines 33-34)
+        bad_input: Any = 42
         with pytest.raises(TypeError):
-            eneg_mulliken(42)  # type: ignore[arg-type]
+            eneg_mulliken(bad_input)
 
     def test_harrison_gap_logging(self, caplog):
         """band_gap_Harrison always logs debug info."""
@@ -524,8 +528,9 @@ class TestSequenceFunctions:
         assert isinstance(val, float)
 
         # Invalid element type raises TypeError
+        bad_elements: Any = [42, 43]
         with pytest.raises(TypeError):
-            compound_electroneg(elements=[42, 43], stoichs=[1, 1])  # type: ignore[arg-type]
+            compound_electroneg(elements=bad_elements, stoichs=[1, 1])
 
         # Invalid source raises ValueError
         with pytest.raises(ValueError):
@@ -566,8 +571,9 @@ class TestSequenceFunctions:
             ox._generate_lookup_key(Species("Fe", 5), Species("O", -2))
 
         # Invalid input type → TypeError (line 151)
+        bad_input: Any = "NaCl_string"
         with pytest.raises(TypeError):
-            ox.compound_probability("NaCl_string")  # type: ignore[arg-type]
+            ox.compound_probability(bad_input)
 
         # No cations in list → ValueError (line 161)
         with pytest.raises(ValueError, match="No cations"):
@@ -667,10 +673,11 @@ class TestSequenceFunctions:
         with pytest.raises(ValueError, match="No oxidation states"):
             smact.screening.smact_filter([Na, Ar], threshold=2, oxidation_states_set="icsd24")
 
-    def test_smact_validity_filter_params_warning(self):
-        """smact_validity warns when filtering params used with explicit oxidation_states_set (line 561)."""
-        with pytest.warns(UserWarning, match="include_zero"):
-            smact.screening.smact_validity("NaCl", oxidation_states_set="icsd24", include_zero=True)
+    def test_smact_validity_icsd_filter_config(self):
+        """smact_validity accepts ICSD24FilterConfig for filtering (line 561)."""
+        config = smact.screening.ICSD24FilterConfig(include_zero=True, consensus=10)
+        result = smact.screening.smact_validity("NaCl", icsd_filter=config)
+        assert isinstance(result, bool)
 
     def test_smact_validity_element_not_in_consensus_set(self):
         """smact_validity returns False when element absent from consensus ICSD24 filter (line 609)."""
