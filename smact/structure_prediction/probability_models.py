@@ -21,6 +21,7 @@ import abc
 from itertools import combinations_with_replacement
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from smact import data_directory
@@ -66,9 +67,10 @@ class SubstitutionModel(abc.ABC):
         lambda_tab = []
         for s1, s2 in pairs:
             prob = self.sub_prob(s1, s2)
-            lambda_tab.append((s1, s2, prob))
+            lam = np.log(max(prob, np.finfo(float).tiny))
+            lambda_tab.append((s1, s2, lam))
             if s1 != s2:
-                lambda_tab.append((s2, s1, prob))
+                lambda_tab.append((s2, s1, lam))
 
         lambda_df = pd.DataFrame(lambda_tab)
         return lambda_df.pivot_table(index=0, columns=1, values=2)
@@ -118,8 +120,8 @@ class RadiusModel(SubstitutionModel):
         spec2 = parse_spec(s2)
 
         try:
-            ele1_rows = self.shannon_data.loc[spec1[0]]
-            ele2_rows = self.shannon_data.loc[spec2[0]]
+            ele1_rows = self.shannon_data.loc[[spec1[0]]]
+            ele2_rows = self.shannon_data.loc[[spec2[0]]]
         except KeyError as e:
             msg = f"Element not in Shannon radius data file: {e}"
             raise KeyError(msg) from e

@@ -565,9 +565,9 @@ class TestSequenceFunctions:
         with pytest.raises(ValueError, match="cation and one anion"):
             ox._generate_lookup_key(Species("O", -2), Species("S", -2))
 
-        # Species not in table → NameError (line 88)
+        # Species not in table → KeyError (line 88)
         # Fe+5 is a valid smact Species but is absent from the Hautier probability table
-        with pytest.raises(NameError):
+        with pytest.raises(KeyError):
             ox._generate_lookup_key(Species("Fe", 5), Species("O", -2))
 
         # Invalid input type → TypeError (line 151)

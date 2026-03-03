@@ -14,12 +14,26 @@ import warnings
 from pathlib import Path
 from typing import cast
 
-from numpy import mean
+import numpy as np
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Species as pmgSpecies
 from pymatgen.core.periodic_table import get_el_sp
 
 from smact import Species, data_directory
+
+
+def _deduplicate_species_pairs(
+    species_pairs: list[tuple],
+) -> list[tuple]:
+    """Remove duplicate species pairs based on (symbol, oxidation) identity."""
+    seen: set[tuple[str, int, str, int]] = set()
+    unique: list[tuple] = []
+    for anion_sp, cation_sp in species_pairs:
+        key = (anion_sp.symbol, anion_sp.oxidation, cation_sp.symbol, cation_sp.oxidation)
+        if key not in seen:
+            seen.add(key)
+            unique.append((anion_sp, cation_sp))
+    return unique
 
 
 class OxidationStateProbabilityFinder:
@@ -52,7 +66,7 @@ class OxidationStateProbabilityFinder:
         # Define set of species for which we have data
         included_anions = {i[0] for i in self._probability_table}
         included_cations = {i[1] for i in self._probability_table}
-        included_species = list(included_anions) + list(included_cations)
+        included_species = included_anions | included_cations
 
         self._included_species = included_species
         self._included_cations = included_cations
@@ -90,7 +104,7 @@ class OxidationStateProbabilityFinder:
         # Check that both the species are included in the probability table
         if not all(elem in self._included_species for elem in [an_key, cat_key]):
             msg = f"One or both of [{cat_key}, {an_key}] are not in the probability table."
-            raise NameError(msg)
+            raise KeyError(msg)
 
         return (an_key, cat_key)
 
@@ -114,8 +128,8 @@ class OxidationStateProbabilityFinder:
         probability_table_key = self._generate_lookup_key(species1, species2)
         return self._probability_table[probability_table_key]
 
-    def get_included_species(self) -> list[str]:
-        """Returns a list of species for which there exists data in the probability table used."""
+    def get_included_species(self) -> set[str]:
+        """Returns a set of species for which there exists data in the probability table used."""
         return self._included_species
 
     def compound_probability(self, structure: Structure | list, ignore_stoichiometry: bool = True) -> float:
@@ -127,7 +141,7 @@ class OxidationStateProbabilityFinder:
             structure (pymatgen.Structure): Compound for which the probability score will be generated.
                 Can also be a list of pymatgen or SMACT Species.
             ignore_stoichiometry (bool): Whether to weight probabilities by stoichiometry.
-                Defaults to false as described in the original paper.
+                Defaults to True (i.e. stoichiometry is ignored).
 
         Returns:
         -------
@@ -159,8 +173,8 @@ class OxidationStateProbabilityFinder:
             msg = "Input requires a list of SMACT or Pymatgen Species or a Structure."
             raise TypeError(msg)
 
-        # Put most electonegative element last in list by sorting by electroneg
-        structure.sort(key=lambda x: x.pauling_eneg)
+        # Put most electronegative element last in list by sorting by electroneg
+        structure.sort(key=lambda x: x.pauling_eneg if x.pauling_eneg is not None else 0.0)
 
         # Define necessary species pairs
         anion = structure[-1]
@@ -174,11 +188,11 @@ class OxidationStateProbabilityFinder:
 
         # Reduce down to unique pairs if ignoring stoichiometry
         if ignore_stoichiometry:
-            species_pairs = list(set(species_pairs))
+            species_pairs = _deduplicate_species_pairs(species_pairs)
 
         # Do the maths
         pair_probs = [self.pair_probability(pair[0], pair[1]) for pair in species_pairs]
-        return float(mean(pair_probs))
+        return float(np.mean(pair_probs))
 
 
 def __getattr__(name: str) -> type:

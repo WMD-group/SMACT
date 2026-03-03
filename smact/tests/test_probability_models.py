@@ -59,18 +59,18 @@ class TestRadiusModel:
         table = self.model.gen_lambda(species)
         assert table.loc["Na1+", "K1+"] == pytest.approx(table.loc["K1+", "Na1+"])
 
-    def test_gen_lambda_diagonal_is_one(self):
-        """Diagonal entries (self-substitution) should be 1.0."""
+    def test_gen_lambda_diagonal_is_zero(self):
+        """Diagonal entries (self-substitution) should be log(1.0) = 0.0."""
         species = ["Na1+", "K1+"]
         table = self.model.gen_lambda(species)
         for sp in species:
-            assert table.loc[sp, sp] == pytest.approx(1.0)
+            assert table.loc[sp, sp] == pytest.approx(0.0)
 
     def test_gen_lambda_single_species(self):
-        """gen_lambda with one species returns 1x1 table with value 1.0."""
+        """gen_lambda with one species returns 1x1 table with log(1.0) = 0.0."""
         table = self.model.gen_lambda(["Na1+"])
         assert table.shape == (1, 1)
-        assert table.iloc[0, 0] == pytest.approx(1.0)
+        assert table.iloc[0, 0] == pytest.approx(0.0)
 
     def test_sub_prob_different_radii_lower(self):
         """Species with different radii should have lower probability than self-substitution."""

@@ -85,7 +85,8 @@ class StructurePredictor:
             return None
 
         # Get species to be substituted; ensure only 1 species is obtained
-        extra = set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - {diff_spec_str}
+        target_specs = set(map(unparse_spec, species)) | {diff_spec_str}
+        extra = [s for s in parent.get_spec_strs() if s not in target_specs]
         if len(extra) > 1:
             return None
         (alt_spec,) = extra
@@ -104,16 +105,12 @@ class StructurePredictor:
             return None
 
         try:
-            self.cm._mutate_structure(parent, alt_spec, diff_spec_str)
+            mutated = self.cm._mutate_structure(parent, alt_spec, diff_spec_str)
         except ValueError:
             # Poorly decorated
             return None
 
-        return (
-            self.cm._mutate_structure(parent, alt_spec, diff_spec_str),
-            p,
-            parent,
-        )
+        return (mutated, p, parent)
 
     def predict_structs(
         self,
@@ -156,9 +153,11 @@ class StructurePredictor:
         for spec_idx, parents in enumerate(potential_unary_parents):
             # Get missing ion
             # Ensure a different ion is obtained
-            if len(set(species) - set(sub_spec[spec_idx])) < 1:
+            sub_set = set(sub_spec[spec_idx])
+            diff_list = [s for s in species if s not in sub_set]
+            if len(diff_list) < 1:
                 continue
-            (diff_spec,) = set(species) - set(sub_spec[spec_idx])
+            (diff_spec,) = diff_list
             diff_spec_str = unparse_spec(diff_spec)
 
             # Determine conditional substitution likelihoods
@@ -193,10 +192,11 @@ class StructurePredictor:
             return None
 
         # Get species to be substituted; ensure n species are obtained
-        alt_spec_set = set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_spec_str)
-        if len(alt_spec_set) != n_ary:
+        # (preserve parent order to ensure deterministic pairing with diff_sub_probs)
+        target_specs = set(map(unparse_spec, species)) | set(diff_spec_str)
+        alt_spec = [s for s in parent.get_spec_strs() if s not in target_specs]
+        if len(alt_spec) != n_ary:
             return None
-        alt_spec = list(alt_spec_set)
 
         try:
             p = [diff_sub_probs[i].loc[alt_spec[i]] for i in range(n_ary)]
@@ -210,16 +210,12 @@ class StructurePredictor:
             return None
 
         try:
-            self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str)
+            mutated = self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str)
         except ValueError:
             # Poorly decorated
             return None
 
-        return (
-            self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str),
-            p_prod,
-            parent,
-        )
+        return (mutated, p_prod, parent)
 
     def nary_predict_structs(
         self,
@@ -262,8 +258,10 @@ class StructurePredictor:
         ]
 
         for spec_idx, parents in enumerate(potential_nary_parents):
-            # Get missing ions
-            diff_species = list(set(species) - set(sub_species[spec_idx]))
+            # Get missing ions (preserve original order from species to ensure
+            # deterministic pairing with diff_sub_probs)
+            sub_set = set(sub_species[spec_idx])
+            diff_species = [s for s in species if s not in sub_set]
             diff_spec_str = [unparse_spec(i) for i in diff_species]
 
             diff_sub_probs = [self.cm.cond_sub_probs(i) for i in diff_spec_str]

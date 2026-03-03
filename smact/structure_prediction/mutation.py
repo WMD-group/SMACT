@@ -307,7 +307,18 @@ class CationMutator:
         struct_buff = deepcopy(structure)
         init_spec_tup_list = [parse_spec(i) for i in init_species]
         struct_spec_tups = list(map(itemgetter(0, 1), struct_buff.species))
-        spec_loc = [struct_spec_tups.index(init_spec_tup_list[i]) for i in range(n)]
+        # Use a set to track already-matched indices, avoiding duplicates from list.index()
+        used: set[int] = set()
+        spec_loc: list[int] = []
+        for tup in init_spec_tup_list:
+            for idx, st in enumerate(struct_spec_tups):
+                if st == tup and idx not in used:
+                    spec_loc.append(idx)
+                    used.add(idx)
+                    break
+            else:
+                msg = f"Species {tup} not found in structure."
+                raise ValueError(msg)
 
         final_spec_tup_list = [parse_spec(i) for i in final_species]
 
@@ -359,7 +370,7 @@ class CationMutator:
     def complete_cond_probs(self) -> pd.DataFrame:
         """Generate a DataFrame with all the conditional substitution probabilities."""
         lambda_exp = np.exp(self.lambda_tab)
-        return lambda_exp / lambda_exp.sum(axis=1)
+        return lambda_exp / lambda_exp.sum(axis=0)
 
     def complete_pair_corrs(self) -> pd.DataFrame:
         """Generate a DataFrame with all the pair correlations."""
@@ -382,7 +393,7 @@ class CationMutator:
             np.exp(
                 pd.Series(
                     np.diag(self.lambda_tab),
-                    index=[self.lambda_tab.index, self.lambda_tab.columns],
+                    index=self.lambda_tab.index,
                 )
             )
             / self.Z
@@ -413,7 +424,7 @@ class CationMutator:
         """
         probs = self.get_lambdas(s1)
         probs = np.exp(probs)
-        probs /= np.exp(self.lambda_tab).sum()
+        probs /= np.exp(self.lambda_tab).sum(axis=0)
         return probs
 
     def unary_substitute(
