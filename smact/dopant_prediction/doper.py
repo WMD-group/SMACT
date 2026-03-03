@@ -119,16 +119,16 @@ class Doper:
         cations: list[str],
         sub: str,
     ) -> list[list]:
-        data = data_list.copy()
+        data = [dopant[:] for dopant in data_list]
         for dopants in data:
             if sub == "anion":
                 dopants.append(1.0)
                 continue
-            selected_site, original_specie, sub_prob = dopants[:3]
+            dopant_species, host_ion, sub_prob = dopants[:3]
             sum_prob = sub_prob
             for cation in cations:
-                if cation != original_specie:
-                    sum_prob += self.cation_mutator.sub_prob(cation, selected_site)
+                if cation != host_ion:
+                    sum_prob += self.cation_mutator.sub_prob(cation, dopant_species)
 
             selectivity = sub_prob / sum_prob
             selectivity = round(selectivity, 2)
@@ -390,10 +390,10 @@ class Doper:
 
         parts: list[str] = []
         for dopant_type, dopants in self.results.items():
-            parts.append("\033[91m" + str(dopant_type) + "\033[0m")
+            parts.append(str(dopant_type))
             for k, v in dopants.items():
                 kind = k if k == "sorted" else self._format_number(k)
-                parts.append("\033[96m" + str(kind) + "\033[0m")
+                parts.append(str(kind))
                 enumerated_data = [[i + 1, *sublist] for i, sublist in enumerate(v)]
                 parts.append(
                     tabulate(

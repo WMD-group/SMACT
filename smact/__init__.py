@@ -23,6 +23,7 @@ __all__ = [
     "ordered_elements",
 ]
 
+import functools
 import itertools
 import warnings
 from functools import reduce
@@ -34,7 +35,7 @@ from typing import TYPE_CHECKING, cast
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Iterable, Iterator, Sequence
 
 import pandas as pd
 
@@ -110,7 +111,7 @@ class Element:
 
         Element.HHI_p (float) : Herfindahl-Hirschman Index for elemental production
 
-        Element.HHI_r (float) : Hirfindahl-Hirschman Index for elemental reserves
+        Element.HHI_r (float) : Herfindahl-Hirschman Index for elemental reserves
 
         Element.mendeleev (int): Mendeleev number
 
@@ -126,8 +127,7 @@ class Element:
 
     Raises:
     ------
-        NameError: Element not found in element.txt
-        Warning: Element not found in Eigenvalues.csv
+        KeyError: Element not found in element.txt
 
     """
 
@@ -175,10 +175,10 @@ class Element:
         # Get the oxidation states from the custom file if it exists
         if oxi_states_custom_filepath:
             try:
-                self._oxidation_states_custom = data_loader.lookup_element_oxidation_states_custom(
-                    symbol, oxi_states_custom_filepath
+                self.oxidation_states_custom = cast(
+                    "list[int] | None",
+                    data_loader.lookup_element_oxidation_states_custom(symbol, oxi_states_custom_filepath),
                 )
-                self.oxidation_states_custom = cast("list[int] | None", self._oxidation_states_custom)
             except (TypeError, FileNotFoundError, OSError, ValueError):
                 warnings.warn("Custom oxidation states file not found. Please check the file path.", stacklevel=2)
                 self.oxidation_states_custom = None
@@ -190,7 +190,7 @@ class Element:
 
         if dataset is None:
             msg = f"Elemental data for {symbol} not found."
-            raise NameError(msg)
+            raise KeyError(msg)
 
         # Set coordination-environment data from the Shannon-radius data.
         # As above, it is safe to use copy = False with this Get* function.
@@ -252,6 +252,37 @@ class Element:
         self.num_valence = num_valence
         self.num_valence_modified = num_valence_modified
 
+    # snake_case aliases for PascalCase attributes, providing a consistent API
+    @property
+    def sse(self) -> float | None:
+        """Solid State Energy (alias for SSE)."""
+        return self.SSE
+
+    @property
+    def sse_pauling(self) -> float | None:
+        """SSE from Pauling electronegativity regression (alias for SSEPauling)."""
+        return self.SSEPauling
+
+    @property
+    def atomic_weight(self) -> float | None:
+        """Atomic weight (alias for AtomicWeight)."""
+        return self.AtomicWeight
+
+    @property
+    def melting_t(self) -> float | None:
+        """Melting temperature in K (alias for MeltingT)."""
+        return self.MeltingT
+
+    @property
+    def hhi_p(self) -> float | None:
+        """Herfindahl-Hirschman Index for production (alias for HHI_p)."""
+        return self.HHI_p
+
+    @property
+    def hhi_r(self) -> float | None:
+        """Herfindahl-Hirschman Index for reserves (alias for HHI_r)."""
+        return self.HHI_r
+
 
 class Species(Element):
     """
@@ -303,8 +334,7 @@ class Species(Element):
 
     Raises:
     ------
-        NameError: Element not found in element.txt
-        Warning: Element not found in Eigenvalues.csv
+        KeyError: Element not found in element.txt
 
     """
 
@@ -345,6 +375,10 @@ class Species(Element):
             msg = f"Data source {radii_source!r} not recognised. Choose 'shannon' or 'extended'."
             raise ValueError(msg)
 
+        # Get the average shannon and ionic radii
+        self.average_shannon_radius = None
+        self.average_ionic_radius = None
+
         if shannon_data:
             for dataset in shannon_data:
                 if dataset["charge"] == oxidation and str(coordination) == dataset["coordination"].split("_")[0]:
@@ -352,20 +386,10 @@ class Species(Element):
                     self.ionic_radius = dataset["ionic_radius"]
                     break
 
-        # Get the average shannon and ionic radii
-        self.average_shannon_radius = None
-        self.average_ionic_radius = None
-
-        if shannon_data:
-            # Get the rows of the shannon radius table for the element
-            shannon_data_df = pd.DataFrame(shannon_data)
-
-            # Get the rows corresponding to the oxidation state of the species
-            charge_rows = shannon_data_df.loc[shannon_data_df["charge"] == oxidation]
-
-            # Get the mean
-            self.average_shannon_radius = charge_rows["crystal_radius"].mean()
-            self.average_ionic_radius = charge_rows["ionic_radius"].mean()
+            charge_rows = pd.DataFrame(shannon_data).loc[lambda df: df["charge"] == oxidation]
+            if not charge_rows.empty:
+                self.average_shannon_radius = charge_rows["crystal_radius"].mean()
+                self.average_ionic_radius = charge_rows["ionic_radius"].mean()
 
         # Get SSE_2015 (revised) for the oxidation state.
 
@@ -376,8 +400,13 @@ class Species(Element):
             for dataset in sse_2015_data:
                 if dataset["OxidationState"] == oxidation:
                     self.SSE_2015 = dataset["SolidStateEnergy2015"]
-        else:
-            self.SSE_2015 = None
+
+
+@functools.cache
+def _load_ordered_elements() -> list[str]:
+    """Load and cache the ordered periodic table symbols."""
+    with (Path(data_directory) / "ordered_periodic.txt").open() as f:
+        return [line.split()[0] for line in f]
 
 
 def ordered_elements(x: int, y: int) -> list[str]:
@@ -390,11 +419,7 @@ def ordered_elements(x: int, y: int) -> list[str]:
     Returns:
         list: Ordered list of element symbols.
     """
-    with (Path(data_directory) / "ordered_periodic.txt").open() as f:
-        data = f.readlines()
-    elements = [line.split()[0] for line in data]
-
-    return elements[x - 1 : y]
+    return _load_ordered_elements()[x - 1 : y]
 
 
 def element_dictionary(
@@ -405,7 +430,7 @@ def element_dictionary(
     Create a dictionary of initialised smact.Element objects.
 
     Accessing an Element from a dict is significantly faster than
-    repeadedly initialising them on-demand within nested loops.
+    repeatedly initialising them on-demand within nested loops.
 
     Args:
     ----
@@ -464,7 +489,7 @@ def lattices_are_same(lattice1: Sequence, lattice2: Sequence, tolerance: float =
             ):
                 matched.add(j)
                 break
-    return len(matched) == len(lattice1)
+    return len(matched) == len(lattice1) == len(lattice2)
 
 
 def _gcd_recursive(*args: int) -> int:
@@ -489,7 +514,7 @@ def neutral_ratios_iter(
     oxidations: Sequence[int],
     stoichs: Sequence[Sequence[int]] | None = None,
     threshold: int | None = 5,
-) -> filter:
+) -> Iterator[tuple[int, ...]]:
     """
     Iterator for charge-neutral stoichiometries.
 
@@ -504,9 +529,9 @@ def neutral_ratios_iter(
         stoichs : stoichiometric ratios for each site (if provided)
         threshold : single threshold to go up to if stoichs are not provided
 
-    Yields:
-    ------
-        tuple: ratio that gives neutrality
+    Returns:
+    -------
+        filter: Iterator of tuples; each tuple is a ratio that gives neutrality
 
     """
     if stoichs is None:

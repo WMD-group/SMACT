@@ -138,7 +138,7 @@ class SmactStructure:
         if not isinstance(other, SmactStructure):
             return False
 
-        if list(self.sites.keys()) != list(other.sites.keys()):
+        if sorted(self.sites.keys()) != sorted(other.sites.keys()):
             return False
 
         sites_equal = True
@@ -179,11 +179,13 @@ class SmactStructure:
         lattice_t = tuple(tuple(row) for row in self.lattice_mat.tolist())
 
         # sites: preserve insertion/order of keys (constructor enforces order)
-        # Round coordinates to 1e-7 to match __eq__ tolerance
+        # Round coordinates to 5 d.p. — coarser than __eq__'s atol=1e-7 to ensure
+        # that values within the tolerance hash identically (at the cost of more
+        # collisions, which are harmless).
         sites_t = tuple(
             (
                 spec,
-                tuple(tuple(round(c, 7) for c in coord) for coord in coords),
+                tuple(tuple(round(c, 5) for c in coord) for coord in coords),
             )
             for spec, coords in self.sites.items()
         )
@@ -219,8 +221,9 @@ class SmactStructure:
         if len(species) == 0:
             msg = "`species` cannot be empty."
             raise ValueError(msg)
-        if not isinstance(species[0], tuple):
-            msg = f"`species` must be a list of tuples, got list of {type(species[0])}."
+        if not all(isinstance(s, tuple) for s in species):
+            bad = next(s for s in species if not isinstance(s, tuple))
+            msg = f"`species` must be a list of tuples, got list containing {type(bad)}."
             raise TypeError(msg)
 
         species_error = (
@@ -228,7 +231,7 @@ class SmactStructure:
             "2-tuples of Species objects and stoichiometries, "
             "or 3-tuples of elements, oxidations and stoichiometries."
         )
-        if len(species[0]) not in {2, 3}:
+        if any(len(s) not in {2, 3} for s in species):
             raise ValueError(species_error)
 
         if isinstance(species[0][0], str):  # String variation of instantiation
@@ -561,12 +564,12 @@ class SmactStructure:
         lines = poscar.split("\n")
 
         # Find stoichiometry
-        total_specs = [int(x) for x in lines[6].split(" ")]
+        total_specs = [int(x) for x in lines[6].split()]
         hcf = reduce(gcd, total_specs)
         total_specs = [int(x / hcf) for x in total_specs]
 
         species = []
-        for spec_str, stoic in zip(lines[0].split(" "), total_specs, strict=True):
+        for spec_str, stoic in zip(lines[0].split(), total_specs, strict=True):
             charge_match = re.search(r"\d+", spec_str)
 
             if charge_match:
@@ -581,14 +584,14 @@ class SmactStructure:
 
         lattice_param = float(lines[1])
 
-        lattice = np.array([[float(point) for point in line.split(" ")] for line in lines[2:5]])
+        lattice = np.array([[float(point) for point in line.split()] for line in lines[2:5]])
 
         sites = defaultdict(list)
         for line in lines[8:]:
             if not line:  # EOF
                 break
 
-            split_line = line.split(" ")
+            split_line = line.split()
             coords = [float(x) for x in split_line[:3]]
             spec = split_line[-1]
 
@@ -736,17 +739,16 @@ class SmactStructure:
 
         The POSCAR format adopted is as follows:
 
-        The first line contains the species' names separated by a whitespace.
-        The second through fourth line, inclusive, contain the lattice
-        matrix: each line contains a lattice vector, with elements
-        separated by a whitespace.
-        The fifth line contains the elements' names separated by a whitespace.
-        If more than one oxidation state exists for an element, the element
-        appears multiple times; once for each oxidation state.
-        The sixth line is the string 'Cartesian'.
-        The seventh line onwards are the Cartesian coordinates of each site,
-        separated by a whitespace. In addition, at the end of each line is the
-        species' name, separated by a whitespace.
+        Line 1: species strings (e.g. "Na1+ Cl1-"), whitespace-separated.
+        Line 2: lattice parameter (scaling factor).
+        Lines 3-5: lattice matrix, one vector per line.
+        Line 6: element symbols, whitespace-separated. If more than one
+        oxidation state exists for an element, the element appears
+        multiple times; once for each oxidation state.
+        Line 7: number of atoms per species, whitespace-separated.
+        Line 8: the string 'Cartesian'.
+        Lines 9+: Cartesian coordinates of each site, with the species
+        string appended at the end of each line.
 
         For examples of this format, see the text files under tests/files.
 
@@ -757,7 +759,8 @@ class SmactStructure:
         """
         poscar = " ".join(self.get_spec_strs()) + "\n"
 
-        poscar += f"{self.lattice_param}\n"
+        lattice_param = self.lattice_param if self.lattice_param is not None else 1.0
+        poscar += f"{lattice_param}\n"
 
         poscar += "\n".join(" ".join(map(str, vec)) for vec in self.lattice_mat.tolist()) + "\n"
 

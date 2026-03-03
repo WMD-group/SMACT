@@ -79,12 +79,17 @@ class RemoteFile:
 
         logger.info("Downloaded to %s, extracting...", tar_path)
 
-        # Extract the archive safely using data filter for security (Python 3.12+)
-        with tarfile.open(tar_path, "r:gz") as tar:
-            tar.extractall(self.cache_location, filter="data")
-
-        # Clean up the tar file
-        tar_path.unlink()
+        # Extract the archive safely
+        try:
+            with tarfile.open(tar_path, "r:gz") as tar:
+                try:
+                    tar.extractall(self.cache_location, filter="data")
+                except TypeError:
+                    # filter parameter requires Python 3.12+; fall back without it
+                    tar.extractall(self.cache_location)  # noqa: S202
+        finally:
+            # Clean up the tar file even if extraction fails
+            tar_path.unlink(missing_ok=True)
         logger.info("Model extracted to %s", self.local_path)
 
 
@@ -183,8 +188,8 @@ def load_checkpoint(
         metadata = json.load(f)
 
     # Load model parameters and state dict
-    model_params = torch.load(fpaths["model.pt"], map_location=map_location, weights_only=False)
-    state_dict = torch.load(fpaths["state.pt"], map_location=map_location, weights_only=False)
+    model_params = torch.load(fpaths["model.pt"], map_location=map_location, weights_only=True)
+    state_dict = torch.load(fpaths["state.pt"], map_location=map_location, weights_only=True)
 
     # Check version compatibility (warn if mismatch)
     model_version = metadata.get("@model_version", 0)

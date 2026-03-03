@@ -57,7 +57,7 @@ def _get_data_rows(filename: str) -> Generator[list[str], None, None]:
 
     Skips rows with no oxidation states for performance.
     """
-    with Path(filename).open() as file:
+    with Path(filename).open(encoding="utf-8") as file:
         for raw_line in file:
             stripped = raw_line.strip()
             if stripped and stripped[0] != "#" and any(char.isdigit() for char in stripped):
@@ -167,7 +167,7 @@ def lookup_element_oxidation_states_custom(
     symbol: str,
     filepath: str,
     copy: bool = True,
-) -> list[int] | list[str] | dict[str, list[int]] | None:
+) -> list[int] | dict[str, list[int]] | None:
     """
     Retrieve a list of known oxidation states for an element from a user-supplied file.
 
@@ -185,7 +185,7 @@ def lookup_element_oxidation_states_custom(
     """
     data = _load_oxidation_states(filepath)
     if symbol == "all":
-        return dict(data) if copy else data
+        return {k: list(v) for k, v in data.items()} if copy else data
     if symbol in data:
         return list(data[symbol]) if copy else data[symbol]
     _warn(f"Oxidation states for element {symbol} not found.")
@@ -216,7 +216,7 @@ def lookup_element_oxidation_states_icsd24(symbol: str, copy: bool = True) -> li
 @functools.cache
 def _load_hhis() -> dict[str, tuple[float, float]]:
     data: dict[str, tuple[float, float]] = {}
-    with (Path(data_directory) / "hhi.txt").open() as file:
+    with (Path(data_directory) / "hhi.txt").open(encoding="utf-8") as file:
         for raw_line in file:
             stripped = raw_line.strip()
             if stripped and stripped[0] != "#":
@@ -269,7 +269,11 @@ def _load_element_data() -> dict[str, dict]:
     data: dict[str, dict] = {}
     for items in _get_data_rows(str(Path(data_directory) / "element_data.txt")):
         clean_items = items[0:2] + list(map(float_or_None, items[2:]))
-        data[items[0]] = dict(list(zip(_ELEMENT_DATA_KEYS, clean_items, strict=True)))
+        entry = dict(list(zip(_ELEMENT_DATA_KEYS, clean_items, strict=True)))
+        # Z (atomic number) should be int, not float
+        if entry["Z"] is not None:
+            entry["Z"] = int(entry["Z"])
+        data[items[0]] = entry
     return data
 
 
@@ -304,7 +308,7 @@ def lookup_element_data(symbol: str, copy: bool = True) -> dict | None:
 @functools.cache
 def _load_shannon_radii() -> dict[str, list[dict]]:
     data: dict[str, list[dict]] = {}
-    with (Path(data_directory) / "shannon_radii.csv").open() as file:
+    with (Path(data_directory) / "shannon_radii.csv").open(encoding="utf-8") as file:
         reader = csv.reader(file)
         next(reader)  # skip header
         for row in reader:
@@ -352,7 +356,7 @@ def lookup_element_shannon_radius_data(symbol: str, copy: bool = True) -> list[d
         charge
             *int* charge
         coordination
-            *int* coordination
+            *str* coordination (e.g. "4_n" for 4-fold, see Shannon data)
         crystal_radius
             *float*
         ionic_radius
@@ -371,7 +375,7 @@ def lookup_element_shannon_radius_data(symbol: str, copy: bool = True) -> list[d
 @functools.cache
 def _load_shannon_radii_extended_ml() -> dict[str, list[dict]]:
     data: dict[str, list[dict]] = {}
-    with (Path(data_directory) / "shannon_radii_ML_extended.csv").open() as file:
+    with (Path(data_directory) / "shannon_radii_ML_extended.csv").open(encoding="utf-8") as file:
         reader = csv.reader(file)
         next(reader)  # skip header
         for row in reader:
@@ -424,7 +428,7 @@ def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True
         charge
             *int* charge
         coordination
-            *int* coordination
+            *str* coordination (e.g. "4_n" for 4-fold, see Shannon data)
         crystal_radius
             *float*
         ionic_radius
@@ -443,7 +447,7 @@ def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True
 @functools.cache
 def _load_sse_data() -> dict[str, dict]:
     data: dict[str, dict] = {}
-    with (Path(data_directory) / "SSE.csv").open() as file:
+    with (Path(data_directory) / "SSE.csv").open(encoding="utf-8") as file:
         reader = csv.reader(file)
         for row in reader:
             data[row[0]] = {
@@ -470,23 +474,23 @@ def lookup_element_sse_data(symbol: str) -> dict | None:
 
     Returns:
     -------
-        list : SSE datasets for the element, or None
+        dict : SSE data for the element, or None
             if the element was not found among the external data.
 
-        SSE datasets are dictionaries with the keys:
+            Dictionary keys:
 
-        AtomicNumber
-            *int*
-        SolidStateEnergy
-            *float* SSE
-        IonisationPotential
-            *float*
-        ElectronAffinity
-            *float*
-        MullikenElectronegativity
-            *str*
-        SolidStateRenormalisationEnergy
-            *float*
+            AtomicNumber
+                *int*
+            SolidStateEnergy
+                *float* SSE
+            IonisationPotential
+                *float*
+            ElectronAffinity
+                *float*
+            MullikenElectronegativity
+                *float*
+            SolidStateRenormalisationEnergy
+                *float*
 
     """
     data = _load_sse_data()
@@ -499,7 +503,7 @@ def lookup_element_sse_data(symbol: str) -> dict | None:
 @functools.cache
 def _load_sse2015_data() -> dict[str, list[dict]]:
     data: dict[str, list[dict]] = {}
-    with (Path(data_directory) / "SSE_2015.csv").open() as file:
+    with (Path(data_directory) / "SSE_2015.csv").open(encoding="utf-8") as file:
         reader = csv.reader(file)
         for row in reader:
             key = row[0]
@@ -553,14 +557,14 @@ def lookup_element_sse2015_data(symbol: str, copy: bool = True) -> list[dict] | 
 @functools.cache
 def _load_sse_pauling_data() -> dict[str, dict]:
     data: dict[str, dict] = {}
-    with (Path(data_directory) / "SSE_Pauling.csv").open() as file:
+    with (Path(data_directory) / "SSE_Pauling.csv").open(encoding="utf-8") as file:
         reader = csv.reader(file)
         for row in reader:
             data[row[0]] = {"SolidStateEnergyPauling": float(row[1])}
     return data
 
 
-def lookup_element_sse_pauling_data(symbol: str) -> dict | None:
+def lookup_element_sse_pauling_data(symbol: str, copy: bool = True) -> dict | None:
     """
     Retrieve Pauling SSE data.
 
@@ -572,6 +576,8 @@ def lookup_element_sse_pauling_data(symbol: str) -> dict | None:
     Args:
     ----
     symbol (str) : the atomic symbol of the element to look up.
+    copy (bool) : if True (default), return a copy of the data dictionary,
+        rather than a reference to the cached object.
 
     Returns: A dictionary containing the SSE2015 dataset for the
         element, or None if the element was not found among the external
@@ -580,7 +586,7 @@ def lookup_element_sse_pauling_data(symbol: str) -> dict | None:
     """
     data = _load_sse_pauling_data()
     if symbol in data:
-        return data[symbol]
+        return data[symbol].copy() if copy else data[symbol]
     _warn(f"Solid-state energy (Pauling regression) data for element {symbol} not found.")
     return None
 
@@ -661,8 +667,7 @@ def lookup_element_valence_data(symbol: str, copy: bool = True) -> dict | None:
 
     For d-block elements, the s and d electrons contribute to NValence.
     For p-block elements, the s and p electrons contribute to NValence.
-    For s- and f-block elements, NValence is calculated from the Noble Gas electron configuration
-        i.e.
+    For s- and f-block elements, NValence is calculated from the noble gas electron configuration.
 
     Args:
         symbol : the atomic symbol of the element to look up.

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
@@ -66,6 +66,8 @@ def get_element_fraction(composition: str | Composition, element_set: Collection
     """
     comp = _ensure_composition(composition)
     total_amt = sum(comp.values())
+    if total_amt == 0:
+        return 0.0
     target_amt = sum(amt for el, amt in comp.items() if el.symbol in element_set)
     return target_amt / total_amt
 
@@ -109,7 +111,8 @@ def get_pauling_test_mismatch(composition: str | Composition) -> float:
     if any(e is None or e <= 0 for e in electronegativities):
         return float("nan")
 
-    eneg_values: list[float] = [e for e in electronegativities if e is not None and e > 0]
+    # At this point all values are known to be positive floats
+    eneg_values = cast("list[float]", electronegativities)
     mismatches: list[float] = [
         abs(eneg1 - eneg2) for i, eneg1 in enumerate(eneg_values) for eneg2 in eneg_values[i + 1 :]
     ]

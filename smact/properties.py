@@ -39,6 +39,9 @@ def eneg_mulliken(element: smact.Element | str) -> float:
         msg = f"Unexpected type: {type(element)}"
         raise TypeError(msg)
 
+    if element.ionpot is None or element.e_affinity is None:
+        msg = f"Ionisation potential or electron affinity data missing for {element.symbol}"
+        raise ValueError(msg)
     return (element.ionpot + element.e_affinity) / 2.0
 
 
@@ -73,6 +76,9 @@ def band_gap_Harrison(
     an = anion
     cat = cation
     d = float(distance)
+    if d <= 0:
+        msg = f"distance must be positive, got {d}"
+        raise ValueError(msg)
 
     # Get elemental data:
     elements_dict = smact.element_dictionary((an, cat))
@@ -228,7 +234,7 @@ def valence_electron_count(compound: str) -> float:
     def get_element_valence(element: str) -> int:
         try:
             val = smact.Element(element).num_valence_modified
-        except NameError:
+        except KeyError:
             msg = f"Valence data not found for element: {element}"
             raise ValueError(msg) from None
         if val is None:

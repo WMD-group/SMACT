@@ -1,12 +1,12 @@
-"""Tools for estimating physical properties based on chemical composition."""
+"""Tools for screening chemical compositions based on SMACT rules."""
 
 from __future__ import annotations
 
+import functools
 import itertools
 import warnings
 from dataclasses import dataclass
 from enum import StrEnum
-from itertools import combinations
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
@@ -155,7 +155,7 @@ def _get_oxidation_states(
                 stacklevel=3,
             )
         return [getattr(e, attr) for e in elements]
-    if Path(oxidation_states_set).exists():
+    if Path(oxidation_states_set).is_file():
         return cast("list[list[int] | None]", [oxi_custom(e.symbol, oxidation_states_set) for e in elements])
     msg = (
         f'{oxidation_states_set} is not valid. Enter either "smact14", "icsd16", "icsd24", '
@@ -278,7 +278,7 @@ def eneg_states_test(ox_states: Sequence[int], enegs: Sequence[float | None]) ->
                cations, otherwise False
 
     """
-    for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=True)), 2):
+    for (ox1, eneg1), (ox2, eneg2) in itertools.combinations(list(zip(ox_states, enegs, strict=True)), 2):
         if (
             eneg1 is None
             or eneg2 is None
@@ -316,7 +316,7 @@ def eneg_states_test_threshold(ox_states: Sequence[int], enegs: Sequence[float |
                cations, otherwise False
 
     """
-    for (ox1, eneg1), (ox2, eneg2) in combinations(list(zip(ox_states, enegs, strict=True)), 2):
+    for (ox1, eneg1), (ox2, eneg2) in itertools.combinations(list(zip(ox_states, enegs, strict=True)), 2):
         if eneg1 is None or eneg2 is None:
             return False
         if ((ox1 > 0) and (ox2 < 0) and ((eneg1 - eneg2) > threshold)) or (
@@ -377,13 +377,18 @@ def ml_rep_generator(
 
 
 def smact_filter(
-    els: tuple[Element] | list[Element],
+    els: tuple[Element, ...] | list[Element],
     threshold: int | None = 8,
     stoichs: list[list[int]] | None = None,
     species_unique: bool = True,
     oxidation_states_set: str = "icsd24",
     return_output: SmactFilterOutputs = SmactFilterOutputs.default,
-) -> list[tuple[str, int, int]] | list[tuple[str, int]] | list[str] | list[dict]:
+) -> (
+    list[tuple[tuple[str, ...], tuple[int, ...], tuple[int, ...]]]
+    | list[tuple[tuple[str, ...], tuple[int, ...]]]
+    | list[str]
+    | list[dict]
+):
     """Function that applies the charge neutrality and electronegativity tests.
 
     Applied in one go for simple application in external scripts that
@@ -399,7 +404,7 @@ def smact_filter(
     ----
         els (tuple/list): A list of smact.Element objects.
         threshold (int): Threshold for stoichiometry limit, default = 8.
-        stoichs (list[int]): A selection of valid stoichiometric
+        stoichs (list[list[int]]): A selection of valid stoichiometric
             ratios for each site.
         species_unique (bool): Whether or not to consider elements in
             different oxidation states as unique in the results.
@@ -475,7 +480,7 @@ def smact_filter(
     # Return list depending on whether we are interested in unique species combinations
     # or just unique element combinations.
     if not species_unique:
-        compositions = list({(i[0], i[2]) for i in compositions})
+        compositions = list(dict.fromkeys((i[0], i[2]) for i in compositions))
     return _format_output(compositions, return_output)
 
 
@@ -504,20 +509,39 @@ def _check_fast_paths(
     return None
 
 
+@functools.lru_cache(maxsize=1)
+def _get_icsd24_filter() -> ICSD24OxStatesFilter:
+    """Return a cached ICSD24OxStatesFilter (avoids re-reading the JSON on every call)."""
+    return ICSD24OxStatesFilter()
+
+
+@functools.lru_cache(maxsize=8)
+def _get_icsd24_oxidation_dict(
+    include_zero: bool,
+    consensus: int,
+    commonality: str | float,
+) -> dict[str, list[int]]:
+    """Return a cached element -> oxidation-states mapping for the given filter parameters."""
+    filtered_df = _get_icsd24_filter().filter(
+        consensus=consensus,
+        include_zero=include_zero,
+        commonality=commonality,
+    )
+    return {
+        str(row["element"]): [int(x) for x in str(row["oxidation_state"]).split()] for _, row in filtered_df.iterrows()
+    }
+
+
 def _get_icsd24_oxidation_states(
     smact_elems: list[Element],
     config: ICSD24FilterConfig,
 ) -> list[list[int]] | None:
     """Get oxidation states from ICSD24 filter. Returns None if any element has no states."""
-    ox_filter = ICSD24OxStatesFilter()
-    filtered_df = ox_filter.filter(
-        consensus=config.consensus,
+    oxidation_dict = _get_icsd24_oxidation_dict(
         include_zero=config.include_zero,
+        consensus=config.consensus,
         commonality=config.commonality,
     )
-    oxidation_dict = {
-        row["element"]: [int(x) for x in str(row["oxidation_state"]).split()] for _, row in filtered_df.iterrows()
-    }
     ox_combos: list[list[int]] = []
     for el in smact_elems:
         ox_el = oxidation_dict.get(el.symbol)
@@ -590,14 +614,15 @@ def smact_validity(
     if isinstance(composition, str):
         composition = Composition(composition)
 
-    elem_symbols = tuple(composition.as_dict().keys())
+    comp_dict = composition.as_dict()
+    elem_symbols = tuple(comp_dict.keys())
 
     fast = _check_fast_paths(elem_symbols, include_alloys, check_metallicity, metallicity_threshold, composition)
     if fast is not None:
         return fast
 
     # Convert composition counts -> stoichiometric ratios
-    counts = [int(v) for v in composition.as_dict().values()]
+    counts = [int(v) for v in comp_dict.values()]
     gcd_val = _gcd_recursive(*counts)
     stoichs = [(int(c // gcd_val),) for c in counts]
     threshold = max(int(c // gcd_val) for c in counts)

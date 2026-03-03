@@ -16,15 +16,7 @@ if TYPE_CHECKING:
     from ase import Atoms
     from ase.atom import Atom
 
-try:
-    from pyspglib import spglib  # type: ignore[import-not-found]
-except ImportError:
-    try:
-        import spglib
-    except ImportError as e:  # pragma: no cover
-        msg = "Could not load spglib. Install it with: pip install spglib"
-        raise ImportError(msg) from e
-
+import spglib
 from ase.spacegroup import Spacegroup
 
 
@@ -36,10 +28,15 @@ def get_sg(lattice: Atoms) -> Spacegroup:
     ----
         lattice: the ASE crystal class
     Returns:
-        sg (int): integer number of the spacegroup
+        sg (Spacegroup): ASE Spacegroup object
 
     """
-    spacegroup: str | None = spglib.get_spacegroup(lattice, symprec=1e-5)  # type: ignore[arg-type]  # spglib expects Cell, ASE Atoms is compatible at runtime
+    cell = (
+        lattice.get_cell().tolist(),  # type: ignore[union-attr]  # ASE Cell stubs lack tolist
+        lattice.get_scaled_positions().tolist(),
+        lattice.get_atomic_numbers().tolist(),
+    )
+    spacegroup: str | None = spglib.get_spacegroup(cell, symprec=1e-5)  # type: ignore[attr-defined]  # spglib stubs incomplete
     if spacegroup is None:
         msg = "spglib could not determine the spacegroup of the lattice"
         raise ValueError(msg)
@@ -57,7 +54,7 @@ def get_inequivalent_sites(
 
     Args:
     ----
-        sub_lattice (list of lists): array containing Cartesian coordinates
+        sub_lattice (list of lists): array containing fractional coordinates
             of the sub-lattice of interest
 
         lattice (ASE crystal): the total lattice
@@ -95,7 +92,7 @@ def make_substitution(lattice: Atoms, site: list[float], new_species: str) -> At
     Args:
     ----
         lattice (ASE crystal): Input lattice
-        site (list): Cartesian coordinates of the substitution site
+        site (list): Fractional coordinates of the substitution site
         new_species (str): New species
 
     Returns:
@@ -106,10 +103,19 @@ def make_substitution(lattice: Atoms, site: list[float], new_species: str) -> At
     # deepcopy is necessary, otherwise changes applied to the clone also apply to the parent object.
     new_lattice = copy.deepcopy(lattice)
     lattice_sites = new_lattice.get_scaled_positions()
+    found = False
     for i, lattice_site in enumerate(lattice_sites):
         if smact.are_eq(lattice_site, site):
             atom = cast("Atom", new_lattice[i])
             atom.symbol = new_species
+            found = True
+    if not found:
+        import warnings
+
+        warnings.warn(
+            f"Site {site} not found in lattice; returning unmodified copy.",
+            stacklevel=2,
+        )
     return new_lattice
 
 
@@ -125,7 +131,7 @@ def build_sub_lattice(lattice: Atoms, symbol: str) -> list[list[float]]:
     Returns:
     -------
         list of lists:
-            sub_lattice: Cartesian coordinates of the sub-lattice of symbol
+            sub_lattice: Fractional coordinates of the sub-lattice of symbol
 
     """
     sub_lattice = []

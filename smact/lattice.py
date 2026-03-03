@@ -29,7 +29,7 @@ class Lattice:
 
     """
 
-    def __init__(self, sites: list[Site], space_group: int = 1, strukturbericht: str | bool = False) -> None:
+    def __init__(self, sites: list[Site], space_group: int = 1, strukturbericht: str | None = None) -> None:
         """Initialize the Lattice object."""
         self.sites = sites
         self.space_group = space_group
@@ -53,5 +53,7 @@ class Site:
         """Initialize the Site object."""
         if oxidation_states is None:
             oxidation_states = [0]
+        elif isinstance(oxidation_states, int):
+            oxidation_states = [oxidation_states]
         self.position = position
         self.oxidation_states = oxidation_states

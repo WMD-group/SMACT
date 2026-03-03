@@ -451,7 +451,7 @@ class TestSequenceFunctions:
         site_A = smact.lattice.Site([0, 0, 0], -1)
         site_B = smact.lattice.Site([0.5, 0.5, 0.5], [+2, +3])
         test_lattice = smact.lattice.Lattice([site_A, site_B], space_group=221)
-        assert test_lattice.sites[0].oxidation_states == -1
+        assert test_lattice.sites[0].oxidation_states == [-1]
         assert test_lattice.sites[1].position == [0.5, 0.5, 0.5]
 
     # ---------- Lattice parameters -----------

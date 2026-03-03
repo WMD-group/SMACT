@@ -59,7 +59,11 @@ class ICSD24OxStatesFilter:
             if commonality == "main":
                 pass
             else:
-                commonality_threshold = commonality_map.get(commonality)
+                threshold = commonality_map.get(commonality)
+                if threshold is None:
+                    msg = f"Unrecognised commonality string {commonality!r}. Use 'low', 'medium', 'high', or 'main'."
+                    raise ValueError(msg)
+                commonality_threshold = threshold
         elif isinstance(commonality, int | float):
             commonality_threshold = commonality
         else:
@@ -135,7 +139,7 @@ class ICSD24OxStatesFilter:
                 try:
                     species_list.append(
                         unparse_spec(
-                            (str(row["element"]), int(ox_state)),
+                            (str(row["element"]), int(float(ox_state))),
                             include_one=include_one_oxidation_state,
                         )
                     )

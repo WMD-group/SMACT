@@ -182,11 +182,13 @@ class StructureDB:
         self.add_table(table)
 
         pool = ParallelPool()
-        parse_iter = pool.uimap(parse_mprest, data)
-        results = list(parse_iter)
-        pool.close()
-        pool.join()
-        pool.clear()
+        try:
+            parse_iter = pool.uimap(parse_mprest, data)
+            results = list(parse_iter)
+        finally:
+            pool.close()
+            pool.join()
+            pool.clear()
 
         return self.add_structs(results, table, commit_after_each=True)
 
@@ -226,7 +228,7 @@ class StructureDB:
         self,
         structs: Sequence[SmactStructure | None],
         table: str,
-        commit_after_each: bool | None = False,
+        commit_after_each: bool = False,
     ) -> int:
         """
         Add several SmactStructures to a table.
@@ -307,11 +309,14 @@ class StructureDB:
         """
         table = _validate_table_name(table)
 
+        if not species:
+            return []
+
         glob = "*".join("{}_*_{}{}" for _ in range(len(species)))
         glob = f"*{glob}*"
 
-        species.sort(key=itemgetter(1), reverse=True)
-        species.sort(key=itemgetter(0))
+        species = sorted(species, key=itemgetter(1), reverse=True)
+        species = sorted(species, key=itemgetter(0))
 
         # Generate a list of [element1, charge1, sign1, element2, ...]
         vals = list(itertools.chain.from_iterable([x[0], abs(x[1]), get_sign(x[1])] for x in species))

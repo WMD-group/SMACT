@@ -38,9 +38,9 @@ def cubic_perovskite(
 
     Args:
     ----
-        species (str): Element symbols
+        species (list[str]): Element symbols
         cell_par (list): Six floats/ints specifying 3 unit cell lengths and 3 unit cell angles.
-        repetitions (list): Three floats specifying the expansion of the cell in x,y,z directions.
+        repetitions (list): Three integers specifying the expansion of the cell in x,y,z directions.
         oxidation_states (list): Oxidation states per site in the unit cell basis.
             Defaults to ``[[2], [4], [-2], [-2], [-2]]`` for the standard ABX3 perovskite.
 
@@ -77,13 +77,13 @@ def wurtzite(
     oxidation_states: list[list[int]] | None = None,
 ) -> tuple[Lattice, Atoms]:
     """
-    Build a wurzite cell using the crystal function in ASE.
+    Build a wurtzite cell using the crystal function in ASE.
 
     Args:
     ----
-        species (str): Element symbols
+        species (list[str]): Element symbols
         cell_par (list): Six floats/ints specifying 3 unit cell lengths and 3 unit cell angles.
-        repetitions (list): Three floats specifying the expansion of the cell in x,y,z directions.
+        repetitions (list): Three integers specifying the expansion of the cell in x,y,z directions.
         oxidation_states (list): Oxidation states per site in the unit cell basis.
             Defaults to ``[[2], [2], [-2], [-2]]`` for the standard AX wurtzite.
 

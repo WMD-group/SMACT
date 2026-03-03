@@ -32,8 +32,6 @@ _NAMED_OX_SETS: dict[str, str] = {
     "pymatgen_sp": str(Path(data_directory) / "oxidation_states_SP.txt"),
 }
 
-warnings.simplefilter(action="ignore", category=UserWarning)
-
 
 def convert_formula(combinations: list, num_elements: int, max_stoich: int) -> list:
     """Convert combinations into chemical formula.
@@ -78,18 +76,18 @@ def _generate_unique_compounds(
     logger.info("Number of generated combinations: %d", len(combinations))
 
     logger.info("#2. Generating all possible stoichiometric combinations...")
-    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
-    compounds = list(
-        tqdm(
-            pool.imap_unordered(
-                partial(convert_formula, num_elements=num_elements, max_stoich=max_stoich),
-                cast("Iterable[Any]", combinations),
-            ),
-            total=len(combinations),
+    with multiprocessing.Pool(
+        processes=(multiprocessing.cpu_count() if num_processes is None else num_processes)
+    ) as pool:
+        compounds = list(
+            tqdm(
+                pool.imap_unordered(
+                    partial(convert_formula, num_elements=num_elements, max_stoich=max_stoich),
+                    cast("Iterable[Any]", combinations),
+                ),
+                total=len(combinations),
+            )
         )
-    )
-    pool.close()
-    pool.join()
 
     compounds = [item for sublist in compounds for item in sublist]
     logger.info("Number of generated compounds: %d", len(compounds))
@@ -170,18 +168,22 @@ def generate_composition_with_smact(
     ]  # omit elements without Pauling electronegativity (e.g., He, Ne, Ar, ...)
     compounds_pauling = list(itertools.combinations(elements_pauling, num_elements))
 
-    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
-    results = list(
-        tqdm(
-            pool.imap_unordered(
-                partial(smact_filter, threshold=max_stoich, oxidation_states_set=oxidation_states_set),
-                cast("Iterable[Any]", compounds_pauling),
-            ),
-            total=len(compounds_pauling),
+    with (
+        multiprocessing.Pool(
+            processes=(multiprocessing.cpu_count() if num_processes is None else num_processes)
+        ) as pool,
+        warnings.catch_warnings(),
+    ):
+        warnings.simplefilter(action="ignore", category=UserWarning)
+        results = list(
+            tqdm(
+                pool.imap_unordered(
+                    partial(smact_filter, threshold=max_stoich, oxidation_states_set=oxidation_states_set),
+                    cast("Iterable[Any]", compounds_pauling),
+                ),
+                total=len(compounds_pauling),
+            )
         )
-    )
-    pool.close()
-    pool.join()
 
     return _build_results_df(compounds, results, save_path)
 
@@ -232,17 +234,21 @@ def generate_composition_with_smact_custom(
             elements_pauling.append(el)
     compounds_pauling = list(itertools.combinations(elements_pauling, num_elements))
 
-    pool = multiprocessing.Pool(processes=(multiprocessing.cpu_count() if num_processes is None else num_processes))
-    results = list(
-        tqdm(
-            pool.imap_unordered(
-                partial(smact_filter, threshold=max_stoich, oxidation_states_set=ox_filepath),
-                cast("Iterable[Any]", compounds_pauling),
-            ),
-            total=len(compounds_pauling),
+    with (
+        multiprocessing.Pool(
+            processes=(multiprocessing.cpu_count() if num_processes is None else num_processes)
+        ) as pool,
+        warnings.catch_warnings(),
+    ):
+        warnings.simplefilter(action="ignore", category=UserWarning)
+        results = list(
+            tqdm(
+                pool.imap_unordered(
+                    partial(smact_filter, threshold=max_stoich, oxidation_states_set=ox_filepath),
+                    cast("Iterable[Any]", compounds_pauling),
+                ),
+                total=len(compounds_pauling),
+            )
         )
-    )
-    pool.close()
-    pool.join()
 
     return _build_results_df(compounds, results, save_path)
