@@ -2,46 +2,38 @@
 
 ## [v4.0.0](https://github.com/WMD-group/SMACT/tree/v4.0.0) (2026-03-03)
 
-[Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.1.0...v4.0.0)
-
-**Breaking changes:**
-
-- Drop Python 3.10 support; minimum version is now Python 3.11
-- Rename `SmactFilterOutputs.dict` to `composition_dict` to avoid shadowing the built-in [\#442](https://github.com/WMD-group/SMACT/pull/442)
-- Enforce `zip(strict=True)` across all source code — silently mismatched sequences now raise `ValueError`
+[Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.2.0...v4.0.0)
 
 **Implemented enhancements:**
 
-- Add mixed-valence support to `smact_validity` [\#568](https://github.com/WMD-group/SMACT/pull/568)
-- Add ElementEmbeddings integration via `smact.io` [\#442](https://github.com/WMD-group/SMACT/pull/442)
-- Add full type annotations across all public APIs with pyright "standard" mode enforcement
-- Enable ruff ANN rules for enforcing type annotations in source code
-- Migrate `test_core.py` from `unittest.TestCase` to idiomatic pytest
-- Add pytest markers for `slow` and `integration` tests
-- Add coverage threshold (`fail_under = 85`) to prevent regressions
-- Compile regexes at module level in `composition.py` and `species.py` for performance
-- Read docs version from `importlib.metadata` instead of hardcoding
+- WIP feat: SMACT Property Prediction Module [\#448](https://github.com/WMD-group/SMACT/issues/448)
+- \[WIP\] ElementEmbeddings integration [\#442](https://github.com/WMD-group/SMACT/pull/442) ([AntObi](https://github.com/AntObi))
+- WIP: Support validity for mixed valence compounds [\#441](https://github.com/WMD-group/SMACT/pull/441) ([utf](https://github.com/utf))
 
-**Fixed bugs:**
+**Closed issues:**
 
-- Fix noble gas `TypeError` crash with explicit oxidation state sets [\#588](https://github.com/WMD-group/SMACT/pull/588)
-- Fix `RuntimeError` in `SmactStructure.from_mp()` BVAnalyzer fallback [\#595](https://github.com/WMD-group/SMACT/pull/595)
-- Replace recursive GCD with `functools.reduce` to prevent stack overflow on large stoichiometries
-- Fix type-check in `properties.py` that only validated the first element in a list
-- Convert recursive `parse_formula` to iterative with depth limit to prevent `RecursionError`
-- Fix variable shadowing in `ordered_elements` function
-- Fix `SmactStructure.__eq__` to handle different species counts without raising `ValueError`
-- Fix wurtzite builder oxidation states mismatch (8 states for 4 sites)
+- UserWarning when assessing the validity of compounds with noble gases [\#585](https://github.com/WMD-group/SMACT/issues/585)
 
 **Merged pull requests:**
 
-- Deep audit: security, correctness, and API cleanup for v4.0.0 [\#595](https://github.com/WMD-group/SMACT/pull/595)
-- Unify local checks via pre-commit and consolidate CI workflows
-- Fix all pyright type errors and add pyright to CI
-- Modernize install instructions and update Python version to >=3.11
-- Remove redundant requirements files and modernize docs
-- Use local pre-commit hooks for ruff, codespell, and pyright
-- Update maintainers for v4.0.0 [\#595](https://github.com/WMD-group/SMACT/pull/595)
+- chore: merge develop into master \(v4.0.0\) [\#603](https://github.com/WMD-group/SMACT/pull/603) ([KingaMas](https://github.com/KingaMas))
+- chore: v4.0.0 audit — type annotations, bug fixes, CI hardening [\#602](https://github.com/WMD-group/SMACT/pull/602) ([KingaMas](https://github.com/KingaMas))
+- Release 4.0.0 [\#595](https://github.com/WMD-group/SMACT/pull/595) ([KingaMas](https://github.com/KingaMas))
+- chore: upgrade dependencies to resolve [\#589](https://github.com/WMD-group/SMACT/pull/589) ([KingaMas](https://github.com/KingaMas))
+- Fix TypeError crash for noble gases with explicit oxidation state sets [\#588](https://github.com/WMD-group/SMACT/pull/588) ([KingaMas](https://github.com/KingaMas))
+- pre-commit autoupdate [\#584](https://github.com/WMD-group/SMACT/pull/584) ([pre-commit-ci[bot]](https://github.com/apps/pre-commit-ci))
+
+## [v3.2.0](https://github.com/WMD-group/SMACT/tree/v3.2.0) (2025-07-31)
+
+[Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.1.0...v3.2.0)
+
+**Closed issues:**
+
+- ICSD24 details clarification [\#427](https://github.com/WMD-group/SMACT/issues/427)
+
+**Merged pull requests:**
+
+- Update version number [\#438](https://github.com/WMD-group/SMACT/pull/438) ([AntObi](https://github.com/AntObi))
 
 ## [v3.1.0](https://github.com/WMD-group/SMACT/tree/v3.1.0) (2025-04-02)
 
@@ -124,7 +116,7 @@
 
 **Implemented enhancements:**
 
-- Move to ruff for linting and formatting [\#297](https://github.com/WMD-group/SMACT/issues/297)
+- Move to ruff for linting and formating [\#297](https://github.com/WMD-group/SMACT/issues/297)
 - Running examples from a browser [\#67](https://github.com/WMD-group/SMACT/issues/67)
 - Migrate CI dependency installation from pip to uv [\#338](https://github.com/WMD-group/SMACT/pull/338) ([AntObi](https://github.com/AntObi))
 - Structure prediction fixes [\#336](https://github.com/WMD-group/SMACT/pull/336) ([AntObi](https://github.com/AntObi))
