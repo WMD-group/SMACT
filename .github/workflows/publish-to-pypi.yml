@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     uses: ./.github/workflows/ci.yml
+    secrets: inherit
 
   build:
     needs: test
