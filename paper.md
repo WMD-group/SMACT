@@ -12,39 +12,29 @@ authors:
     orcid: 0009-0006-5656-6646
     affiliation: 1
   - name: Anthony Onwuli
-    orcid: 0000-0003-2107-153X
     affiliation: 1
   - name: Alexander Moriarty
-    orcid: 0000-0001-7525-1419
     affiliation: 2
-  - name: Daniel W. Davies
-    orcid: 0000-0003-4094-5992
+  - name: Daniel Davies
     affiliation: 1
   - name: Ryan Nduma
-    orcid: 0009-0008-1428-4637
     affiliation: 1
   - name: Aron Walsh
     orcid: 0000-0001-5460-7033
-    affiliation: "1, 3"
-  - name: Keith T. Butler
-    orcid: 0000-0001-5432-5597
+    affiliation: 1
+  - name: Keith Butler
     affiliation: 4
   - name: Jiwoo Lee
-    affiliation: 1
+    affiliation: 3
   - name: Panyalak Detrattanawichai
-    orcid: 0000-0001-9606-5631
     affiliation: 1
-  - name: Alex M. Ganose
-    orcid: 0000-0002-4486-3321
+  - name: Alex Ganose
     affiliation: 5
   - name: Hyunsoo Park
-    orcid: 0000-0001-9388-173X
     affiliation: 1
-  - name: Rhys E. A. Goodall
-    orcid: 0000-0002-6589-1700
+  - name: Rhys Goodall
     affiliation: 6
   - name: Tianshu Li
-    orcid: 0000-0002-0529-543X
     affiliation: 1
 affiliations:
   - name: Department of Materials, Imperial College London, London, UK
@@ -53,13 +43,13 @@ affiliations:
     index: 2
   - name: Department of Materials Science and Engineering, Yonsei University, Seoul, South Korea
     index: 3
-  - name: Department of Chemistry, University of Bath, Bath, UK
+  - name: Department of Chemistry, University College London, London, UK
     index: 4
   - name: Department of Chemistry, Imperial College London, London, UK
     index: 5
   - name: Radical AI, New York, USA
     index: 6
-date: 2 March 2026
+date: 3 March 2026
 bibliography: paper.bib
 ---
 
@@ -87,7 +77,7 @@ SMACT v4 retains the `Element` and `Species` classes at its core, providing acce
 
 **Dopant prediction.** The `dopant_prediction` module (`Doper` class) enables high-throughput identification of p-type and n-type dopants for a given host composition. It combines oxidation state filters with ionic radius constraints and optional species embedding similarities to rank candidate dopants by substitution probability and site selectivity.
 
-**Property prediction.** The `property_prediction` subpackage provides composition-to-property prediction using pre-trained ROOST (Representation Learning from Stoichiometry) models [@Goodall2020]. Users can predict band gaps, formation energies, bulk moduli, and other properties directly from chemical formulae, with ensemble-based uncertainty quantification. A model registry and caching system manage multiple pre-trained checkpoints across different property fidelities.
+**Property prediction.** The `property_prediction` subpackage provides composition-to-property prediction using pre-trained ROOST (Representation Learning from Stoichiometry) models [@Goodall2020]. Users can predict band gaps directly from chemical formulae, with the extensible architecture designed to support additional properties as pre-trained models become available. Ensemble-based uncertainty quantification is included, and a model registry and caching system manage pre-trained checkpoints.
 
 **Oxidation states and metallicity.** The `oxidation_states` module implements a probabilistic model for predicting the likelihood of metal species coexisting in compounds based on anion-dependent statistics [@davies2018]. SMACT v3 updated the default oxidation state data from the original SMACT14 set to ICSD24, reflecting more recent experimental observations. The `metallicity` module provides scoring functions based on electronegativity differences to distinguish ionic compounds from intermetallic phases.
 
@@ -95,7 +85,7 @@ SMACT v4 retains the `Element` and `Species` classes at its core, providing acce
 
 **Screening enhancements.** The core `smact_filter` and `smact_validity` functions have been extended with support for mixed-valence compositions, switchable oxidation state datasets (ICSD24, ICSD16, SMACT14, Pymatgen, Wikipedia), early short-circuiting for performance, and consensus-based oxidation state filtering.
 
-**Code quality.** SMACT v4 enforces full type annotations checked by `pyright` in strict mode, linting with `ruff` across all rule categories, and maintains greater than 85% test coverage across 271 tests running on three Python versions and three operating systems via GitHub Actions.
+**Code quality.** SMACT v4 enforces full type annotations checked by `pyright` in standard mode, linting with `ruff` across all rule categories, and maintains greater than 85% test coverage across 318 tests running on three Python versions and three operating systems via GitHub Actions.
 
 # Research Impact
 
@@ -107,7 +97,7 @@ Generative AI tools (Claude, Anthropic) were used to assist with code modernisat
 
 # Author Contributions
 
-[KOM](https://github.com/KingaMas) is the current maintainer and led the v4.0.0 release including type annotations, test modernisation, and documentation updates.
+[KOM](https://github.com/KingaMas) is the current maintainer. She contributed consensus-based oxidation state filtering for `smact_validity` and `smact_filter`, and led the v4.0.0 release including mixed-valence support, a deep code audit, full type annotations, security hardening, test migration to pytest with coverage raised to over 85%, and CI consolidation.
 [AO](https://github.com/AntObi) was the primary developer from v2.2 to v3.1, contributing the dopant prediction module, oxidation states improvements, crystal space utilities, and extensive maintenance.
 [AM](https://github.com/a-ws-m) designed and implemented the structure prediction subpackage and benchmarking framework.
 [DWD](https://github.com/dandavies99) is the original lead developer and contributed to CI infrastructure and code quality tooling.

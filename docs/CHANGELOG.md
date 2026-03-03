@@ -1,6 +1,6 @@
 # Changelog
 
-## [v4.0.0](https://github.com/WMD-group/SMACT/tree/v4.0.0) (2026-02-26)
+## [v4.0.0](https://github.com/WMD-group/SMACT/tree/v4.0.0) (2026-03-03)
 
 [Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.1.0...v4.0.0)
 
