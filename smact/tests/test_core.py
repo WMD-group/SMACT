@@ -461,8 +461,8 @@ class TestSequenceFunctions:
         assert perovskite[0] == pytest.approx(6.3)
         assert perovskite[1] == pytest.approx(6.3)
         assert perovskite[3] == pytest.approx(90)
-        assert wurtz[0] == pytest.approx(5.13076)
-        assert wurtz[2] == pytest.approx(8.3838)
+        assert wurtz[0] == pytest.approx(5.1276, abs=1e-4)
+        assert wurtz[2] == pytest.approx(8.3733, abs=1e-4)
 
     # ---------- smact.oxidation_states module -----------
     def test_oxidation_states(self):

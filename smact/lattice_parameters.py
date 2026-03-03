@@ -9,8 +9,8 @@ from __future__ import annotations
 import numpy as np
 
 # Wurtzite geometry: tetrahedral bond angle ~ 109.47 deg = 2*arccos(-1/3)
-_TETRAHEDRAL_HALF_ANGLE_SIN = 0.817  # sin(109.47 deg / 2)
-_TETRAHEDRAL_COMPLEMENT_SIN = 0.335  # sin(109.47 deg - 90 deg)
+_TETRAHEDRAL_HALF_ANGLE_SIN = np.sqrt(2.0 / 3.0)  # sin(109.47 deg / 2) = sqrt(2/3) ≈ 0.8165
+_TETRAHEDRAL_COMPLEMENT_SIN = 1.0 / 3.0  # sin(109.47 deg - 90 deg) = 1/3 ≈ 0.3333
 
 # Body-centred tetragonal: empirical a/r ratio (β-Sn structure)
 _BCT_A_FACTOR = 3.86
@@ -34,23 +34,26 @@ def _check_positive(values: list[float] | float, name: str = "radius", expected_
 
 def cubic_perovskite(
     shannon_radius: list[float],
-) -> tuple[float, float, float, float, float, float]:  # Cubic Pervoskite
+) -> tuple[float, float, float, float, float, float]:  # Cubic Perovskite
     """
     The lattice parameters of the cubic perovskite structure.
 
     Args:
     ----
-        shannon_radius (list) : The radii of the a,b,c ions
+        shannon_radius (list) : The radii of the A, B, X ions
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
     _check_positive(shannon_radius, expected_length=3)
-    limiting_factors = [2 * sum(shannon_radius[1:])]
+    limiting_factors = [
+        2 * (shannon_radius[1] + shannon_radius[2]),  # B-X contact along cube edge
+        np.sqrt(2) * (shannon_radius[0] + shannon_radius[2]),  # A-X contact along face diagonal
+    ]
     a = max(limiting_factors)
     b = a
     c = a
@@ -73,7 +76,7 @@ def wurtzite(
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
@@ -110,12 +113,12 @@ def fcc(
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
@@ -138,12 +141,12 @@ def bcc(
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
@@ -166,12 +169,12 @@ def hcp(
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
@@ -194,12 +197,12 @@ def diamond(
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
@@ -222,12 +225,12 @@ def bct(
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
@@ -255,14 +258,17 @@ def rocksalt(
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
     _check_positive(shannon_radius, expected_length=2)
+    # In rocksalt, same-species ions sit at face-diagonal distance = a*sqrt(2)/2,
+    # so a >= 2*sqrt(2)*r for each species. The third factor is the nearest-neighbour
+    # cation-anion distance along the cube edge: a >= 2*(r_A + r_B).
     limiting_factors = [
-        2 * 2**0.2 * shannon_radius[0],
-        2 * 2**0.2 * shannon_radius[1],
+        2 * 2**0.5 * shannon_radius[0],
+        2 * 2**0.5 * shannon_radius[1],
         2 * shannon_radius[0] + 2 * shannon_radius[1],
     ]
     a = max(limiting_factors)
@@ -288,13 +294,15 @@ def b2(
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
     _check_positive(shannon_radius, expected_length=2)
+    # In B2 (CsCl), the body diagonal relates both species: a*sqrt(3)/2 = r_A + r_B,
+    # so a >= 2*(r_A + r_B)/sqrt(3). The other two factors are same-species contacts.
     limiting_factors = [
-        2 * (shannon_radius[0] + shannon_radius[0]) / np.sqrt(3),
+        2 * (shannon_radius[0] + shannon_radius[1]) / np.sqrt(3),
         2 * shannon_radius[1],
         2 * shannon_radius[0],
     ]
@@ -321,14 +329,16 @@ def zincblende(
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
     _check_positive(shannon_radius, expected_length=2)
+    # In zinc-blende, same-species ions sit at face-diagonal distance = a*sqrt(2)/2,
+    # and the nearest-neighbour A-B distance along the body diagonal = a*sqrt(3)/4.
     limiting_factors = [
         2 * (max(shannon_radius) * np.sqrt(2)),
-        4 * (shannon_radius[0] + shannon_radius[1]) ** (1.0 / 3.0),
+        4 * (shannon_radius[0] + shannon_radius[1]) / np.sqrt(3),
     ]
     a = max(limiting_factors)
     b = a
@@ -358,7 +368,7 @@ def b10(
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
@@ -389,7 +399,7 @@ def stuffed_wurtzite(
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """

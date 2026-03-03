@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 from smact.lattice_parameters import (
@@ -37,7 +38,7 @@ def _assert_six_tuple(result: LatticeResult):
     assert isinstance(result, tuple)
     assert len(result) == 6
     for v in result:
-        assert isinstance(v, (int, float))
+        assert isinstance(v, (int, float, np.floating))
 
 
 def _assert_angles(result: LatticeResult, expected: tuple[int, int, int]):
