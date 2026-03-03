@@ -26,11 +26,11 @@ def test_dopant_prediction():
 
     # Assert: Length of the list and return type (dictionary: list)
     result = test.get_dopants()
-    assert type(result) is dict
+    assert isinstance(result, dict)
     for d in result.values():
         assert "sorted" in d
         for v in d.values():
-            assert type(v) is list
+            assert isinstance(v, list)
 
     # Assert: (cation) higher charges for n-type and lower charges for p-type
     n_sub_list_cat = result["n-type cation substitutions"]["sorted"]

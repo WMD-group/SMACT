@@ -7,10 +7,10 @@ import json
 import logging
 import os
 import pickle
+import random
 from contextlib import contextmanager
 from importlib.util import find_spec
 from operator import itemgetter
-from random import sample
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
@@ -41,12 +41,19 @@ if TYPE_CHECKING:
 MP_URL = "https://api.materialsproject.org"
 MP_API_AVAILABLE = bool(find_spec("mp_api"))
 
-try:
-    skip_mprester_tests = requests.get(MP_URL, timeout=60).status_code != 200
+# Lazily evaluated at first use to avoid network calls during test collection.
+_skip_mprester_tests: bool | None = None
 
-except (ModuleNotFoundError, ImportError, requests.exceptions.RequestException):
-    # Skip all MPRester tests if some downstream problem on the website, mp-api or whatever.
-    skip_mprester_tests = True
+
+def _should_skip_mprester() -> bool:
+    global _skip_mprester_tests  # noqa: PLW0603
+    if _skip_mprester_tests is None:
+        try:
+            _skip_mprester_tests = requests.get(MP_URL, timeout=60).status_code != 200
+        except (ModuleNotFoundError, ImportError, requests.exceptions.RequestException):
+            _skip_mprester_tests = True
+    return _skip_mprester_tests
+
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_STRUCT = os.path.join(files_dir, "test_struct")
@@ -62,20 +69,6 @@ TEST_SPECIES: dict[str, list[tuple[str, int, int] | tuple[Species, int]]] = {
     "NaCl": [("Na", 1, 1), ("Cl", -1, 1)],
     "Fe": [("Fe", 0, 1)],
 }
-
-
-def generate_test_structure(comp: str) -> bool:
-    """Generate a pickled test structure for comparison."""
-    poscar_file = os.path.join(files_dir, f"{comp}.txt")
-    s = SmactStructure.from_file(poscar_file)
-
-    with open(TEST_STRUCT, "wb") as f:
-        pickle.dump(s, f)
-
-    with open(TEST_POSCAR, "w") as f:
-        f.write(s.as_poscar())
-
-    return True
 
 
 @contextmanager
@@ -234,10 +227,12 @@ def test_ele_stoics():
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    (skip_mprester_tests or not MP_API_AVAILABLE or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY"))),
+    not MP_API_AVAILABLE or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")),
     reason="Materials Project API not available or not configured.",
 )
 def test_from_mp():
+    if _should_skip_mprester():
+        pytest.skip("Materials Project API endpoint not reachable.")
     api_key = os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY")
 
     for comp, species in TEST_SPECIES.items():
@@ -645,8 +640,9 @@ def cation_mutator_data():
     test_mutator = CationMutator.from_json(lambda_json=TEST_LAMBDA_JSON)
     test_pymatgen_mutator = CationMutator.from_json(lambda_json=None, alpha=lambda _x, _y: -5)
 
-    # 5 random test species -> 5! test pairs
-    test_species = sample(list(test_pymatgen_mutator.specs), 5)
+    # 5 random test species -> 5! test pairs (seeded for determinism)
+    rng = random.Random(42)
+    test_species = rng.sample(list(test_pymatgen_mutator.specs), 5)
     test_pairs = list(itertools.combinations_with_replacement(test_species, 2))
 
     pymatgen_sp = SubstitutionProbability(lambda_table=None, alpha=-5)

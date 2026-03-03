@@ -65,7 +65,8 @@ def test_raises_import_error_when_not_available():
 def test_does_not_raise_when_available():
     mock_featuriser = MagicMock(return_value="result")
     with patch("smact.io.elementembeddings._ee_composition_featuriser", mock_featuriser):
-        composition_featuriser(composition_data=["NaCl"])
+        result = composition_featuriser(composition_data=["NaCl"])
+    assert result == "result"
 
 
 def test_composition_featuriser_delegates_with_correct_args():

@@ -43,8 +43,3 @@ def files_dir():
 @pytest.fixture
 def test_ox_states_path(files_dir):
     return os.path.join(files_dir, "test_oxidation_states.txt")
-
-
-@pytest.fixture
-def test_struct_path(files_dir):
-    return os.path.join(files_dir, "mp-540839_CsPbI3_oxi.json")

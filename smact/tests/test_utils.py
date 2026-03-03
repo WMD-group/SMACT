@@ -29,12 +29,18 @@ from smact.utils.species import _parse_spec_old, parse_spec
 MP_URL = "https://api.materialsproject.org"
 MP_API_AVAILABLE = bool(find_spec("mp_api"))
 
-try:
-    skip_mprester_tests = requests.get(MP_URL, timeout=60).status_code != 200
+# Lazily evaluated at first use to avoid network calls during test collection.
+_skip_mprester_tests: bool | None = None
 
-except (ModuleNotFoundError, ImportError, requests.exceptions.ConnectionError):
-    # Skip all MPRester tests if some downstream problem on the website, mp-api or whatever.
-    skip_mprester_tests = True
+
+def _should_skip_mprester() -> bool:
+    global _skip_mprester_tests  # noqa: PLW0603
+    if _skip_mprester_tests is None:
+        try:
+            _skip_mprester_tests = requests.get(MP_URL, timeout=60).status_code != 200
+        except (ModuleNotFoundError, ImportError, requests.exceptions.ConnectionError):
+            _skip_mprester_tests = True
+    return _skip_mprester_tests
 
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
@@ -230,8 +236,8 @@ def test_convert_formula():
 
 
 @pytest.mark.parametrize("ox_states", ["smact14", "icsd24"])
-def test_generate_composition_with_smact(ox_states):
-    save_dir = "data/binary/df_binary_label.pkl"
+def test_generate_composition_with_smact(ox_states, tmp_path):
+    save_dir = str(tmp_path / "binary" / "df_binary_label.pkl")
     oxidation_states_sets_dict = {
         "smact14": {"smact_allowed": 388},
         "icsd24": {"smact_allowed": 342},
@@ -249,13 +255,10 @@ def test_generate_composition_with_smact(ox_states):
     # Check if the data was saved to disk
     assert os.path.exists(save_dir)
 
-    # Clean up
-    shutil.rmtree("data")
-
 
 @pytest.mark.parametrize("ox_states", ["smact14", "icsd24"])
-def test_generate_composition_with_smact_custom(ox_states):
-    save_dir = "data/binary/df_binary_label.pkl"
+def test_generate_composition_with_smact_custom(ox_states, tmp_path):
+    save_dir = str(tmp_path / "binary" / "df_binary_label.pkl")
     oxidation_states_sets_dict = {
         "smact14": {"smact_allowed": 388},
         "icsd24": {"smact_allowed": 342},
@@ -273,9 +276,6 @@ def test_generate_composition_with_smact_custom(ox_states):
     # Check if the data was saved to disk
     assert os.path.exists(save_dir)
 
-    # Clean up
-    shutil.rmtree("data")
-
 
 @pytest.mark.integration
 @pytest.mark.skipif(
@@ -283,11 +283,12 @@ def test_generate_composition_with_smact_custom(ox_states):
         sys.platform == "win32"
         or not (os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY"))
         or not MP_API_AVAILABLE
-        or skip_mprester_tests
     ),
     reason="Test requires MP_API_KEY and fails on Windows due to filepath issues.",
 )
 def test_download_compounds_with_mp_api():
+    if _should_skip_mprester():
+        pytest.skip("Materials Project API endpoint not reachable.")
     save_mp_dir = "data/binary/mp_data"
     if MP_API_AVAILABLE:
         download_compounds_with_mp_api.download_mp_data(
