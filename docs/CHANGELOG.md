@@ -109,7 +109,7 @@
 
 **Implemented enhancements:**
 
-- Move to ruff for linting and formating [\#297](https://github.com/WMD-group/SMACT/issues/297)
+- Move to ruff for linting and formatting [\#297](https://github.com/WMD-group/SMACT/issues/297)
 - Running examples from a browser [\#67](https://github.com/WMD-group/SMACT/issues/67)
 - Migrate CI dependency installation from pip to uv [\#338](https://github.com/WMD-group/SMACT/pull/338) ([AntObi](https://github.com/AntObi))
 - Structure prediction fixes [\#336](https://github.com/WMD-group/SMACT/pull/336) ([AntObi](https://github.com/AntObi))
