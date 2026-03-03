@@ -66,13 +66,17 @@ jobs:
           git add docs/CHANGELOG.md
           git commit -m "Fix typos in CHANGELOG.md" || echo "No changes to commit"
 
-      - name: Commit and push changes
+      - name: Create changelog PR
         run: |
-
+          BRANCH_NAME="chore/update-changelog-$(date +%Y%m%d%H%M%S)"
+          git checkout -b "$BRANCH_NAME"
           git add docs/CHANGELOG.md
-          git add .
-          git commit -m "Update changelog for new release"
-          git pull --rebase origin master  # Pull latest changes and rebase
-          git push origin master  # Push changes to the master branch
+          git commit -m "docs: update changelog for new release" || echo "No changes to commit"
+          git push origin "$BRANCH_NAME"
+          gh pr create \
+            --title "docs: update changelog for new release" \
+            --body "Auto-generated changelog update from tag push." \
+            --base master \
+            --head "$BRANCH_NAME"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
