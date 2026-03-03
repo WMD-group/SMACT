@@ -21,3 +21,4 @@ For workflows that have been used in real examples and in published work, visit 
    examples/doper
    examples/distorter
    examples/metallicity
+   examples/property_prediction

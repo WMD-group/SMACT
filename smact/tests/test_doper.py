@@ -1,86 +1,154 @@
 from __future__ import annotations
 
 import os
-import unittest
+import warnings
+from unittest.mock import patch
 
+import numpy as np
 import pytest
 
 from smact.dopant_prediction import doper
 from smact.structure_prediction import utilities
+from smact.structure_prediction.mutation import CationMutator
 
 files_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 TEST_LAMBDA_JSON = os.path.join(files_dir, "test_lambda_tab.json")
 
 
-class DopantPredictionTest(unittest.TestCase):
-    def test_dopant_prediction(self):
-        test_specie = ("Cu+", "Ga3+", "S2-")
-        test = doper.Doper(test_specie)
+def test_dopant_prediction():
+    test_specie = ("Cu+", "Ga3+", "S2-")
+    test = doper.Doper(test_specie)
 
-        cation_max_charge = max(test_specie, key=lambda x: utilities.parse_spec(x)[1])
-        anion_min_charge = min(test_specie, key=lambda x: utilities.parse_spec(x)[1])
-        _, cat_charge = utilities.parse_spec(cation_max_charge)
-        _, an_charge = utilities.parse_spec(anion_min_charge)
+    cation_max_charge = max(test_specie, key=lambda x: utilities.parse_spec(x)[1])
+    anion_min_charge = min(test_specie, key=lambda x: utilities.parse_spec(x)[1])
+    _, cat_charge = utilities.parse_spec(cation_max_charge)
+    _, an_charge = utilities.parse_spec(anion_min_charge)
 
-        # Assert: Length of the list and return type (dictionary: list)
+    # Assert: Length of the list and return type (dictionary: list)
+    result = test.get_dopants()
+    assert isinstance(result, dict)
+    for d in result.values():
+        assert "sorted" in d
+        for v in d.values():
+            assert isinstance(v, list)
+
+    # Assert: (cation) higher charges for n-type and lower charges for p-type
+    n_sub_list_cat = result["n-type cation substitutions"]["sorted"]
+    p_sub_list_cat = result["p-type cation substitutions"]["sorted"]
+    n_sub_list_an = result["n-type anion substitutions"]["sorted"]
+    p_sub_list_an = result["p-type anion substitutions"]["sorted"]
+
+    for n_atom, p_atom in zip(n_sub_list_cat, p_sub_list_cat, strict=False):
+        assert utilities.parse_spec(n_atom[0])[1] > cat_charge
+        assert utilities.parse_spec(p_atom[0])[1] < cat_charge
+
+    for n_atom, p_atom in zip(n_sub_list_an, p_sub_list_an, strict=False):
+        assert utilities.parse_spec(n_atom[0])[1] > an_charge
+        assert utilities.parse_spec(p_atom[0])[1] < an_charge
+
+
+def test_dopant_prediction_skipspecies():
+    test_specie = ("Cu+", "Ga3+", "S2-")
+    with pytest.raises(ValueError):
+        doper.Doper(test_specie, filepath=TEST_LAMBDA_JSON, embedding="skipspecies")
+
+    with pytest.raises(ValueError):
+        doper.Doper(test_specie, embedding="skip", use_probability=False)
+
+    test = doper.Doper(test_specie, embedding="skipspecies", use_probability=False)
+    result = test.get_dopants()
+
+    n_sub_list_cat = result["n-type cation substitutions"]["sorted"]
+    p_sub_list_cat = result["p-type cation substitutions"]["sorted"]
+    n_sub_list_an = result["n-type anion substitutions"]["sorted"]
+    p_sub_list_an = result["p-type anion substitutions"]["sorted"]
+
+    # Create a list of the results
+    results = [n_sub_list_cat, p_sub_list_cat, n_sub_list_an, p_sub_list_an]
+
+    # Assert that the similarity values are between 0 and 1
+    for r in results:
+        for dopant_result_list in r:
+            assert 0 <= dopant_result_list[2] <= 1
+
+
+def test_alternative_representations():
+    test_specie = ("Cu+", "Ga3+", "S2-")
+    test_gap = doper.Doper(test_specie, embedding="M3GNet-MP-2023.11.1-oxi-band_gap")
+    test_eform = doper.Doper(test_specie, embedding="M3GNet-MP-2023.11.1-oxi-Eform")
+    test_lamba = doper.Doper(test_specie, filepath=TEST_LAMBDA_JSON)
+    for test in [test_gap, test_eform, test_lamba]:
+        assert isinstance(test, doper.Doper)
         result = test.get_dopants()
-        self.assertIs(type(result), dict)
-        for d in result.values():
-            self.assertIn("sorted", d)
-            for v in d.values():
-                self.assertIs(type(v), list)
+        assert isinstance(result, dict)
 
-        # Assert: (cation) higher charges for n-type and lower charges for p-type
-        n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")
-        p_sub_list_cat = result.get("p-type cation substitutions").get("sorted")
-        n_sub_list_an = result.get("n-type anion substitutions").get("sorted")
-        p_sub_list_an = result.get("p-type anion substitutions").get("sorted")
 
-        for n_atom, p_atom in zip(n_sub_list_cat, p_sub_list_cat, strict=False):
-            self.assertGreater(utilities.parse_spec(n_atom[0])[1], cat_charge)
-            self.assertLess(utilities.parse_spec(p_atom[0])[1], cat_charge)
+def test_format_number():
+    test_specie = ("Cu+", "Ga3+", "S2-")
+    test = doper.Doper(test_specie)
 
-        for n_atom, p_atom in zip(n_sub_list_an, p_sub_list_an, strict=False):
-            self.assertGreater(utilities.parse_spec(n_atom[0])[1], an_charge)
-            self.assertLess(utilities.parse_spec(p_atom[0])[1], an_charge)
+    assert test._format_number(2) == "2+"
+    assert test._format_number(-2) == "2-"
 
-    def test_dopant_prediction_skipspecies(self):
-        test_specie = ("Cu+", "Ga3+", "S2-")
-        with pytest.raises(ValueError):
-            doper.Doper(test_specie, filepath=TEST_LAMBDA_JSON, embedding="skipspecies")
 
-        with pytest.raises(ValueError):
-            doper.Doper(test_specie, embedding="skip", use_probability=False)
-
-        test = doper.Doper(test_specie, embedding="skipspecies", use_probability=False)
+def test_unparseable_ion_warning():
+    # "1+" starts with a digit so _parse_spec_old raises ValueError → caught, warning emitted
+    test = doper.Doper(("Cu+", "1+", "S2-"))
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
         result = test.get_dopants()
+    assert isinstance(result, dict)
+    assert any("Could not parse" in str(w.message) for w in caught)
 
-        n_sub_list_cat = result.get("n-type cation substitutions").get("sorted")
-        p_sub_list_cat = result.get("p-type cation substitutions").get("sorted")
-        n_sub_list_an = result.get("n-type anion substitutions").get("sorted")
-        p_sub_list_an = result.get("p-type anion substitutions").get("sorted")
 
-        # Create a list of the results
-        results = [n_sub_list_cat, p_sub_list_cat, n_sub_list_an, p_sub_list_an]
+def test_plot_dopants_not_called_before_get_dopants():
+    test = doper.Doper(("Cu+", "Ga3+", "S2-"))
+    with pytest.raises(RuntimeError, match="get_dopants first"):
+        test.plot_dopants()
 
-        # Assert that the similarity values are between 0 and 1
-        for r in results:
-            for dopant_result_list in r:
-                self.assertTrue(0 <= dopant_result_list[2] <= 1)
 
-    def test_alternative_representations(self):
-        test_specie = ("Cu+", "Ga3+", "S2-")
-        test_gap = doper.Doper(test_specie, embedding="M3GNet-MP-2023.11.1-oxi-band_gap")
-        test_eform = doper.Doper(test_specie, embedding="M3GNet-MP-2023.11.1-oxi-Eform")
-        test_lamba = doper.Doper(test_specie, filepath=TEST_LAMBDA_JSON)
-        for test in [test_gap, test_eform, test_lamba]:
-            self.assertIsInstance(test, doper.Doper)
-            result = test.get_dopants()
-            self.assertIsInstance(result, dict)
+def test_to_table_no_results():
+    test = doper.Doper(("Cu+", "Ga3+", "S2-"))
+    result = test.to_table
+    assert result == ""
 
-    def test_format_number(self):
-        test_specie = ("Cu+", "Ga3+", "S2-")
-        test = doper.Doper(test_specie)
 
-        self.assertEqual(test._format_number(2), "2+")
-        self.assertEqual(test._format_number(-2), "2-")
+def test_to_table_with_results():
+    test = doper.Doper(("Cu+", "Ga3+", "S2-"))
+    test.get_dopants(num_dopants=2)
+
+    out = test.to_table
+    assert isinstance(out, str)
+    assert "n-type cation substitutions" in out
+
+
+def test_plot_dopants_branches():
+    test = doper.Doper(("Cu+", "Ga3+", "S2-"))
+    test.get_dopants(num_dopants=3)
+
+    for plot_value in ("probability", "similarity", "selectivity", "combined"):
+        with patch("pymatgen.util.plotting.periodic_table_heatmap"):
+            test.plot_dopants(plot_value=plot_value)
+
+
+def test_anion_substitution_continue_paths():
+    # Use a compound with two anions so that n-type candidates for one anion
+    # have the same charge as the other anion → triggers the continue guard.
+    test = doper.Doper(("Cu+", "S2-", "Cl1-"))
+    result = test.get_dopants()
+    assert isinstance(result, dict)
+
+
+def test_doper_alpha_none_fallback():
+    # Build a real CationMutator, then set alpha=None.
+    # Patch from_json so Doper.__init__ receives this mutator,
+    # exercising the alpha-is-None branch (lines 106-107).
+    cm = CationMutator.from_json()
+    cm.alpha = None
+    with patch.object(CationMutator, "from_json", return_value=cm):
+        test = doper.Doper(("Cu+", "Ga3+", "S2-"))
+
+    assert test.lambda_threshold == doper._DEFAULT_LAMBDA_THRESHOLD
+    assert test.threshold == pytest.approx(1 / cm.Z * np.exp(doper._DEFAULT_LAMBDA_THRESHOLD))
+    result = test.get_dopants()
+    assert isinstance(result, dict)

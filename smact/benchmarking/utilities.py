@@ -9,17 +9,27 @@ from time import time
 
 DELIM_LENGTH = 15
 
-logging.basicConfig(filename="benchmark.log", level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-def timeit(_func=None, *, fname=None, n=1, delim=False):
+def _setup_benchmark_logger(fname: str = "benchmark.log") -> None:
+    """Configure the benchmark logger to write to *fname* if it has no handlers."""
+    if not logger.handlers:
+        handler = logging.FileHandler(fname)
+        handler.setLevel(logging.INFO)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+
+
+def timeit(_func=None, *, fname="benchmark.log", n=1, delim=False):
     """Time function duration."""
+    _setup_benchmark_logger(fname)
 
     def decorator_timeit(func):
         @functools.wraps(func)
         def wrapper_timeit(*args, **kwargs):
             if delim:
-                logging.info("-" * DELIM_LENGTH)  # noqa: LOG015
+                logger.info("-" * DELIM_LENGTH)
 
             times = []
             value = None
@@ -28,18 +38,14 @@ def timeit(_func=None, *, fname=None, n=1, delim=False):
                 value = func(*args, **kwargs)
                 times.append(time() - t0)
 
-            logging.info(f"{func.__name__} -- Average over {n} repeats = {mean(times)}s")  # noqa: LOG015
+            logger.info("%s -- Average over %s repeats = %ss", func.__name__, n, mean(times))
 
             if delim:
-                logging.info("-" * DELIM_LENGTH)  # noqa: LOG015
+                logger.info("-" * DELIM_LENGTH)
             return value
 
         return wrapper_timeit
 
-    fname = fname if fname else "benchmark.log"
-    logging.basicConfig(filename=fname)
-
     if _func is None:
         return decorator_timeit
-    else:
-        return decorator_timeit(_func)
+    return decorator_timeit(_func)

@@ -5,21 +5,23 @@ from __future__ import annotations
 import itertools
 from operator import itemgetter
 
+from pathos.pools import ParallelPool
+
 try:
-    from pathos.pools import ParallelPool
+    from mp_api.client import MPRester as MPResterNew
 
-    pathos_available = True
-
-except ImportError:
-    pathos_available = False
-    ParallelPool = None
+    HAS_MP_API = True
+except ImportError:  # pragma: no cover
+    HAS_MP_API = False
+    MPResterNew = None
 
 import os
+import re
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
-from mp_api.client import MPRester as MPResterNew
 from pymatgen.core import SETTINGS
+from pymatgen.core import Structure as pmg_Structure
 from pymatgen.ext.matproj import MPRester
 
 from . import logger
@@ -29,7 +31,25 @@ from .utilities import get_sign
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    import pymatgen
+
+_NEW_MP_API_KEY_LENGTH = 32
+
+_VALID_TABLE_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _validate_table_name(table: str) -> str:
+    """Validate and return a safe SQLite table name.
+
+    Raises:
+        ValueError: If the table name contains invalid characters.
+    """
+    if not _VALID_TABLE_NAME_RE.match(table):
+        msg = (
+            f"Invalid table name {table!r}. "
+            "Table names must start with a letter or underscore and contain only alphanumerics and underscores."
+        )
+        raise ValueError(msg)
+    return table
 
 
 class StructureDB:
@@ -64,7 +84,7 @@ class StructureDB:
 
     """
 
-    def __init__(self, db: str):
+    def __init__(self, db: str) -> None:
         """
         Set database name.
 
@@ -90,7 +110,7 @@ class StructureDB:
 
         return self.cur
 
-    def __exit__(self, exc_type, *args):
+    def __exit__(self, exc_type: type[BaseException] | None, *args: object) -> None:
         """
         Close database connection.
 
@@ -109,7 +129,7 @@ class StructureDB:
     def add_mp_icsd(
         self,
         table: str,
-        mp_data: list[dict[str, pymatgen.core.Structure | str]] | None = None,
+        mp_data: list[dict[str, pmg_Structure | str]] | None = None,
         mp_api_key: str | None = None,
     ) -> int:
         """
@@ -134,37 +154,45 @@ class StructureDB:
             The number of structs added.
 
         """
-        if mp_api_key is None:
-            # Try to get the API key from the environment
-            mp_api_key = SETTINGS.get("PMG_MAPI_KEY") or os.environ.get("MP_API_KEY")
-        if mp_api_key is None:
-            raise ValueError("No Materials Project API key provided.")
-
         if mp_data is None:  # pragma: no cover
-            if len(mp_api_key) != 32:
+            if mp_api_key is None:
+                # Try to get the API key from the environment
+                mp_api_key = SETTINGS.get("PMG_MAPI_KEY") or os.environ.get("MP_API_KEY")
+            if mp_api_key is None:
+                msg = "No Materials Project API key provided."
+                raise ValueError(msg)
+            if len(mp_api_key) != _NEW_MP_API_KEY_LENGTH:
                 with MPRester(mp_api_key) as m:
                     data = m.query(
                         criteria={"icsd_ids.0": {"$exists": True}},
                         properties=["structure", "material_id"],
                     )
             else:
+                if not HAS_MP_API or MPResterNew is None:
+                    msg = (
+                        "mp-api is required for 32-character Materials Project API keys. "
+                        "Install it with: pip install mp-api"
+                    )
+                    raise ImportError(msg)
                 with MPResterNew(mp_api_key, use_document_model=False) as m:
                     data = m.materials.summary.search(theoretical=False, fields=["structure", "material_id"])
-
         else:
             data = mp_data
 
         self.add_table(table)
 
-        if pathos_available:
-            pool = ParallelPool()
+        pool = ParallelPool()
+        try:
             parse_iter = pool.uimap(parse_mprest, data)
-        else:  # pragma: no cover
-            parse_iter = map(parse_mprest, data)
+            results = list(parse_iter)
+        finally:
+            pool.close()
+            pool.join()
+            pool.clear()
 
-        return self.add_structs(parse_iter, table, commit_after_each=True)
+        return self.add_structs(results, table, commit_after_each=True)
 
-    def add_table(self, table: str):
+    def add_table(self, table: str) -> None:
         """
         Add a table to the database.
 
@@ -173,13 +201,14 @@ class StructureDB:
             table: The name of the table to add
 
         """
+        table = _validate_table_name(table)
         with self as c:
             c.execute(
                 f"""CREATE TABLE {table}
                 (composition TEXT NOT NULL, structure TEXT NOT NULL)""",
             )
 
-    def add_struct(self, struct: SmactStructure, table: str):
+    def add_struct(self, struct: SmactStructure, table: str) -> None:
         """
         Add a SmactStructure to a table.
 
@@ -189,6 +218,7 @@ class StructureDB:
             table: The name of the table to add the structure to.
 
         """
+        table = _validate_table_name(table)
         entry = (struct.composition(), struct.as_poscar())
 
         with self as c:
@@ -196,9 +226,9 @@ class StructureDB:
 
     def add_structs(
         self,
-        structs: Sequence[SmactStructure],
+        structs: Sequence[SmactStructure | None],
         table: str,
-        commit_after_each: bool | None = False,
+        commit_after_each: bool = False,
     ) -> int:
         """
         Add several SmactStructures to a table.
@@ -219,6 +249,7 @@ class StructureDB:
             The number of structures added.
 
         """
+        table = _validate_table_name(table)
         with self as c:
             num = 0
             for struct in structs:
@@ -249,6 +280,7 @@ class StructureDB:
             A list of :class:`~.SmactStructure` s.
 
         """
+        table = _validate_table_name(table)
         with self as c:
             c.execute(
                 f"SELECT structure FROM {table} WHERE composition = ?",
@@ -275,11 +307,16 @@ class StructureDB:
             A list of :class:`SmactStructure` s in the table that contain the species.
 
         """
+        table = _validate_table_name(table)
+
+        if not species:
+            return []
+
         glob = "*".join("{}_*_{}{}" for _ in range(len(species)))
         glob = f"*{glob}*"
 
-        species.sort(key=itemgetter(1), reverse=True)
-        species.sort(key=itemgetter(0))
+        species = sorted(species, key=itemgetter(1), reverse=True)
+        species = sorted(species, key=itemgetter(0))
 
         # Generate a list of [element1, charge1, sign1, element2, ...]
         vals = list(itertools.chain.from_iterable([x[0], abs(x[1]), get_sign(x[1])] for x in species))
@@ -297,9 +334,9 @@ class StructureDB:
 
 
 def parse_mprest(
-    data: dict[str, pymatgen.core.Structure | str],
+    data: dict[str, pmg_Structure | str],
     determine_oxi: str = "BV",
-) -> SmactStructure:
+) -> SmactStructure | None:
     """
     Parse MPRester query data to generate structures.
 
@@ -317,7 +354,9 @@ def parse_mprest(
 
     """
     try:
-        return SmactStructure.from_py_struct(data["structure"], determine_oxi="BV")
-    except:
+        structure = cast("pmg_Structure", data["structure"])
+        return SmactStructure.from_py_struct(structure, determine_oxi=determine_oxi)
+    except (ValueError, RuntimeError, TypeError):
         # Couldn't decorate with oxidation states
-        logger.warn(f"Couldn't decorate {data['material_id']} with oxidation states.")
+        logger.warning(f"Couldn't decorate {data.get('material_id', 'unknown')} with oxidation states.")
+        return None

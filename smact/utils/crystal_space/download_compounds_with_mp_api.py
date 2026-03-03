@@ -4,26 +4,31 @@ from __future__ import annotations
 
 import itertools
 import json
+import logging
 import string
 import time
 from collections import defaultdict
 from pathlib import Path
 
+from emmet.core.summary import SummaryDoc
 from mp_api.client import MPRester
 from pymatgen.core import Composition
 from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 
 def download_mp_data(
     mp_api_key: str | None = None,
     num_elements: int = 2,
     max_stoich: int = 8,
-    save_dir: str = "data/binary/mp_api",
+    save_dir: str | Path = "data/binary/mp_api",
     request_interval: float = 0.1,
-):
+) -> None:
     """
-    Downloads Materials Project data all possible combinations of `num_elements` elements
-    with atomic numbers.
+    Downloads Materials Project data for all possible combinations of `num_elements` elements.
+
+    Uses elements with atomic numbers.
     When chemical formula is same, the one with lowest energy above hull is saved.
     The data is saved to a specified directory.
 
@@ -46,7 +51,8 @@ def download_mp_data(
     """
     # check if MP_API_KEY is set
     if mp_api_key is None:
-        raise ValueError("Please set your MP_API_KEY in the environment variable.")
+        msg = "Please set your MP_API_KEY in the environment variable."
+        raise ValueError(msg)
     # set save directory
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
@@ -62,7 +68,7 @@ def download_mp_data(
     e_hull_dict = defaultdict(lambda: float("inf"))
 
     for formula_anonymous in tqdm(formula_anonymous_list):
-        print(f"Downloading data for {formula_anonymous}...")
+        logger.info("Downloading data for %s...", formula_anonymous)
         # download data from MP
         with MPRester(mp_api_key) as mpr:
             docs = mpr.materials.summary.search(
@@ -86,11 +92,17 @@ def download_mp_data(
             )
         # save data with lowest energy above hull
         for doc in docs:
+            if not isinstance(doc, SummaryDoc):
+                continue
             formula_pretty = doc.formula_pretty
             energy_above_hull = doc.energy_above_hull
 
-            if (energy_above_hull) < e_hull_dict[formula_pretty]:
+            if (
+                energy_above_hull is not None
+                and formula_pretty is not None
+                and energy_above_hull < e_hull_dict[formula_pretty]
+            ):
                 e_hull_dict[formula_pretty] = energy_above_hull
-                with open(save_dir / f"{formula_pretty}.json", "w") as f:
-                    json.dump(doc.dict(), f)
+                with (save_dir / f"{formula_pretty}.json").open("w") as f:
+                    json.dump(doc.model_dump(), f, default=str)
         time.sleep(request_interval)

@@ -1,40 +1,71 @@
 """
-This module can be used to calculate roughly the lattice parameters of a
-lattice type, based on the radii of the species on each site.
+This module can be used to calculate roughly the lattice parameters of a lattice type.
+
+Based on the radii of the species on each site.
 """
 
 from __future__ import annotations
 
 import numpy as np
 
+# Wurtzite geometry: tetrahedral bond angle ~ 109.47 deg = 2*arccos(-1/3)
+_TETRAHEDRAL_HALF_ANGLE_SIN = np.sqrt(2.0 / 3.0)  # sin(109.47 deg / 2) = sqrt(2/3) ≈ 0.8165
+_TETRAHEDRAL_COMPLEMENT_SIN = 1.0 / 3.0  # sin(109.47 deg - 90 deg) = 1/3 ≈ 0.3333
 
-def cubic_perovskite(shannon_radius):  # Cubic Pervoskite
+# Body-centred tetragonal: empirical a/r ratio (β-Sn structure)
+_BCT_A_FACTOR = 3.86
+
+# Litharge (B10, PbO-type) empirical factors
+_LITHARGE_SUM_FACTOR = 1.31
+_LITHARGE_C_OVER_A = 1.26  # c/a from PbO data (http://www.mindat.org/min-2466.html)
+
+
+def _check_positive(values: list[float] | float, name: str = "radius", expected_length: int | None = None) -> None:
+    """Raise ValueError if any radius value is not positive or wrong length."""
+    if isinstance(values, (int, float)):
+        values = [values]
+    if expected_length is not None and len(values) != expected_length:
+        msg = f"Expected {expected_length} {name} values, got {len(values)}"
+        raise ValueError(msg)
+    if any(v <= 0 for v in values):
+        msg = f"All {name} values must be positive, got {values}"
+        raise ValueError(msg)
+
+
+def cubic_perovskite(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:  # Cubic Perovskite
     """
     The lattice parameters of the cubic perovskite structure.
 
     Args:
     ----
-        shannon_radius (list) : The radii of the a,b,c ions
+        shannon_radius (list) : The radii of the A, B, X ions
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
-    limiting_factors = [2 * sum(shannon_radius[1:])]
+    _check_positive(shannon_radius, expected_length=3)
+    limiting_factors = [
+        2 * (shannon_radius[1] + shannon_radius[2]),  # B-X contact along cube edge
+        np.sqrt(2) * (shannon_radius[0] + shannon_radius[2]),  # A-X contact along face diagonal
+    ]
     a = max(limiting_factors)
     b = a
     c = a
-    #    space = a * np.sqrt(3) - 2 * shannon_radius[1]
     alpha = 90
     beta = 90
     gamma = 90
     return a, b, c, alpha, beta, gamma
 
 
-def wurtzite(shannon_radius):
+def wurtzite(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the wurtzite structure.
 
@@ -45,11 +76,12 @@ def wurtzite(shannon_radius):
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
-    shannon_radius.sort(reverse=True)  # Geometry assumes atom A is larger
+    _check_positive(shannon_radius, expected_length=2)
+    shannon_radius = sorted(shannon_radius, reverse=True)  # Geometry assumes atom A is larger
     # "Ideal" wurtzite structure
     # c/a = 1.633, u = 0.375
     #
@@ -60,36 +92,37 @@ def wurtzite(shannon_radius):
     # Scenario A: A atoms are touching
     #   i.e. height is that of two tetrahegons with side length a
     #    = 2 * sqrt(2/3) * a
-    if shannon_radius[0] > 0.817 * (shannon_radius[0] + shannon_radius[1]):
+    if shannon_radius[0] > _TETRAHEDRAL_HALF_ANGLE_SIN * (shannon_radius[0] + shannon_radius[1]):
         a = 2 * shannon_radius[0]
         b = a
         c = 2 * np.sqrt(2.0 / 3.0) * a
     else:
         # Scenario B: regular wurtzite, similar sizes
-        # 0.817 is sin(109.6/2)
-        a = 2 * 0.817 * (shannon_radius[0] + shannon_radius[1])
+        a = 2 * _TETRAHEDRAL_HALF_ANGLE_SIN * (shannon_radius[0] + shannon_radius[1])
         b = a
-        c = (shannon_radius[0] + shannon_radius[1]) * (2 + 2 * 0.335)  # 0.335 is sin(109.6-90)
-    #    inner_space = a * (6**0.5) - (4*shannon_radius[0])
+        c = (shannon_radius[0] + shannon_radius[1]) * (2 + 2 * _TETRAHEDRAL_COMPLEMENT_SIN)
     return a, b, c, alpha, beta, gamma
 
 
 # A1#
-def fcc(covalent_radius):
+def fcc(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the A1.
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(covalent_radius)
     a = 2 * 2**0.5 * covalent_radius
     b = 2 * 2**0.5 * covalent_radius
     c = 2 * 2**0.5 * covalent_radius
@@ -100,21 +133,24 @@ def fcc(covalent_radius):
 
 
 # A2#
-def bcc(covalent_radius):
+def bcc(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the A2.
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(covalent_radius)
     a = 4 * covalent_radius / np.sqrt(3)
     b = a
     c = a
@@ -125,21 +161,24 @@ def bcc(covalent_radius):
 
 
 # A3#
-def hcp(covalent_radius):
+def hcp(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the hcp.
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(covalent_radius)
     a = 2 * covalent_radius
     b = a
     c = (4.0 / 3.0) * 6**0.5 * covalent_radius
@@ -150,21 +189,24 @@ def hcp(covalent_radius):
 
 
 # A4#
-def diamond(covalent_radius):
+def diamond(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the diamond.
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(covalent_radius)
     a = 8 * covalent_radius / np.sqrt(3)
     b = a
     c = a
@@ -175,22 +217,25 @@ def diamond(covalent_radius):
 
 
 # A5#
-def bct(covalent_radius):
+def bct(
+    covalent_radius: float,
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of the bct.
 
     Args:
     ----
-        covalent_radius (list) : The radii of the a ions
+        covalent_radius (float) : The covalent radius
 
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
-    a = 3.86 * covalent_radius
+    _check_positive(covalent_radius)
+    a = _BCT_A_FACTOR * covalent_radius
     b = a
     c = 2 * covalent_radius
     alpha = 90
@@ -200,7 +245,9 @@ def bct(covalent_radius):
 
 
 # B1
-def rocksalt(shannon_radius):
+def rocksalt(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of rocksalt.
 
@@ -211,13 +258,17 @@ def rocksalt(shannon_radius):
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radius, expected_length=2)
+    # In rocksalt, same-species ions sit at face-diagonal distance = a*sqrt(2)/2,
+    # so a >= 2*sqrt(2)*r for each species. The third factor is the nearest-neighbour
+    # cation-anion distance along the cube edge: a >= 2*(r_A + r_B).
     limiting_factors = [
-        2 * 2**0.2 * shannon_radius[0],
-        2 * 2**0.2 * shannon_radius[1],
+        2 * 2**0.5 * shannon_radius[0],
+        2 * 2**0.5 * shannon_radius[1],
         2 * shannon_radius[0] + 2 * shannon_radius[1],
     ]
     a = max(limiting_factors)
@@ -230,7 +281,9 @@ def rocksalt(shannon_radius):
 
 
 # B2
-def b2(shannon_radius):
+def b2(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of b2.
 
@@ -241,12 +294,15 @@ def b2(shannon_radius):
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radius, expected_length=2)
+    # In B2 (CsCl), the body diagonal relates both species: a*sqrt(3)/2 = r_A + r_B,
+    # so a >= 2*(r_A + r_B)/sqrt(3). The other two factors are same-species contacts.
     limiting_factors = [
-        2 * (shannon_radius[0] + shannon_radius[0]) / np.sqrt(3),
+        2 * (shannon_radius[0] + shannon_radius[1]) / np.sqrt(3),
         2 * shannon_radius[1],
         2 * shannon_radius[0],
     ]
@@ -260,7 +316,9 @@ def b2(shannon_radius):
 
 
 # B3
-def zincblende(shannon_radius):
+def zincblende(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The lattice parameters of Zinc Blende.
 
@@ -271,13 +329,16 @@ def zincblende(shannon_radius):
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radius, expected_length=2)
+    # In zinc-blende, same-species ions sit at face-diagonal distance = a*sqrt(2)/2,
+    # and the nearest-neighbour A-B distance along the body diagonal = a*sqrt(3)/4.
     limiting_factors = [
         2 * (max(shannon_radius) * np.sqrt(2)),
-        4 * (shannon_radius[0] + shannon_radius[1]) ** (1.0 / 3.0),
+        4 * (shannon_radius[0] + shannon_radius[1]) / np.sqrt(3),
     ]
     a = max(limiting_factors)
     b = a
@@ -294,7 +355,9 @@ def zincblende(shannon_radius):
 
 
 # B10
-def b10(shannon_radius):  # Litharge
+def b10(
+    shannon_radius: list[float],
+) -> tuple[float, float, float, float, float, float]:  # Litharge
     """
     The lattice parameters of Litharge.
 
@@ -305,24 +368,27 @@ def b10(shannon_radius):  # Litharge
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radius, expected_length=2)
     limiting_factors = [
         4 * (max(shannon_radius)) / np.sqrt(2),
-        sum(shannon_radius) * 1.31,
-    ]  # Explained below.
+        sum(shannon_radius) * _LITHARGE_SUM_FACTOR,
+    ]
     a = max(limiting_factors)
     b = a
-    c = a * 1.26  # Value taken for PbO http://www.mindat.org/min-2466.html#
+    c = a * _LITHARGE_C_OVER_A
     alpha = 90
     beta = 90
     gamma = 90
     return a, b, c, alpha, beta, gamma
 
 
-def stuffed_wurtzite(shannon_radii):
+def stuffed_wurtzite(
+    shannon_radii: list[float],
+) -> tuple[float, float, float, float, float, float]:
     """
     The stuffed wurtzite structure (e.g. LiGaGe) space group P63/mc.
 
@@ -333,10 +399,11 @@ def stuffed_wurtzite(shannon_radii):
     Returns:
     -------
        (tuple):
-           float values of lattics constants and
+           float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
 
     """
+    _check_positive(shannon_radii, expected_length=3)
     rac = shannon_radii[2] + shannon_radii[1]
     x = rac * np.sin(np.radians(19.5))
     c = 2 * rac + x

@@ -2,10 +2,22 @@
 
 from __future__ import annotations
 
+import logging
+from typing import cast
+
 import numpy as np
 
 import smact
 from smact.utils.composition import parse_formula
+
+logger = logging.getLogger(__name__)
+
+__all__ = [
+    "band_gap_Harrison",
+    "compound_electroneg",
+    "eneg_mulliken",
+    "valence_electron_count",
+]
 
 
 def eneg_mulliken(element: smact.Element | str) -> float:
@@ -24,16 +36,19 @@ def eneg_mulliken(element: smact.Element | str) -> float:
     if isinstance(element, str):
         element = smact.Element(element)
     elif not isinstance(element, smact.Element):
-        raise TypeError(f"Unexpected type: {type(element)}")
+        msg = f"Unexpected type: {type(element)}"
+        raise TypeError(msg)
 
+    if element.ionpot is None or element.e_affinity is None:
+        msg = f"Ionisation potential or electron affinity data missing for {element.symbol}"
+        raise ValueError(msg)
     return (element.ionpot + element.e_affinity) / 2.0
 
 
 def band_gap_Harrison(
     anion: str,
     cation: str,
-    verbose: bool = False,
-    distance: float | str | None = None,
+    distance: float | str = 2.0,
 ) -> float:
     """
     Estimates the band gap from elemental data.
@@ -46,10 +61,8 @@ def band_gap_Harrison(
     ----
         anion (str): Element symbol of the dominant anion in the system
         cation (str): Element symbol of the the dominant cation in the system
-        distance (float or str): Nuclear separation between anion and cation
-                i.e. sum of ionic radii
-        verbose (bool) : An optional True/False flag. If True, additional
-            information is printed to the standard output. [Default: False]
+        distance (float or str): Nuclear separation between anion and cation,
+            i.e. sum of ionic radii (in Angstroms). Default: 2.0.
 
     Returns:
     -------
@@ -60,35 +73,70 @@ def band_gap_Harrison(
     hbarsq_over_m = 7.62
 
     # Get anion and cation
-    An = anion
-    Cat = cation
+    an = anion
+    cat = cation
     d = float(distance)
+    if d <= 0:
+        msg = f"distance must be positive, got {d}"
+        raise ValueError(msg)
 
     # Get elemental data:
-    elements_dict = smact.element_dictionary((An, Cat))
-    An, Cat = elements_dict[An], elements_dict[Cat]
+    elements_dict = smact.element_dictionary((an, cat))
+    an_el, cat_el = elements_dict[an], elements_dict[cat]
 
     # Calculate values of equation components
-    V1_Cat = (Cat.eig - Cat.eig_s) / 4
-    V1_An = (An.eig - An.eig_s) / 4
-    V1_bar = (V1_An + V1_Cat) / 2
-    V2 = 2.16 * hbarsq_over_m / (d**2)
-    V3 = (Cat.eig - An.eig) / 2
-    alpha_m = (1.11 * V1_bar) / np.sqrt(V2**2 + V3**2)
+    v1_cat = (cat_el.eig - cat_el.eig_s) / 4
+    v1_an = (an_el.eig - an_el.eig_s) / 4
+    v1_bar = (v1_an + v1_cat) / 2
+    v2 = 2.16 * hbarsq_over_m / (d**2)
+    v3 = (cat_el.eig - an_el.eig) / 2
+    alpha_m = (1.11 * v1_bar) / np.sqrt(v2**2 + v3**2)
 
     # Calculate Band gap [(3-43) Harrison 1980 ]
-    Band_gap = (3.60 / 3.0) * (np.sqrt(V2**2 + V3**2)) * (1 - alpha_m)
-    if verbose:
-        print("V1_bar = ", V1_bar)
-        print("V2 = ", V2)
-        print("alpha_m = ", alpha_m)
-        print("V3 = ", V3)
+    band_gap = (3.60 / 3.0) * (np.sqrt(v2**2 + v3**2)) * (1 - alpha_m)
+    logger.debug("V1_bar = %s", v1_bar)
+    logger.debug("V2 = %s", v2)
+    logger.debug("alpha_m = %s", alpha_m)
+    logger.debug("V3 = %s", v3)
 
-    return Band_gap
+    return band_gap
+
+
+def _get_eneg_values(
+    elementlist: list[smact.Element],
+    source: str,
+) -> list[float]:
+    """Return per-element electronegativity values for the requested source.
+
+    Args:
+    ----
+        elementlist: SMACT Element objects.
+        source: ``'Mulliken'`` or ``'Pauling'``.
+
+    Returns:
+    -------
+        List of electronegativity floats, one per element.
+
+    Raises:
+    ------
+        ValueError: If *source* is unrecognised or a Pauling value is missing.
+
+    """
+    if source == "Mulliken":
+        return [(el.ionpot + el.e_affinity) / 2.0 for el in elementlist]
+
+    if source == "Pauling":
+        eneg_list = [(2.86 * el.pauling_eneg) for el in elementlist if el.pauling_eneg is not None]
+        if len(eneg_list) != len(elementlist):
+            msg = "Some elements have no Pauling electronegativity; cannot use Pauling source."
+            raise ValueError(msg)
+        return eneg_list
+
+    msg = f"Electronegativity type '{source}' is not recognised"
+    raise ValueError(msg)
 
 
 def compound_electroneg(
-    verbose: bool = False,
     elements: list[str | smact.Element] | None = None,
     stoichs: list[int | float] | None = None,
     source: str = "Mulliken",
@@ -110,8 +158,6 @@ def compound_electroneg(
     ----
         elements (list) : Elements given as standard elemental symbols.
         stoichs (list) : Stoichiometries, given as integers or floats.
-        verbose (bool) : An optional True/False flag. If True, additional information
-            is printed to the standard output. [Default: False]
         source: String 'Mulliken' or 'Pauling'; type of Electronegativity to
             use. Note that in SMACT, Pauling electronegativities are
             rescaled to a Mulliken-like scale.
@@ -121,45 +167,50 @@ def compound_electroneg(
         Electronegativity (float) : Estimated electronegativity (no units).
 
     """
-    if isinstance(elements[0], str):
-        elementlist = [smact.Element(i) for i in elements]
-    elif isinstance(elements[0], smact.Element):
-        elementlist = elements
-    else:
-        raise TypeError("Please supply a list of element symbols or SMACT Element objects")
+    if elements is None:
+        msg = "Please supply a list of element symbols or SMACT Element objects"
+        raise TypeError(msg)
+    if stoichs is None:
+        msg = "Please supply stoichiometries"
+        raise TypeError(msg)
+    if not elements:
+        msg = "Please supply a non-empty list of elements"
+        raise TypeError(msg)
 
-    stoichslist = stoichs
+    if all(isinstance(e, str) for e in elements):
+        elementlist: list[smact.Element] = [smact.Element(e) for e in cast("list[str]", elements)]
+    elif all(isinstance(e, smact.Element) for e in elements):
+        elementlist = cast("list[smact.Element]", elements)
+    else:
+        msg = "Please supply a list of element symbols or SMACT Element objects (no mixed types)"
+        raise TypeError(msg)
+
+    stoichslist: list[int | float] = list(stoichs)
     # Convert stoichslist from string to float
     stoichslist = list(map(float, stoichslist))
+    if len(elementlist) != len(stoichslist):
+        msg = "elements and stoichs must have the same length"
+        raise ValueError(msg)
+    if any(s <= 0 for s in stoichslist):
+        msg = "All stoichiometries must be positive"
+        raise ValueError(msg)
 
     # Get electronegativity values for each element
+    eneg_list = _get_eneg_values(elementlist, source)
 
-    if source == "Mulliken":
-        elementlist = [(el.ionpot + el.e_affinity) / 2.0 for el in elementlist]
-
-    elif source == "Pauling":
-        elementlist = [(2.86 * el.pauling_eneg) for el in elementlist]
-    else:
-        raise Exception(f"Electronegativity type '{source}'", "is not recognised")
-
-    # Print optional list of element electronegativities.
-    # This may be a useful sanity check in case of a suspicious result.
-    if verbose:
-        print("Electronegativities of elements=", elementlist)
+    logger.debug("Electronegativities of elements= %s", eneg_list)
 
     # Raise each electronegativity to its appropriate power
     # to account for stoichiometry.
-    for i in range(len(elementlist)):
-        elementlist[i] = [elementlist[i] ** stoichslist[i]]
+    eneg_list = [eneg**stoich for eneg, stoich in zip(eneg_list, stoichslist, strict=True)]
 
     # Calculate geometric mean (n-th root of product)
-    prod = np.prod(elementlist)
+    prod = np.prod(eneg_list)
     compelectroneg = (prod) ** (1.0 / (sum(stoichslist)))
 
-    if verbose:
-        print("Geometric mean = Compound 'electronegativity'=", compelectroneg)
+    logger.debug("Geometric mean = Compound 'electronegativity'= %s", compelectroneg)
 
-    return compelectroneg
+    return float(compelectroneg)
 
 
 def valence_electron_count(compound: str) -> float:
@@ -182,21 +233,23 @@ def valence_electron_count(compound: str) -> float:
 
     def get_element_valence(element: str) -> int:
         try:
-            return smact.Element(element).num_valence_modified
-        except NameError:
-            raise ValueError(f"Valence data not found for element: {element}") from None
+            val = smact.Element(element).num_valence_modified
+        except KeyError:
+            msg = f"Valence data not found for element: {element}"
+            raise ValueError(msg) from None
+        if val is None:
+            msg = f"Valence data not found for element: {element}"
+            raise ValueError(msg)
+        return val
 
     element_stoich = parse_formula(compound)
 
     total_valence = 0
     total_stoich = 0
     for element, stoich in element_stoich.items():
-        try:
-            valence = get_element_valence(element)
-            total_valence += stoich * valence
-            total_stoich += stoich
-        except TypeError:
-            raise ValueError(f"No valence information for element {element}")
+        valence = get_element_valence(element)
+        total_valence += stoich * valence
+        total_stoich += stoich
 
     if total_stoich == 0:
         return 0.0

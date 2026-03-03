@@ -29,11 +29,9 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="store_true", help="More Verbose output.")
     args = parser.parse_args()
 
-    print(
-        band_gap_Harrison(
-            verbose=args.verbose,
-            anion=args.anion,
-            cation=args.cation,
-            distance=args.distance,
-        )
+    result = band_gap_Harrison(
+        anion=args.anion,
+        cation=args.cation,
+        distance=args.distance,
     )
+    print(result)

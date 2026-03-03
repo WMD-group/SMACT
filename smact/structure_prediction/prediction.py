@@ -22,6 +22,8 @@ from .utilities import parse_spec, unparse_spec
 if TYPE_CHECKING:
     from collections.abc import Generator
 
+    import pandas as pd
+
     from .database import StructureDB
     from .mutation import CationMutator
     from .structure import SmactStructure
@@ -44,7 +46,7 @@ class StructurePredictor:
 
     """
 
-    def __init__(self, mutator: CationMutator, struct_db: StructureDB, table: str):
+    def __init__(self, mutator: CationMutator, struct_db: StructureDB, table: str) -> None:
         """
         Initialize class.
 
@@ -59,6 +61,56 @@ class StructurePredictor:
         self.cm = mutator
         self.db = struct_db
         self.table = table
+
+    def _try_substitution(
+        self,
+        parent: SmactStructure,
+        diff_spec: tuple[str, int],
+        diff_spec_str: str,
+        diff_sub_probs: pd.Series,
+        species: list[tuple[str, int]],
+        thresh: float | None,
+    ) -> tuple[SmactStructure, float, SmactStructure] | None:
+        """Attempt a single unary substitution on a parent structure.
+
+        Returns a (mutated_structure, probability, parent) tuple on success,
+        or None if the substitution should be skipped.
+        """
+        # Filter out any structures with identical species
+        if parent.has_species(diff_spec):
+            return None
+
+        # Ensure parent has as many species as target
+        if len(parent.species) != len(species):
+            return None
+
+        # Get species to be substituted; ensure only 1 species is obtained
+        target_specs = set(map(unparse_spec, species)) | {diff_spec_str}
+        extra = [s for s in parent.get_spec_strs() if s not in target_specs]
+        if len(extra) > 1:
+            return None
+        (alt_spec,) = extra
+
+        if parse_spec(alt_spec)[1] != diff_spec[1]:
+            # Different charge
+            return None
+
+        try:
+            p = diff_sub_probs.loc[alt_spec]
+        except KeyError:
+            # Not in the Series
+            return None
+
+        if thresh is not None and p <= thresh:
+            return None
+
+        try:
+            mutated = self.cm._mutate_structure(parent, alt_spec, diff_spec_str)
+        except ValueError:
+            # Poorly decorated
+            return None
+
+        return (mutated, p, parent)
 
     def predict_structs(
         self,
@@ -101,52 +153,69 @@ class StructurePredictor:
         for spec_idx, parents in enumerate(potential_unary_parents):
             # Get missing ion
             # Ensure a different ion is obtained
-            if len(set(species) - set(sub_spec[spec_idx])) < 1:
+            sub_set = set(sub_spec[spec_idx])
+            diff_list = [s for s in species if s not in sub_set]
+            if len(diff_list) < 1:
                 continue
-            (diff_spec,) = set(species) - set(sub_spec[spec_idx])
+            (diff_spec,) = diff_list
             diff_spec_str = unparse_spec(diff_spec)
 
             # Determine conditional substitution likelihoods
             diff_sub_probs = self.cm.cond_sub_probs(diff_spec_str)
 
             for parent in parents:
-                # print("Testing parent")
-                # Filter out any structures with identical species
-                if parent.has_species(diff_spec):
-                    continue
+                result = self._try_substitution(parent, diff_spec, diff_spec_str, diff_sub_probs, species, thresh)
+                if result is not None:
+                    yield result
 
-                # Ensure parent has as many species as target
-                if len(parent.species) != len(species):
-                    continue
+    def _try_nary_substitution(
+        self,
+        parent: SmactStructure,
+        diff_species: list[tuple[str, int]],
+        diff_spec_str: list[str],
+        diff_sub_probs: list[pd.Series],
+        species: list[tuple[str, int]],
+        n_ary: int,
+        thresh: float | None,
+    ) -> tuple[SmactStructure, float, SmactStructure] | None:
+        """Attempt an n-ary substitution on a parent structure.
 
-                # Determine probability
-                # Get species to be substituted
-                # Ensure only 1 species is obtained
-                if len(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - {diff_spec_str}) > 1:
-                    continue
-                (alt_spec,) = set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - {diff_spec_str}
+        Returns a (mutated_structure, probability, parent) tuple on success,
+        or None if the substitution should be skipped.
+        """
+        # Filter out structures where the parent already has all the diff species
+        if all(parent.has_species(ds) for ds in diff_species):
+            return None
 
-                if parse_spec(alt_spec)[1] != diff_spec[1]:
-                    # Different charge
-                    continue
+        # Ensure parent has as many species as target
+        if len(parent.species) != len(species):
+            return None
 
-                try:
-                    p = diff_sub_probs.loc[alt_spec]
-                except:
-                    # Not in the Series
-                    continue
+        # Get species to be substituted; ensure n species are obtained
+        # (preserve parent order to ensure deterministic pairing with diff_sub_probs)
+        target_specs = set(map(unparse_spec, species)) | set(diff_spec_str)
+        alt_spec = [s for s in parent.get_spec_strs() if s not in target_specs]
+        if len(alt_spec) != n_ary:
+            return None
 
-                if p > thresh:
-                    try:
-                        self.cm._mutate_structure(parent, alt_spec, diff_spec_str)
-                    except ValueError:
-                        # Poorly decorated
-                        continue
-                    yield (
-                        self.cm._mutate_structure(parent, alt_spec, diff_spec_str),
-                        p,
-                        parent,
-                    )
+        try:
+            p = [diff_sub_probs[i].loc[alt_spec[i]] for i in range(n_ary)]
+        except KeyError:
+            # Not in the Series
+            return None
+
+        p_prod = float(np.prod(p))
+
+        if thresh is not None and p_prod <= thresh:
+            return None
+
+        try:
+            mutated = self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str)
+        except ValueError:
+            # Poorly decorated
+            return None
+
+        return (mutated, p_prod, parent)
 
     def nary_predict_structs(
         self,
@@ -177,8 +246,10 @@ class StructurePredictor:
                 yield (identical, 1.0, identical)
 
         # Ensure that we can obtain a subset of species of the target compound
-        if len(species) - n_ary == 0:
-            return None
+        if n_ary is None:
+            return
+        if n_ary < 1 or n_ary >= len(species):
+            return
         sub_species = itertools.combinations(species, len(species) - n_ary)
         sub_species = list(map(list, sub_species))
 
@@ -187,68 +258,17 @@ class StructurePredictor:
         ]
 
         for spec_idx, parents in enumerate(potential_nary_parents):
-            # Get missing ions
-            # Ensure we get the correct number of species
-            # Ensure the ions obtained are different
-            # if len(set(species) - set(sub_species[spec_idx])) !=2:
-            # continue
-            diff_species = list(set(species) - set(sub_species[spec_idx]))
+            # Get missing ions (preserve original order from species to ensure
+            # deterministic pairing with diff_sub_probs)
+            sub_set = set(sub_species[spec_idx])
+            diff_species = [s for s in species if s not in sub_set]
             diff_spec_str = [unparse_spec(i) for i in diff_species]
 
             diff_sub_probs = [self.cm.cond_sub_probs(i) for i in diff_spec_str]
 
             for parent in parents:
-                # print("testing parent")
-                # Filter out any structures with identical species
-                if n_ary == 1:
-                    if parent.has_species(diff_species[0]):
-                        continue
-                elif n_ary == 2:
-                    if parent.has_species(diff_species[0]) and parent.has_species(diff_species[1]):
-                        continue
-                elif n_ary == 3 and (
-                    parent.has_species(diff_species[0])
-                    and parent.has_species(diff_species[1])
-                    and parent.has_species(diff_species[2])
-                ):
-                    continue
-
-                # Ensure parent has as many species as target
-                if len(parent.species) != len(species):
-                    continue
-
-                # Determine probability
-                # Get species to be substituted
-                # Ensure n species are obtained
-
-                if len(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species)) != n_ary:
-                    continue
-                alt_spec = list(set(parent.get_spec_strs()) - set(map(unparse_spec, species)) - set(diff_species))
-
-                # Need to consider p(A,X)p(B,Y) and p(A,Y)p(B,X)
-                # if utilities.parse_spec(alt_spec_1)[1] != diff_species_1[1] and utilities.parse_spec(alt_spec_2)[1] != diff_species_2[1] :
-                # Different charge
-                # continue
-
-                try:
-                    p = []
-                    for i in range(n_ary):
-                        p.append(diff_sub_probs[i].loc[alt_spec[i]])
-                except:
-                    # Not in the Series
-                    continue
-
-                p = np.prod(p)
-
-                if p > thresh:
-                    try:
-                        self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str)
-
-                    except ValueError:
-                        # Poorly decorated
-                        continue
-                    yield (
-                        self.cm._nary_mutate_structure(parent, alt_spec, diff_spec_str),
-                        p,
-                        parent,
-                    )
+                result = self._try_nary_substitution(
+                    parent, diff_species, diff_spec_str, diff_sub_probs, species, n_ary, thresh
+                )
+                if result is not None:
+                    yield result

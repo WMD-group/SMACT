@@ -2,7 +2,21 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, cast
+
 import numpy as np
+
+if TYPE_CHECKING:
+    from collections.abc import Collection
+
+__all__ = [
+    "get_d_block_element_fraction",
+    "get_distinct_metal_count",
+    "get_element_fraction",
+    "get_metal_fraction",
+    "get_pauling_test_mismatch",
+    "metallicity_score",
+]
 from pymatgen.core import Composition
 
 import smact
@@ -25,18 +39,21 @@ def _ensure_composition(composition: str | Composition) -> Composition:
     """
     if isinstance(composition, str):
         if not composition.strip():
-            raise ValueError("Empty composition")
+            msg = "Empty composition"
+            raise ValueError(msg)
         # Try to parse with pymatgen
         try:
             return Composition(composition)
         except ValueError as exc:
             # If pymatgen can't parse, re-raise with a message the test expects
-            raise ValueError("Invalid formula") from exc
+            msg = "Invalid formula"
+            raise ValueError(msg) from exc
     return composition
 
 
-def get_element_fraction(composition: str | Composition, element_set: set[str]) -> float:
+def get_element_fraction(composition: str | Composition, element_set: Collection[str]) -> float:
     """Calculate the fraction of elements from a given set in a composition.
+
     This helper function is used to avoid code duplication in functions that
     calculate fractions of specific element types (e.g., metals, d-block elements).
 
@@ -49,6 +66,8 @@ def get_element_fraction(composition: str | Composition, element_set: set[str]) 
     """
     comp = _ensure_composition(composition)
     total_amt = sum(comp.values())
+    if total_amt == 0:
+        return 0.0
     target_amt = sum(amt for el, amt in comp.items() if el.symbol in element_set)
     return target_amt / total_amt
 
@@ -76,8 +95,7 @@ def get_distinct_metal_count(composition: str | Composition) -> int:
 
 
 def get_pauling_test_mismatch(composition: str | Composition) -> float:
-    """Calculate a score for how much the composition deviates from ideal
-    Pauling electronegativity ordering.
+    """Calculate a score for how much the composition deviates from ideal Pauling electronegativity ordering.
 
     Higher mismatch => more difference (ionic, e.g. NaCl).
     Lower mismatch => metal-metal bonds (e.g. Fe-Al).
@@ -90,18 +108,17 @@ def get_pauling_test_mismatch(composition: str | Composition) -> float:
     electronegativities = [el.pauling_eneg for el in elements]
 
     # If any element lacks a known electronegativity, return NaN
-    if None in electronegativities:
+    if any(e is None or e <= 0 for e in electronegativities):
         return float("nan")
-    else:
-        mismatches = []
-        for i, (_el1, eneg1) in enumerate(zip(elements, electronegativities, strict=False)):
-            for _el2, eneg2 in zip(elements[i + 1 :], electronegativities[i + 1 :], strict=False):
-                # Always use absolute difference
-                mismatch = abs(eneg1 - eneg2)
-                mismatches.append(mismatch)
 
-        # Return average mismatch across all unique pairs
-        return np.mean(mismatches) if mismatches else 0.0
+    # At this point all values are known to be positive floats
+    eneg_values = cast("list[float]", electronegativities)
+    mismatches: list[float] = [
+        abs(eneg1 - eneg2) for i, eneg1 in enumerate(eneg_values) for eneg2 in eneg_values[i + 1 :]
+    ]
+
+    # Return average mismatch across all unique pairs
+    return float(np.mean(mismatches)) if mismatches else 0.0
 
 
 def metallicity_score(composition: str | Composition) -> float:

@@ -18,9 +18,10 @@ Todo:
 from __future__ import annotations
 
 import abc
-import os
 from itertools import combinations_with_replacement
+from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from smact import data_directory
@@ -66,9 +67,10 @@ class SubstitutionModel(abc.ABC):
         lambda_tab = []
         for s1, s2 in pairs:
             prob = self.sub_prob(s1, s2)
-            lambda_tab.append((s1, s2, prob))
+            lam = np.log(max(prob, np.finfo(float).tiny))
+            lambda_tab.append((s1, s2, lam))
             if s1 != s2:
-                lambda_tab.append((s2, s1, prob))
+                lambda_tab.append((s2, s1, lam))
 
         lambda_df = pd.DataFrame(lambda_tab)
         return lambda_df.pivot_table(index=0, columns=1, values=2)
@@ -77,7 +79,7 @@ class SubstitutionModel(abc.ABC):
 class RadiusModel(SubstitutionModel):
     """Substitution probability model based on Shannon radii."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         r"""
         Parse Shannon radii data file.
 
@@ -88,13 +90,13 @@ class RadiusModel(SubstitutionModel):
             k = \Delta r_\mathrm{max}^{-2}.
 
         """
-        shannon_file = os.path.join(data_directory, "shannon_radii.csv")
+        shannon_file = str(Path(data_directory) / "shannon_radii.csv")
 
         self.shannon_data = pd.read_csv(shannon_file, index_col=0)
 
         self.k = (self.shannon_data["ionic_radius"].max() - self.shannon_data["ionic_radius"].min()) ** -2
 
-    def sub_prob(self, s1, s2):
+    def sub_prob(self, s1: str, s2: str) -> float:
         r"""
         Calculate the probability of substituting species s1 for s2.
 
@@ -118,10 +120,11 @@ class RadiusModel(SubstitutionModel):
         spec2 = parse_spec(s2)
 
         try:
-            ele1_rows = self.shannon_data.loc[spec1[0]]
-            ele2_rows = self.shannon_data.loc[spec2[0]]
+            ele1_rows = self.shannon_data.loc[[spec1[0]]]
+            ele2_rows = self.shannon_data.loc[[spec2[0]]]
         except KeyError as e:
-            raise KeyError(f"Element not in Shannon radius data file: {e}")
+            msg = f"Element not in Shannon radius data file: {e}"
+            raise KeyError(msg) from e
 
         spec1_rows = ele1_rows.loc[ele1_rows["charge"] == spec1[1]]
         spec2_rows = ele2_rows.loc[ele2_rows["charge"] == spec2[1]]
@@ -130,5 +133,5 @@ class RadiusModel(SubstitutionModel):
         mean_spec1_r = spec1_rows["ionic_radius"].mean()
         mean_spec2_r = spec2_rows["ionic_radius"].mean()
 
-        # Hooke's law-style probability
-        return 1 - self.k * (mean_spec1_r - mean_spec2_r) ** 2
+        # Hooke's law-style probability, clamped to valid range [0, 1]
+        return max(0.0, 1 - self.k * (mean_spec1_r - mean_spec2_r) ** 2)

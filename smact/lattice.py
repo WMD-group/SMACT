@@ -18,22 +18,18 @@ class Lattice:
 
     Attributes:
     ----------
-        basis_sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
+        sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
         comprising the basis sites in Cartesian coordinates
 
         space_group: Integer space group number according to the
         International Tables for Crystallography.
 
-        structurbericht:
-        Structurbericht identity, if applicable (e.g. 'B1')
-
-    Methods:
-    -------
-        lattice_vector_calc():
+        strukturbericht:
+        Strukturbericht identity, if applicable (e.g. 'B1')
 
     """
 
-    def __init__(self, sites, space_group=1, strukturbericht=False):
+    def __init__(self, sites: list[Site], space_group: int = 1, strukturbericht: str | None = None) -> None:
         """Initialize the Lattice object."""
         self.sites = sites
         self.space_group = space_group
@@ -53,9 +49,11 @@ class Site:
 
     """
 
-    def __init__(self, position, oxidation_states=None):
+    def __init__(self, position: list[float], oxidation_states: list[int] | int | None = None) -> None:
         """Initialize the Site object."""
         if oxidation_states is None:
             oxidation_states = [0]
+        elif isinstance(oxidation_states, int):
+            oxidation_states = [oxidation_states]
         self.position = position
         self.oxidation_states = oxidation_states

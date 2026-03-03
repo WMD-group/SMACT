@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import itertools
 import json
-import os
 from copy import deepcopy
 from operator import itemgetter
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -36,8 +36,8 @@ class CationMutator:
     def __init__(
         self,
         lambda_df: pd.DataFrame,
-        alpha: Callable[[str, str], float] | None = (lambda s1, s2: -5.0),
-    ):
+        alpha: Callable[[str, str], float] | None = (lambda _s1, _s2: -5.0),
+    ) -> None:
         """
         Assign attributes and get lambda table.
 
@@ -67,8 +67,8 @@ class CationMutator:
     @staticmethod
     def from_json(
         lambda_json: str | None = None,
-        alpha: Callable[[str, str], float] | None = (lambda s1, s2: -5.0),
-    ):
+        alpha: Callable[[str, str], float] | None = (lambda _s1, _s2: -5.0),
+    ) -> CationMutator:
         """
         Create a CationMutator instance from a DataFrame.
 
@@ -88,13 +88,13 @@ class CationMutator:
 
         """
         if lambda_json is not None:
-            with open(lambda_json) as f:
+            with Path(lambda_json).open() as f:
                 lambda_dat = json.load(f)
         else:
             # Get pymatgen lambda table
-            py_sp_dir = os.path.dirname(pymatgen_sp.__file__)
-            pymatgen_lambda = os.path.join(py_sp_dir, "data", "lambda.json")
-            with open(pymatgen_lambda) as f:
+            py_sp_dir = Path(pymatgen_sp.__file__).parent
+            pymatgen_lambda = py_sp_dir / "data" / "lambda.json"
+            with pymatgen_lambda.open() as f:
                 lambda_dat = json.load(f)
 
             # Get rid of 'D1+' values to reflect pymatgen
@@ -109,7 +109,50 @@ class CationMutator:
 
         return CationMutator(lambda_df, alpha)
 
-    def _populate_lambda(self):
+    def _add_alpha(self, s1: str, s2: str) -> None:
+        """Add an alpha value to the lambda table at both coordinates."""
+        if self.alpha is None:
+            msg = "alpha function must not be None"
+            raise ValueError(msg)
+        a = self.alpha(s1, s2)
+        self.lambda_tab.loc[s1, s2] = a
+        self.lambda_tab.loc[s2, s1] = a
+
+    def _mirror_lambda(self, s1: str, s2: str) -> None:
+        """Mirror the lambda value at (s2, s1) into (s1, s2)."""
+        self.lambda_tab.loc[s1, s2] = self.lambda_tab.loc[s2, s1]
+
+    def _populate_from_pair(self, s1: str, s2: str) -> None:
+        """Populate lambda when (s1, s2) exists in the table.
+
+        If the value is NaN, try to mirror from (s2, s1) or fall back to alpha.
+        If the value is valid, mirror it to (s2, s1).
+        """
+        if np.isnan(self.lambda_tab.loc[s1, s2]):
+            try:
+                if not np.isnan(self.lambda_tab.loc[s2, s1]):
+                    self._mirror_lambda(s1, s2)
+                else:
+                    self._add_alpha(s1, s2)
+            except KeyError:
+                self._add_alpha(s1, s2)
+        else:
+            self._mirror_lambda(s2, s1)
+
+    def _populate_from_single(self, s1: str, s2: str) -> None:
+        """Populate lambda when (s1, s2) is missing but (s2, s1) may exist.
+
+        If (s2, s1) exists and is valid, mirror it. Otherwise, use alpha.
+        """
+        try:
+            if np.isnan(self.lambda_tab.loc[s2, s1]):
+                self._add_alpha(s1, s2)
+            else:
+                self._mirror_lambda(s1, s2)
+        except KeyError:
+            self._add_alpha(s1, s2)
+
+    def _populate_lambda(self) -> None:
         """
         Populate lambda table.
 
@@ -121,36 +164,11 @@ class CationMutator:
         """
         pairs = itertools.combinations_with_replacement(self.specs, 2)
 
-        def add_alpha(s1, s2):
-            """Add an alpha value to the lambda table at both coordinates."""
-            a = self.alpha(s1, s2)
-            self.lambda_tab.loc[s1, s2] = a
-            self.lambda_tab.loc[s2, s1] = a
-
-        def mirror_lambda(s1, s2):
-            """Mirror the lambda value at (s2, s1) into (s1, s2)."""
-            self.lambda_tab.loc[s1, s2] = self.lambda_tab.loc[s2, s1]
-
         for s1, s2 in pairs:
             try:
-                if np.isnan(self.lambda_tab.loc[s1, s2]):
-                    try:
-                        if not np.isnan(self.lambda_tab.loc[s2, s1]):
-                            mirror_lambda(s1, s2)
-                        else:
-                            add_alpha(s1, s2)
-                    except KeyError:
-                        add_alpha(s1, s2)
-                else:
-                    mirror_lambda(s2, s1)
+                self._populate_from_pair(s1, s2)
             except KeyError:
-                try:
-                    if np.isnan(self.lambda_tab.loc[s2, s1]):
-                        add_alpha(s1, s2)
-                    else:
-                        mirror_lambda(s1, s2)
-                except KeyError:
-                    add_alpha(s1, s2)
+                self._populate_from_single(s1, s2)
 
         # Ensure symmetry
         idx = self.lambda_tab.index
@@ -175,7 +193,9 @@ class CationMutator:
         if {s1, s2} <= self.specs:
             return self.lambda_tab.loc[s1, s2]
 
-        return self.alpha(s1, s2)
+        if self.alpha is not None:
+            return self.alpha(s1, s2)
+        return -5.0
 
     def get_lambdas(self, species: str) -> pd.Series:
         """
@@ -192,7 +212,8 @@ class CationMutator:
 
         """
         if not {species} <= self.specs:
-            raise ValueError(f"{species} not in lambda table.")
+            msg = f"{species} not in lambda table."
+            raise ValueError(msg)
 
         return self.lambda_tab.loc[species]
 
@@ -239,19 +260,18 @@ class CationMutator:
 
         final_spec_tup = parse_spec(final_species)
 
-        # Replace species tuple
-        struct_buff.species[spec_loc] = (
-            *final_spec_tup,
-            struct_buff.species[spec_loc][2],
-        )
+        # Replace species tuple (struct_buff.species is always list[tuple[str, int, int]] after sanitisation)
+        old_stoic: int = struct_buff.species[spec_loc][2]
+        struct_buff.species[spec_loc] = (final_spec_tup[0], final_spec_tup[1], old_stoic)
 
         # Check for charge neutrality
-        if sum(x[1] * x[2] for x in struct_buff.species) != 0:
-            raise ValueError("New structure is not charge neutral.")
+        if sum(spec[1] * spec[2] for spec in struct_buff.species) != 0:
+            msg = "New structure is not charge neutral."
+            raise ValueError(msg)
 
         # Sort species again
-        struct_buff.species.sort(key=itemgetter(1), reverse=True)
-        struct_buff.species.sort(key=itemgetter(0))
+        struct_buff.species.sort(key=lambda s: s[1], reverse=True)
+        struct_buff.species.sort(key=lambda s: s[0])
 
         # Replace sites
         struct_buff.sites[final_species] = struct_buff.sites.pop(init_species)
@@ -269,6 +289,7 @@ class CationMutator:
     ) -> SmactStructure:
         """
         Perform a n-ary mutation of a SmactStructure (n>1).
+
         Replaces all instances of a group of species within the structure.
         Stoichiometry is maintained.
         Charge neutrality is preserved, but the species pair do not need the same charge.
@@ -286,24 +307,34 @@ class CationMutator:
         struct_buff = deepcopy(structure)
         init_spec_tup_list = [parse_spec(i) for i in init_species]
         struct_spec_tups = list(map(itemgetter(0, 1), struct_buff.species))
-        spec_loc = [struct_spec_tups.index(init_spec_tup_list[i]) for i in range(n)]
+        # Use a set to track already-matched indices, avoiding duplicates from list.index()
+        used: set[int] = set()
+        spec_loc: list[int] = []
+        for tup in init_spec_tup_list:
+            for idx, st in enumerate(struct_spec_tups):
+                if st == tup and idx not in used:
+                    spec_loc.append(idx)
+                    used.add(idx)
+                    break
+            else:
+                msg = f"Species {tup} not found in structure."
+                raise ValueError(msg)
 
         final_spec_tup_list = [parse_spec(i) for i in final_species]
 
-        # Replace species tuple
+        # Replace species tuple (struct_buff.species is always list[tuple[str, int, int]] after sanitisation)
         for i in range(n):
-            struct_buff.species[spec_loc[i]] = (
-                *final_spec_tup_list[i],
-                struct_buff.species[spec_loc[i]][2],
-            )
+            old_stoic: int = struct_buff.species[spec_loc[i]][2]
+            struct_buff.species[spec_loc[i]] = (final_spec_tup_list[i][0], final_spec_tup_list[i][1], old_stoic)
 
         # Check for charge neutrality
-        if sum(x[1] * x[2] for x in struct_buff.species) != 0:
-            raise ValueError("New structure is not charge neutral")
+        if sum(spec[1] * spec[2] for spec in struct_buff.species) != 0:
+            msg = "New structure is not charge neutral"
+            raise ValueError(msg)
 
         # Sort species again
-        struct_buff.species.sort(key=itemgetter(1), reverse=True)
-        struct_buff.species.sort(key=itemgetter(0))
+        struct_buff.species.sort(key=lambda s: s[1], reverse=True)
+        struct_buff.species.sort(key=lambda s: s[0])
 
         # Replace sites
         for i in range(n):
@@ -339,7 +370,7 @@ class CationMutator:
     def complete_cond_probs(self) -> pd.DataFrame:
         """Generate a DataFrame with all the conditional substitution probabilities."""
         lambda_exp = np.exp(self.lambda_tab)
-        return lambda_exp / lambda_exp.sum(axis=1)
+        return lambda_exp / lambda_exp.sum(axis=0)
 
     def complete_pair_corrs(self) -> pd.DataFrame:
         """Generate a DataFrame with all the pair correlations."""
@@ -362,7 +393,7 @@ class CationMutator:
             np.exp(
                 pd.Series(
                     np.diag(self.lambda_tab),
-                    index=[self.lambda_tab.index, self.lambda_tab.columns],
+                    index=self.lambda_tab.index,
                 )
             )
             / self.Z
@@ -393,14 +424,14 @@ class CationMutator:
         """
         probs = self.get_lambdas(s1)
         probs = np.exp(probs)
-        probs /= np.exp(self.lambda_tab).sum()
+        probs /= np.exp(self.lambda_tab).sum(axis=0)
         return probs
 
     def unary_substitute(
         self,
         structure: SmactStructure,
         thresh: float | None = 1e-5,
-    ) -> Generator[tuple[SmactStructure, float], None, None]:
+    ) -> Generator[tuple[SmactStructure, float, str, str], None, None]:
         """
         Find all structures with 1 substitution with probability above a threshold.
 
