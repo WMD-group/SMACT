@@ -16,13 +16,6 @@
 
 **Merged pull requests:**
 
-- chore: merge develop into master \(v4.0.0\) [\#603](https://github.com/WMD-group/SMACT/pull/603) ([KingaMas](https://github.com/KingaMas))
-- chore: v4.0.0 audit — type annotations, bug fixes, CI hardening [\#602](https://github.com/WMD-group/SMACT/pull/602) ([KingaMas](https://github.com/KingaMas))
-- Release 4.0.0 [\#595](https://github.com/WMD-group/SMACT/pull/595) ([KingaMas](https://github.com/KingaMas))
-- chore: upgrade dependencies to resolve [\#589](https://github.com/WMD-group/SMACT/pull/589) ([KingaMas](https://github.com/KingaMas))
-- Fix TypeError crash for noble gases with explicit oxidation state sets [\#588](https://github.com/WMD-group/SMACT/pull/588) ([KingaMas](https://github.com/KingaMas))
-- pre-commit autoupdate [\#584](https://github.com/WMD-group/SMACT/pull/584) ([pre-commit-ci[bot]](https://github.com/apps/pre-commit-ci))
-
 ## [v3.2.0](https://github.com/WMD-group/SMACT/tree/v3.2.0) (2025-07-31)
 
 [Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.1.0...v3.2.0)
@@ -116,7 +109,7 @@
 
 **Implemented enhancements:**
 
-- Move to ruff for linting and formatting [\#297](https://github.com/WMD-group/SMACT/issues/297)
+- Move to ruff for linting and formating [\#297](https://github.com/WMD-group/SMACT/issues/297)
 - Running examples from a browser [\#67](https://github.com/WMD-group/SMACT/issues/67)
 - Migrate CI dependency installation from pip to uv [\#338](https://github.com/WMD-group/SMACT/pull/338) ([AntObi](https://github.com/AntObi))
 - Structure prediction fixes [\#336](https://github.com/WMD-group/SMACT/pull/336) ([AntObi](https://github.com/AntObi))
