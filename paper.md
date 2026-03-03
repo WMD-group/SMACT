@@ -19,9 +19,6 @@ authors:
     affiliation: 1
   - name: Ryan Nduma
     affiliation: 1
-  - name: Aron Walsh
-    orcid: 0000-0001-5460-7033
-    affiliation: 1
   - name: Keith Butler
     affiliation: 4
   - name: Jiwoo Lee
@@ -35,6 +32,9 @@ authors:
   - name: Rhys Goodall
     affiliation: 6
   - name: Tianshu Li
+    affiliation: 1
+  - name: Aron Walsh
+    orcid: 0000-0001-5460-7033
     affiliation: 1
 affiliations:
   - name: Department of Materials, Imperial College London, London, UK
@@ -102,7 +102,6 @@ Generative AI tools (Claude, Anthropic) were used to assist with code modernisat
 [AM](https://github.com/a-ws-m) designed and implemented the structure prediction subpackage and benchmarking framework.
 [DWD](https://github.com/dandavies99) is the original lead developer and contributed to CI infrastructure and code quality tooling.
 [RN](https://github.com/ryannduma) implemented the property prediction subpackage, metallicity module, and screening performance optimisations.
-[AW](https://wmd-group.github.io/) supervised the project and contributed to the codebase.
 [KTB](https://github.com/keeeto) is an original author who continued contributing to the codebase.
 [JL](https://github.com/JiwooChloeLee) contributed the initial dopant prediction implementation and charge state comparison fixes.
 [PD](https://github.com/Panyalak) contributed to lattice parameter calculations.
@@ -110,6 +109,7 @@ Generative AI tools (Claude, Anthropic) were used to assist with code modernisat
 [HP](https://github.com/hspark1212) contributed the crystal space visualisation tools and element data corrections.
 [REAG](https://github.com/comprhys) fixed a screening bug related to electronegativity handling.
 [TL](https://github.com/lits19) contributed to code reorganisation and utility refactoring.
+[AW](https://wmd-group.github.io/) supervised the project and contributed to the codebase.
 
 # Acknowledgements
 
