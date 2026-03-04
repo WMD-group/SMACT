@@ -16,6 +16,7 @@ authors:
   - name: Alexander Moriarty
     affiliation: 2
   - name: Daniel Davies
+    orcid: 0000-0003-4094-5992
     affiliation: 1
   - name: Ryan Nduma
     affiliation: 1
