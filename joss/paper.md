@@ -12,27 +12,36 @@ authors:
     orcid: 0009-0006-5656-6646
     affiliation: 1
   - name: Anthony Onwuli
+    orcid: 0000-0003-2107-153X
     affiliation: 1
   - name: Alexander Moriarty
+    orcid: 0000-0001-7525-1419
     affiliation: 2
   - name: Daniel Davies
     orcid: 0000-0003-4094-5992
     affiliation: 1
   - name: Ryan Nduma
+    orcid: 0009-0008-1428-4637
     affiliation: 1
   - name: Keith Butler
+    orcid: 0000-0001-5432-5597
     affiliation: 4
   - name: Jiwoo Lee
     affiliation: 3
   - name: Panyalak Detrattanawichai
+    orcid: 0000-0001-9606-5631
     affiliation: 1
   - name: Alex Ganose
+    orcid: 0000-0002-4486-3321
     affiliation: 5
   - name: Hyunsoo Park
+    orcid: 0000-0001-9388-173X
     affiliation: 1
   - name: Rhys Goodall
+    orcid: 0000-0002-6589-1700
     affiliation: 6
   - name: Tianshu Li
+    orcid: 0009-0007-4694-7709
     affiliation: 1
   - name: Aron Walsh
     orcid: 0000-0001-5460-7033
@@ -50,13 +59,13 @@ affiliations:
     index: 5
   - name: Radical AI, New York, USA
     index: 6
-date: 3 March 2026
+date: 29 March 2026
 bibliography: paper.bib
 ---
 
 # Summary
 
-`SMACT` (Semiconducting Materials by Analogy and Chemical Theory) is a Python library for the high-throughput screening and discovery of inorganic materials. The name reflects the foundational analogy-based approaches to semiconductor prediction [@goodman1958; @pamplin1964]. Originally published as a JOSS paper in 2019 [@Davies2019], the package provided chemical filters based on charge neutrality, electronegativity, and elemental data to rapidly identify chemically plausible compositions from the vast space of possible element combinations [@davies_computational_2016]. Since then, SMACT has undergone substantial development spanning seven major releases (v2.1 through v4.0). The library now includes modules for crystal structure prediction via data-mined ionic substitution [@Hautier2011], dopant prediction, composition-to-property prediction using deep learning models [@Goodall2020], and tools for mapping and visualising inorganic crystal chemical space [@Park2025]. These additions transform SMACT from a compositional screening tool into a comprehensive platform for computational materials design.
+`SMACT` (Semiconducting Materials by Analogy and Chemical Theory) is a Python library for the high-throughput screening and discovery of inorganic materials. The name reflects foundational analogy-based approaches to semiconductor prediction [@goodman1958; @pamplin1964]. Originally published as a JOSS paper in 2019 [@Davies2019], the package provided chemical filters based on charge neutrality, electronegativity, and elemental data to rapidly identify chemically plausible compositions [@davies_computational_2016]. Since then, SMACT has undergone substantial development from v2.1 through v4.0. The library now includes modules for crystal structure prediction via data-mined ionic substitution [@Hautier2011], dopant prediction, composition-to-property prediction using deep learning models [@Goodall2020], and tools for mapping inorganic crystal chemical space [@Park2025]. These additions transform SMACT from a compositional screening tool into a comprehensive platform for computational materials design.
 
 # Statement of Need
 
@@ -72,25 +81,23 @@ SMACT occupies a distinct niche: it works at the composition level, upstream of 
 
 # Software Design
 
-SMACT v4 retains the `Element` and `Species` classes at its core, providing access to tabulated data for all elements of the periodic table in arbitrary oxidation states and coordination environments. Building on this foundation, the following major modules have been added since the original publication.
+SMACT v4 retains the `Element` and `Species` classes at its core, providing access to tabulated data for all elements in arbitrary oxidation states and coordination environments. The following major modules have been added since the original publication.
 
-**Structure prediction.** The `structure_prediction` subpackage implements data-mined ionic substitution methods [@Hautier2011]. A `CationMutator` class computes substitution probabilities from lambda tables derived from a statistical analysis of known compounds. The `StructurePredictor` applies these probabilities to predict likely crystal structures for new compositions by analogy with parent structures stored in a local SQLite database (`StructureDB`), which can be populated from the Materials Project.
+**Structure prediction.** Implements data-mined ionic substitution methods [@Hautier2011] to predict likely crystal structures for new compositions by analogy with known parent structures, using substitution probabilities derived from statistical analysis of experimental databases.
 
-**Dopant prediction.** The `dopant_prediction` module (`Doper` class) enables high-throughput identification of p-type and n-type dopants for a given host composition. It combines oxidation state filters with ionic radius constraints and optional species embedding similarities to rank candidate dopants by substitution probability and site selectivity.
+**Dopant prediction.** Enables high-throughput identification of p-type and n-type dopants for a given host composition by combining oxidation state filters with ionic radius constraints and species embedding similarities.
 
-**Property prediction.** The `property_prediction` subpackage provides composition-to-property prediction using pre-trained ROOST (Representation Learning from Stoichiometry) models [@Goodall2020]. Users can predict band gaps directly from chemical formulae, with the extensible architecture designed to support additional properties as pre-trained models become available. Ensemble-based uncertainty quantification is included, and a model registry and caching system manage pre-trained checkpoints.
+**Property prediction.** Provides composition-to-property prediction using pre-trained ROOST models [@Goodall2020], allowing users to predict band gaps directly from chemical formulae with uncertainty estimates.
 
-**Oxidation states and metallicity.** The `oxidation_states` module implements a probabilistic model for predicting the likelihood of metal species coexisting in compounds based on anion-dependent statistics [@davies2018]. SMACT v3 updated the default oxidation state data from the original SMACT14 set to ICSD24, reflecting more recent experimental observations. The `metallicity` module provides scoring functions based on electronegativity differences to distinguish ionic compounds from intermetallic phases.
+**Oxidation states and metallicity.** Implements a probabilistic model for predicting the likelihood of metal species coexisting in compounds based on anion-dependent statistics [@davies2018], with updated default data (ICSD24). A metallicity scoring module distinguishes ionic compounds from intermetallic phases.
 
-**Crystal space utilities.** The `crystal_space` subpackage provides tools for systematically mapping inorganic composition space [@Park2025], including Materials Project data acquisition, SMACT-based composition generation, and dimensionality-reduced visualisation of compositional embeddings.
+**Crystal space utilities.** Tools for systematically mapping inorganic composition space [@Park2025], including data acquisition, composition generation, and dimensionality-reduced visualisation of compositional embeddings.
 
-**Screening enhancements.** The core `smact_filter` and `smact_validity` functions have been extended with support for mixed-valence compositions, switchable oxidation state datasets (ICSD24, ICSD16, SMACT14, Pymatgen, Wikipedia), early short-circuiting for performance, and consensus-based oxidation state filtering.
-
-**Code quality.** SMACT v4 enforces full type annotations checked by `pyright` in standard mode, linting with `ruff` across all rule categories, and maintains greater than 85% test coverage across 318 tests running on three Python versions and three operating systems via GitHub Actions.
+**Screening enhancements.** The core screening functions now support mixed-valence compositions, switchable oxidation state datasets, and consensus-based filtering.
 
 # Research Impact
 
-SMACT has been used in a number of published research studies. Park et al. [@Park2025] used SMACT's screening and crystal space tools to map the landscape of inorganic crystal chemistry. Onwuli et al. [@Onwuli2024] employed SMACT's species representations for materials informatics, developing ionic embeddings that capture oxidation-state-dependent chemical behaviour. The structure prediction module has supported studies on data-driven discovery of new compounds using ionic substitution methods. The dopant prediction capabilities have been applied to identify candidate dopants for semiconductor and energy materials. Park et al. [@Park2025synthesis] used SMACT in a workflow for closing the synthesis gap in computational materials design. Nduma et al. [@Nduma2025crystalyse] integrated SMACT into the Crystalyse multi-tool agent for autonomous materials design.
+Park et al. [@Park2025] used SMACT's screening and crystal space tools to map the landscape of inorganic crystal chemistry. Onwuli et al. [@Onwuli2024] employed SMACT's species representations for materials informatics, developing ionic embeddings that capture oxidation-state-dependent chemical behaviour. Park et al. [@Park2025synthesis] used SMACT in a workflow for closing the synthesis gap in computational materials design. Nduma et al. [@Nduma2025crystalyse] integrated SMACT into the Crystalyse multi-tool agent for autonomous materials design.
 
 # AI Usage Disclosure
 
