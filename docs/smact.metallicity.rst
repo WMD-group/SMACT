@@ -1,5 +1,5 @@
 smact.metallicity module
-====================
+========================
 
 .. automodule:: smact.metallicity
     :members:

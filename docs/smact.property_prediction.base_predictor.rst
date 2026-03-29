@@ -1,5 +1,5 @@
 smact.property_prediction.base_predictor module
-================================================
+===============================================
 
 Abstract base class for property predictors and the
 :class:`~smact.property_prediction.base_predictor.PredictionResult`

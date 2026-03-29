@@ -66,7 +66,7 @@ The steps for a new piece of work can be summarised as follows:
 git remote add upstream https://github.com/WMD-group/SMACT.git
 ```
 
-Fetch the latest changes from the master branch to keep it up to date (make sure you are on the master branch ).
+Fetch the latest changes from the master branch to keep it up to date (make sure you are on the master branch).
 
 ```bash
 git checkout master

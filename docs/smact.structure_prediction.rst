@@ -1,5 +1,5 @@
-Structure Prediction Module
-===========================
+smact.structure_prediction module
+=================================
 
 The structure prediction module implements a minimalist
 framework for high-throughput prediction of new compounds

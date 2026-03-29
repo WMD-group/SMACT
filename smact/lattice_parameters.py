@@ -90,7 +90,7 @@ def wurtzite(
     gamma = 120
     #
     # Scenario A: A atoms are touching
-    #   i.e. height is that of two tetrahegons with side length a
+    #   i.e. height is that of two tetrahedra with side length a
     #    = 2 * sqrt(2/3) * a
     if shannon_radius[0] > _TETRAHEDRAL_HALF_ANGLE_SIN * (shannon_radius[0] + shannon_radius[1]):
         a = 2 * shannon_radius[0]

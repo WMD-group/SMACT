@@ -1,5 +1,5 @@
-Structure Prediction Utilities Module
-=====================================
+smact.structure_prediction.utilities module
+===========================================
 
 Miscellaneous utilities for data manipulation.
 

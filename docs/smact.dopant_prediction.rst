@@ -1,5 +1,5 @@
-Dopant Prediction Module
-===========================
+smact.dopant_prediction module
+==============================
 
 The dopant prediction module facilitates high-throughput prediction of p-type and n-type dopants in multi-component solids. The search and ranking process is based on electronic filters (e.g. accessible oxidation states) and chemical filters (e.g. difference in ionic radius).
 

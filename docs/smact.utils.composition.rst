@@ -1,5 +1,5 @@
-SMACT Utilities Composition Module
-=====================================
+smact.utils.composition module
+==============================
 
 Miscellaneous utilities for composition handling
 

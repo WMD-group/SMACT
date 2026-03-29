@@ -431,7 +431,6 @@ def test_get_species_list(ox_filter):
 def test_oxidation_states_filter_species_occurrences(ox_filter):
     species_occurrences_df = ox_filter.get_species_occurrences_df(consensus=1)
     assert isinstance(species_occurrences_df, pd.DataFrame)
-    assert isinstance(species_occurrences_df, pd.DataFrame)
     assert species_occurrences_df.columns.tolist() == [
         "element",
         "species",
@@ -474,7 +473,6 @@ def test_commonality_type_error(ox_filter):
 def test_get_species_occurrences_unsorted(ox_filter):
     occurrences = ox_filter.get_species_occurrences_df(sort_by_occurrences=False)
     assert isinstance(occurrences, pd.DataFrame)
-    assert isinstance(occurrences, pd.DataFrame)
     assert len(occurrences) > 0
 
 
@@ -486,7 +484,6 @@ def test_filter_numeric_commonality(ox_filter):
 
 def test_get_species_occurrences_include_zero(ox_filter):
     occurrences = ox_filter.get_species_occurrences_df(include_zero=True)
-    assert isinstance(occurrences, pd.DataFrame)
     assert isinstance(occurrences, pd.DataFrame)
     assert len(occurrences) > 0
 
