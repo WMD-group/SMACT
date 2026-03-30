@@ -1,5 +1,5 @@
-SMACT Utilities Oxidation Module
-=====================================
+smact.utils.oxidation module
+============================
 
 Miscellaneous utilities for creating SMACT compatible oxidation states list
 

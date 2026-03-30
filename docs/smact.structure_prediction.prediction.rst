@@ -1,5 +1,5 @@
-Prediction Module
-=================
+smact.structure_prediction.prediction module
+============================================
 
 Prediction algorithm implementation. Wraps the structure prediction
 pipeline.

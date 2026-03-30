@@ -6,7 +6,7 @@
 Semiconducting Materials from Analogy and Chemical Theory
 =========================================================
 
-View the code on Github `here <http://github.com/wmd-group/smact>`_.
+View the code on Github `here <https://github.com/wmd-group/smact>`_.
 
 Introduction
 ============
@@ -24,7 +24,7 @@ Features of :mod:`smact` include:
 
 - Chemical elements with associated properties
 - Filters for oxidation states and charge balancing
-- Structure predcition from chemical composition
+- Structure prediction from chemical composition
 - Composition probability prediction
 - Property prediction from composition using pre-trained ROOST models
 

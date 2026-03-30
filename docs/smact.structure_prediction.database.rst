@@ -1,5 +1,5 @@
-Structure Database Module
-=========================
+smact.structure_prediction.database module
+==========================================
 
 Implements :class:`~.StructureDB`: a minimalist SQLite
 database for storing :class:`~.SmactStructure`-compatible

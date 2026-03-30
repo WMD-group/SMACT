@@ -1,5 +1,5 @@
-Substitution Probability Models
-===============================
+smact.structure_prediction.probability_models module
+====================================================
 
 Minimal API for developing substitution likelihood probability models
 for species mutation.

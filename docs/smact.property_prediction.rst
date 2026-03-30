@@ -1,5 +1,5 @@
-Property Prediction Module
-===========================
+smact.property_prediction module
+================================
 
 The property prediction module enables prediction of material properties
 directly from chemical composition, without requiring crystal structure

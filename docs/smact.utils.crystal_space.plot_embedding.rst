@@ -1,5 +1,5 @@
-Crystal Space Embedding Module
-===========================
+smact.utils.crystal_space.plot_embedding module
+===============================================
 
 
 .. automodule:: smact.utils.crystal_space.plot_embedding

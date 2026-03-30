@@ -1,5 +1,5 @@
-SMACT Utilities module
-===========================
+smact.utils module
+==================
 
 The utilities module provides some utility functions to support the core functionalities of SMACT
 

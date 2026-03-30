@@ -1,5 +1,5 @@
-Mutation Module
-===============
+smact.structure_prediction.mutation module
+==========================================
 
 Contains tools for determining substitution probability
 of different species and for mutating instances of

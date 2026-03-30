@@ -1,5 +1,5 @@
 smact.property_prediction.roost module
-=======================================
+======================================
 
 ROOST (Representation Learning from Stoichiometry) predictor
 implementation for composition-only property prediction.
