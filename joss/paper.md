@@ -17,13 +17,13 @@ authors:
   - name: Alexander Moriarty
     orcid: 0000-0001-7525-1419
     affiliation: 2
-  - name: Daniel Davies
+  - name: Daniel W. Davies
     orcid: 0000-0003-4094-5992
     affiliation: 1
   - name: Ryan Nduma
     orcid: 0009-0008-1428-4637
     affiliation: 1
-  - name: Keith Butler
+  - name: Keith T. Butler
     orcid: 0000-0001-5432-5597
     affiliation: 4
   - name: Jiwoo Lee
@@ -31,13 +31,13 @@ authors:
   - name: Panyalak Detrattanawichai
     orcid: 0000-0001-9606-5631
     affiliation: 1
-  - name: Alex Ganose
+  - name: Alex M. Ganose
     orcid: 0000-0002-4486-3321
     affiliation: 5
   - name: Hyunsoo Park
     orcid: 0000-0001-9388-173X
     affiliation: 1
-  - name: Rhys Goodall
+  - name: Rhys E. A. Goodall
     orcid: 0000-0002-6589-1700
     affiliation: 6
   - name: Tianshu Li
