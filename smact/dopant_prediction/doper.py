@@ -368,7 +368,7 @@ class Doper:
                 colorbar={"tickformat": ".1e"},
                 font_size=10,
             )
-            fig.show()
+            fig.show(renderer="png")
 
     def _format_number(self, num_str: str | int) -> str:
         num = int(num_str)
