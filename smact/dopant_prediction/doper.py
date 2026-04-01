@@ -12,7 +12,7 @@ from itertools import groupby
 from pathlib import Path
 
 import numpy as np
-from pymatviz.ptable.ptable_plotly import ptable_heatmap_plotly
+from pymatgen.util import plotting
 from tabulate import tabulate
 
 from smact import data_directory
@@ -357,18 +357,14 @@ class Doper:
                     "Run get_dopants with get_selectivity=True to include selectivity data."
                 )
                 raise ValueError(msg)
-            dict_results: dict[str | int, float] = {
-                utilities.parse_spec(row[0])[0]: float(row[idx]) for row in sorted_rows
-            }
-            fig = ptable_heatmap_plotly(
-                values=dict_results,
-                colorscale=cmap,
-                nan_color="gainsboro",
-                fmt=".1e",
-                colorbar={"tickformat": ".1e"},
-                font_size=10,
+            dict_results = {utilities.parse_spec(row[0])[0]: row[idx] for row in sorted_rows}
+            plotting.periodic_table_heatmap(
+                elemental_data=dict_results,
+                cmap=cmap,
+                blank_color="gainsboro",
+                edge_color="white",
+                pymatviz=False,
             )
-            fig.show()
 
     def _format_number(self, num_str: str | int) -> str:
         num = int(num_str)
