@@ -127,7 +127,7 @@ def test_plot_dopants_branches():
     test.get_dopants(num_dopants=3)
 
     for plot_value in ("probability", "similarity", "selectivity", "combined"):
-        with patch("smact.dopant_prediction.doper.plotting"):
+        with patch("pymatgen.util.plotting.periodic_table_heatmap"):
             test.plot_dopants(plot_value=plot_value)
 
 
