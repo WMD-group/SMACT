@@ -1,7 +1,7 @@
 name: SMACT CI
 
 on:
-  pull_request:
+  pull_request_target:
   push:
     branches:
       - master
@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Install uv and set up Python
         uses: astral-sh/setup-uv@v7
@@ -43,6 +45,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Install uv and set up Python ${{ matrix.python-version }}
         uses: astral-sh/setup-uv@v7
