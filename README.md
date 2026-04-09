@@ -66,46 +66,84 @@ Use cases are available in our [examples](https://smact.readthedocs.io/en/latest
 
 ## Package structure
 
+**Legend:** 🟢 new in v4 — 🟡 improved in v4
+
 ```mermaid
 graph TD
+    classDef new fill:#c8e6c9,stroke:#388e3c,color:#000
+    classDef improved fill:#fff9c4,stroke:#f9a825,color:#000
+
     SMACT(["smact"])
 
     SMACT --> core["Core modules"]
     SMACT --> SP["structure_prediction"]
     SMACT --> DP["dopant_prediction"]
-    SMACT --> PP["property_prediction"]
-    SMACT --> IO["io"]
+    SMACT --> PP["🟢 property_prediction"]
+    SMACT --> IO["🟢 io"]
     SMACT --> UT["utils"]
 
-    core --> init["init.py — Element and Species classes, neutral_ratios"]
-    core --> dl["data_loader.py — loads elemental property data from disk"]
-    core --> sc["screening.py — smact_filter and smact_validity with ICSD 2024 oxidation states and mixed-valence support"]
-    core --> pr["properties.py — estimates band gap, electronegativity, and valence electron count"]
-    core --> ox["oxidation_states.py — data-driven likelihood of oxidation state combinations"]
-    core --> mt["metallicity.py — scores metallic character of compositions"]
-    core --> la["lattice.py — crystal site and lattice representation"]
-    core --> bu["builder.py — builds perovskite and wurtzite structures"]
-    core --> lp["lattice_parameters.py — estimates lattice parameters from ionic radii"]
-    core --> di["distorter.py — enumerates and substitutes inequivalent lattice sites"]
+    core --> init["init.py — Element, Species, neutral_ratios"]
+    core --> dl["data_loader.py — elemental and oxidation state data loading"]
+    core --> sc["🟡 screening.py — compositional screening"]
+    core --> pr["properties.py — band gap, electronegativity, valence electron count"]
+    core --> ox["oxidation_states.py — oxidation state combination likelihood"]
+    core --> mt["metallicity.py — metallic character scoring"]
+    core --> la["lattice.py — Site and Lattice representations"]
+    core --> bu["🟡 builder.py — perovskite and wurtzite structure builders"]
+    core --> lp["🟡 lattice_parameters.py — lattice parameter estimation from ionic radii"]
+    core --> di["distorter.py — inequivalent site enumeration and substitution"]
 
-    SP --> spst["structure.py — SmactStructure: lightweight structure with oxidation states"]
-    SP --> spdb["database.py — SQLite storage for predicted structures"]
-    SP --> spmu["mutation.py — cation substitution probabilities from lambda tables"]
-    SP --> sppd["prediction.py — StructurePredictor: ionic substitution-based structure prediction"]
+    sc --> sc1["smact_validity — charge neutrality and Pauling electronegativity test"]
+    sc --> sc2["smact_filter — compositional search space generation"]
+    sc --> sc3["🟢 mixed_valence flag — correct handling of Fe3O4, Mn3O4"]
+    sc --> sc4["🟢 ICSD 2024 oxidation states — stricter, updated elemental data"]
 
-    DP --> doper["doper.py — Doper: high-throughput p-type and n-type dopant prediction"]
+    bu --> bu1["cubic_perovskite — parameterized oxidation state tiling"]
+    bu --> bu2["wurtzite — corrected default cell parameters"]
 
-    PP --> base["base_predictor.py — abstract BasePropertyPredictor and PredictionResult"]
-    PP --> roost["roost/ — RoostPropertyPredictor: pretrained ML band gap model"]
-    PP --> conv["convenience.py — predict_band_gap one-liner wrapper"]
+    lp --> lp1["corrected geometric formulae for all structure types"]
+
+    SP --> spst["structure.py — SmactStructure"]
+    SP --> spdb["database.py — StructureDB SQLite interface"]
+    SP --> spmu["mutation.py — CationMutator from lambda tables"]
+    SP --> sppd["🟡 prediction.py — StructurePredictor"]
+
+    spst --> spst1["from_file, from_mp, from_pymatgen constructors"]
+    sppd --> sppd1["ionic substitution-based crystal structure prediction"]
+    sppd --> sppd2["🟢 updated to mp_api.client.MPRester interface"]
+
+    DP --> doper["🟡 doper.py — Doper"]
+    doper --> doper1["get_dopants — p-type and n-type candidates"]
+    doper --> doper2["🟢 DopantCandidate dataclass — structured prediction output"]
+    doper --> doper3["plot_dopants — periodic table heatmap visualisation"]
+
+    PP --> base["base_predictor.py — BasePropertyPredictor, PredictionResult"]
+    PP --> roost["roost/ — RoostPropertyPredictor"]
+    PP --> conv["convenience.py — predict_band_gap"]
     PP --> reg["registry.py — model discovery and resolution"]
 
-    IO --> ee["elementembeddings.py — composition and species featurisation via ElementEmbeddings"]
+    roost --> roost1["pretrained ROOST model for band gap prediction"]
+    roost --> roost2["uncertainty estimates alongside predictions"]
+    roost --> roost3["trained on Materials Project 2024 database"]
+    base --> base1["PredictionResult — value, uncertainty, metadata"]
 
-    UT --> comp["composition.py — formula parsing and composition utilities"]
-    UT --> uox["oxidation.py — ICSD24OxStatesFilter for oxidation state management"]
-    UT --> sp2["species.py — species string parsing utilities"]
-    UT --> cs["crystal_space/ — generate and download inorganic crystal chemical space"]
+    IO --> ee["🟢 elementembeddings.py — ElementEmbeddings interface"]
+    ee --> ee1["composition_featuriser — composition-level feature vectors"]
+    ee --> ee2["species_featuriser — species-level feature vectors"]
+
+    UT --> comp["composition.py — parse_formula, comp_maker, formula_maker"]
+    UT --> uox["🟢 oxidation.py — ICSD24OxStatesFilter"]
+    UT --> sp2["species.py — parse_spec, unparse_spec"]
+    UT --> cs["crystal_space/"]
+
+    uox --> uox1["consensus and commonality-based filtering of oxidation states"]
+    cs --> cs1["generate_composition_with_smact.py — SMACT-based composition generation"]
+    cs --> cs2["download_compounds_with_mp_api.py — Materials Project bulk download"]
+    cs --> cs3["plot_embedding.py — crystal space visualisation"]
+
+    class PP,IO new
+    class sc,bu,lp,sppd,doper,uox improved
+    class sc3,sc4,sppd2,doper2,ee,uox new
 ```
 
 ## List of modules
