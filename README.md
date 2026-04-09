@@ -89,7 +89,7 @@ graph TD
     core --> ox["oxidation_states.py — oxidation state combination likelihood"]
     core --> mt["metallicity.py — metallic character scoring"]
     core --> la["lattice.py — Site and Lattice representations"]
-    core --> bu["🟡 builder.py — perovskite and wurtzite structure builders"]
+    core --> bld["🟡 builder.py — perovskite and wurtzite structure builders"]
     core --> lp["🟡 lattice_parameters.py — lattice parameter estimation from ionic radii"]
     core --> di["distorter.py — inequivalent site enumeration and substitution"]
 
@@ -98,8 +98,8 @@ graph TD
     sc --> sc3["🟢 mixed_valence flag — correct handling of Fe3O4, Mn3O4"]
     sc --> sc4["🟢 ICSD 2024 oxidation states — stricter, updated elemental data"]
 
-    bu --> bu1["cubic_perovskite — parameterized oxidation state tiling"]
-    bu --> bu2["wurtzite — corrected default cell parameters"]
+    bld --> bld1["cubic_perovskite — parameterized oxidation state tiling"]
+    bld --> bld2["wurtzite — corrected default cell parameters"]
 
     lp --> lp1["corrected geometric formulae for all structure types"]
 
@@ -142,7 +142,7 @@ graph TD
     cs --> cs3["plot_embedding.py — crystal space visualisation"]
 
     class PP,IO new
-    class sc,bu,lp,sppd,doper,uox improved
+    class sc,bld,lp,sppd,doper,uox improved
     class sc3,sc4,sppd2,doper2,ee,uox new
 ```
 
@@ -176,24 +176,32 @@ Core dependencies include NumPy, SciPy, pandas, [pymatgen](https://pymatgen.org)
 
 The latest stable release can be installed via pip:
 
-    pip install smact
+```bash
+pip install smact
+```
 
 Optional dependencies (needed for full replication of examples and tutorials):
 
-    pip install "smact[optional]"
+```bash
+pip install "smact[optional]"
+```
 
 SMACT is also available via conda-forge:
 
-    conda install -c conda-forge smact
+```bash
+conda install -c conda-forge smact
+```
 
 ### Developer installation
 
 We use [uv](https://docs.astral.sh/uv/) for dependency management. To set up a development environment:
 
-    git clone https://github.com/wmd-group/smact.git
-    cd smact
-    uv sync --extra optional --extra property_prediction --dev
-    pre-commit install
+```bash
+git clone https://github.com/wmd-group/smact.git
+cd smact
+uv sync --extra optional --extra property_prediction --dev
+pre-commit install
+```
 
 This installs SMACT in editable mode with all optional and development dependencies, and sets up pre-commit hooks. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
 
@@ -222,11 +230,15 @@ We use [GitHub Actions](https://github.com/features/actions) for CI. Tests shoul
 
 Run the tests locally:
 
-    make test
+```bash
+make test
+```
 
 Or to run the full CI pipeline (pre-commit hooks and tests):
 
-    make ci-local
+```bash
+make ci-local
+```
 
 ## References
 
