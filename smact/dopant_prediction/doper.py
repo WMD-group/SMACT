@@ -363,6 +363,7 @@ class Doper:
                 cmap=cmap,
                 blank_color="gainsboro",
                 edge_color="white",
+                pymatviz=False,
             )
 
     def _format_number(self, num_str: str | int) -> str:
