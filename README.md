@@ -14,7 +14,7 @@
 
 # SMACT
 
-**Semiconducting Materials from Analogy and Chemical Theory** (SMACT) is a collection of rapid screening and informatics tools that uses data about chemical elements.
+**Semiconducting Materials by Analogy and Chemical Theory** (SMACT) is a collection of rapid screening and informatics tools that uses data about chemical elements.
 
 - **Documentation:** <https://smact.readthedocs.io/en/latest/>
 - **Examples:** <https://smact.readthedocs.io/en/latest/examples.html>
@@ -51,12 +51,62 @@ Use cases are available in our [examples](https://smact.readthedocs.io/en/latest
 
 - Compositions can be converted for use in Pymatgen or for representation to machine learning algorithms ([see this example](https://smact.readthedocs.io/en/latest/tutorials/smact_generation_of_solar_oxides.html)) and the related [ElementEmbeddings](https://github.com/WMD-group/ElementEmbeddings) package.
 
+- Charge neutrality screening supports **mixed-valence compounds** via the `mixed_valence=True` flag in `smact_validity`, enabling correct handling of materials like Fe₃O₄ and Mn₃O₄.
+
+- Oxidation state data is sourced from **ICSD 2024**, providing an updated and stricter set of experimentally observed oxidation states per element.
+
+- The [property prediction module](https://smact.readthedocs.io/en/latest/smact.property_prediction.html) enables composition-to-property prediction using pretrained deep learning models, including a ROOST-based band gap predictor trained on the Materials Project database.
+
 - The code also has tools for manipulating common crystal lattice types:
   - Certain structure types can be built using the [builder module](https://smact.readthedocs.io/en/latest/smact.builder.html)
   - Lattice parameters can be estimated using ionic radii of the elements for various common crystal structure types using the [lattice_parameters module](https://smact.readthedocs.io/en/latest/smact.lattice_parameters.html).
   - The [lattice module](https://smact.readthedocs.io/en/latest/smact.lattice.html) and [distorter module](https://smact.readthedocs.io/en/latest/smact.distorter.html) rely on the [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase/) and can be used to generate unique atomic substitutions on a given crystal structure.
   - The [structure prediction](https://smact.readthedocs.io/en/latest/smact.structure_prediction.html) module can be used to predict the structure of hypothetical compositions using species similarity measures.
   - The [dopant prediction](https://smact.readthedocs.io/en/latest/smact.dopant_prediction.html) module can be used to facilitate high-throughput predictions of p-type and n-type dopants of multicomponent solids.
+
+## Package structure
+
+```mermaid
+graph TD
+    SMACT(["smact"])
+
+    SMACT --> core["Core modules"]
+    SMACT --> SP["structure_prediction"]
+    SMACT --> DP["dopant_prediction"]
+    SMACT --> PP["property_prediction"]
+    SMACT --> IO["io"]
+    SMACT --> UT["utils"]
+
+    core --> init["init.py — Element and Species classes, neutral_ratios"]
+    core --> dl["data_loader.py — loads elemental property data from disk"]
+    core --> sc["screening.py — smact_filter and smact_validity with ICSD 2024 oxidation states and mixed-valence support"]
+    core --> pr["properties.py — estimates band gap, electronegativity, and valence electron count"]
+    core --> ox["oxidation_states.py — data-driven likelihood of oxidation state combinations"]
+    core --> mt["metallicity.py — scores metallic character of compositions"]
+    core --> la["lattice.py — crystal site and lattice representation"]
+    core --> bu["builder.py — builds perovskite and wurtzite structures"]
+    core --> lp["lattice_parameters.py — estimates lattice parameters from ionic radii"]
+    core --> di["distorter.py — enumerates and substitutes inequivalent lattice sites"]
+
+    SP --> spst["structure.py — SmactStructure: lightweight structure with oxidation states"]
+    SP --> spdb["database.py — SQLite storage for predicted structures"]
+    SP --> spmu["mutation.py — cation substitution probabilities from lambda tables"]
+    SP --> sppd["prediction.py — StructurePredictor: ionic substitution-based structure prediction"]
+
+    DP --> doper["doper.py — Doper: high-throughput p-type and n-type dopant prediction"]
+
+    PP --> base["base_predictor.py — abstract BasePropertyPredictor and PredictionResult"]
+    PP --> roost["roost/ — RoostPropertyPredictor: pretrained ML band gap model"]
+    PP --> conv["convenience.py — predict_band_gap one-liner wrapper"]
+    PP --> reg["registry.py — model discovery and resolution"]
+
+    IO --> ee["elementembeddings.py — composition and species featurisation via ElementEmbeddings"]
+
+    UT --> comp["composition.py — formula parsing and composition utilities"]
+    UT --> uox["oxidation.py — ICSD24OxStatesFilter for oxidation state management"]
+    UT --> sp2["species.py — species string parsing utilities"]
+    UT --> cs["crystal_space/ — generate and download inorganic crystal chemical space"]
+```
 
 ## List of modules
 
@@ -75,8 +125,9 @@ Use cases are available in our [examples](https://smact.readthedocs.io/en/latest
     substituting on inequivalent sites of a sub-lattice.
   - **oxidation_states.py**: Used for predicting the likelihood of species coexisting in a compound based on a statistical model.
   - **structure_prediction**: A submodule which contains a collection of tools for facilitating crystal structure predictions via ionic substitutions
-  - **dopant_prediction**: A submodule which contains a collections of tools for predicting dopants.
-  - **utils.py** A collection of utility functions used throughout the codebase.
+  - **dopant_prediction**: A submodule which contains a collection of tools for predicting dopants.
+  - **property_prediction**: A submodule for composition-to-property prediction using pretrained deep learning models (e.g. ROOST band gap predictor).
+  - **utils**: A submodule containing utility functions for composition parsing, species handling, oxidation state filtering, and crystal space generation and download.
 
 ## Requirements
 
