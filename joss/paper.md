@@ -28,6 +28,9 @@ authors:
     affiliation: 4
   - name: Jiwoo Lee
     affiliation: 3
+  - name: Masahiro Negishi
+    orcid: 0009-0000-2003-0256
+    affiliation: 1
   - name: Panyalak Detrattanawichai
     orcid: 0000-0001-9606-5631
     affiliation: 1
@@ -59,7 +62,7 @@ affiliations:
     index: 5
   - name: Radical AI, New York, USA
     index: 6
-date: 29 March 2026
+date: 9 April 2026
 bibliography: paper.bib
 ---
 
@@ -101,7 +104,7 @@ Park et al. [@Park2025] used SMACT's screening and crystal space tools to map th
 
 # AI Usage Disclosure
 
-Generative AI tools (Claude, Anthropic) were used to assist with code modernisation tasks during the v4.0.0 development cycle, including type annotation additions, test migration, and documentation formatting. All AI-generated code was reviewed and validated by the authors. The first draft of this manuscript was prepared with AI assistance and reviewed by all co-authors.
+Generative AI tools (Claude, Anthropic) were used to assist with code modernisation tasks during the v4.0.0 development cycle. All AI-generated code was reviewed and validated by the authors.
 
 # Author Contributions
 
@@ -112,6 +115,7 @@ Generative AI tools (Claude, Anthropic) were used to assist with code modernisat
 [RN](https://github.com/ryannduma) implemented the property prediction subpackage, metallicity module, and screening performance optimisations.
 [KTB](https://github.com/keeeto) is an original author who continued contributing to the codebase.
 [JL](https://github.com/JiwooChloeLee) contributed the initial dopant prediction implementation and charge state comparison fixes.
+[MN](https://github.com/masahiro-negishi) updated and fixed all example and tutorial notebooks to work correctly with the current SMACT library.
 [PD](https://github.com/Panyalak) contributed to lattice parameter calculations.
 [AMG](https://github.com/utf) contributed to code quality and structure.
 [HP](https://github.com/hspark1212) contributed the crystal space visualisation tools and element data corrections.
