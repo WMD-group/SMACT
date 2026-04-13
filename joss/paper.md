@@ -125,6 +125,6 @@ Generative AI tools (Claude, Anthropic) were used to assist with code modernisat
 
 # Acknowledgements
 
-We acknowledge contributions from all members of the Materials Design Group at Imperial College London who have provided feedback, testing, and feature requests. We thank the JOSS editors and reviewers of the original 2019 paper. This work was supported by multiple funders over the years, including Engineering and Physical Sciences Research Council (UKRI), the Royal Society, the Leverhulme Trust, and the European Research Council. 
+We acknowledge contributions from all members of the Materials Design Group at Imperial College London who have provided feedback, testing, and feature requests. We thank the JOSS editors and reviewers of the original 2019 paper. This work was supported by multiple funders over the years, including Engineering and Physical Sciences Research Council (UKRI), the Royal Society, the Leverhulme Trust, and the European Research Council.
 
 # References
