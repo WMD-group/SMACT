@@ -14,7 +14,7 @@
 
 # SMACT
 
-**Semiconducting Materials from Analogy and Chemical Theory** (SMACT) is a collection of rapid screening and informatics tools that uses data about chemical elements.
+**Semiconducting Materials by Analogy and Chemical Theory** (SMACT) is a collection of rapid screening and informatics tools that uses data about chemical elements.
 
 - **Documentation:** <https://smact.readthedocs.io/en/latest/>
 - **Examples:** <https://smact.readthedocs.io/en/latest/examples.html>
@@ -51,12 +51,100 @@ Use cases are available in our [examples](https://smact.readthedocs.io/en/latest
 
 - Compositions can be converted for use in Pymatgen or for representation to machine learning algorithms ([see this example](https://smact.readthedocs.io/en/latest/tutorials/smact_generation_of_solar_oxides.html)) and the related [ElementEmbeddings](https://github.com/WMD-group/ElementEmbeddings) package.
 
+- Charge neutrality screening supports **mixed-valence compounds** via the `mixed_valence=True` flag in `smact_validity`, enabling correct handling of materials like Fe₃O₄ and Mn₃O₄.
+
+- Oxidation state data is sourced from **ICSD 2024**, providing an updated and stricter set of experimentally observed oxidation states per element.
+
+- The [property prediction module](https://smact.readthedocs.io/en/latest/smact.property_prediction.html) enables composition-to-property prediction using pretrained deep learning models, including a ROOST-based band gap predictor trained on the Materials Project database.
+
 - The code also has tools for manipulating common crystal lattice types:
   - Certain structure types can be built using the [builder module](https://smact.readthedocs.io/en/latest/smact.builder.html)
   - Lattice parameters can be estimated using ionic radii of the elements for various common crystal structure types using the [lattice_parameters module](https://smact.readthedocs.io/en/latest/smact.lattice_parameters.html).
   - The [lattice module](https://smact.readthedocs.io/en/latest/smact.lattice.html) and [distorter module](https://smact.readthedocs.io/en/latest/smact.distorter.html) rely on the [Atomic Simulation Environment](https://wiki.fysik.dtu.dk/ase/) and can be used to generate unique atomic substitutions on a given crystal structure.
   - The [structure prediction](https://smact.readthedocs.io/en/latest/smact.structure_prediction.html) module can be used to predict the structure of hypothetical compositions using species similarity measures.
   - The [dopant prediction](https://smact.readthedocs.io/en/latest/smact.dopant_prediction.html) module can be used to facilitate high-throughput predictions of p-type and n-type dopants of multicomponent solids.
+
+## Package structure
+
+**Legend:** 🟢 new in v4 — 🟡 improved in v4
+
+```mermaid
+graph TD
+    classDef new fill:#c8e6c9,stroke:#388e3c,color:#000
+    classDef improved fill:#fff9c4,stroke:#f9a825,color:#000
+
+    SMACT(["smact"])
+
+    SMACT --> core["Core modules"]
+    SMACT --> SP["structure_prediction"]
+    SMACT --> DP["dopant_prediction"]
+    SMACT --> PP["🟢 property_prediction"]
+    SMACT --> IO["🟢 io"]
+    SMACT --> UT["utils"]
+
+    core --> init["init.py — Element, Species, neutral_ratios"]
+    core --> dl["data_loader.py — elemental and oxidation state data loading"]
+    core --> sc["🟡 screening.py — compositional screening"]
+    core --> pr["properties.py — band gap, electronegativity, valence electron count"]
+    core --> ox["oxidation_states.py — oxidation state combination likelihood"]
+    core --> mt["metallicity.py — metallic character scoring"]
+    core --> la["lattice.py — Site and Lattice representations"]
+    core --> bld["🟡 builder.py — perovskite and wurtzite structure builders"]
+    core --> lp["🟡 lattice_parameters.py — lattice parameter estimation from ionic radii"]
+    core --> di["distorter.py — inequivalent site enumeration and substitution"]
+
+    sc --> sc1["smact_validity — charge neutrality and Pauling electronegativity test"]
+    sc --> sc2["smact_filter — compositional search space generation"]
+    sc --> sc3["🟢 mixed_valence flag — correct handling of Fe3O4, Mn3O4"]
+    sc --> sc4["🟢 ICSD 2024 oxidation states — stricter, updated elemental data"]
+
+    bld --> bld1["cubic_perovskite — parameterized oxidation state tiling"]
+    bld --> bld2["wurtzite — corrected default cell parameters"]
+
+    lp --> lp1["corrected geometric formulae for all structure types"]
+
+    SP --> spst["structure.py — SmactStructure"]
+    SP --> spdb["database.py — StructureDB SQLite interface"]
+    SP --> spmu["mutation.py — CationMutator from lambda tables"]
+    SP --> sppd["🟡 prediction.py — StructurePredictor"]
+
+    spst --> spst1["from_file, from_mp, from_pymatgen constructors"]
+    sppd --> sppd1["ionic substitution-based crystal structure prediction"]
+    sppd --> sppd2["🟢 updated to mp_api.client.MPRester interface"]
+
+    DP --> doper["🟡 doper.py — Doper"]
+    doper --> doper1["get_dopants — p-type and n-type candidates"]
+    doper --> doper2["🟢 DopantCandidate dataclass — structured prediction output"]
+    doper --> doper3["plot_dopants — periodic table heatmap visualisation"]
+
+    PP --> base["base_predictor.py — BasePropertyPredictor, PredictionResult"]
+    PP --> roost["roost/ — RoostPropertyPredictor"]
+    PP --> conv["convenience.py — predict_band_gap"]
+    PP --> reg["registry.py — model discovery and resolution"]
+
+    roost --> roost1["pretrained ROOST model for band gap prediction"]
+    roost --> roost2["uncertainty estimates alongside predictions"]
+    roost --> roost3["trained on Materials Project 2024 database"]
+    base --> base1["PredictionResult — value, uncertainty, metadata"]
+
+    IO --> ee["🟢 elementembeddings.py — ElementEmbeddings interface"]
+    ee --> ee1["composition_featuriser — composition-level feature vectors"]
+    ee --> ee2["species_featuriser — species-level feature vectors"]
+
+    UT --> comp["composition.py — parse_formula, comp_maker, formula_maker"]
+    UT --> uox["🟢 oxidation.py — ICSD24OxStatesFilter"]
+    UT --> sp2["species.py — parse_spec, unparse_spec"]
+    UT --> cs["crystal_space/"]
+
+    uox --> uox1["consensus and commonality-based filtering of oxidation states"]
+    cs --> cs1["generate_composition_with_smact.py — SMACT-based composition generation"]
+    cs --> cs2["download_compounds_with_mp_api.py — Materials Project bulk download"]
+    cs --> cs3["plot_embedding.py — crystal space visualisation"]
+
+    class PP,IO new
+    class sc,bld,lp,sppd,doper,uox improved
+    class sc3,sc4,sppd2,doper2,ee,uox new
+```
 
 ## List of modules
 
@@ -75,8 +163,9 @@ Use cases are available in our [examples](https://smact.readthedocs.io/en/latest
     substituting on inequivalent sites of a sub-lattice.
   - **oxidation_states.py**: Used for predicting the likelihood of species coexisting in a compound based on a statistical model.
   - **structure_prediction**: A submodule which contains a collection of tools for facilitating crystal structure predictions via ionic substitutions
-  - **dopant_prediction**: A submodule which contains a collections of tools for predicting dopants.
-  - **utils.py** A collection of utility functions used throughout the codebase.
+  - **dopant_prediction**: A submodule which contains a collection of tools for predicting dopants.
+  - **property_prediction**: A submodule for composition-to-property prediction using pretrained deep learning models (e.g. ROOST band gap predictor).
+  - **utils**: A submodule containing utility functions for composition parsing, species handling, oxidation state filtering, and crystal space generation and download.
 
 ## Requirements
 
@@ -87,24 +176,32 @@ Core dependencies include NumPy, SciPy, pandas, [pymatgen](https://pymatgen.org)
 
 The latest stable release can be installed via pip:
 
-    pip install smact
+```bash
+pip install smact
+```
 
 Optional dependencies (needed for full replication of examples and tutorials):
 
-    pip install "smact[optional]"
+```bash
+pip install "smact[optional]"
+```
 
 SMACT is also available via conda-forge:
 
-    conda install -c conda-forge smact
+```bash
+conda install -c conda-forge smact
+```
 
 ### Developer installation
 
 We use [uv](https://docs.astral.sh/uv/) for dependency management. To set up a development environment:
 
-    git clone https://github.com/wmd-group/smact.git
-    cd smact
-    uv sync --extra optional --extra property_prediction --dev
-    pre-commit install
+```bash
+git clone https://github.com/wmd-group/smact.git
+cd smact
+uv sync --extra optional --extra property_prediction --dev
+pre-commit install
+```
 
 This installs SMACT in editable mode with all optional and development dependencies, and sets up pre-commit hooks. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
 
@@ -133,11 +230,15 @@ We use [GitHub Actions](https://github.com/features/actions) for CI. Tests shoul
 
 Run the tests locally:
 
-    make test
+```bash
+make test
+```
 
 Or to run the full CI pipeline (pre-commit hooks and tests):
 
-    make ci-local
+```bash
+make ci-local
+```
 
 ## References
 
