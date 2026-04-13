@@ -117,7 +117,7 @@ Generative AI tools (Claude, Anthropic) were used to assist with code modernisat
 [JL](https://github.com/JiwooChloeLee) contributed the initial dopant prediction implementation and charge state comparison fixes.
 [MN](https://github.com/masahiro-negishi) updated and fixed all example and tutorial notebooks to work correctly with the current SMACT library.
 [PD](https://github.com/Panyalak) contributed to lattice parameter calculations.
-[AMG](https://github.com/utf) contributed to code quality and structure.
+[AMG](https://github.com/utf) contributed to the implementation of mixed-valence support during the AIchemy's SMACT hackathon.
 [HP](https://github.com/hspark1212) contributed the crystal space visualisation tools and element data corrections.
 [REAG](https://github.com/comprhys) fixed a screening bug related to electronegativity handling.
 [TL](https://github.com/lits19) contributed to code reorganisation and utility refactoring.
