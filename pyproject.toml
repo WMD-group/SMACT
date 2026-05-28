@@ -40,7 +40,7 @@ keywords = [
 dependencies = [
     "ase",
     "numpy<3",
-    "pandarallel[optional]>=1.6.5",
+    "pandarallel>=1.6.5",
     "pandas",
     "pathos",
     "pymatgen>=2024.2.20",
