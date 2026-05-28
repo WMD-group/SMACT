@@ -80,7 +80,14 @@ class Element:
         Element.SSEPauling (float) : SSE based on regression fit with Pauling electronegativity
 
         Element.oxidation_states (list) : Default list of allowed oxidation
-            states for use in SMACT. In >3.0, these are the ICSD24 set.
+            states for use in SMACT. In >3.0, these are the ICSD24 set,
+            loaded from the static ``oxidation_states_icsd24_filtered.txt``
+            file (species with >5 reports in ICSD 2024). This is a stricter
+            cut-off than the ``consensus=3`` default applied dynamically by
+            :class:`smact.screening.ICSD24FilterConfig` in ``smact_validity``;
+            the two paths can therefore return different lists for the same
+            element. For a configurable threshold use
+            :class:`smact.utils.oxidation.ICSD24OxStatesFilter`.
             In <3.0, these are the SMACT14 set.
 
         Element.oxidation_states_smact14 (list): Original list of oxidation

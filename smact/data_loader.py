@@ -197,7 +197,14 @@ def lookup_element_oxidation_states_icsd24(symbol: str, copy: bool = True) -> li
     Retrieve a list of known oxidation states for an element.
 
     The oxidation states list used contains only those found
-    in the 2024 version of the ICSD (with ≥5 reports).
+    in the 2024 version of the ICSD (with >5 reports, i.e. ≥6).
+
+    Note: this static list applies a stricter ``>5 reports`` cut-off
+    than the default ``consensus=3`` used by
+    :class:`smact.screening.ICSD24FilterConfig`. Use the
+    :class:`smact.utils.oxidation.ICSD24OxStatesFilter` or pass a custom
+    ``ICSD24FilterConfig`` to ``smact_validity`` if you need a different
+    threshold.
 
     Args:
         symbol (str): the atomic symbol of the element to look up.

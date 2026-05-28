@@ -47,12 +47,15 @@ class ICSD24FilterConfig:
         consensus: Minimum number of literature occurrences for
             an ion to be considered valid. Default is 3.
         commonality: Excludes species below a certain proportion
-            of appearances. "low", "medium", "high", "main", or a float/int threshold.
+            of appearances. "low" (no proportion filter, default),
+            "medium" (>=10%), "high" (>=50%), "main" (top species per
+            element), or a float/int threshold. The default matches
+            :meth:`smact.utils.oxidation.ICSD24OxStatesFilter.filter`.
     """
 
     include_zero: bool = False
     consensus: int = 3
-    commonality: str | float = "medium"
+    commonality: str | float = "low"
 
 
 MIXED_VALENCE_ELEMENTS: frozenset[str] = frozenset(
@@ -602,7 +605,7 @@ def smact_validity(
             If specified it overrides the ICSD24 filter.
         icsd_filter (ICSD24FilterConfig): Configuration for ICSD24 oxidation
             state filtering. Only used when ``oxidation_states_set`` is None.
-            Defaults to ``ICSD24FilterConfig()`` (consensus=3, commonality="medium").
+            Defaults to ``ICSD24FilterConfig()`` (consensus=3, commonality="low").
         mixed_valence (bool): If True, allow mixed valence elements to be treated as separate species. Default is False.
 
     Returns:
