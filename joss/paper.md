@@ -50,17 +50,17 @@ authors:
     orcid: 0000-0001-5460-7033
     affiliation: 1
 affiliations:
-  - name: Department of Materials, Imperial College London, London, UK
+  - name: Department of Materials, Imperial College London, London, United Kingdom
     index: 1
-  - name: Department of Chemical Engineering, University College London, London, UK
+  - name: Department of Chemical Engineering, University College London, London, United Kingdom
     index: 2
   - name: Department of Materials Science and Engineering, Yonsei University, Seoul, South Korea
     index: 3
-  - name: Department of Chemistry, University College London, London, UK
+  - name: Department of Chemistry, University College London, London, United Kingdom
     index: 4
-  - name: Department of Chemistry, Imperial College London, London, UK
+  - name: Department of Chemistry, Imperial College London, London, United Kingdom
     index: 5
-  - name: Radical AI, New York, USA
+  - name: Radical AI, New York, United States of America
     index: 6
 date: 13 April 2026
 bibliography: paper.bib
@@ -98,7 +98,7 @@ SMACT v4 retains the `Element` and `Species` classes at its core, providing acce
 
 **Screening enhancements.** The core screening functions now support mixed-valence compositions, switchable oxidation state datasets, and consensus-based filtering.
 
-# Research Impact
+# Research Impact Statement
 
 SMACT has been employed in major materials discovery campaigns, including GNoME from Google DeepMind [@Merchant2023] and MatterGen from Microsoft Research [@Zeni2025]. Park et al. [@Park2025] used SMACT's screening and crystal space tools to map the landscape of inorganic crystal chemistry. Onwuli et al. [@Onwuli2024] employed SMACT's species representations for materials informatics, developing ionic embeddings that capture oxidation-state-dependent chemical behaviour. Park et al. [@Park2025synthesis] used SMACT in a workflow for closing the synthesis gap in computational materials design. Nduma et al. [@Nduma2025crystalyse] integrated SMACT into the Crystalyse multi-tool agent for autonomous materials design.
 
