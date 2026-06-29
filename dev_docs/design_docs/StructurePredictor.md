@@ -104,5 +104,6 @@ E.g.
 - target is a list, the target composition - this is generated rather than stored. After each generation
 - subs are keys, for the potential compositions to substitute into
 
-  Example of [[targetX],[subsNX],...] structure
+Example of `[[targetX],[subsNX],...]` structure:
+
 [[[Ba2+, O2-, F1-], ["Ca_2_2+O_1_2-F_2_1-", "Mg_2_2+O_1_2-F_2_1-"]]...]
