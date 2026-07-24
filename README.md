@@ -242,6 +242,9 @@ make ci-local
 
 ## References
 
+[K. O. Mastej et al.,
+"Chemical filters for ultra-high-throughput materials screening and generation" _arXiv_ (2026)](https://doi.org/10.48550/arXiv.2607.17910)
+
 [H. Park et al.,
 "Mapping inorganic crystal chemical space" _Faraday Discuss._ (2024)](https://pubs.rsc.org/en/content/articlelanding/2024/fd/d4fd00063c)
 
