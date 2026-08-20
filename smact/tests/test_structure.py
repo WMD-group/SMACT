@@ -11,6 +11,7 @@ import random
 from contextlib import contextmanager
 from importlib.util import find_spec
 from operator import itemgetter
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
@@ -27,11 +28,12 @@ from pymatgen.core import SETTINGS
 from pymatgen.core import Lattice as PmgLattice
 from pymatgen.core import Structure as PmgStructure
 
+import smact
 import smact.structure_prediction.structure as sp_struct
 from smact import Species
 from smact.structure_prediction import logger as sp_logger
 from smact.structure_prediction.database import StructureDB, parse_mprest
-from smact.structure_prediction.mutation import CationMutator
+from smact.structure_prediction.mutation import DEFAULT_LAMBDA_JSON, CationMutator
 from smact.structure_prediction.prediction import StructurePredictor
 from smact.structure_prediction.structure import SmactStructure
 
@@ -642,24 +644,37 @@ def test_parse_mprest_exception_path():
 # ---------------------------------------------------------------------------
 
 
+def require_pymatgen_sp(cation_mutator_data):
+    """Return pymatgen's SubstitutionProbability, skipping if its lambda table is absent."""
+    pymatgen_sp = cation_mutator_data["pymatgen_sp"]
+    if pymatgen_sp is None:
+        pytest.skip("pymatgen does not ship lambda.json in this version")
+    return pymatgen_sp
+
+
 @pytest.fixture(scope="module")
 def cation_mutator_data():
     test_struct = SmactStructure.from_file(TEST_POSCAR)
 
     test_mutator = CationMutator.from_json(lambda_json=TEST_LAMBDA_JSON)
-    test_pymatgen_mutator = CationMutator.from_json(lambda_json=None, alpha=lambda _x, _y: -5)
+    default_mutator = CationMutator.from_json(lambda_json=None, alpha=lambda _x, _y: -5)
 
     # 5 random test species -> 5! test pairs (seeded for determinism)
     rng = random.Random(42)
-    test_species = rng.sample(list(test_pymatgen_mutator.specs), 5)
+    test_species = rng.sample(list(default_mutator.specs), 5)
     test_pairs = list(itertools.combinations_with_replacement(test_species, 2))
 
-    pymatgen_sp = SubstitutionProbability(lambda_table=None, alpha=-5)
+    # pymatgen no longer ships lambda.json as package data; where it is absent
+    # the cross-implementation checks below are skipped rather than failing.
+    try:
+        pymatgen_sp = SubstitutionProbability(lambda_table=None, alpha=-5)
+    except FileNotFoundError:
+        pymatgen_sp = None
 
     return {
         "test_struct": test_struct,
         "test_mutator": test_mutator,
-        "test_pymatgen_mutator": test_pymatgen_mutator,
+        "default_mutator": default_mutator,
         "test_species": test_species,
         "test_pairs": test_pairs,
         "pymatgen_sp": pymatgen_sp,
@@ -690,9 +705,26 @@ def test_partition_func_Z(cation_mutator_data):
     assert pytest.approx(6.0308499) == test_mutator.Z
 
 
-def test_pymatgen_lambda_import(cation_mutator_data):
-    test_pymatgen_mutator = cation_mutator_data["test_pymatgen_mutator"]
-    assert isinstance(test_pymatgen_mutator.lambda_tab, pd.DataFrame)
+def test_default_lambda_import(cation_mutator_data):
+    default_mutator = cation_mutator_data["default_mutator"]
+    assert isinstance(default_mutator.lambda_tab, pd.DataFrame)
+    assert not default_mutator.lambda_tab.empty
+
+
+def test_default_lambda_is_bundled_with_smact():
+    """The default lambda table must ship with SMACT, not be read out of pymatgen.
+
+    pymatgen moved this file within its own package in 2026, which broke the previous
+    hard-coded lookup for anyone on a current pymatgen. See GH issue #643.
+    """
+    smact_data = Path(smact.__file__).parent / "data"
+    assert DEFAULT_LAMBDA_JSON.is_file(), f"{DEFAULT_LAMBDA_JSON} is missing from the installed package"
+    assert DEFAULT_LAMBDA_JSON.parent == smact_data
+
+    # A truncated or half-installed data file would still load, so check the shape.
+    mutator = CationMutator.from_json()
+    assert len(mutator.specs) == 230
+    assert "D1+" not in mutator.specs
 
 
 def test_lambda_interface(cation_mutator_data):
@@ -726,11 +758,11 @@ def test_ion_mutation(cation_mutator_data):
 
 
 def test_sub_prob(cation_mutator_data):
-    test_pymatgen_mutator = cation_mutator_data["test_pymatgen_mutator"]
+    default_mutator = cation_mutator_data["default_mutator"]
     test_pairs = cation_mutator_data["test_pairs"]
-    pymatgen_sp = cation_mutator_data["pymatgen_sp"]
+    pymatgen_sp = require_pymatgen_sp(cation_mutator_data)
     for s1, s2 in test_pairs:
-        assert pymatgen_sp.prob(s1, s2) == pytest.approx(test_pymatgen_mutator.sub_prob(s1, s2))
+        assert pymatgen_sp.prob(s1, s2) == pytest.approx(default_mutator.sub_prob(s1, s2))
 
 
 def test_cond_sub_probs(cation_mutator_data):
@@ -748,19 +780,19 @@ def test_cond_sub_probs(cation_mutator_data):
 
 
 def test_cond_sub_prob(cation_mutator_data):
-    test_pymatgen_mutator = cation_mutator_data["test_pymatgen_mutator"]
+    default_mutator = cation_mutator_data["default_mutator"]
     test_pairs = cation_mutator_data["test_pairs"]
-    pymatgen_sp = cation_mutator_data["pymatgen_sp"]
+    pymatgen_sp = require_pymatgen_sp(cation_mutator_data)
     for s1, s2 in test_pairs:
-        assert pymatgen_sp.cond_prob(s1, s2) == pytest.approx(test_pymatgen_mutator.cond_sub_prob(s1, s2))
+        assert pymatgen_sp.cond_prob(s1, s2) == pytest.approx(default_mutator.cond_sub_prob(s1, s2))
 
 
 def test_pair_corr(cation_mutator_data):
-    test_pymatgen_mutator = cation_mutator_data["test_pymatgen_mutator"]
+    default_mutator = cation_mutator_data["default_mutator"]
     test_pairs = cation_mutator_data["test_pairs"]
-    pymatgen_sp = cation_mutator_data["pymatgen_sp"]
+    pymatgen_sp = require_pymatgen_sp(cation_mutator_data)
     for s1, s2 in test_pairs:
-        assert pymatgen_sp.pair_corr(s1, s2) == pytest.approx(test_pymatgen_mutator.pair_corr(s1, s2))
+        assert pymatgen_sp.pair_corr(s1, s2) == pytest.approx(default_mutator.pair_corr(s1, s2))
 
 
 def test_from_df(cation_mutator_data):
@@ -915,11 +947,11 @@ def test_nary_mutate_structure_not_neutral():
 
 
 def test_unary_substitute(cation_mutator_data):
-    test_pymatgen_mutator = cation_mutator_data["test_pymatgen_mutator"]
+    default_mutator = cation_mutator_data["default_mutator"]
     ca_file = os.path.join(files_dir, "CaTiO3.txt")
     CaTiO3 = SmactStructure.from_file(ca_file)
-    # Use pymatgen mutator which has a full lambda table
-    results = list(test_pymatgen_mutator.unary_substitute(CaTiO3, thresh=1e-3))
+    # Use the default mutator, which has a full lambda table
+    results = list(default_mutator.unary_substitute(CaTiO3, thresh=1e-3))
     # Should yield at least some substitutions
     assert len(results) > 0
     for struct, prob, old_spec, new_spec in results:
@@ -943,7 +975,7 @@ def test_sub_probs(cation_mutator_data):
 @pytest.fixture(scope="module")
 def predictor_data():
     db = StructureDB(TEST_PREDICTOR_DB)
-    # NOTE: This may break if the pymatgen lambda table is updated
+    # NOTE: This may break if the bundled lambda table is updated
     cm = CationMutator.from_json()
     table = TEST_PREDICTOR_TABLE
     return {"db": db, "cm": cm, "table": table}

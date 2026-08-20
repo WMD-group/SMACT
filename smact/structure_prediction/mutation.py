@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
-import pymatgen.analysis.structure_prediction as pymatgen_sp
 
 from .utilities import parse_spec
 
@@ -19,6 +18,12 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Generator
 
     from .structure import SmactStructure
+
+# Lambda table of Hautier et al. (2011), copied verbatim from pymatgen (MIT licence).
+# This used to be read out of pymatgen's install directory, but that path is part of
+# pymatgen's internal layout, not its API: the file moved from analysis/ to core/ in
+# 2026 and the hard-coded lookup broke for anyone on a current pymatgen.
+DEFAULT_LAMBDA_JSON = Path(__file__).parent.parent / "data" / "lambda.json"
 
 
 class CationMutator:
@@ -79,7 +84,7 @@ class CationMutator:
                 and their associated lambda values.
                 Each entry is a list of [species1, species2, lambda].
                 If not supplied, defaults to the lambda table
-                included with pymatgen.
+                bundled with SMACT (see :data:`DEFAULT_LAMBDA_JSON`).
             alpha: See :meth:`__init__`.
 
         Returns:
@@ -91,10 +96,7 @@ class CationMutator:
             with Path(lambda_json).open() as f:
                 lambda_dat = json.load(f)
         else:
-            # Get pymatgen lambda table
-            py_sp_dir = Path(pymatgen_sp.__file__).parent
-            pymatgen_lambda = py_sp_dir / "data" / "lambda.json"
-            with pymatgen_lambda.open() as f:
+            with DEFAULT_LAMBDA_JSON.open() as f:
                 lambda_dat = json.load(f)
 
             # Get rid of 'D1+' values to reflect pymatgen
