@@ -661,7 +661,7 @@ def cation_mutator_data():
 
     # 5 random test species -> 5! test pairs (seeded for determinism)
     rng = random.Random(42)
-    test_species = rng.sample(list(default_mutator.specs), 5)
+    test_species = rng.sample(sorted(default_mutator.specs), 5)
     test_pairs = list(itertools.combinations_with_replacement(test_species, 2))
 
     # pymatgen no longer ships lambda.json as package data; where it is absent
