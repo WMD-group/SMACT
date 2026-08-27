@@ -6,13 +6,23 @@ on:
       - "v*"
   workflow_dispatch:
 
+# Read-only by default, matching ci.yml. The release job below overrides this with the
+# id-token permission that PyPI trusted publishing needs.
+permissions:
+  contents: read
+
 jobs:
   test:
     uses: ./.github/workflows/ci.yml
     secrets: inherit
 
+  # The suite above runs against the checkout, so it cannot tell whether the data files
+  # under smact/data would ship. Check the built artefact before publishing one.
+  packaging:
+    uses: ./.github/workflows/packaging.yml
+
   build:
-    needs: test
+    needs: [test, packaging]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
