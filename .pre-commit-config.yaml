@@ -72,6 +72,9 @@ repos:
     hooks:
       - id: prettier
         args: [--write] # edit files in-place
+        # smact/data/lambda.json is vendored verbatim from pymatgen so that its
+        # provenance (and checksum) can be verified against the upstream file.
+        exclude: ^smact/data/lambda\.json$
         additional_dependencies:
           - prettier
   - repo: https://github.com/kynan/nbstripout

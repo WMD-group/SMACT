@@ -53,6 +53,7 @@ REQUIRED_DATA_FILES = (
     "element_data.txt",
     "element_valence_modified.csv",
     "hhi.txt",
+    "lambda.json",
     "magpie.csv",
     "ordered_periodic.txt",
     "oxidation_state_probability_table.json",
@@ -138,6 +139,25 @@ def test_element_data_loads_from_the_installed_package():
     # None here would mean shannon_radii.csv shipped but held no rows for this species.
     assert fe2.average_ionic_radius is not None
     assert fe2.average_ionic_radius > 0
+
+
+def test_default_lambda_table_loads():
+    """The default lambda table must ship with SMACT, not be read out of pymatgen.
+
+    pymatgen moved this file within its own package in 2026, which broke SMACT's previous
+    hard-coded lookup into pymatgen's install directory for anyone on a current version.
+    See GH issue #643. Checking that the file exists is not enough: a truncated or
+    half-installed table would still satisfy is_file(), so load it and check its shape.
+    """
+    from smact.structure_prediction.mutation import DEFAULT_LAMBDA_JSON, CationMutator
+
+    # DEFAULT_LAMBDA_JSON is built from an unresolved __file__, DATA_DIR from a resolved
+    # one, so resolve before comparing (see the note on PACKAGE_DIR above).
+    assert DEFAULT_LAMBDA_JSON.resolve() == DATA_DIR / "lambda.json"
+
+    mutator = CationMutator.from_json()
+    assert len(mutator.specs) == 230
+    assert "D1+" not in mutator.specs
 
 
 def test_species_embedding_tables_load():
