@@ -69,7 +69,10 @@ class Doper:
     """
     A class to search for n & p type dopants.
 
-    Methods: get_dopants, plot_dopants.
+    Takes the host as a tuple of species strings, e.g. ``("Ti4+", "O2-")``; no structure
+    is required. See the module docstring for how candidates are filtered and ranked.
+
+    Methods: get_dopants, plot_dopants, to_table.
     """
 
     def __init__(
