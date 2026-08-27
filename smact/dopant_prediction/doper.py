@@ -1,11 +1,16 @@
 """The dopant prediction module facilitates high-throughput prediction of p-type and n-type dopants.
 
 Candidates are taken from the species covered by the substitution table and filtered on
-oxidation state: an n-type dopant must carry a more positive charge than the host ion it
-replaces, and a p-type dopant a more negative one. Surviving candidates are ranked by their
-substitution probability from the data-mined lambda table of Hautier et al. (2011), or by
-cosine similarity in a species embedding, and optionally by a selectivity score that weighs
-a dopant's affinity for one host site against its affinity for the others.
+oxidation state: an n-type dopant must carry a higher charge than the host ion it replaces
+and a p-type dopant a lower one, with the sign of the site preserved, so a cation site is
+only ever doped by another cation and an anion site by another anion. A p-type dopant is
+therefore not necessarily an anion; doping Ti4+ p-type offers 3+, 2+ and 1+ cations.
+
+Surviving candidates are scored by the substitution table, which holds data-mined lambda
+values after Hautier et al. (2011) or cosine similarities if a species embedding is
+supplied. By default the ranking combines that score with a selectivity term that compares
+a dopant's affinity for one host site against its affinity for the others; pass
+``get_selectivity=False`` to rank on the substitution score alone.
 
 No ionic-radius criterion is applied. The workflow takes a composition rather than a
 structure, and Shannon radii are defined per coordination number, which is not known until
