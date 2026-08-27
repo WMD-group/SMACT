@@ -8,9 +8,12 @@ therefore not necessarily an anion; doping Ti4+ p-type offers 3+, 2+ and 1+ cati
 
 Surviving candidates are scored by the substitution table, which holds data-mined lambda
 values after Hautier et al. (2011) or cosine similarities if a species embedding is
-supplied. By default the ranking combines that score with a selectivity term that compares
-a dopant's affinity for one host site against its affinity for the others; pass
-``get_selectivity=False`` to rank on the substitution score alone.
+supplied. By default the ranking combines that score with a selectivity term comparing
+a dopant's affinity for one host site against its affinity for the others. Selectivity is
+only calculated for substitutions on cation sites; anion substitutions take a fixed value
+of 1.0, so the selectivity term cannot discriminate between them and their ranking follows
+the substitution score alone. Pass ``get_selectivity=False`` to rank on the substitution
+score everywhere.
 
 No ionic-radius criterion is applied. The workflow takes a composition rather than a
 structure, and Shannon radii are defined per coordination number, which is not known until
