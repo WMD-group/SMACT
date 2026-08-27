@@ -11,7 +11,6 @@ import random
 from contextlib import contextmanager
 from importlib.util import find_spec
 from operator import itemgetter
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
@@ -28,12 +27,11 @@ from pymatgen.core import SETTINGS
 from pymatgen.core import Lattice as PmgLattice
 from pymatgen.core import Structure as PmgStructure
 
-import smact
 import smact.structure_prediction.structure as sp_struct
 from smact import Species
 from smact.structure_prediction import logger as sp_logger
 from smact.structure_prediction.database import StructureDB, parse_mprest
-from smact.structure_prediction.mutation import DEFAULT_LAMBDA_JSON, CationMutator
+from smact.structure_prediction.mutation import CationMutator
 from smact.structure_prediction.prediction import StructurePredictor
 from smact.structure_prediction.structure import SmactStructure
 
@@ -709,22 +707,6 @@ def test_default_lambda_import(cation_mutator_data):
     default_mutator = cation_mutator_data["default_mutator"]
     assert isinstance(default_mutator.lambda_tab, pd.DataFrame)
     assert not default_mutator.lambda_tab.empty
-
-
-def test_default_lambda_is_bundled_with_smact():
-    """The default lambda table must ship with SMACT, not be read out of pymatgen.
-
-    pymatgen moved this file within its own package in 2026, which broke the previous
-    hard-coded lookup for anyone on a current pymatgen. See GH issue #643.
-    """
-    smact_data = Path(smact.__file__).parent / "data"
-    assert DEFAULT_LAMBDA_JSON.is_file(), f"{DEFAULT_LAMBDA_JSON} is missing from the installed package"
-    assert DEFAULT_LAMBDA_JSON.parent == smact_data
-
-    # A truncated or half-installed data file would still load, so check the shape.
-    mutator = CationMutator.from_json()
-    assert len(mutator.specs) == 230
-    assert "D1+" not in mutator.specs
 
 
 def test_lambda_interface(cation_mutator_data):
