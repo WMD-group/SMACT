@@ -1,0 +1,50 @@
+name: Packaged data files
+
+# SMACT reads its reference data from files under smact/data, which reach users only if they
+# are declared in [tool.setuptools.package-data]. The "SMACT CI" test job installs the project
+# with `uv sync`, an editable install, so it resolves that data to the checkout and cannot tell
+# whether the files would ship. This workflow builds a wheel, installs it into a clean
+# environment and checks the packaged data there.
+#
+# Deliberately triggered by `pull_request` rather than `pull_request_target`: it needs no
+# secrets, and `pull_request` uses the workflow definition from the pull request itself, so
+# changes to this file are validated before they are merged.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  wheel:
+    name: Wheel contents
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install uv and set up Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Build the wheel
+        run: uv build --wheel --out-dir dist
+
+      - name: Install the wheel into a clean environment
+        run: |
+          uv venv --python 3.12 "$RUNNER_TEMP/wheel-env"
+          uv pip install --python "$RUNNER_TEMP/wheel-env/bin/python" dist/*.whl pytest
+
+      # Run from a directory that does not hold the source tree, so that `import smact`
+      # resolves to the installed wheel and not to the checkout.
+      - name: Check the packaged data files
+        working-directory: ${{ runner.temp }}
+        run: |
+          "$RUNNER_TEMP/wheel-env/bin/python" -m pytest --pyargs smact.tests.test_packaging -v
