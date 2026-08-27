@@ -1,7 +1,16 @@
 """The dopant prediction module facilitates high-throughput prediction of p-type and n-type dopants.
 
-The search and ranking process is based on electronic filters
-(e.g. accessible oxidation states) and chemical filters (e.g. difference in ionic radius).
+Candidates are taken from the species covered by the substitution table and filtered on
+oxidation state: an n-type dopant must carry a more positive charge than the host ion it
+replaces, and a p-type dopant a more negative one. Surviving candidates are ranked by their
+substitution probability from the data-mined lambda table of Hautier et al. (2011), or by
+cosine similarity in a species embedding, and optionally by a selectivity score that weighs
+a dopant's affinity for one host site against its affinity for the others.
+
+No ionic-radius criterion is applied. The workflow takes a composition rather than a
+structure, and Shannon radii are defined per coordination number, which is not known until
+a structure is. For radius-based dopant prediction on a known structure, see
+:func:`pymatgen.analysis.structure_prediction.dopant_predictor.get_dopants_from_shannon_radii`.
 """
 
 from __future__ import annotations
