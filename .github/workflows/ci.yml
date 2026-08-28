@@ -1,7 +1,13 @@
 name: SMACT CI
 
+# Triggered by `pull_request`, not `pull_request_target`. This workflow builds and runs
+# the code from the pull request, including installing its dependencies and executing its
+# pre-commit hooks, so it must not run with access to the base repository's secrets. Under
+# `pull_request` a fork's job gets no secrets and a read-only token, and the workflow
+# definition comes from the pull request, so changes to this file are validated before
+# they are merged. See also packaging.yml, which is triggered the same way.
 on:
-  pull_request_target:
+  pull_request:
   push:
     branches:
       - master
@@ -16,8 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Install uv and set up Python
         uses: astral-sh/setup-uv@v7
@@ -45,8 +49,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Install uv and set up Python ${{ matrix.python-version }}
         uses: astral-sh/setup-uv@v7
@@ -65,7 +67,11 @@ jobs:
         env:
           MP_API_KEY: ${{ secrets.MP_API_KEY }}
         run: uv run pytest --cov=smact --cov-report=xml -v
+      # CODECOV_TOKEN is not available to pull requests from forks, and the step below
+      # fails the job when an upload errors. Skip it there rather than showing a
+      # contributor a red build they cannot fix.
       - name: Upload coverage reports to CodeCov
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
