@@ -6,6 +6,8 @@ The dopant prediction module facilitates high-throughput prediction of p-type an
 #.
    :class:`~smact.dopant_prediction.doper.Doper`, A class to identify possible dopants. :meth:`~smact.dopant_prediction.doper.Doper.get_dopants` returns a dictionary keyed by "n-type cation substitutions", "p-type cation substitutions", "n-type anion substitutions" and "p-type anion substitutions".
 
+See :doc:`/examples/doper` for a worked example, covering the default lambda table, a species embedding and the table and heatmap outputs.
+
 
 Submodules
 ----------

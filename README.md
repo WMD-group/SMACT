@@ -114,7 +114,7 @@ graph TD
 
     DP --> doper["🟡 doper.py — Doper"]
     doper --> doper1["get_dopants — p-type and n-type candidates"]
-    doper --> doper2["🟢 DopantCandidate dataclass — structured prediction output"]
+    doper --> doper2["to_table — ranked candidates as a formatted table"]
     doper --> doper3["plot_dopants — periodic table heatmap visualisation"]
 
     PP --> base["base_predictor.py — BasePropertyPredictor, PredictionResult"]
@@ -143,7 +143,7 @@ graph TD
 
     class PP,IO new
     class sc,bld,lp,sppd,doper,uox improved
-    class sc3,sc4,sppd2,doper2,ee,uox new
+    class sc3,sc4,sppd2,ee,uox new
 ```
 
 ## List of modules

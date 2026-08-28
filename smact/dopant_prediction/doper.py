@@ -75,7 +75,7 @@ class Doper:
     Takes the host as a tuple of species strings, e.g. ``("Ti4+", "O2-")``; no structure
     is required. See the module docstring for how candidates are filtered and ranked.
 
-    Methods: get_dopants, plot_dopants, to_table.
+    Methods: get_dopants, plot_dopants. Properties: to_table.
     """
 
     def __init__(
