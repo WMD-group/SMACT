@@ -15,4 +15,5 @@ Tutorials are intended as a more complete example of `smact` being applied in re
    tutorials/structure_prediction
    tutorials/crystal_space
    tutorials/crystal_space_visualisation
+   tutorials/element_embeddings_integration
    tutorials/filtering_icsd_oxidation_states.ipynb
