@@ -292,7 +292,7 @@ def test_download_compounds_with_mp_api():
     save_mp_dir = "data/binary/mp_data"
     if MP_API_AVAILABLE:
         download_compounds_with_mp_api.download_mp_data(
-            mp_api_key=os.environ.get("MP_API_KEY"),
+            mp_api_key=os.environ.get("MP_API_KEY") or SETTINGS.get("PMG_MAPI_KEY"),
             num_elements=2,
             max_stoich=1,
             save_dir=save_mp_dir,
