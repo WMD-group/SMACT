@@ -12,8 +12,7 @@ supplied. By default the ranking combines that score with a selectivity term com
 a dopant's affinity for one host site against its affinity for the others. Selectivity is
 only calculated for substitutions on cation sites; anion substitutions take a fixed value
 of 1.0, so the selectivity term cannot discriminate between them and their ranking follows
-the substitution score alone. Pass ``get_selectivity=False`` to rank on the substitution
-score everywhere.
+that score alone. Pass ``get_selectivity=False`` to rank on that score everywhere.
 
 No ionic-radius criterion is applied. The workflow takes a composition rather than a
 structure, and Shannon radii are defined per coordination number, which is not known until
