@@ -61,7 +61,6 @@ class StructureDB:
     methods.
 
     Attributes:
-    ----------
         db: The database name.
         conn: The database connection. Only open when
             used as a context manager.
@@ -69,7 +68,6 @@ class StructureDB:
             when class implemented as context manager.
 
     Examples:
-    --------
         Connecting to a database in memory:
 
         >>> DB = StructureDB(":memory:")
@@ -89,7 +87,6 @@ class StructureDB:
         Set database name.
 
         Args:
-        ----
             db (str): The name of the database. Can also be ':memory:'
                 to connect to a database in RAM.
 
@@ -101,7 +98,6 @@ class StructureDB:
         Initialize database connection.
 
         Returns:
-        -------
             An SQLite cursor for interfacing with the database.
 
         """
@@ -136,13 +132,11 @@ class StructureDB:
         Add a table populated with Materials Project-hosted ICSD structures.
 
         Note:
-        ----
             This is very computationally expensive for large datasets
             and will not likely run on a laptop.
             If possible, download a pre-constructed database.
 
         Args:
-        ----
             table (str): The name of the table to add.
             mp_data: The Materials Project data to parse. If this is None, data
                 will be downloaded. Downloading data needs `mp_api_key` to be set.
@@ -150,7 +144,6 @@ class StructureDB:
                 is None.
 
         Returns:
-        -------
             The number of structs added.
 
         """
@@ -197,7 +190,6 @@ class StructureDB:
         Add a table to the database.
 
         Args:
-        ----
             table: The name of the table to add
 
         """
@@ -213,7 +205,6 @@ class StructureDB:
         Add a SmactStructure to a table.
 
         Args:
-        ----
             struct: The :class:`~.SmactStructure` to add.
             table: The name of the table to add the structure to.
 
@@ -234,7 +225,6 @@ class StructureDB:
         Add several SmactStructures to a table.
 
         Args:
-        ----
             structs: Iterable of :class:`~.SmactStructure` s to add to table.
             table: The name of the table to add the structs to.
             commit_after_each (bool, optional): Whether to commit the addition
@@ -245,7 +235,6 @@ class StructureDB:
                 Defaults to False.
 
         Returns:
-        -------
             The number of structures added.
 
         """
@@ -270,13 +259,11 @@ class StructureDB:
         Get SmactStructures for a given composition.
 
         Args:
-        ----
             composition: The composition to search for.
                 See :meth:`SmactStructure.composition`.
             table: The name of the table in which to search.
 
         Returns:
-        -------
             A list of :class:`~.SmactStructure` s.
 
         """
@@ -298,12 +285,10 @@ class StructureDB:
         Get SmactStructures containing given species.
 
         Args:
-        ----
             species: A list of species as tuples, in (element, charge) format.
             table: The name of the table from which to get the species.
 
         Returns:
-        -------
             A list of :class:`SmactStructure` s in the table that contain the species.
 
         """
@@ -341,7 +326,6 @@ def parse_mprest(
     Parse MPRester query data to generate structures.
 
     Args:
-    ----
         data: A dictionary containing the keys 'structure' and
             'material_id', with the associated values.
         determine_oxi (str): The method to determine the assignments oxidation states in the structure.
@@ -349,7 +333,6 @@ def parse_mprest(
                 ICSD statistics or trial both sequentially, respectively.
 
     Returns:
-    -------
         An oxidation-state-decorated :class:`SmactStructure`.
 
     """

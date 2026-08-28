@@ -39,11 +39,9 @@ def cubic_perovskite(
     The lattice parameters of the cubic perovskite structure.
 
     Args:
-    ----
         shannon_radius (list) : The radii of the A, B, X ions
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -70,11 +68,9 @@ def wurtzite(
     The lattice parameters of the wurtzite structure.
 
     Args:
-    ----
         shannon_radius (list) : The radii of the a,b ions
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -112,11 +108,9 @@ def fcc(
     The lattice parameters of the A1.
 
     Args:
-    ----
         covalent_radius (float) : The covalent radius
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -140,11 +134,9 @@ def bcc(
     The lattice parameters of the A2.
 
     Args:
-    ----
         covalent_radius (float) : The covalent radius
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -168,11 +160,9 @@ def hcp(
     The lattice parameters of the hcp.
 
     Args:
-    ----
         covalent_radius (float) : The covalent radius
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -196,11 +186,9 @@ def diamond(
     The lattice parameters of the diamond.
 
     Args:
-    ----
         covalent_radius (float) : The covalent radius
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -224,11 +212,9 @@ def bct(
     The lattice parameters of the bct.
 
     Args:
-    ----
         covalent_radius (float) : The covalent radius
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -252,11 +238,9 @@ def rocksalt(
     The lattice parameters of rocksalt.
 
     Args:
-    ----
         shannon_radius (list) : The radii of the a,b ions
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -288,11 +272,9 @@ def b2(
     The lattice parameters of b2.
 
     Args:
-    ----
         shannon_radius (list) : The radii of the a,b ions
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -323,11 +305,9 @@ def zincblende(
     The lattice parameters of Zinc Blende.
 
     Args:
-    ----
         shannon_radius (list) : The radii of the a,b ions
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -362,11 +342,9 @@ def b10(
     The lattice parameters of Litharge.
 
     Args:
-    ----
         shannon_radius (list) : The radii of the a,b ions
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)
@@ -393,11 +371,9 @@ def stuffed_wurtzite(
     The stuffed wurtzite structure (e.g. LiGaGe) space group P63/mc.
 
     Args:
-    ----
         shannon_radii (list) : The radii of the a,b,c ions
 
     Returns:
-    -------
        (tuple):
            float values of lattice constants and
            angles (a, b, c, alpha, beta, gamma)

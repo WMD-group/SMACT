@@ -70,7 +70,6 @@ def composition_featuriser(
     Wrapper around `composition_featuriser` in ElementEmbeddings.
 
     Args:
-    ----
         composition_data: Input compositions as a DataFrame, Series,
             CompositionalEmbedding, or list of formula strings.
         formula_column (str): Column name containing formulas if input
@@ -82,7 +81,6 @@ def composition_featuriser(
             Default is False.
 
     Returns:
-    -------
         pd.DataFrame: DataFrame containing the computed feature vectors.
     """
     if _ee_composition_featuriser is None:
@@ -113,7 +111,6 @@ def species_composition_featuriser(
     in the stats argument.
 
     Args:
-    ----
         composition_data: list[dict[str, float]]:
             a list of composition dictionaries
         embedding (Union[AllowedSpeciesEmbeddings, str], optional): An AllowedSpeciesEmbeddings class
@@ -124,7 +121,6 @@ def species_composition_featuriser(
             as a DataFrame. The default is False.
 
     Returns:
-    -------
         Union[pd.DataFrame,list]: A pandas DataFrame containing the feature vector,
         or a list of feature vectors is returned
     """

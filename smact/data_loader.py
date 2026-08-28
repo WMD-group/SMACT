@@ -237,11 +237,9 @@ def lookup_element_hhis(symbol: str) -> tuple[float, float] | None:
     Retrieve the HHI_R and HHI_p scores for an element.
 
     Args:
-    ----
         symbol : the atomic symbol of the element to look up.
 
     Returns:
-    -------
         tuple : (HHI_p, HHI_R)
 
             Return None if values for the elements were
@@ -292,7 +290,6 @@ def lookup_element_data(symbol: str, copy: bool = True) -> dict | None:
     atomic data.
 
     Args:
-    ----
         symbol (str) : Atomic symbol for lookup
         copy (bool) : if True (default), return a copy of the
             data dictionary, rather than a reference to the cached
@@ -301,7 +298,6 @@ def lookup_element_data(symbol: str, copy: bool = True) -> dict | None:
             modified!
 
     Returns:
-    -------
         dict: Dictionary of data for given element, keyed by column headings from data/element_data.txt.
 
     """
@@ -342,7 +338,6 @@ def lookup_element_shannon_radius_data(symbol: str, copy: bool = True) -> list[d
     environments of an element.
 
     Args:
-    ----
         symbol (str) : the atomic symbol of the element to look up.
 
         copy (Optional(bool)): if True (default), return a copy of the data
@@ -351,7 +346,6 @@ def lookup_element_shannon_radius_data(symbol: str, copy: bool = True) -> list[d
         you are certain the dictionary will not be modified!
 
     Returns:
-    -------
         list:
             Shannon radii datasets.
 
@@ -414,7 +408,6 @@ def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True
     arXiv preprint arXiv:2101.00269.
 
     Args:
-    ----
         symbol (str) : the atomic symbol of the element to look up.
 
         copy (Optional(bool)): if True (default), return a copy of the data
@@ -423,7 +416,6 @@ def lookup_element_shannon_radius_data_extendedML(symbol: str, copy: bool = True
         you are certain the dictionary will not be modified!
 
     Returns:
-    -------
         list:
             Extended Shannon radii datasets.
 
@@ -476,11 +468,9 @@ def lookup_element_sse_data(symbol: str) -> dict | None:
     DOI: 10.1021/ja204670s
 
     Args:
-    ----
         symbol : the atomic symbol of the element to look up.
 
     Returns:
-    -------
         dict : SSE data for the element, or None
             if the element was not found among the external data.
 
@@ -534,7 +524,6 @@ def lookup_element_sse2015_data(symbol: str, copy: bool = True) -> list[dict] | 
     pp138-144, DOI: 10.1016/j.jssc.2015.07.037.
 
     Args:
-    ----
         symbol : the atomic symbol of the element to look up.
         copy: if True (default), return a copy of the data dictionary,
         rather than a reference to a cached object -- only use
@@ -542,7 +531,6 @@ def lookup_element_sse2015_data(symbol: str, copy: bool = True) -> list[dict] | 
         certain the dictionary will not be modified!
 
     Returns:
-    -------
         list : SSE datasets for the element, or None
             if the element was not found among the external data.
 
@@ -581,14 +569,13 @@ def lookup_element_sse_pauling_data(symbol: str, copy: bool = True) -> dict | No
     pp138-144, DOI: 10.1016/j.jssc.2015.07.037
 
     Args:
-    ----
-    symbol (str) : the atomic symbol of the element to look up.
-    copy (bool) : if True (default), return a copy of the data dictionary,
-        rather than a reference to the cached object.
+        symbol (str) : the atomic symbol of the element to look up.
+        copy (bool) : if True (default), return a copy of the data dictionary,
+            rather than a reference to the cached object.
 
-    Returns: A dictionary containing the SSE2015 dataset for the
-        element, or None if the element was not found among the external
-        data.
+    Returns:
+        A dictionary containing the SSE2015 dataset for the element, or None
+        if the element was not found among the external data.
 
     """
     data = _load_sse_pauling_data()

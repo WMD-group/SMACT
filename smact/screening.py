@@ -181,7 +181,6 @@ def pauling_test(
         (i.e. positive ions should be of lower electronegativity).
 
     Args:
-    ----
         oxidation_states (list):  oxidation states of elements in the compound
         electronegativities (list): the corresponding  Pauling electronegativities
             of the elements in the compound
@@ -193,7 +192,6 @@ def pauling_test(
         repeat_cations : as above, but for cations
 
     Returns:
-    -------
         bool:
             True if anions are more electronegative than
             cations, otherwise False
@@ -232,7 +230,6 @@ def _no_repeats(
     Check if any anion or cation appears twice.
 
     Args:
-    ----
         oxidation_states (list): oxidation states of species
         symbols (list): chemical symbols corresponding to oxidation
             states
@@ -242,7 +239,6 @@ def _no_repeats(
             Cu in +1 and +2 states)
 
     Returns:
-    -------
         bool: True if no anion or cation is repeated, False otherwise
     """
     if repeat_anions is False and repeat_cations is False:
@@ -269,14 +265,12 @@ def eneg_states_test(ox_states: Sequence[int], enegs: Sequence[float | None]) ->
     this method and alternatives.
 
     Args:
-    ----
         ox_states (list): oxidation states corresponding to species
             in compound
         enegs (list): Electronegativities corresponding to species in
             compound
 
     Returns:
-    -------
         bool : True if anions are more electronegative than
                cations, otherwise False
 
@@ -305,7 +299,6 @@ def eneg_states_test_threshold(ox_states: Sequence[int], enegs: Sequence[float |
     relaxed somewhat.
 
     Args:
-    ----
         ox_states (list): oxidation states corresponding to species
             in compound
         enegs (list): Electronegativities corresponding to species in
@@ -314,7 +307,6 @@ def eneg_states_test_threshold(ox_states: Sequence[int], enegs: Sequence[float |
             the Pauling criterion
 
     Returns:
-    -------
         bool : True if anions are more electronegative than
                cations, otherwise False
 
@@ -347,12 +339,10 @@ def ml_rep_generator(
     Inspired by the representation used by Legrain et al. DOI: 10.1021/acs.chemmater.7b00789
 
     Args:
-    ----
         composition (list): Element objects in composition OR symbols of elements in composition
         stoichs (list): Corresponding stoichiometries in the composition
 
     Returns:
-    -------
         norm (list): List of floats representing the composition that sum
             to one
 
@@ -404,7 +394,6 @@ def smact_filter(
         function will be set to use a new default oxidation states set.
 
     Args:
-    ----
         els (tuple/list): A list of smact.Element objects.
         threshold (int): Threshold for stoichiometry limit, default = 8.
         stoichs (list[list[int]]): A selection of valid stoichiometric
@@ -425,7 +414,6 @@ def smact_filter(
             returns a list of dictionaries.
 
     Returns:
-    -------
         allowed_comps (list): Allowed compositions for that chemical system
         in the form [(elements), (oxidation states), (ratios)] if species_unique=True and tuple=False
         or in the form [(elements), (ratios)] if species_unique=False and tuple=False.

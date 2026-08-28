@@ -7,7 +7,6 @@ lambda tables. An example of such an extension,
 :class:`RadiusModel`, is also implemented.
 
 Todo:
-----
     * Allow for parallelism in lambda table calculations
       by implementing a `sub_probs` abstractmethod
       that :meth:`SubstitutionModel.gen_lambda` uses,
@@ -38,12 +37,10 @@ class SubstitutionModel(abc.ABC):
         Calculate the probability of substituting species s1 for s2.
 
         Args:
-        ----
             s1: The species being substituted.
             s2: The species substituting.
 
         Returns:
-        -------
             The probability of substitution.
 
         """
@@ -53,11 +50,9 @@ class SubstitutionModel(abc.ABC):
         Generate a lambda table for a list of species.
 
         Args:
-        ----
             species: A list of species strings.
 
         Returns:
-        -------
             A pivot table-style DataFrame containing lambda values
             for every possible species pair.
 
@@ -107,12 +102,10 @@ class RadiusModel(SubstitutionModel):
             p = 1 - k \Delta r^2.
 
         Args:
-        ----
             s1: The species being substituted.
             s2: The species substituting.
 
         Returns:
-        -------
             The probability of substitution.
 
         """

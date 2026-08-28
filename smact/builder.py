@@ -37,7 +37,6 @@ def cubic_perovskite(
     Build a perovskite cell using the crystal function in ASE.
 
     Args:
-    ----
         species (list[str]): Element symbols
         cell_par (list): Six floats/ints specifying 3 unit cell lengths and 3 unit cell angles.
         repetitions (list): Three integers specifying the expansion of the cell in x,y,z directions.
@@ -45,7 +44,6 @@ def cubic_perovskite(
             Defaults to ``[[2], [4], [-2], [-2], [-2]]`` for the standard ABX3 perovskite.
 
     Returns:
-    -------
         SMACT Lattice object of the unit cell,
         ASE crystal system of the unit cell.
 
@@ -80,7 +78,6 @@ def wurtzite(
     Build a wurtzite cell using the crystal function in ASE.
 
     Args:
-    ----
         species (list[str]): Element symbols
         cell_par (list): Six floats/ints specifying 3 unit cell lengths and 3 unit cell angles.
         repetitions (list): Three integers specifying the expansion of the cell in x,y,z directions.
@@ -88,7 +85,6 @@ def wurtzite(
             Defaults to ``[[2], [2], [-2], [-2]]`` for the standard AX wurtzite.
 
     Returns:
-    -------
         SMACT Lattice object of the unit cell,
         ASE crystal system of the unit cell.
 

@@ -56,7 +56,6 @@ class Element:
     "Species" class.
 
     Attributes:
-    ----------
         Element.symbol (string) : Elemental symbol used to retrieve data
 
         Element.name (string) : Full name of element
@@ -133,7 +132,6 @@ class Element:
 
 
     Raises:
-    ------
         KeyError: Element not found in element.txt
 
     """
@@ -174,7 +172,6 @@ class Element:
         Initialise Element class.
 
         Args:
-        ----
             symbol (str): Chemical element symbol (e.g. 'Fe')
             oxi_states_custom_filepath (str): Path to custom oxidation states file
 
@@ -309,7 +306,6 @@ class Species(Element):
     Physical Review Materials, 5(4), p.043804.
 
     Attributes:
-    ----------
         Species.symbol: Elemental symbol used to retrieve data
 
         Species.name: Full name of element
@@ -340,7 +336,6 @@ class Species(Element):
             environments.
 
     Raises:
-    ------
         KeyError: Element not found in element.txt
 
     """
@@ -356,7 +351,6 @@ class Species(Element):
         Initialise Species class.
 
         Args:
-        ----
         symbol (str): Chemical element symbol (e.g. 'Fe')
         oxidation (int): Oxidation state of species
         coordination (int): Coordination number of species
@@ -440,14 +434,12 @@ def element_dictionary(
     repeatedly initialising them on-demand within nested loops.
 
     Args:
-    ----
         elements (iterable of strings) : Elements to include. If None,
             use all elements up to 103.
         oxi_states_custom_filepath (str): Path to custom oxidation states file
 
 
     Returns:
-    -------
         dict: Dictionary with element symbols as keys and smact.Element
             objects as data
 
@@ -509,7 +501,6 @@ def _isneutral(oxidations: Sequence[int], stoichs: Sequence[int]) -> bool:
     Check if set of oxidation states is neutral in given stoichiometry.
 
     Args:
-    ----
         oxidations (tuple): Oxidation states of a set of oxidised elements
         stoichs (tuple): Stoichiometry values corresponding to `oxidations`
 
@@ -531,13 +522,11 @@ def neutral_ratios_iter(
     otherwise all unique ratios are tried up to a threshold coefficient.
 
     Args:
-    ----
         oxidations : list of integers
         stoichs : stoichiometric ratios for each site (if provided)
         threshold : single threshold to go up to if stoichs are not provided
 
     Returns:
-    -------
         filter: Iterator of tuples; each tuple is a ratio that gives neutrality
 
     """
@@ -571,7 +560,6 @@ def neutral_ratios(
     otherwise all unique ratios are tried up to a threshold coefficient.
 
     Args:
-    ----
         oxidations (list of ints): Oxidation state of each site
         stoichs (list of positive ints): A selection of valid stoichiometric
             ratios for each site
@@ -580,7 +568,6 @@ def neutral_ratios(
             to this value will be tried.
 
     Returns:
-    -------
         list of tuples: Ratios of atoms in given oxidation states which yield
             a charge-neutral structure. Empty list if no ratios exist.
 

@@ -48,7 +48,6 @@ class OxidationStateProbabilityFinder:
         Initialise the oxidation state probability finder.
 
         Args:
-        ----
             probability_table (dict): Lookup table to get probabilities for anion-cation pairs.
                 Must be of the format {(anion,cation): probability, ...} e.g. {('F-1', 'Li1'): 1.0,...}.
                 If none, the default table is loaded from the data directory.
@@ -77,12 +76,10 @@ class OxidationStateProbabilityFinder:
         Internal function to generate keys to lookup table.
 
         Args:
-        ----
             species1 (smact.Species): Species
             species2 (smact.Species): Species
 
         Returns:
-        -------
             table_key (tuple): For looking up probability in the form (an_key, cat_key).
 
         """
@@ -115,12 +112,10 @@ class OxidationStateProbabilityFinder:
         i.e. :math:`P_{SA}=\\frac{N_{SX}}{N_{MX}}` in the original paper (DOI:10.1039/C8FD00032H).
 
         Args:
-        ----
             species1 (smact.Species): Cation or anion species
             species2 (smact.Species): Cation or anion species
 
         Returns:
-        -------
             prob (float): Species-anion probability
 
         """
@@ -137,14 +132,12 @@ class OxidationStateProbabilityFinder:
         Calculate overall probability for structure or composition.
 
         Args:
-        ----
             structure (pymatgen.Structure): Compound for which the probability score will be generated.
                 Can also be a list of pymatgen or SMACT Species.
             ignore_stoichiometry (bool): Whether to weight probabilities by stoichiometry.
                 Defaults to True (i.e. stoichiometry is ignored).
 
         Returns:
-        -------
             compound_prob (float): Compound probability
 
         """

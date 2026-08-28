@@ -59,7 +59,6 @@ class SmactStructure:
     from the `Materials Project <https://www.materialsproject.org>`_.
 
     Attributes:
-    ----------
         species: A list of tuples describing the composition of the structure,
             stored as (element, oxidation, stoichiometry). The list is sorted
             alphabetically based on element symbol, and identical elements
@@ -89,7 +88,6 @@ class SmactStructure:
         Initialize structure with constituent species.
 
         Args:
-        ----
             species: See :class:`~.SmactStructure`. May be supplied as either a list of
                 (element, oxidation, stoichiometry) or (:class:`~smact.Species`, stoichiometry).
             lattice_mat: See :class:`~.SmactStructure`.
@@ -128,7 +126,6 @@ class SmactStructure:
         :attr:`~.sites` must all be equal for the comparison to be True.
 
         Note:
-        ----
             For the SmactStructures to be equal their attributes must be
             *identical*. For example, it is insufficient that the two
             structures have the same space group or the same species;
@@ -200,16 +197,13 @@ class SmactStructure:
         Sanitise and format a list of species.
 
         Args:
-        ----
             species: See :meth:`~.__init__`.
 
         Returns:
-        -------
             sanit_species: Sanity-checked species in the format of
             a list of (element, oxidation, stoichiometry).
 
         Raises:
-        ------
             TypeError: species contains the wrong types.
             ValueError: species is either empty or contains tuples of
                 incorrect length.
@@ -258,11 +252,9 @@ class SmactStructure:
         Parse the sites of a pymatgen Structure.
 
         Args:
-        ----
             structure: A :class:`pmg_Structure` instance.
 
         Returns:
-        -------
             sites (dict): In which a key is a species string
                 and its corresponding value is a list of the coordinates
                 that species occupies in the supercell. The coordinates
@@ -389,14 +381,12 @@ class SmactStructure:
         Create a SmactStructure from a pymatgen Structure object.
 
         Args:
-        ----
             structure: A pymatgen Structure.
             determine_oxi (str): The method to determine the assignments oxidation states in the structure.
                 Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence,
                 ICSD statistics or trial both sequentially, respectively.
 
         Returns:
-        -------
             :class:`~.SmactStructure`
 
         """
@@ -476,7 +466,6 @@ class SmactStructure:
         Create a SmactStructure using the first Materials Project entry for a composition.
 
         Args:
-        ----
             species: See :meth:`~.__init__`.
             determine_oxi (str): The method to determine the assignments
                 oxidation states in the structure. Options are 'BV',
@@ -486,7 +475,6 @@ class SmactStructure:
             api_key (str| None): A www.materialsproject.org API key.
 
         Returns:
-        -------
             :class:`~.SmactStructure`
 
         """
@@ -534,12 +522,10 @@ class SmactStructure:
         Create SmactStructure from a POSCAR file.
 
         Args:
-        ----
             fname: The name of the POSCAR file.
                 See :meth:`~.as_poscar` for format specification.
 
         Returns:
-        -------
             :class:`~.SmactStructure`
 
         """
@@ -552,12 +538,10 @@ class SmactStructure:
         Create SmactStructure from a POSCAR string.
 
         Args:
-        ----
             poscar: A SMACT-formatted POSCAR string.
                 See :meth:`~.as_poscar` for format specification.
 
         Returns:
-        -------
             :class:`~.SmactStructure`
 
         """
@@ -619,7 +603,6 @@ class SmactStructure:
         with each species separated by a given delimiter.
 
         Args:
-        ----
             template: Template string to format, using python's
                 curly brackets notation. Supported keywords are
                 `ele` for the elemental symbol, `stoic` for the
@@ -631,12 +614,10 @@ class SmactStructure:
                 of neutral species.
 
         Returns:
-        -------
             String of templates formatted for each species, separated
                 by `delim`.
 
         Examples:
-        --------
             >>> s = SmactStructure.from_file("tests/files/CaTiO3.txt")
             >>> template = "{stoic}x{ele}{charge}{sign}"
             >>> print(s._format_style(template))
@@ -670,15 +651,12 @@ class SmactStructure:
         Get the number of each element type in the compound, irrespective of oxidation state.
 
         Args:
-        ----
             species: See :meth:`~.__init__`.
 
         Returns:
-        -------
             eles: Dictionary of {element: stoichiometry}.
 
         Examples:
-        --------
             >>> species = [("Fe", 2, 1), ("Fe", 3, 2), ("O", -2, 4)]
             >>> print(SmactStructure._get_ele_stoics(species))
             {'Fe': 3, 'O': 4}
@@ -699,11 +677,9 @@ class SmactStructure:
         Get string representations of the constituent species.
 
         Returns:
-        -------
             A list of strings, formatted as '{element}{charge}{sign}'.
 
         Examples:
-        --------
             >>> s = SmactStructure.from_file("tests/files/CaTiO3.txt")
             >>> s.get_spec_strs()
             ['Ca2+', 'O2-', 'Ti4+']
@@ -720,11 +696,9 @@ class SmactStructure:
         the structure, see :class:`~.SmactStructure`.
 
         Returns:
-        -------
             Key describing constituent species.
 
         Examples:
-        --------
             >>> s = SmactStructure.from_file("tests/files/CaTiO3.txt")
             >>> print(s.composition())
             Ca_1_2+O_3_2-Ti_1_4+
@@ -753,7 +727,6 @@ class SmactStructure:
         For examples of this format, see the text files under tests/files.
 
         Returns:
-        -------
             str: POSCAR-style representation of the structure.
 
         """
@@ -783,7 +756,6 @@ class SmactStructure:
         Represent the structure as a pymatgen Structure object.
 
         Returns:
-        -------
             pmg_Structure: pymatgen Structure object.
 
         """
@@ -794,11 +766,9 @@ class SmactStructure:
         Generate a reduced formula for the structure.
 
         Returns:
-        -------
             str: Reduced formula of the structure.
 
         Examples:
-        --------
             >>> s = SmactStructure.from_file("tests/files/CaTiO3.txt")
             >>> print(s.reduced_formula())
             CaTiO3

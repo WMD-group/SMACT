@@ -73,11 +73,9 @@ def unparse_spec(species: tuple[str, int], include_one: bool = True) -> str:
 
 
     Returns:
-    -------
         String of {element}{absolute_charge}{sign}.
 
     Examples:
-    --------
         >>> unparse_spec(("Fe", 2))
         'Fe2+'
         >>> unparse_spec(("O", -2))
@@ -94,11 +92,9 @@ def get_sign(charge: int) -> str:
     Get string representation of a number's sign.
 
     Args:
-    ----
         charge (int): The number whose sign to derive.
 
     Returns:
-    -------
         sign (str): either '+', '-', or '' for neutral.
 
     """

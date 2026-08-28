@@ -89,7 +89,6 @@ class Doper:
         Initialise the `Doper` class with a tuple of species.
 
         Args:
-        ----
             original_species: See :class:`~.Doper`.
             filepath (str): Path to a JSON file containing lambda table data.
             embedding (str): Name of the species embedding to use. Currently only 'skipspecies' is supported.
@@ -182,12 +181,10 @@ class Doper:
         Get possible dopants for a given list of elements and dopants.
 
         Args:
-        ----
             specie_ions (List[str]): List of original species (anions or cations) as strings.
             ion_type (str): Identify which species to check.
 
         Returns:
-        -------
             List[str]: List of possible dopants.
 
         """
@@ -282,13 +279,11 @@ class Doper:
         Get the top n dopants for each case.
 
         Args:
-        ----
             num_dopants (int): The number of dopants to return.
             get_selectivity (bool): Whether to calculate the selectivity of the dopants.
             group_by_charge (bool): Whether to group the dopants by charge.
 
         Returns:
-        -------
             dict: A dictionary of the top n dopants for each case.
 
         """
@@ -349,13 +344,11 @@ class Doper:
         Plot the dopant suggestions using the periodic table heatmap.
 
         Args:
-        ----
             cmap (str): The colormap to use for the heatmap.
             plot_value (str): The value to plot on the heatmap.
                 Options are "probability", "similarity" or "selectivity".
 
         Returns:
-        -------
             None
 
         """
@@ -400,7 +393,6 @@ class Doper:
         Format the dopant suggestions as a table string.
 
         Returns:
-        -------
             str: Formatted table of dopant suggestions.
 
         """
