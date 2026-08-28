@@ -17,7 +17,6 @@ class Lattice:
     Environment.
 
     Attributes:
-    ----------
         sites: A list of Site objects [SiteA, SiteB, SiteC, ...]
         comprising the basis sites in Cartesian coordinates
 
@@ -43,7 +42,6 @@ class Site:
     The Site object is primarily used within Lattice objects.
 
     Attributes:
-    ----------
         position: A list of fractional coordinates [x,y,z]
         oxidation_states: A list of possible oxidation states e.g. [-1,0,1]
 

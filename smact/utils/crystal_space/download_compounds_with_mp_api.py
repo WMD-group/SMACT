@@ -33,7 +33,6 @@ def download_mp_data(
     The data is saved to a specified directory.
 
     Args:
-    ----
         mp_api_key (str, optional): the API key for Materials Project.
         num_elements (int, optional): the number of elements in each compound to consider.
             Defaults to 2.
@@ -45,7 +44,6 @@ def download_mp_data(
             Defaults to 1.
 
     Returns:
-    -------
         None
 
     """

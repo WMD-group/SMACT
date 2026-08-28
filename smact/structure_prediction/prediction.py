@@ -2,7 +2,6 @@
 Structure prediction implementation.
 
 Todo:
-----
     * Test with a fully populated database.
     * Implement n-ary substitution probabilities;
       at the moment, only zero- and single-species
@@ -51,7 +50,6 @@ class StructurePredictor:
         Initialize class.
 
         Args:
-        ----
             mutator: A :class:`CationMutator` for probability calculations.
             struct_db: A :class:`StructureDB` from which to read structures
                 to attempt to mutate.
@@ -122,7 +120,6 @@ class StructurePredictor:
         Predict structures for a combination of species.
 
         Args:
-        ----
             species: A list of (element, charge). The constituent species
                 of the target compound.
             thresh: The probability threshold, below which to discard
@@ -132,7 +129,6 @@ class StructurePredictor:
                 same species. Defaults to True.
 
         Yields:
-        ------
             Potential structures, as tuples of (structure, probability, parent).
 
         """
@@ -228,7 +224,6 @@ class StructurePredictor:
         Predicts structures for a combination of species.
 
         Args:
-        ----
             species: A list of (element, charge). The constituent species
              of the target compound.
             thresh: The probability threshold, below which to discard predictions.
@@ -237,7 +232,6 @@ class StructurePredictor:
              i.e. structures containing all the same species.
 
         Yields:
-        ------
             Potential structures, as tuples of (structure, probability, parent).
 
         """

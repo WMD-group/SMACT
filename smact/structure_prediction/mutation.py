@@ -47,7 +47,6 @@ class CationMutator:
         Assign attributes and get lambda table.
 
         Args:
-        ----
             lambda_df: A pandas DataFrame, with column and index labels
                 as species strings and lambda values as entries.
             alpha: A function to call to fill in missing lambda values.
@@ -78,7 +77,6 @@ class CationMutator:
         Create a CationMutator instance from a DataFrame.
 
         Args:
-        ----
             lambda_json (str, optional): JSON-style representation of the
                 lambda table. This is a list of entries, containing pairs
                 and their associated lambda values.
@@ -88,7 +86,6 @@ class CationMutator:
             alpha: See :meth:`__init__`.
 
         Returns:
-        -------
             A :class:`CationMutator` instance.
 
         """
@@ -181,12 +178,10 @@ class CationMutator:
         Get lambda values corresponding to a pair of species.
 
         Args:
-        ----
             s1 (str): One of the species.
             s2 (str): The other species.
 
         Returns:
-        -------
             lambda (float): The lambda value, if it exists
                 in the table. Otherwise, the alpha value
                 for the two species.
@@ -204,12 +199,10 @@ class CationMutator:
         Get all the lambda values associated with a species.
 
         Args:
-        ----
             species (str): The species for which to get the
                 lambda values.
 
         Returns:
-        -------
             A pandas Series, with index-labelled lambda entries.
 
         """
@@ -237,12 +230,10 @@ class CationMutator:
         Requires the species to have the same charge.
 
         Note:
-        ----
             Creates a deepcopy of the supplied structure,
             such that the original instance is not modified.
 
         Args:
-        ----
             structure (SmactStructure): The structure to mutate.
             init_species (str): The species within the structure
                 to mutate.
@@ -250,7 +241,6 @@ class CationMutator:
                 initial species with.
 
         Returns:
-        -------
             A :class:`.~SmactStructure`, with the species
                 mutated.
 
@@ -297,7 +287,6 @@ class CationMutator:
         Charge neutrality is preserved, but the species pair do not need the same charge.
 
         Args:
-        ----
             structure (SmactStructure): The structure to mutate.
             init_species (list): A list of species within the structure to mutate.
             final_species (list): The list of species to replace the initial species with
@@ -438,13 +427,11 @@ class CationMutator:
         Find all structures with 1 substitution with probability above a threshold.
 
         Args:
-        ----
             structure: A :class:`SmactStructure` instance from which to generate compounds.
             thresh (float): The probability threshold; discard all substitutions that have
                 a probability to generate a naturally-occuring compound less than this.
 
         Yields:
-        ------
             Tuples of (:class:`SmactStructure`, probability, original species, new species).
 
         """

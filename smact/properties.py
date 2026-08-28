@@ -25,11 +25,9 @@ def eneg_mulliken(element: smact.Element | str) -> float:
     Get Mulliken electronegativity from the IE and EA.
 
     Arguments:
-    ---------
         element (smact.Element or str): Element object or symbol
 
     Returns:
-    -------
         mulliken (float): Mulliken electronegativity
 
     """
@@ -58,14 +56,12 @@ def band_gap_Harrison(
     Solids: The Physics of the Chemical Bond".
 
     Args:
-    ----
         anion (str): Element symbol of the dominant anion in the system
         cation (str): Element symbol of the the dominant cation in the system
         distance (float or str): Nuclear separation between anion and cation,
             i.e. sum of ionic radii (in Angstroms). Default: 2.0.
 
     Returns:
-    -------
         Band_gap (float): Band gap in eV
 
     """
@@ -109,16 +105,13 @@ def _get_eneg_values(
     """Return per-element electronegativity values for the requested source.
 
     Args:
-    ----
         elementlist: SMACT Element objects.
         source: ``'Mulliken'`` or ``'Pauling'``.
 
     Returns:
-    -------
         List of electronegativity floats, one per element.
 
     Raises:
-    ------
         ValueError: If *source* is unrecognised or a Pauling value is missing.
 
     """
@@ -155,7 +148,6 @@ def compound_electroneg(
     X_Cu2S = (X_Cu * X_Cu * C_S)^(1/3)
 
     Args:
-    ----
         elements (list) : Elements given as standard elemental symbols.
         stoichs (list) : Stoichiometries, given as integers or floats.
         source: String 'Mulliken' or 'Pauling'; type of Electronegativity to
@@ -163,7 +155,6 @@ def compound_electroneg(
             rescaled to a Mulliken-like scale.
 
     Returns:
-    -------
         Electronegativity (float) : Estimated electronegativity (no units).
 
     """

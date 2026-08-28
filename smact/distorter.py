@@ -25,7 +25,6 @@ def get_sg(lattice: Atoms) -> Spacegroup:
     Get the space-group of the system.
 
     Args:
-    ----
         lattice: the ASE crystal class
     Returns:
         sg (Spacegroup): ASE Spacegroup object
@@ -53,14 +52,12 @@ def get_inequivalent_sites(
     Given a sub lattice, returns symmetry unique sites for substitutions.
 
     Args:
-    ----
         sub_lattice (list of lists): array containing fractional coordinates
             of the sub-lattice of interest
 
         lattice (ASE crystal): the total lattice
 
     Returns:
-    -------
         List of sites
 
     """
@@ -90,13 +87,11 @@ def make_substitution(lattice: Atoms, site: list[float], new_species: str) -> At
     Change atomic species on lattice site to new_species.
 
     Args:
-    ----
         lattice (ASE crystal): Input lattice
         site (list): Fractional coordinates of the substitution site
         new_species (str): New species
 
     Returns:
-    -------
         lattice
 
     """
@@ -124,12 +119,10 @@ def build_sub_lattice(lattice: Atoms, symbol: str) -> list[list[float]]:
     Generate a sub-lattice of the lattice based on equivalent atomic species.
 
     Args:
-    ----
         lattice (ASE crystal class): Input lattice
         symbol (string): Symbol of species identifying sub-lattice
 
     Returns:
-    -------
         list of lists:
             sub_lattice: Fractional coordinates of the sub-lattice of symbol
 

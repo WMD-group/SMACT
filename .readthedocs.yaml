@@ -8,6 +8,8 @@ build:
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   configuration: docs/conf.py
+  # The build is warning-clean; keep it that way.
+  fail_on_warning: true
 
 # Install from pyproject.toml extras (single source of truth for deps)
 python:
