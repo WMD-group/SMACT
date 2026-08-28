@@ -31,12 +31,22 @@ sys.path.insert(0, os.path.abspath(".."))
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "myst_nb",
 ]
+
+# Resolve cross-references to the projects SMACT documents against. Referring to a
+# pymatgen module rather than a function is deliberate: the dopant predictors moved
+# from pymatgen.analysis to pymatgen.core after the version SMACT pins, and only the
+# module path is present in both inventories.
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "pymatgen": ("https://pymatgen.org", None),
+}
 
 myst_enable_extensions = [
     "amsmath",

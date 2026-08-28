@@ -1,7 +1,24 @@
 """The dopant prediction module facilitates high-throughput prediction of p-type and n-type dopants.
 
-The search and ranking process is based on electronic filters
-(e.g. accessible oxidation states) and chemical filters (e.g. difference in ionic radius).
+Candidates are taken from the species covered by the substitution table and filtered on
+oxidation state: an n-type dopant must carry a higher charge than the host ion it replaces
+and a p-type dopant a lower one, with the sign of the site preserved, so a cation site is
+only ever doped by another cation and an anion site by another anion. A p-type dopant is
+therefore not necessarily an anion; doping Ti4+ p-type offers 3+, 2+ and 1+ cations.
+
+Surviving candidates are scored by the substitution table, which holds data-mined lambda
+values after Hautier et al. (2011) or cosine similarities if a species embedding is
+supplied. By default the ranking combines that score with a selectivity term comparing
+a dopant's affinity for one host site against its affinity for the others. Selectivity is
+only calculated for substitutions on cation sites; anion substitutions take a fixed value
+of 1.0, so the selectivity term cannot discriminate between them and their ranking follows
+that score alone. Pass ``get_selectivity=False`` to rank on that score everywhere.
+
+No ionic-radius criterion is applied. The workflow takes a composition rather than a
+structure, and Shannon radii are defined per coordination number, which is not known until
+a structure is. For radius-based dopant prediction on a known structure, see
+``get_dopants_from_shannon_radii`` in
+:mod:`pymatgen.analysis.structure_prediction.dopant_predictor`.
 """
 
 from __future__ import annotations
@@ -55,7 +72,10 @@ class Doper:
     """
     A class to search for n & p type dopants.
 
-    Methods: get_dopants, plot_dopants.
+    Takes the host as a tuple of species strings, e.g. ``("Ti4+", "O2-")``; no structure
+    is required. See the module docstring for how candidates are filtered and ranked.
+
+    Methods: get_dopants, plot_dopants. Properties: to_table.
     """
 
     def __init__(
