@@ -48,6 +48,11 @@ intersphinx_mapping = {
     "pymatgen": ("https://pymatgen.org", None),
 }
 
+# Render docstring "Attributes:" sections as :ivar: fields. Without this Napoleon
+# emits .. attribute:: directives that autodoc also emits from the class itself,
+# which Sphinx reports as duplicate object descriptions.
+napoleon_use_ivar = True
+
 myst_enable_extensions = [
     "amsmath",
     "colon_fence",
@@ -404,6 +409,8 @@ autodoc_mock_imports = [
     "torch",
     "aviary",
     "requests",
+    "mp_api",
+    "emmet",
     "pymatgen",
     "pymatgen.util",
     "pymatgen.util.plotting",
