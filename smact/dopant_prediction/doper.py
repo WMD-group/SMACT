@@ -18,7 +18,8 @@ score everywhere.
 No ionic-radius criterion is applied. The workflow takes a composition rather than a
 structure, and Shannon radii are defined per coordination number, which is not known until
 a structure is. For radius-based dopant prediction on a known structure, see
-:func:`pymatgen.analysis.structure_prediction.dopant_predictor.get_dopants_from_shannon_radii`.
+``get_dopants_from_shannon_radii`` in
+:mod:`pymatgen.analysis.structure_prediction.dopant_predictor`.
 """
 
 from __future__ import annotations
