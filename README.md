@@ -180,10 +180,17 @@ The latest stable release can be installed via pip:
 pip install smact
 ```
 
-Optional dependencies (needed for full replication of examples and tutorials):
+Optional dependencies, needed by most of the examples and tutorials:
 
 ```bash
 pip install "smact[optional]"
+```
+
+The band-gap prediction example additionally needs the pre-trained ROOST models, which
+bring in PyTorch. To run every example and tutorial:
+
+```bash
+pip install "smact[optional,property_prediction]"
 ```
 
 SMACT is also available via conda-forge:
