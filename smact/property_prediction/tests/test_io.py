@@ -15,7 +15,7 @@ import pytest
 # ship the same nvidia/nccl/lib/libnccl.so.2, so whichever installs last wins. When
 # cu12 won, `import torch` failed and this module skipped silently instead of failing.
 if importlib.util.find_spec("torch") is None:
-    pytest.skip("torch required for IO tests", allow_module_level=True)
+    pytest.skip("torch required for IO tests", allow_module_level=True)  # pragma: no cover
 
 import torch
 
