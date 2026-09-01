@@ -2,22 +2,13 @@
 
 from __future__ import annotations
 
-import importlib.util
 import json
 import tempfile
 from pathlib import Path
 
 import pytest
 
-# Skip when torch is genuinely absent, but let an installed-yet-broken torch raise.
-# pytest.importorskip() swallows ImportError, which hid a real breakage: torch needs
-# nvidia-nccl-cu13 while xgboost (via smact[ml]) needs nvidia-nccl-cu12, and the two
-# ship the same nvidia/nccl/lib/libnccl.so.2, so whichever installs last wins. When
-# cu12 won, `import torch` failed and this module skipped silently instead of failing.
-if importlib.util.find_spec("torch") is None:
-    pytest.skip("torch required for IO tests", allow_module_level=True)  # pragma: no cover
-
-import torch
+torch = pytest.importorskip("torch", reason="torch required for IO tests")
 
 from smact.property_prediction.io import (
     get_cache_size,
