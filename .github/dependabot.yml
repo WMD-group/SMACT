@@ -11,3 +11,29 @@ updates:
       interval: daily
     open-pull-requests-limit: 0
     target-branch: master
+
+  # `open-pull-requests-limit: 0` disables scheduled version-update PRs for this
+  # ecosystem; this block exists only so the `ignore` rules below also apply to
+  # Dependabot's automated *security* updates (enabled repo-wide, independent of this
+  # file), which otherwise use default behaviour with no way to scope them.
+  #
+  # torch and xgboost both depend on an NVIDIA NCCL package on Linux, and both install
+  # it to the same path (nvidia/nccl/lib/libnccl.so.2), so the two must stay on the same
+  # CUDA generation (see pyproject.toml's property_prediction extra). A routine grouped
+  # bump (#634) silently moved torch from nvidia-nccl-cu12 to -cu13 while xgboost stayed
+  # on -cu12 -- no version conflict, just two packages quietly overwriting the same file,
+  # which produced a broken torch install on Linux (`ncclCommResume` undefined symbol).
+  # Minor/major bumps of either package now need a human to run
+  # `uv lock --upgrade-package <name>` and check the resulting nvidia-nccl-cuXX pin
+  # matches; patch releases are low-risk enough to keep automatic.
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
+    target-branch: master
+    ignore:
+      - dependency-name: "torch"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "xgboost"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
