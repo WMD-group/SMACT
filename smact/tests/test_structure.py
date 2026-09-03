@@ -371,11 +371,38 @@ def test_from_mp_no_api_key():
 
 
 def test_from_mp_mocked_new_api():
+    """use_document_model=False, mp-api<0.46: nested "structure" field is a Structure."""
     with open(TEST_PY_STRUCT) as f:
         real_struct = PmgStructure.from_dict(json.load(f))
 
     mock_cm = MagicMock()
-    mock_cm.materials.summary.search.return_value = [real_struct]
+    mock_cm.materials.summary.search.return_value = [{"structure": real_struct}]
+    mock_rester = MagicMock()
+    mock_rester.return_value.__enter__ = MagicMock(return_value=mock_cm)
+    mock_rester.return_value.__exit__ = MagicMock(return_value=False)
+
+    species: list[tuple[str, int, int] | tuple[Species, int]] = [("Ca", 2, 1), ("Ti", 4, 1), ("O", -2, 3)]
+    with (
+        patch.object(sp_struct, "MPResterNew", new=mock_rester),
+        patch.object(sp_struct, "HAS_MP_API", new=True),
+        ignore_warnings(sp_logger),
+    ):
+        s = SmactStructure.from_mp(species, api_key="x" * 32)
+    assert isinstance(s, SmactStructure)
+
+
+def test_from_mp_mocked_new_api_dict_structure():
+    """use_document_model=False, mp-api>=0.46: nested "structure" is an MSONable dict.
+
+    Confirmed live against the real API (mp-api==0.46.5): the "structure" field comes
+    back as {"@class": ..., "@module": ..., "lattice": ..., "sites": ..., ...} rather
+    than a Structure object, which from_mp must convert via Structure.from_dict.
+    """
+    with open(TEST_PY_STRUCT) as f:
+        real_struct = PmgStructure.from_dict(json.load(f))
+
+    mock_cm = MagicMock()
+    mock_cm.materials.summary.search.return_value = [{"structure": real_struct.as_dict()}]
     mock_rester = MagicMock()
     mock_rester.return_value.__enter__ = MagicMock(return_value=mock_cm)
     mock_rester.return_value.__exit__ = MagicMock(return_value=False)
