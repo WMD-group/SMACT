@@ -497,6 +497,13 @@ class SmactStructure:
         # Default to first found structure
         first = structs[0]
         struct = first["structure"] if isinstance(first, dict) else first
+        # mp-api's use_document_model=False controls the top-level document only; whether
+        # a nested "structure" field is left as a Structure or serialised to an MSONable
+        # dict (@class/@module/lattice/sites) has changed between mp-api releases (seen
+        # directly: 0.45.5 returns a Structure there, 0.46.5 returns a dict), so handle
+        # both rather than assuming the field always deserialises to the same type.
+        if isinstance(struct, dict):
+            struct = pmg_Structure.from_dict(struct)
         assert isinstance(struct, pmg_Structure)  # noqa: S101
 
         if 0 not in (spec[1] for spec in sanit_species):  # If everything's charged
