@@ -19,10 +19,11 @@ if TYPE_CHECKING:
 
     from .structure import SmactStructure
 
-# Lambda table of Hautier et al. (2011), copied verbatim from pymatgen (MIT licence).
-# This used to be read out of pymatgen's install directory, but that path is part of
-# pymatgen's internal layout, not its API: the file moved from analysis/ to core/ in
-# 2026 and the hard-coded lookup broke for anyone on a current pymatgen.
+# Lambda table of Hautier et al. (2011), copied verbatim from pymatgen (MIT licence;
+# reproduced in THIRD_PARTY_NOTICES.md). This used to be read out of pymatgen's install
+# directory, but that path is part of pymatgen's internal layout, not its API: the file
+# moved from analysis/ to core/ in 2026 and the hard-coded lookup broke for anyone on a
+# current pymatgen.
 DEFAULT_LAMBDA_JSON = Path(__file__).parent.parent / "data" / "lambda.json"
 
 
