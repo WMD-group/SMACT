@@ -101,7 +101,7 @@ property_prediction = [
     # whichever installs last wins, leaving torch loaded against a mismatched NCCL ABI.
     # xgboost can't move to cu13 without dropping Python 3.11 support (dropped at 3.3.0,
     # before its own cu13 switch at 3.4.0), so cap torch here instead. See #651.
-    "torch>=2.0.0,<2.11",
+    "torch>=2.0.0,<2.14",
 ]
 optional = [
     "pydantic>=2.9.2",
