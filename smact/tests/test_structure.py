@@ -664,6 +664,20 @@ def test_parse_mprest_exception_path():
     parse_mprest({"structure": "not_a_structure", "material_id": "mp-test"})
 
 
+def test_parse_mprest_dict_structure():
+    """use_document_model=False, mp-api>=0.46: nested "structure" is an MSONable dict.
+
+    Same mp-api behaviour as test_from_mp_mocked_new_api_dict_structure: the "structure"
+    field comes back as {"@class": ..., "@module": ..., "lattice": ..., "sites": ..., ...}
+    rather than a Structure object, which parse_mprest must convert via Structure.from_dict.
+    """
+    real_struct = PmgStructure.from_file(os.path.join(files_dir, "CaTiO3.json"))
+
+    result = parse_mprest({"structure": real_struct.as_dict(), "material_id": "mp-4019"})
+
+    assert isinstance(result, SmactStructure)
+
+
 # ---------------------------------------------------------------------------
 # CationMutatorTest
 # ---------------------------------------------------------------------------

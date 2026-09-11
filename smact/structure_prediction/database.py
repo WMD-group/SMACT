@@ -18,7 +18,7 @@ except ImportError:  # pragma: no cover
 import os
 import re
 import sqlite3
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from pymatgen.core import SETTINGS
 from pymatgen.core import Structure as pmg_Structure
@@ -125,7 +125,7 @@ class StructureDB:
     def add_mp_icsd(
         self,
         table: str,
-        mp_data: list[dict[str, pmg_Structure | str]] | None = None,
+        mp_data: list[dict[str, pmg_Structure | dict[str, Any] | str]] | None = None,
         mp_api_key: str | None = None,
     ) -> int:
         """
@@ -319,7 +319,7 @@ class StructureDB:
 
 
 def parse_mprest(
-    data: dict[str, pmg_Structure | str],
+    data: dict[str, pmg_Structure | dict[str, Any] | str],
     determine_oxi: str = "BV",
 ) -> SmactStructure | None:
     """
@@ -327,7 +327,8 @@ def parse_mprest(
 
     Args:
         data: A dictionary containing the keys 'structure' and
-            'material_id', with the associated values.
+            'material_id'. 'structure' may be a pymatgen Structure or,
+            depending on the mp-api version, its MSONable dict form.
         determine_oxi (str): The method to determine the assignments oxidation states in the structure.
                 Options are 'BV', 'comp_ICSD','both' for determining the oxidation states by bond valence,
                 ICSD statistics or trial both sequentially, respectively.
@@ -337,7 +338,14 @@ def parse_mprest(
 
     """
     try:
-        structure = cast("pmg_Structure", data["structure"])
+        structure = data["structure"]
+        # mp-api's use_document_model=False controls the top-level document only; whether
+        # a nested "structure" field is left as a Structure or serialised to an MSONable
+        # dict (@class/@module/lattice/sites) has changed between mp-api releases, so
+        # handle both rather than assuming the field always deserialises to the same type.
+        if isinstance(structure, dict):
+            structure = pmg_Structure.from_dict(structure)
+        structure = cast("pmg_Structure", structure)
         return SmactStructure.from_py_struct(structure, determine_oxi=determine_oxi)
     except (ValueError, RuntimeError, TypeError):
         # Couldn't decorate with oxidation states
