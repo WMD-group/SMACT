@@ -27,6 +27,31 @@ Alternatively, the latest version from the default branch of the Git repo can be
 
     pip install git+https://github.com/WMD-group/SMACT.git
 
+SMACT is also available from conda-forge:
+
+.. code::
+
+    conda install -c conda-forge smact
+
+Optional functionality is provided by conda-forge feature packages. For example,
+install the pre-trained property-prediction functionality with:
+
+.. code::
+
+    conda install -c conda-forge smact-property-prediction
+
+The available feature packages are ``smact-mp``, ``smact-crystal-space``,
+``smact-featurisers``, ``smact-visualisation``, ``smact-ml``, and
+``smact-optional``. The latter matches the ``smact[optional]`` pip extra. To
+install the dependencies required by all documented examples and tutorials:
+
+.. code::
+
+    conda install -c conda-forge smact-optional smact-property-prediction
+
+These packages use conda-forge builds of compiled dependencies such as PyTorch.
+Choose any GPU-specific PyTorch configuration separately for your platform.
+
 For developer installation, clone the repository and use `uv <https://docs.astral.sh/uv/>`_:
 
 .. code::
