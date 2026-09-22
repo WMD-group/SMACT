@@ -49,8 +49,9 @@ install the dependencies required by all documented examples and tutorials:
 
     conda install -c conda-forge smact-optional smact-property-prediction
 
-These packages use conda-forge builds of compiled dependencies such as PyTorch.
-Choose any GPU-specific PyTorch configuration separately for your platform.
+These packages use conda-forge builds of compiled dependencies such as
+``pytorch`` (the package is named ``torch`` on PyPI). Choose any GPU-specific
+``pytorch`` configuration separately for your platform.
 
 For developer installation, clone the repository and use `uv <https://docs.astral.sh/uv/>`_:
 
