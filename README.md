@@ -217,8 +217,8 @@ conda install -c conda-forge smact-optional smact-property-prediction
 ```
 
 Conda feature packages use conda-forge builds of compiled dependencies such as
-``pytorch`` (the package is named ``torch`` on PyPI). Select any GPU-specific
-``pytorch`` configuration separately for your platform.
+`pytorch` (the package is named `torch` on PyPI). Select any GPU-specific
+`pytorch` configuration separately for your platform.
 
 ### Developer installation
 
