@@ -47,8 +47,18 @@ not installed by default. Install them with:
 
    pip install smact[property_prediction]
 
-This installs `aviary-models <https://pypi.org/project/aviary-models/>`_ (>=1.2.0)
-and `PyTorch <https://pytorch.org/>`_ (>=2.0.0).
+This installs `aviary-models <https://pypi.org/project/aviary-models/>`_ (>=1.2.1)
+and the PyPI package `torch <https://pytorch.org/>`_ (>=2.0.0,<2.11).
+
+With conda, install the corresponding conda-forge feature package instead:
+
+.. code-block:: bash
+
+   conda install -c conda-forge smact-property-prediction
+
+This installs SMACT, Aviary, and the conda-forge package ``pytorch``. The default
+profile does not select a GPU backend; choose any platform-specific ``pytorch``
+GPU configuration separately.
 
 Architecture
 ------------

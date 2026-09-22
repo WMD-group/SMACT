@@ -199,6 +199,27 @@ SMACT is also available via conda-forge:
 conda install -c conda-forge smact
 ```
 
+The optional functionality is available as conda-forge feature packages. Install
+only the feature you need; for example, the pre-trained property-prediction
+models can be installed with:
+
+```bash
+conda install -c conda-forge smact-property-prediction
+```
+
+The other feature packages are `smact-mp`, `smact-crystal-space`,
+`smact-featurisers`, `smact-visualisation`, `smact-ml`, and `smact-optional`.
+`smact-optional` matches the `smact[optional]` pip extra. To install all
+documented examples and tutorials, including property prediction:
+
+```bash
+conda install -c conda-forge smact-optional smact-property-prediction
+```
+
+Conda feature packages use conda-forge builds of compiled dependencies such as
+`pytorch` (the package is named `torch` on PyPI). Select any GPU-specific
+`pytorch` configuration separately for your platform.
+
 ### Developer installation
 
 We use [uv](https://docs.astral.sh/uv/) for dependency management. To set up a development environment:
