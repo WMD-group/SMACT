@@ -1,5 +1,14 @@
 # Changelog
 
+## [v4.0.2](https://github.com/WMD-group/SMACT/tree/v4.0.2) (2026-09-24)
+
+[Full Changelog](https://github.com/WMD-group/SMACT/compare/v4.0.1...v4.0.2)
+
+**Merged pull requests:**
+
+- chore: bump version to v4.0.2 and fix archive title mismatch [\#674](https://github.com/WMD-group/SMACT/pull/674) ([KingaMas](https://github.com/KingaMas))
+- docs: sync .zenodo.json author list with joss/paper.md [\#673](https://github.com/WMD-group/SMACT/pull/673) ([KingaMas](https://github.com/KingaMas))
+
 ## [v4.0.1](https://github.com/WMD-group/SMACT/tree/v4.0.1) (2026-09-24)
 
 [Full Changelog](https://github.com/WMD-group/SMACT/compare/v4.0.0...v4.0.1)
@@ -154,7 +163,7 @@
 
 **Implemented enhancements:**
 
-- Move to ruff for linting and formatting [\#297](https://github.com/WMD-group/SMACT/issues/297)
+- Move to ruff for linting and formating [\#297](https://github.com/WMD-group/SMACT/issues/297)
 - Running examples from a browser [\#67](https://github.com/WMD-group/SMACT/issues/67)
 - Migrate CI dependency installation from pip to uv [\#338](https://github.com/WMD-group/SMACT/pull/338) ([AntObi](https://github.com/AntObi))
 - Structure prediction fixes [\#336](https://github.com/WMD-group/SMACT/pull/336) ([AntObi](https://github.com/AntObi))
