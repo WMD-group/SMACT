@@ -1,5 +1,14 @@
 # Changelog
 
+## [v4.0.2](https://github.com/WMD-group/SMACT/tree/v4.0.2) (2026-09-24)
+
+[Full Changelog](https://github.com/WMD-group/SMACT/compare/v4.0.1...v4.0.2)
+
+**Merged pull requests:**
+
+- chore: bump version to v4.0.2 and fix archive title mismatch [\#674](https://github.com/WMD-group/SMACT/pull/674) ([KingaMas](https://github.com/KingaMas))
+- docs: sync .zenodo.json author list with joss/paper.md [\#673](https://github.com/WMD-group/SMACT/pull/673) ([KingaMas](https://github.com/KingaMas))
+
 ## [v4.0.1](https://github.com/WMD-group/SMACT/tree/v4.0.1) (2026-09-24)
 
 [Full Changelog](https://github.com/WMD-group/SMACT/compare/v4.0.0...v4.0.1)
