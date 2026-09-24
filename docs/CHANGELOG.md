@@ -1,5 +1,50 @@
 # Changelog
 
+## [v4.0.1](https://github.com/WMD-group/SMACT/tree/v4.0.1) (2026-09-24)
+
+[Full Changelog](https://github.com/WMD-group/SMACT/compare/v4.0.0...v4.0.1)
+
+**Closed issues:**
+
+- \[JOSS review \#11015\] Optional dependencies can not be install automatically using conda [\#665](https://github.com/WMD-group/SMACT/issues/665)
+- \[JOSS review \#11015\] "Couldn't decorate mp-xyz with oxidation states." in docs/tutorials/structure\_prediction.ipynb [\#664](https://github.com/WMD-group/SMACT/issues/664)
+- \[JOSS review \#11015\] Reproducibility issues in the tutorials and example [\#643](https://github.com/WMD-group/SMACT/issues/643)
+- \[JOSS review \#11015\] Clarifications to the paper and related documentation [\#642](https://github.com/WMD-group/SMACT/issues/642)
+- Inconsistent ICSD24 oxidation state filtering thresholds [\#627](https://github.com/WMD-group/SMACT/issues/627)
+- Examples and tutorials are outdated [\#618](https://github.com/WMD-group/SMACT/issues/618)
+
+**Merged pull requests:**
+
+- chore: bump version to v4.0.1 for JOSS-reviewed release [\#671](https://github.com/WMD-group/SMACT/pull/671) ([KingaMas](https://github.com/KingaMas))
+- chore: Documentation updates for conda installation [\#668](https://github.com/WMD-group/SMACT/pull/668) ([AntObi](https://github.com/AntObi))
+- docs: update perovskite structure count in tutorial notebook [\#667](https://github.com/WMD-group/SMACT/pull/667) ([KingaMas](https://github.com/KingaMas))
+- fix: convert dict-serialised structure in parse\_mprest for newer mp-api [\#666](https://github.com/WMD-group/SMACT/pull/666) ([KingaMas](https://github.com/KingaMas))
+- Fix typos in the documentation [\#663](https://github.com/WMD-group/SMACT/pull/663) ([goelakash](https://github.com/goelakash))
+- Update the spglib documentation link [\#662](https://github.com/WMD-group/SMACT/pull/662) ([goelakash](https://github.com/goelakash))
+- docs: sharpen JOSS paper wording [\#660](https://github.com/WMD-group/SMACT/pull/660) ([KingaMas](https://github.com/KingaMas))
+- chore: remove two unreferenced files [\#659](https://github.com/WMD-group/SMACT/pull/659) ([KingaMas](https://github.com/KingaMas))
+- docs: make the solar-oxides tutorial fast by default [\#658](https://github.com/WMD-group/SMACT/pull/658) ([KingaMas](https://github.com/KingaMas))
+- fix: handle mp-api serialising the nested structure field to a dict [\#657](https://github.com/WMD-group/SMACT/pull/657) ([KingaMas](https://github.com/KingaMas))
+- ci: stop Dependabot auto-bumping torch/xgboost across a minor version [\#656](https://github.com/WMD-group/SMACT/pull/656) ([KingaMas](https://github.com/KingaMas))
+- fix: stop torch and xgboost colliding over nvidia-nccl on Linux [\#654](https://github.com/WMD-group/SMACT/pull/654) ([KingaMas](https://github.com/KingaMas))
+- docs: regenerate joss/paper.pdf from the current paper.md [\#653](https://github.com/WMD-group/SMACT/pull/653) ([KingaMas](https://github.com/KingaMas))
+- fix: make the documented install and the tutorials runnable as written [\#651](https://github.com/WMD-group/SMACT/pull/651) ([KingaMas](https://github.com/KingaMas))
+- deps: clear the vulnerable transitive pins in uv.lock [\#650](https://github.com/WMD-group/SMACT/pull/650) ([KingaMas](https://github.com/KingaMas))
+- security: run CI on pull\_request instead of pull\_request\_target [\#649](https://github.com/WMD-group/SMACT/pull/649) ([KingaMas](https://github.com/KingaMas))
+- docs: bring the Sphinx build to zero warnings [\#648](https://github.com/WMD-group/SMACT/pull/648) ([KingaMas](https://github.com/KingaMas))
+- test: read the MP API key from the same sources the skip guard accepts [\#647](https://github.com/WMD-group/SMACT/pull/647) ([KingaMas](https://github.com/KingaMas))
+- docs: describe the dopant workflow accurately and sharpen the pymatgen comparison [\#646](https://github.com/WMD-group/SMACT/pull/646) ([KingaMas](https://github.com/KingaMas))
+- test: check the data files in a built wheel, not just the checkout [\#645](https://github.com/WMD-group/SMACT/pull/645) ([KingaMas](https://github.com/KingaMas))
+- fix: make the structure prediction and solar oxides tutorials reproducible [\#644](https://github.com/WMD-group/SMACT/pull/644) ([KingaMas](https://github.com/KingaMas))
+- Add references to chemical filters and crystal mapping [\#639](https://github.com/WMD-group/SMACT/pull/639) ([KingaMas](https://github.com/KingaMas))
+- Revise affiliations and update section header [\#633](https://github.com/WMD-group/SMACT/pull/633) ([KingaMas](https://github.com/KingaMas))
+- Clarify ICSD24 oxidation-state filtering thresholds \(fixes \#627\) [\#630](https://github.com/WMD-group/SMACT/pull/630) ([KingaMas](https://github.com/KingaMas))
+- Remove pandarallel extra that does not exist [\#628](https://github.com/WMD-group/SMACT/pull/628) ([akwarii](https://github.com/akwarii))
+- Add JOSS paper for SMACT v4 [\#622](https://github.com/WMD-group/SMACT/pull/622) ([KingaMas](https://github.com/KingaMas))
+- Update outdated examples and tutorials [\#619](https://github.com/WMD-group/SMACT/pull/619) ([masahiro-negishi](https://github.com/masahiro-negishi))
+- Pre-release cleanup for v4.0.0 [\#616](https://github.com/WMD-group/SMACT/pull/616) ([aronwalsh](https://github.com/aronwalsh))
+- Add ORCID for Daniel Davies in paper.md [\#612](https://github.com/WMD-group/SMACT/pull/612) ([dandavies99](https://github.com/dandavies99))
+
 ## [v4.0.0](https://github.com/WMD-group/SMACT/tree/v4.0.0) (2026-03-03)
 
 [Full Changelog](https://github.com/WMD-group/SMACT/compare/v3.2.0...v4.0.0)
@@ -15,13 +60,6 @@
 - UserWarning when assessing the validity of compounds with noble gases [\#585](https://github.com/WMD-group/SMACT/issues/585)
 
 **Merged pull requests:**
-
-- chore: merge develop into master \(v4.0.0\) [\#603](https://github.com/WMD-group/SMACT/pull/603) ([KingaMas](https://github.com/KingaMas))
-- chore: v4.0.0 audit — type annotations, bug fixes, CI hardening [\#602](https://github.com/WMD-group/SMACT/pull/602) ([KingaMas](https://github.com/KingaMas))
-- Release 4.0.0 [\#595](https://github.com/WMD-group/SMACT/pull/595) ([KingaMas](https://github.com/KingaMas))
-- chore: upgrade dependencies to resolve [\#589](https://github.com/WMD-group/SMACT/pull/589) ([KingaMas](https://github.com/KingaMas))
-- Fix TypeError crash for noble gases with explicit oxidation state sets [\#588](https://github.com/WMD-group/SMACT/pull/588) ([KingaMas](https://github.com/KingaMas))
-- pre-commit autoupdate [\#584](https://github.com/WMD-group/SMACT/pull/584) ([pre-commit-ci[bot]](https://github.com/apps/pre-commit-ci))
 
 ## [v3.2.0](https://github.com/WMD-group/SMACT/tree/v3.2.0) (2025-07-31)
 
@@ -45,7 +83,7 @@
 
 **Implemented enhancements:**
 
-- Changes to the smact_validity function to allow for early short-circuiting resolving issue \#378 [\#379](https://github.com/WMD-group/SMACT/pull/379) ([ryannduma](https://github.com/ryannduma))
+- Changes to the smact\_validity function to allow for early short-circuiting resolving issue \#378 [\#379](https://github.com/WMD-group/SMACT/pull/379) ([ryannduma](https://github.com/ryannduma))
 - SMACT Metallicity Handling Enhancements [\#367](https://github.com/WMD-group/SMACT/pull/367) ([ryannduma](https://github.com/ryannduma))
 
 **Fixed bugs:**
@@ -56,7 +94,7 @@
 
 **Closed issues:**
 
-- Function smact_validity slow [\#378](https://github.com/WMD-group/SMACT/issues/378)
+- Function smact\_validity slow [\#378](https://github.com/WMD-group/SMACT/issues/378)
 
 **Merged pull requests:**
 
@@ -124,7 +162,7 @@
 
 **Fixed bugs:**
 
-- Try MP_API_KEY in Github Actions [\#332](https://github.com/WMD-group/SMACT/pull/332) ([AntObi](https://github.com/AntObi))
+- Try MP\_API\_KEY in Github Actions [\#332](https://github.com/WMD-group/SMACT/pull/332) ([AntObi](https://github.com/AntObi))
 
 **Closed issues:**
 
@@ -154,7 +192,7 @@
 - Gradient information for chemical filters [\#47](https://github.com/WMD-group/SMACT/issues/47)
 - Develop branch updates in preparation for new release [\#308](https://github.com/WMD-group/SMACT/pull/308) ([AntObi](https://github.com/AntObi))
 - Utility module updates [\#307](https://github.com/WMD-group/SMACT/pull/307) ([AntObi](https://github.com/AntObi))
-- Nvalence_modification [\#290](https://github.com/WMD-group/SMACT/pull/290) ([AntObi](https://github.com/AntObi))
+- Nvalence\_modification [\#290](https://github.com/WMD-group/SMACT/pull/290) ([AntObi](https://github.com/AntObi))
 
 **Merged pull requests:**
 
@@ -197,7 +235,7 @@
 **Merged pull requests:**
 
 - Oxidation states [\#191](https://github.com/WMD-group/SMACT/pull/191) ([AntObi](https://github.com/AntObi))
-- crystal_space [\#189](https://github.com/WMD-group/SMACT/pull/189) ([hspark1212](https://github.com/hspark1212))
+- crystal\_space [\#189](https://github.com/WMD-group/SMACT/pull/189) ([hspark1212](https://github.com/hspark1212))
 
 ## [v2.5.4](https://github.com/WMD-group/SMACT/tree/v2.5.4) (2023-11-30)
 
@@ -215,9 +253,9 @@
 **Merged pull requests:**
 
 - Preparing v2.5.4 [\#184](https://github.com/WMD-group/SMACT/pull/184) ([AntObi](https://github.com/AntObi))
-- a tiny error in eletronegativity of Zr in element_data.txt [\#181](https://github.com/WMD-group/SMACT/pull/181) ([hspark1212](https://github.com/hspark1212))
+- a tiny error in eletronegativity of Zr in element\_data.txt [\#181](https://github.com/WMD-group/SMACT/pull/181) ([hspark1212](https://github.com/hspark1212))
 - Update ci.yml [\#178](https://github.com/WMD-group/SMACT/pull/178) ([AntObi](https://github.com/AntObi))
-- compare ternary/quaternary charge state fixed [\#177](https://github.com/WMD-group/SMACT/pull/177) ([JiwooChloeLee](https://github.com/JiwooChloeLee))
+- compare ternary/quaternary charge state fixed [\#177](https://github.com/WMD-group/SMACT/pull/177) ([chloeshare](https://github.com/chloeshare))
 
 ## [v2.5.3](https://github.com/WMD-group/SMACT/tree/v2.5.3) (2023-08-23)
 
@@ -226,7 +264,7 @@
 **Merged pull requests:**
 
 - Structure updates [\#154](https://github.com/WMD-group/SMACT/pull/154) ([AntObi](https://github.com/AntObi))
-- Chloe Lee Modify doper_example and doper.py files to a newer version [\#153](https://github.com/WMD-group/SMACT/pull/153) ([JiwooChloeLee](https://github.com/JiwooChloeLee))
+- Chloe Lee Modify doper\_example and doper.py files to a newer version [\#153](https://github.com/WMD-group/SMACT/pull/153) ([chloeshare](https://github.com/chloeshare))
 
 ## [v2.5.2](https://github.com/WMD-group/SMACT/tree/v2.5.2) (2023-07-14)
 
@@ -259,7 +297,7 @@
 
 **Implemented enhancements:**
 
-- Need to update some structure_prediction functions for the new MP API [\#75](https://github.com/WMD-group/SMACT/issues/75)
+- Need to update some structure\_prediction functions for the new MP API [\#75](https://github.com/WMD-group/SMACT/issues/75)
 
 **Merged pull requests:**
 
@@ -283,7 +321,7 @@
 **Closed issues:**
 
 - oxidation states model not findable from paper [\#66](https://github.com/WMD-group/SMACT/issues/66)
-- oxidation_states module missing from docs [\#65](https://github.com/WMD-group/SMACT/issues/65)
+- oxidation\_states module missing from docs [\#65](https://github.com/WMD-group/SMACT/issues/65)
 - Dopant prediction [\#64](https://github.com/WMD-group/SMACT/issues/64)
 
 **Merged pull requests:**
@@ -315,14 +353,14 @@
 
 **Closed issues:**
 
-- Using of neutral_ratios\(\) method in the case of non-stoichiometric compounds. [\#50](https://github.com/WMD-group/SMACT/issues/50)
+- Using of neutral\_ratios\(\) method in the case of non-stoichiometric compounds. [\#50](https://github.com/WMD-group/SMACT/issues/50)
 - another outdated oxidation states for B [\#36](https://github.com/WMD-group/SMACT/issues/36)
 
 **Merged pull requests:**
 
 - update setup.py and README [\#62](https://github.com/WMD-group/SMACT/pull/62) ([AntObi](https://github.com/AntObi))
 - fix tests and move to GitHub Actions [\#60](https://github.com/WMD-group/SMACT/pull/60) ([dandavies99](https://github.com/dandavies99))
-- Dopant prediction [\#59](https://github.com/WMD-group/SMACT/pull/59) ([JiwooChloeLee](https://github.com/JiwooChloeLee))
+- Dopant prediction [\#59](https://github.com/WMD-group/SMACT/pull/59) ([chloeshare](https://github.com/chloeshare))
 
 ## [v2.3.3.1](https://github.com/WMD-group/SMACT/tree/v2.3.3.1) (2022-07-07)
 
@@ -364,7 +402,7 @@
 **Closed issues:**
 
 - SMACT without local installation [\#41](https://github.com/WMD-group/SMACT/issues/41)
-- how can we switch to another oxidation states table in your data folder for smact.screening.smact_filter? [\#37](https://github.com/WMD-group/SMACT/issues/37)
+- how can we switch to another oxidation states table in your data folder for smact.screening.smact\_filter? [\#37](https://github.com/WMD-group/SMACT/issues/37)
 - a bug in electronegativity calculation... [\#35](https://github.com/WMD-group/SMACT/issues/35)
 - Organise examples and workflows [\#17](https://github.com/WMD-group/SMACT/issues/17)
 
@@ -404,14 +442,14 @@
 
 **Closed issues:**
 
-- \[\_\_init\_\_.py\] Species.shannon_radius produces the NoneType [\#25](https://github.com/WMD-group/SMACT/issues/25)
+- \[\_\_init\_\_.py\] Species.shannon\_radius produces the NoneType [\#25](https://github.com/WMD-group/SMACT/issues/25)
 
 **Merged pull requests:**
 
 - Update \_\_init\_\_.py [\#26](https://github.com/WMD-group/SMACT/pull/26) ([AntObi](https://github.com/AntObi))
 - New license [\#24](https://github.com/WMD-group/SMACT/pull/24) ([keeeto](https://github.com/keeeto))
 - \[WIP\] Structure Predictor [\#23](https://github.com/WMD-group/SMACT/pull/23) ([a-ws-m](https://github.com/a-ws-m))
-- Combinations_practical refactor [\#22](https://github.com/WMD-group/SMACT/pull/22) ([a-ws-m](https://github.com/a-ws-m))
+- Combinations\_practical refactor [\#22](https://github.com/WMD-group/SMACT/pull/22) ([a-ws-m](https://github.com/a-ws-m))
 - Fix typo [\#21](https://github.com/WMD-group/SMACT/pull/21) ([mkhorton](https://github.com/mkhorton))
 - spell out link URL instead of link on word "here" [\#20](https://github.com/WMD-group/SMACT/pull/20) ([labarba](https://github.com/labarba))
 
@@ -434,7 +472,7 @@
 **Closed issues:**
 
 - Contributing section [\#18](https://github.com/WMD-group/SMACT/issues/18)
-- possible_compositions function in lattice module needs fixing [\#15](https://github.com/WMD-group/SMACT/issues/15)
+- possible\_compositions function in lattice module needs fixing [\#15](https://github.com/WMD-group/SMACT/issues/15)
 - Add atomic polarisability [\#11](https://github.com/WMD-group/SMACT/issues/11)
 - Empty API doc pages [\#10](https://github.com/WMD-group/SMACT/issues/10)
 - Include data from Faraday Oxidation Model [\#9](https://github.com/WMD-group/SMACT/issues/9)
