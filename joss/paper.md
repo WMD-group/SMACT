@@ -80,7 +80,7 @@ SMACT v4 meets these needs by providing a unified Python library where a researc
 
 Several established libraries serve the computational materials science community. `Pymatgen` [@ong2013] provides comprehensive tools for structure manipulation and thermodynamic analysis. The Atomic Simulation Environment (`ASE`) [@ase-paper] focuses on atomistic simulations. `Matminer` [@ward2018] specialises in featurisation and machine learning pipelines for materials data. These tools primarily operate on known structures or experimental data.
 
-SMACT occupies a distinct niche: it works at the composition level, upstream of structure-based tools, to define which regions of chemical space merit further investigation. This might overlap with other tools where they also work on the composition of materials studied. For example, `Pymatgen` implements the same data-mined ionic-substitution model [@Hautier2011], with `SubstitutionPredictor` and `Substitutor` already working at the composition level like SMACT; dopant prediction, however, is provided only by separate functions (`get_dopants_from_substitution_probabilities`, `get_dopants_from_shannon_radii`) that require a structure already decorated with oxidation states. SMACT's native `Doper` class, developed independently, closes that gap by combining the same substitution statistics with oxidation-state-based dopant classification directly at the composition level, so a candidate host never needs a resolved structure before dopants can be suggested for it. Its ranking is further extended by a selectivity term weighing a dopant's affinity for one host site against the others, and by an optional swap to a learned species-embedding similarity score. Nonetheless, the popularity of SMACT comes largely from native validity prediction through charge neutrality, electronegativity rule and data-driven oxidation state filtering which makes it a recognised option for evaluating AI generated materials [@Merchant2023;@Zeni2025]. Composition-only bandgap prediction, provided through a pretrained ROOST model with uncertainty estimates, has no equivalent in other libraries and allows candidates to be ordered before any structure is proposed. SMACT brings the full workflow — composition enumeration, validity screening, structure prediction, property prediction and dopant prediction — into one package built on the same `Element`/`Species` classes, rather than requiring a researcher to assemble it from separate tools.
+SMACT occupies a distinct niche: it works at the composition level, upstream of structure-based tools, to define which regions of chemical space merit further investigation. This might overlap with other tools where they also work on the composition of materials studied. For example, `Pymatgen` implements the same data-mined ionic substitution model [@Hautier2011], with `SubstitutionPredictor` and `Substitutor` already working at the composition level like SMACT; dopant prediction, however, is provided only by separate functions (`get_dopants_from_substitution_probabilities`, `get_dopants_from_shannon_radii`) that require a structure already decorated with oxidation states. SMACT's native `Doper` class, developed independently, closes that gap by combining the same substitution statistics with oxidation-state-based dopant classification directly at the composition level, so a candidate host never needs a resolved structure before dopants can be suggested for it. Its ranking is further extended by a selectivity term weighing a dopant's affinity for one host site against the others, and by an optional swap to a learned species-embedding similarity score. Nonetheless, the popularity of SMACT comes largely from native validity prediction through charge neutrality, the electronegativity rule and data-driven oxidation state filtering which makes it a recognised option for evaluating AI-generated materials [@Merchant2023;@Zeni2025]. Composition-only band gap prediction, provided through a pretrained ROOST model with uncertainty estimates, has no equivalent in other libraries and allows candidates to be ordered before any structure is proposed. SMACT brings the full workflow — composition enumeration, validity screening, structure prediction, property prediction and dopant prediction — into one package built on the same `Element`/`Species` classes, rather than requiring a researcher to assemble it from separate tools.
 
 # Software Design
 
@@ -88,9 +88,9 @@ SMACT v4 retains the `Element` and `Species` classes at its core, providing acce
 
 **Structure prediction.** Implements data-mined ionic substitution methods [@Hautier2011] to predict likely crystal structures for new compositions by analogy with known parent structures, using substitution probabilities derived from statistical analysis of experimental databases.
 
-**Dopant prediction.** Enables high-throughput identification of p-type and n-type dopants for a given host composition by combining oxidation state filters and species embedding similarities [@Antunes2022;@Onwuli2024].
+**Dopant prediction.** Enables high-throughput identification of p-type and n-type dopants for a given host composition by combining oxidation state filtering and species-embedding similarities [@Antunes2022;@Onwuli2024].
 
-**Property prediction.** Provides composition-to-property prediction using a pre-trained ROOST model [@Goodall2020], allowing users to predict band gaps directly from chemical formulae with uncertainty estimates.
+**Property prediction.** Provides composition-to-property prediction using a pretrained ROOST model [@Goodall2020], allowing users to predict band gaps directly from chemical formulae with uncertainty estimates.
 
 **Oxidation states and metallicity.** Implements a probabilistic model for predicting the likelihood of metal species coexisting in compounds based on anion-dependent statistics [@davies2018], with updated default data (ICSD24). A metallicity scoring module distinguishes ionic compounds from intermetallic phases.
 
@@ -109,7 +109,7 @@ Generative AI tools (Claude, Anthropic) were used to assist with code modernisat
 # Author Contributions
 
 [KOM](https://github.com/KingaMas) is the current maintainer who contributed consensus-based oxidation state filtering for `smact_validity` and `smact_filter`, and led the v4.0.0 release including mixed-valence support, a deep code audit, full type annotations, security hardening, test migration to pytest with coverage raised to over 85%, and CI consolidation.
-[AO](https://github.com/AntObi) was the primary developer from v2.2 to v3.1, contributing the dopant prediction module, oxidation states improvements, crystal space utilities, and extensive maintenance.
+[AO](https://github.com/AntObi) was the primary developer from v2.2 to v3.1, contributing the dopant prediction module, improvements to oxidation-state handling, crystal space utilities, and extensive maintenance.
 [AM](https://github.com/a-ws-m) designed and implemented the structure prediction subpackage and benchmarking framework.
 [DWD](https://github.com/dandavies99) is the original lead developer and contributed to CI infrastructure and code quality tooling.
 [RN](https://github.com/ryannduma) implemented the property prediction subpackage, metallicity module, and screening performance optimisations.
@@ -117,7 +117,7 @@ Generative AI tools (Claude, Anthropic) were used to assist with code modernisat
 [JL](https://github.com/JiwooChloeLee) contributed the initial dopant prediction implementation and charge state comparison fixes.
 [MN](https://github.com/masahiro-negishi) updated and fixed all example and tutorial notebooks to work correctly with the current SMACT library.
 [PD](https://github.com/Panyalak) contributed to lattice parameter calculations.
-[AMG](https://github.com/utf) contributed to the implementation of mixed-valence support during the AIchemy's SMACT hackathon.
+[AMG](https://github.com/utf) contributed to the implementation of mixed-valence support during the AIchemy SMACT hackathon.
 [HP](https://github.com/hspark1212) contributed the crystal space visualisation tools and element data corrections.
 [REAG](https://github.com/comprhys) fixed a screening bug related to electronegativity handling.
 [TL](https://github.com/lits19) contributed to code reorganisation and utility refactoring.
@@ -125,6 +125,6 @@ Generative AI tools (Claude, Anthropic) were used to assist with code modernisat
 
 # Acknowledgements
 
-We acknowledge contributions from all members of the Materials Design Group at Imperial College London who have provided feedback, testing, and feature requests. We thank the JOSS editors and reviewers of the original 2019 paper. This work was supported by multiple funders over the years, including Engineering and Physical Sciences Research Council (UKRI), the Royal Society, the Leverhulme Trust, and the European Research Council.
+We acknowledge contributions from all members of the Materials Design Group at Imperial College London who have provided feedback, testing, and feature requests. We thank the JOSS editors and reviewers of the original 2019 paper. This work was supported by multiple funders over the years, including the Engineering and Physical Sciences Research Council (EPSRC), the Royal Society, the Leverhulme Trust, and the European Research Council.
 
 # References
