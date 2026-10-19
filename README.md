@@ -268,6 +268,27 @@ Or to run the full CI pipeline (pre-commit hooks and tests):
 make ci-local
 ```
 
+## Citing SMACT
+
+If you use SMACT in your work, please cite:
+
+K. O. Mastej et al., "SMACT v4: Enhanced Screening and Prediction Tools for Computational Materials Design", *J. Open Source Softw.* **11**, 11015 (2026). https://doi.org/10.21105/joss.11015
+
+```bibtex
+@article{Mastej2026,
+  doi = {10.21105/joss.11015},
+  url = {https://doi.org/10.21105/joss.11015},
+  year = {2026},
+  publisher = {The Open Journal},
+  volume = {11},
+  number = {126},
+  pages = {11015},
+  author = {Mastej, Kinga O. and Onwuli, Anthony and Moriarty, Alexander and Davies, Daniel W. and Nduma, Ryan and Butler, Keith T. and Lee, Jiwoo and Negishi, Masahiro and Detrattanawichai, Panyalak and Ganose, Alex M. and Park, Hyunsoo and Goodall, Rhys E. A. and Li, Tianshu and Walsh, Aron},
+  title = {SMACT v4: Enhanced Screening and Prediction Tools for Computational Materials Design},
+  journal = {Journal of Open Source Software}
+}
+```
+
 ## References
 
 [K. O. Mastej et al.,
