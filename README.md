@@ -288,6 +288,7 @@ K. O. Mastej et al., "SMACT v4: Enhanced Screening and Prediction Tools for Comp
   journal = {Journal of Open Source Software}
 }
 ```
+Further reading on the methods behind SMACT:
 
 ## References
 
