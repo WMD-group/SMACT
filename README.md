@@ -272,7 +272,7 @@ make ci-local
 
 If you use SMACT in your work, please cite:
 
-K. O. Mastej et al., "SMACT v4: Enhanced Screening and Prediction Tools for Computational Materials Design", *J. Open Source Softw.* **11**, 11015 (2026). https://doi.org/10.21105/joss.11015
+K. O. Mastej et al., "SMACT v4: Enhanced Screening and Prediction Tools for Computational Materials Design", _J. Open Source Softw._ **11**, 11015 (2026). <https://doi.org/10.21105/joss.11015>
 
 ```bibtex
 @article{Mastej2026,
@@ -288,6 +288,7 @@ K. O. Mastej et al., "SMACT v4: Enhanced Screening and Prediction Tools for Comp
   journal = {Journal of Open Source Software}
 }
 ```
+
 Further reading on the methods behind SMACT:
 
 ## References
