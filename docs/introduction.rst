@@ -34,6 +34,10 @@ To cite the theory of :mod:`smact` please use:
 
 To cite the code of :mod:`smact` please use:
 
+- `SMACT v4: Enhanced Screening and Prediction Tools for Computational Materials Design <https://doi.org/10.21105/joss.11015>`_
+
+The original SMACT paper is also available for reference:
+
 - `SMACT: Semiconducting Materials by Analogy and Chemical Theory <https://joss.theoj.org/papers/10.21105/joss.01361.pdf>`_
 
 Studies using smact
