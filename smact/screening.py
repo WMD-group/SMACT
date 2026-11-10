@@ -605,7 +605,8 @@ def smact_validity(
     if isinstance(composition, str):
         composition = Composition(composition)
 
-    comp_dict = composition.as_dict()
+    integer_formula, _ = composition.get_integer_formula_and_factor()
+    comp_dict = Composition(integer_formula).as_dict()
     elem_symbols = tuple(comp_dict.keys())
 
     fast = _check_fast_paths(elem_symbols, include_alloys, check_metallicity, metallicity_threshold, composition)
@@ -613,7 +614,7 @@ def smact_validity(
         return fast
 
     # Convert composition counts -> stoichiometric ratios
-    counts = [int(v) for v in comp_dict.values()]
+    counts = [round(v) for v in comp_dict.values()]
     gcd_val = _gcd_recursive(*counts)
     stoichs = [(int(c // gcd_val),) for c in counts]
     threshold = max(int(c // gcd_val) for c in counts)

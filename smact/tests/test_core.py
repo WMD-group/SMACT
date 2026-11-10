@@ -325,6 +325,9 @@ class TestSequenceFunctions:
         # Test with an invalid composition
         invalid_result = smact.screening.smact_validity("Al3Li", include_alloys=False)
         assert not invalid_result
+        # Test with fractional stoichiometry
+        assert smact.screening.smact_validity("Fe0.5O0.5")
+        assert smact.screening.smact_validity("Fe1.5O2.25")
 
     def test_smact_validity_parameters(self):
         """
