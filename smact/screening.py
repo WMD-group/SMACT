@@ -603,7 +603,13 @@ def smact_validity(
         icsd_filter = ICSD24FilterConfig()
 
     if isinstance(composition, str):
+        if not composition.strip():
+            # Reject empty compositions cleanly instead of letting pymatgen raise.
+            return False
         composition = Composition(composition)
+    if not composition.as_dict():
+        # Reject empty compositions (e.g. Composition({})) cleanly instead of crashing.
+        return False
 
     integer_formula, _ = composition.get_integer_formula_and_factor()
     comp_dict = Composition(integer_formula).as_dict()
@@ -613,9 +619,10 @@ def smact_validity(
     if fast is not None:
         return fast
 
-    # Convert composition counts -> stoichiometric ratios
     counts = [round(v) for v in comp_dict.values()]
     gcd_val = _gcd_recursive(*counts)
+
+
     stoichs = [(int(c // gcd_val),) for c in counts]
     threshold = max(int(c // gcd_val) for c in counts)
 
