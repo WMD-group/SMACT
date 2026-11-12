@@ -603,16 +603,17 @@ def smact_validity(
         icsd_filter = ICSD24FilterConfig()
 
     if isinstance(composition, str):
-        if not composition.strip():
-            # Reject empty compositions cleanly instead of letting pymatgen raise.
-            return False
-        composition = Composition(composition)
+        composition = Composition(composition) if composition.strip() else Composition()
     if not composition.as_dict():
-        # Reject empty compositions (e.g. Composition({})) cleanly instead of crashing.
-        return False
+        msg = "Composition must not be empty."
+        raise ValueError(msg)
 
+    # Normalise (possibly fractional) amounts to the integer formula.
     integer_formula, _ = composition.get_integer_formula_and_factor()
     comp_dict = Composition(integer_formula).as_dict()
+    if set(comp_dict) != set(composition.as_dict()):
+        # Normalisation dropped a negligible element; cannot be validated reliably.
+        return False
     elem_symbols = tuple(comp_dict.keys())
 
     fast = _check_fast_paths(elem_symbols, include_alloys, check_metallicity, metallicity_threshold, composition)
@@ -621,8 +622,6 @@ def smact_validity(
 
     counts = [round(v) for v in comp_dict.values()]
     gcd_val = _gcd_recursive(*counts)
-
-
     stoichs = [(int(c // gcd_val),) for c in counts]
     threshold = max(int(c // gcd_val) for c in counts)
 

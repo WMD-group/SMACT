@@ -11,6 +11,7 @@ from unittest.mock import patch
 import pytest
 from ase.spacegroup import Spacegroup
 from ase.spacegroup import crystal as ase_crystal
+from pymatgen.core import Composition
 from pymatgen.core import Lattice as PmgLattice
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
@@ -328,6 +329,20 @@ class TestSequenceFunctions:
         # Test with fractional stoichiometry
         assert smact.screening.smact_validity("Fe0.5O0.5")
         assert smact.screening.smact_validity("Fe1.5O2.25")
+        # Fractional composition that must be invalid, same as Al3Li
+        assert not smact.screening.smact_validity("Al0.75Li0.25", include_alloys=False)
+        # Composition object input
+        assert smact.screening.smact_validity(Composition("Fe1.5O2.25"))
+        # Negligible element dropped by normalisation is rejected
+        assert not smact.screening.smact_validity("Na1Cl0.00001")
+        # Awkward ratio should return promptly (bounded by max_denominator)
+        assert isinstance(smact.screening.smact_validity("Fe0.333333O0.5"), bool)
+
+    def test_smact_validity_empty_composition(self):
+        """Empty compositions raise ValueError."""
+        for empty in ("", "  ", "Fe0O0", Composition()):
+            with pytest.raises(ValueError, match="must not be empty"):
+                smact.screening.smact_validity(empty)
 
     def test_smact_validity_parameters(self):
         """
