@@ -584,7 +584,8 @@ def smact_validity(
     This function short-circuits, returning True as soon as a valid combination is found.
 
     Args:
-        composition (Composition or str): Composition to check.
+        composition (Composition or str): Composition to check. Fractional amounts
+            are normalised to integer ratios; species labels are compared by element.
         use_pauling_test (bool): Whether to apply the Pauling EN test.
         include_alloys (bool): Consider pure metals valid automatically.
         check_metallicity (bool): If True, consider high metallicity valid.
@@ -611,7 +612,7 @@ def smact_validity(
     # Normalise (possibly fractional) amounts to the integer formula.
     integer_formula, _ = composition.get_integer_formula_and_factor()
     comp_dict = Composition(integer_formula).as_dict()
-    if set(comp_dict) != set(composition.as_dict()):
+    if set(comp_dict) != set(composition.get_el_amt_dict()):
         # Normalisation dropped a negligible element; cannot be validated reliably.
         return False
     elem_symbols = tuple(comp_dict.keys())
@@ -643,13 +644,11 @@ def smact_validity(
         ox_combos_valid = cast("list[list[int]]", ox_combos)
 
     # Check all possible oxidation state combinations
-    if _is_valid_oxi_state(ox_combos_valid, stoichs, threshold, electronegs, use_pauling_test):
-        return True
-
-    if mixed_valence and any(el in MIXED_VALENCE_ELEMENTS for el in elem_symbols):
-        return _check_mixed_valence(ox_combos_valid, stoichs, threshold, electronegs, elem_symbols, use_pauling_test)
-
-    return False
+    return _is_valid_oxi_state(ox_combos_valid, stoichs, threshold, electronegs, use_pauling_test) or (
+        mixed_valence
+        and any(el in MIXED_VALENCE_ELEMENTS for el in elem_symbols)
+        and _check_mixed_valence(ox_combos_valid, stoichs, threshold, electronegs, elem_symbols, use_pauling_test)
+    )
 
 
 def _expand_mixed_valence_comp(
