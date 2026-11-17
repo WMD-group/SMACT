@@ -62,7 +62,7 @@ class SubstitutionModel(abc.ABC):
         lambda_tab = []
         for s1, s2 in pairs:
             prob = self.sub_prob(s1, s2)
-            lam = np.log(max(prob, np.finfo(float).tiny))
+            lam = np.log(max(prob, float(np.finfo(float).tiny)))
             lambda_tab.append((s1, s2, lam))
             if s1 != s2:
                 lambda_tab.append((s2, s1, lam))

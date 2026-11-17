@@ -55,7 +55,7 @@ The steps for a new piece of work can be summarised as follows:
 9. When you are finished with the work, run the full CI pipeline locally to catch issues before pushing:
 
    ```bash
-   make ci-local # runs pre-commit hooks and tests
+   make ci-local # runs pre-commit hooks, tests and the docs build
    ```
 
 10. Open a pull request [on the pull request page](https://github.com/WMD-group/SMACT/pulls).
@@ -113,16 +113,20 @@ The Makefile provides convenient shortcuts for common tasks:
 make install    # install all dependencies
 make pre-commit # run all pre-commit hooks (ruff, pyright, codespell, prettier, etc.)
 make test       # run pytest with coverage
-make ci-local   # run pre-commit + test (matches CI)
+make docs       # build the documentation as Read the Docs does
+make ci-local   # run pre-commit + test + docs (matches CI)
 ```
+
+The Makefile uses Python 3.12, the version CI's lint job and Read the Docs use, so local results match CI. Some dependencies (e.g. numpy) resolve to different versions on other Python versions. To test another version, pass it explicitly, e.g. `make test UV_PYTHON=3.13`.
 
 ### Documentation
 
-To render the documentation locally:
+To render the documentation locally, with the same settings as Read the Docs:
 
 ```bash
-cd docs
-sphinx-build -nW --keep-going -b html . _build/html/
+make docs
 ```
+
+Warnings fail the build, as on Read the Docs. Adding Sphinx's `-n` (nitpicky) flag also reports unresolved type cross-references in docstrings; these are not checked by CI.
 
 Then open `_build/html/index.html` in a browser to inspect formatting, docstrings, and code examples.
