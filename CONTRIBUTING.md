@@ -119,7 +119,7 @@ make ci-local   # run pre-commit + test + docs (matches CI)
 
 The Makefile uses Python 3.12, the version CI's lint job and Read the Docs use, so local results match CI. Some dependencies (e.g. numpy) resolve to different versions on other Python versions. To test another version, pass it explicitly, e.g. `make test UV_PYTHON=3.13`.
 
-A few tests query the Materials Project and are skipped unless the `MP_API_KEY` environment variable is set to your [Materials Project API key](https://next-gen.materialsproject.org/api). CI sets it, so these tests run there.
+A few tests query the Materials Project and are skipped unless the `MP_API_KEY` environment variable is set to your [Materials Project API key](https://next-gen.materialsproject.org/api). CI runs them only when the key is available: for pushes and pull requests from branches in this repository, not for pull requests from forks.
 
 ### Documentation
 
