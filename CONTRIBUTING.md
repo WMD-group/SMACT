@@ -32,8 +32,8 @@ The steps for a new piece of work can be summarised as follows:
 5. Install SMACT with all development and optional dependencies. This creates a virtual environment automatically and installs the package in editable mode.
 
    ```bash
-   uv sync --extra optional --extra property_prediction --dev
-   pre-commit install # Install pre-commit hooks
+   make install # uv sync with all extras, using the same Python as CI
+   uv run pre-commit install # Install pre-commit hooks
    ```
 
 6. Create a branch from master, with a sensible name that relates to the issue.
@@ -118,6 +118,8 @@ make ci-local   # run pre-commit + test + docs (matches CI)
 ```
 
 The Makefile uses Python 3.12, the version CI's lint job and Read the Docs use, so local results match CI. Some dependencies (e.g. numpy) resolve to different versions on other Python versions. To test another version, pass it explicitly, e.g. `make test UV_PYTHON=3.13`.
+
+A few tests query the Materials Project and are skipped unless the `MP_API_KEY` environment variable is set to your [Materials Project API key](https://next-gen.materialsproject.org/api). CI sets it, so these tests run there.
 
 ### Documentation
 
