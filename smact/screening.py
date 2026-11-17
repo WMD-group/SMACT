@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import itertools
+import math
 import warnings
 from dataclasses import dataclass
 from enum import StrEnum
@@ -25,6 +26,9 @@ from smact.utils.oxidation import ICSD24OxStatesFilter
 
 _NUM_ELEMENTS = 103
 _MAX_MIXED_VALENCE_COMBOS = 1_000_000
+_MAX_RATIO_MULTIPLIER = 10_000
+# Above 0.5 every amount is "within tolerance" of an integer, so snapping is meaningless.
+_MAX_RATIO_TOLERANCE = 0.5
 
 __all__ = [
     "ICSD24FilterConfig",
@@ -480,6 +484,45 @@ def smact_filter(
 # ---------------------------------------------------------------------
 
 
+def _snap_to_integer_counts(el_amt: dict[str, float], ratio_tolerance: float) -> dict[str, int] | None:
+    """Find the smallest integer counts proportional to the amounts within a relative tolerance.
+
+    For k = 1, 2, 3, ... the element with the smallest amount gets k atoms and every other
+    count is rounded proportionally. The counts are accepted if a single scale factor
+    ``s`` puts every count within ``ratio_tolerance`` (relative) of ``s * amount``. Every
+    element, including the smallest, may deviate, so rounded inputs such as
+    ``Fe0.3333O0.5`` or ``Fe0.9991O1.5012`` give ``Fe2O3``. Returns None if no
+    k up to ``_MAX_RATIO_MULTIPLIER`` works.
+    """
+    smallest = min(el_amt.values())
+    for k in range(1, _MAX_RATIO_MULTIPLIER + 1):
+        counts = {el: round(k * amt / smallest) for el, amt in el_amt.items()}
+        # Each count allows scales in [n / (a (1 + tol)), n / (a (1 - tol))]; they must overlap.
+        lowest_scale = max(n / (el_amt[el] * (1 + ratio_tolerance)) for el, n in counts.items())
+        highest_scale = min(n / (el_amt[el] * (1 - ratio_tolerance)) for el, n in counts.items())
+        if lowest_scale <= highest_scale:
+            return counts
+    return None
+
+
+def _integer_counts(composition: Composition, ratio_tolerance: float) -> dict[str, int] | None:
+    """Convert a composition to integer element counts, or None if an element would be lost."""
+    el_amt = composition.get_el_amt_dict()
+    if all(amt == round(amt) for amt in el_amt.values()):
+        return {el: round(amt) for el, amt in el_amt.items()}
+    if ratio_tolerance > 0:
+        snapped = _snap_to_integer_counts(el_amt, ratio_tolerance)
+        if snapped is not None:
+            return snapped
+    # Exact conversion: pymatgen limits each amount to a denominator of 10000.
+    integer_formula, _ = composition.get_integer_formula_and_factor()
+    counts = {el: round(amt) for el, amt in Composition(integer_formula).get_el_amt_dict().items()}
+    if set(counts) != set(el_amt):
+        # Normalisation dropped a negligible element; cannot be validated reliably.
+        return None
+    return counts
+
+
 def _check_fast_paths(
     elem_symbols: tuple[str, ...],
     include_alloys: bool,
@@ -557,7 +600,9 @@ def _check_mixed_valence(
     if projected > _MAX_MIXED_VALENCE_COMBOS:
         warnings.warn(
             "Mixed-valence expansion would generate too many combinations "
-            f"({projected:,}); skipping to avoid excessive runtime.",
+            # Report the magnitude only: formatting the full integer can exceed Python's
+            # int-to-str digit limit and raise ValueError (e.g. Mn9999O13331).
+            f"(~10^{math.log10(projected):.0f}); skipping to avoid excessive runtime.",
             stacklevel=2,
         )
         return False
@@ -565,7 +610,7 @@ def _check_mixed_valence(
     return _is_valid_oxi_state(ox_combos, stoichs, threshold, electronegs, use_pauling_test)
 
 
-def smact_validity(
+def smact_validity(  # noqa: PLR0913 (public API; each option is an independent screening choice)
     composition: Composition | str,
     use_pauling_test: bool = True,
     include_alloys: bool = True,
@@ -574,6 +619,7 @@ def smact_validity(
     oxidation_states_set: str | None = None,
     icsd_filter: ICSD24FilterConfig | None = None,
     mixed_valence: bool = False,
+    ratio_tolerance: float = 1e-3,
 ) -> bool:
     """
     Check if a composition is valid according to SMACT rules.
@@ -585,7 +631,8 @@ def smact_validity(
 
     Args:
         composition (Composition or str): Composition to check. Fractional amounts
-            are normalised to integer ratios; species labels are compared by element.
+            are normalised to integer ratios (see ``ratio_tolerance``); species labels
+            are compared by element.
         use_pauling_test (bool): Whether to apply the Pauling EN test.
         include_alloys (bool): Consider pure metals valid automatically.
         check_metallicity (bool): If True, consider high metallicity valid.
@@ -596,10 +643,21 @@ def smact_validity(
             state filtering. Only used when ``oxidation_states_set`` is None.
             Defaults to ``ICSD24FilterConfig()`` (consensus=3, commonality="low").
         mixed_valence (bool): If True, allow mixed valence elements to be treated as separate species. Default is False.
+        ratio_tolerance (float): Relative tolerance for snapping fractional amounts to
+            the simplest integer ratio, so rounded inputs such as ``Fe0.3333O0.5`` are
+            checked as ``Fe2O3``. Each element's count may differ from its exact scaled
+            amount by at most this fraction. Integer inputs are never changed. Set to 0
+            to disable snapping and use the exact ratio (``Fe3333O5000``). Default is 1e-3.
 
     Returns:
         bool: True if the composition is valid, False otherwise.
+
+    Raises:
+        ValueError: If the composition is empty or ``ratio_tolerance`` is not in [0, 0.5).
     """
+    if not 0 <= ratio_tolerance < _MAX_RATIO_TOLERANCE:
+        msg = f"ratio_tolerance must be in [0, {_MAX_RATIO_TOLERANCE}), got {ratio_tolerance}."
+        raise ValueError(msg)
     if icsd_filter is None:
         icsd_filter = ICSD24FilterConfig()
 
@@ -609,11 +667,9 @@ def smact_validity(
         msg = "Composition must not be empty."
         raise ValueError(msg)
 
-    # Normalise (possibly fractional) amounts to the integer formula.
-    integer_formula, _ = composition.get_integer_formula_and_factor()
-    comp_dict = Composition(integer_formula).as_dict()
-    if set(comp_dict) != set(composition.get_el_amt_dict()):
-        # Normalisation dropped a negligible element; cannot be validated reliably.
+    # Normalise (possibly fractional) amounts to integer counts.
+    comp_dict = _integer_counts(composition, ratio_tolerance)
+    if comp_dict is None:
         return False
     elem_symbols = tuple(comp_dict.keys())
 
@@ -621,7 +677,7 @@ def smact_validity(
     if fast is not None:
         return fast
 
-    counts = [round(v) for v in comp_dict.values()]
+    counts = list(comp_dict.values())
     gcd_val = _gcd_recursive(*counts)
     stoichs = [(int(c // gcd_val),) for c in counts]
     threshold = max(int(c // gcd_val) for c in counts)

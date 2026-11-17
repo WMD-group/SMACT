@@ -339,6 +339,37 @@ class TestSequenceFunctions:
         # The awkward ratio still represents charge-neutral Fe2O3.
         assert smact.screening.smact_validity("Fe0.333333O0.5")
 
+    def test_smact_validity_huge_mixed_valence_formula(self):
+        """A huge formula with mixed valence returns False rather than crashing."""
+        with pytest.warns(UserWarning, match="too many combinations"):
+            assert not smact.screening.smact_validity("Mn9999O13331", mixed_valence=True)
+
+    def test_smact_validity_rounded_fractions(self):
+        """Rounded fractional amounts snap to the simplest integer ratio within ratio_tolerance."""
+        validity = smact.screening.smact_validity
+        # 0.3333 is 1/3 rounded to 4 d.p., so this is Fe2O3
+        assert validity("Fe0.3333O0.5")
+        # Without snapping it is checked exactly as Fe3333O5000, which is not charge neutral
+        assert not validity("Fe0.3333O0.5", ratio_tolerance=0)
+        # Rounding noise in the smallest amount is tolerated too
+        assert validity("Fe0.9991O1.5012")
+        assert smact.screening._integer_counts(Composition("Fe0.9991O1.5012"), 1e-3) == {"Fe": 2, "O": 3}
+        # Mn3O4 is mixed valence, and snapping avoids a huge exact formula
+        assert validity("Mn0.9999O1.3331", mixed_valence=True)
+        # Two-decimal rounding (1% off) needs a looser tolerance
+        assert not validity("Fe0.33O0.5")
+        assert validity("Fe0.33O0.5", ratio_tolerance=0.02)
+        # Genuine small dopant amounts are kept, not snapped away
+        assert smact.screening._integer_counts(Composition("Fe0.999Ni0.001O1"), 1e-3) == {"Fe": 999, "Ni": 1, "O": 1000}
+        # Integer inputs are never snapped: Fe1000O1001 is not FeO
+        assert not validity("Fe1000O1001")
+
+    @pytest.mark.parametrize("tolerance", [-0.1, 0.5, 1.0])
+    def test_smact_validity_invalid_ratio_tolerance(self, tolerance):
+        """ratio_tolerance outside [0, 0.5) raises ValueError."""
+        with pytest.raises(ValueError, match="ratio_tolerance"):
+            smact.screening.smact_validity("NaCl", ratio_tolerance=tolerance)
+
     def test_smact_validity_empty_composition(self):
         """Empty compositions raise ValueError."""
         for empty in ("", "  ", "Fe0O0", Composition()):
