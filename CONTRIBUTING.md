@@ -129,4 +129,4 @@ make docs
 
 Warnings fail the build, as on Read the Docs. Adding Sphinx's `-n` (nitpicky) flag also reports unresolved type cross-references in docstrings; these are not checked by CI.
 
-Then open `_build/html/index.html` in a browser to inspect formatting, docstrings, and code examples.
+Then open `docs/_build/html/index.html` in a browser to inspect formatting, docstrings, and code examples.
