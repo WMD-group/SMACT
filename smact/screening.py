@@ -485,19 +485,22 @@ def smact_filter(
 
 
 def _snap_to_integer_counts(el_amt: dict[str, float], ratio_tolerance: float) -> dict[str, int] | None:
-    """Scale fractional amounts to the smallest integer counts within a relative tolerance.
+    """Find the smallest integer counts proportional to the amounts within a relative tolerance.
 
-    Amounts are divided by the smallest amount and multiplied by k = 1, 2, 3, ... until
-    every scaled amount lies within ``ratio_tolerance`` (relative) of an integer, so
-    rounded inputs such as ``Fe0.3333O0.5`` give ``Fe2O3``. Returns None if no
-    multiplier up to ``_MAX_RATIO_MULTIPLIER`` works.
+    For k = 1, 2, 3, ... the element with the smallest amount gets k atoms and every other
+    count is rounded proportionally. The counts are accepted if a single scale factor
+    ``s`` puts every count within ``ratio_tolerance`` (relative) of ``s * amount``. Every
+    element, including the smallest, may deviate, so rounded inputs such as
+    ``Fe0.3333O0.5`` or ``Fe0.9991O1.5012`` give ``Fe2O3``. Returns None if no
+    k up to ``_MAX_RATIO_MULTIPLIER`` works.
     """
     smallest = min(el_amt.values())
-    ratios = {el: amt / smallest for el, amt in el_amt.items()}
     for k in range(1, _MAX_RATIO_MULTIPLIER + 1):
-        scaled = {el: k * ratio for el, ratio in ratios.items()}
-        counts = {el: round(value) for el, value in scaled.items()}
-        if all(abs(value - counts[el]) <= ratio_tolerance * value for el, value in scaled.items()):
+        counts = {el: round(k * amt / smallest) for el, amt in el_amt.items()}
+        # Each count allows scales in [n / (a (1 + tol)), n / (a (1 - tol))]; they must overlap.
+        lowest_scale = max(n / (el_amt[el] * (1 + ratio_tolerance)) for el, n in counts.items())
+        highest_scale = min(n / (el_amt[el] * (1 - ratio_tolerance)) for el, n in counts.items())
+        if lowest_scale <= highest_scale:
             return counts
     return None
 

@@ -351,6 +351,9 @@ class TestSequenceFunctions:
         assert validity("Fe0.3333O0.5")
         # Without snapping it is checked exactly as Fe3333O5000, which is not charge neutral
         assert not validity("Fe0.3333O0.5", ratio_tolerance=0)
+        # Rounding noise in the smallest amount is tolerated too
+        assert validity("Fe0.9991O1.5012")
+        assert smact.screening._integer_counts(Composition("Fe0.9991O1.5012"), 1e-3) == {"Fe": 2, "O": 3}
         # Mn3O4 is mixed valence, and snapping avoids a huge exact formula
         assert validity("Mn0.9999O1.3331", mixed_valence=True)
         # Two-decimal rounding (1% off) needs a looser tolerance
